@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vangcur Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<!-- ✅ Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ============================================================
+  //  Supabase Connection — Vangcur Admin Panel (admin.html)
+  // ============================================================
+
+  // 👇 আপনার Supabase Project URL
+  const SUPABASE_URL = "https://gzdujkwjplobonvghyhx.supabase.co";
+
+  // 👇 আপনার Supabase Public Key
+  const SUPABASE_PUBLIC_KEY = "sb_publishable_KF1pFUO6N77m216FxBeyTA_vJQ4Rzok";
+
+  // Supabase Client তৈরি করা হচ্ছে
+  const { createClient } = supabase;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+
+  // ✅ Connection Test — Console-এ দেখুন
+  console.log("✅ Supabase Admin connected:", supabaseClient);
+</script>
 <style>
 :root{--bg:#F4F5F7;--side:#1A1A1A;--white:#fff;--border:#E5E7EB;--red:#E63946;--green:#10B981;--warn:#F59E0B;--gray:#6B7280;--light:#F3F4F6;--blue:#3B82F6;--purple:#8B5CF6;--sh1:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 16px rgba(0,0,0,.10);--r:10px;--tr:all .2s ease}
 *{margin:0;padding:0;box-sizing:border-box}

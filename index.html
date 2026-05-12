@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vangcur - ভাঙচুর | Your First Choice for Gadgets</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- ✅ Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ============================================================
+  //  Supabase Connection — Vangcur Frontend (index.html)
+  // ============================================================
+
+  // 👇 আপনার Supabase Project URL
+  const SUPABASE_URL = "https://gzdujkwjplobonvghyhx.supabase.co";
+
+  // 👇 আপনার Supabase Public Key
+  const SUPABASE_PUBLIC_KEY = "sb_publishable_KF1pFUO6N77m216FxBeyTA_vJQ4Rzok";
+
+  // Supabase Client তৈরি করা হচ্ছে
+  const { createClient } = supabase;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+
+  // ✅ Connection Test — Console-এ দেখুন
+  console.log("✅ Supabase connected:", supabaseClient);
+</script>
 <style>
 :root{--cream:#FAF8F5;--white:#fff;--dark:#1A1A1A;--gray:#6B7280;--light:#F3F4F6;--border:#E5E7EB;--red:#E63946;--red2:#C1121F;--gold:#D4A853;--green:#10B981;--blue:#3B82F6;--sh1:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 18px rgba(0,0,0,.10);--sh3:0 8px 36px rgba(0,0,0,.13);--r:12px;--tr:all .25s cubic-bezier(.4,0,.2,1)}
 *{margin:0;padding:0;box-sizing:border-box}
