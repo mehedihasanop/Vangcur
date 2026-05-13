@@ -987,6 +987,26 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
 </div>
 
 <script>
+// ======= SUPABASE SYNC =======
+async function saveSettingToSupabase(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    await supabaseClient.from('store_settings').upsert({ setting_key: key, setting_value: value });
+  } catch (e) { console.warn('Supabase save failed:', e); }
+}
+
+async function syncAdminData(){
+  try {
+    const { data: settings } = await supabaseClient.from('store_settings').select('*');
+    if (settings) {
+      settings.forEach(item => localStorage.setItem(item.setting_key, JSON.stringify(item.setting_value)));
+      // ভেরিয়েবল রিফ্রেশ
+      heroSlides = JSON.parse(localStorage.getItem('vc_hero_slides')||'null') || heroSlides;
+      adminFAQs = JSON.parse(localStorage.getItem('vc_faqs')||'null') || adminFAQs;
+    }
+  } catch(e){}
+}
+
 // ======= STATE =======
 let adminPass=localStorage.getItem('vc_admin_pass')||'vangcur2025';
 let heroSlides=JSON.parse(localStorage.getItem('vc_hero_slides')||'null')||[
@@ -1093,6 +1113,7 @@ async function loadAndRenderOrders(){
 }
 
 async function initDash(){
+  await syncAdminData(); // Supabase থেকে সর্বশেষ ডাটা লোড করুন
   document.getElementById('dashDate').textContent=new Date().toLocaleDateString('bn-BD',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const orders=await getOrdersAsync();
   // Sync to localStorage
@@ -1493,11 +1514,11 @@ function prevLogo(){
   document.getElementById('logoSubColorTxt').value=document.getElementById('logoSubColor').value;
 }
 function saveLogo(){
-  localStorage.setItem('vc_logo',JSON.stringify({main:document.getElementById('logoMain').value,sub:document.getElementById('logoSub').value,color:document.getElementById('logoColor').value,subColor:document.getElementById('logoSubColor').value,favicon:document.getElementById('faviconInp').value}));
+  saveSettingToSupabase('vc_logo', {main:document.getElementById('logoMain').value,sub:document.getElementById('logoSub').value,color:document.getElementById('logoColor').value,subColor:document.getElementById('logoSubColor').value,favicon:document.getElementById('faviconInp').value});
   showAdminToast('✅ Logo সেভ হয়েছে!');
 }
 function saveBrand(){
-  localStorage.setItem('vc_brand',JSON.stringify({name:document.getElementById('brandName').value,tagline:document.getElementById('brandTagline').value,title:document.getElementById('pageTitle').value}));
+  saveSettingToSupabase('vc_brand', {name:document.getElementById('brandName').value,tagline:document.getElementById('brandTagline').value,title:document.getElementById('pageTitle').value});
   showAdminToast('✅ ব্র্যান্ড তথ্য সেভ হয়েছে!');
 }
 
@@ -1542,7 +1563,7 @@ function saveSlide(){
   showAdminToast('✅ স্লাইড সেভ হয়েছে!');
 }
 
-function saveHeroSlides(){localStorage.setItem('vc_hero_slides',JSON.stringify(heroSlides));}
+function saveHeroSlides(){saveSettingToSupabase('vc_hero_slides', heroSlides);}
 
 function askDelSlide(i){delSlideIdx=i;document.getElementById('delSlideModal').classList.add('show');}
 function confirmDelSlide(){
@@ -1588,7 +1609,7 @@ function getCats(){
   if(!saved)return [...DEFAULT_CATS];
   return saved;
 }
-function saveCats(cats){localStorage.setItem('vc_categories',JSON.stringify(cats));syncCatsToSite(cats);}
+function saveCats(cats){saveSettingToSupabase('vc_categories', cats);syncCatsToSite(cats);}
 function syncCatsToSite(cats){/* Site reads vc_categories on load */}
 function getCatProdCount(catId){
   const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
@@ -1682,7 +1703,7 @@ function saveShippingSettings(){
   const dhaka=parseInt(document.getElementById('shipDhaka')?.value)||90;
   const out=parseInt(document.getElementById('shipOut')?.value)||130;
   const bd=parseInt(document.getElementById('shipBD')?.value)||130;
-  localStorage.setItem('vc_shipping',JSON.stringify({dhaka,out,bd}));
+  saveSettingToSupabase('vc_shipping', {dhaka,out,bd});
   showAdminToast('✅ শিপিং সেটিংস সেভ হয়েছে!');
 }
 
@@ -1713,7 +1734,7 @@ function renderFAQSettings(){
   </div>`).join('')+'<button class="btn btn-dark btn-sm" style="margin-top:6px" onclick="saveFAQs();showAdminToast(\'✅ FAQ সেভ হয়েছে!\')">💾 সব FAQ সেভ করুন</button>';
 }
 function addFAQ(){adminFAQs.push({q:'নতুন প্রশ্ন',a:'উত্তর লিখুন'});renderFAQSettings();}
-function saveFAQs(){localStorage.setItem('vc_faqs',JSON.stringify(adminFAQs));}
+function saveFAQs(){saveSettingToSupabase('vc_faqs', adminFAQs);}
 
 // ======= UTILS =======
 function copyTxt(t){

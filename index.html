@@ -1347,9 +1347,12 @@ function loadStock(){
   const saved=JSON.parse(localStorage.getItem('vc_stock')||'{}');
   PRODS.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
 }
-function saveStock(){
+async function saveStock(){
   const map={};PRODS.forEach(p=>{map[p.id]=p.stock;});
   localStorage.setItem('vc_stock',JSON.stringify(map));
+  try {
+    await supabaseClient.from('store_settings').upsert({ setting_key: 'vc_stock', setting_value: map });
+  } catch (e) {}
 }
 let cart=JSON.parse(localStorage.getItem('vc_cart')||'[]');
 let currentUser=JSON.parse(localStorage.getItem('vc_user')||'null');
@@ -1502,6 +1505,15 @@ function resetHeroAuto(){clearInterval(heroTimer);startHeroAuto();}
 
 // INIT
 document.addEventListener('DOMContentLoaded',async ()=>{
+  // --- Supabase থেকে সেটিংস ফেচ করা শুরু ---
+  try {
+    const { data: settings } = await supabaseClient.from('store_settings').select('*');
+    if (settings) {
+      settings.forEach(item => localStorage.setItem(item.setting_key, JSON.stringify(item.setting_value)));
+    }
+  } catch (e) { console.warn('Failed to load settings', e); }
+  // --- Supabase থেকে সেটিংস ফেচ করা শেষ ---
+
   loadStock();
   applyAdminSettings();
   // ১. প্রথমেই localStorage থেকে custom products যোগ করো (instant)
