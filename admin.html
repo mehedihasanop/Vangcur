@@ -984,6 +984,9 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
 // ✅ Security: Admin password SHA-256 hash হিসেবে store করা হচ্ছে (plaintext নয়)
 // Default: 'vangcur2025' এর hash — পরিবর্তন করতে Settings থেকে করুন
 let adminPassHash=localStorage.getItem('vc_admin_pass_hash')||'7f6cd88fdcce2a09d49a5d5a8264ab07e4c6c14cc66b576e3f07c6832d14e61a'; // sha256 of 'vangcur2025'
+// TEMP RESET: force default password
+localStorage.removeItem('vc_admin_pass_hash');
+adminPassHash='7f6cd88fdcce2a09d49a5d5a8264ab07e4c6c14cc66b576e3f07c6832d14e61a';
 let heroSlides=JSON.parse(localStorage.getItem('vc_hero_slides')||'null')||[
   {tag:'⚡ গ্যাজেট স্পেশালিস্ট',title:'Your First Choice for Gadgets',sub:'অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ।',img:'',btn1:'প্রোডাক্ট দেখুন',stats:'3000+|খুশি গ্রাহক,7|ক্যাটাগরি,100%|অথেনটিক'}
 ];
