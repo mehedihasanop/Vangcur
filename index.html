@@ -23,8 +23,7 @@
   const { createClient } = supabase;
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
-  // ✅ Connection Test — Console-এ দেখুন
-  console.log("✅ Supabase connected:", supabaseClient);
+  // Supabase ready
 </script>
 <style>
 :root{--cream:#FAF8F5;--white:#fff;--dark:#1A1A1A;--gray:#6B7280;--light:#F3F4F6;--border:#E5E7EB;--red:#E63946;--red2:#C1121F;--gold:#D4A853;--green:#10B981;--blue:#3B82F6;--sh1:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 18px rgba(0,0,0,.10);--sh3:0 8px 36px rgba(0,0,0,.13);--r:12px;--tr:all .25s cubic-bezier(.4,0,.2,1)}
@@ -64,9 +63,11 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-bar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--white));pointer-events:none;z-index:2;transition:opacity .3s}
 .cat-bar.at-end::after{opacity:0}
 /* UX-7: Back to top */
-.back-to-top{position:fixed;bottom:258px;right:22px;width:44px;height:44px;background:var(--dark);color:#fff;border:none;border-radius:50%;font-size:18px;cursor:pointer;z-index:803;display:none;align-items:center;justify-content:center;box-shadow:var(--sh2);transition:var(--tr)}
+.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:803;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:var(--tr);flex-direction:column;gap:1px}
 .back-to-top.show{display:flex}
-.back-to-top:hover{background:var(--red);transform:translateY(-2px)}
+.back-to-top:hover{background:var(--red);transform:translateY(-3px);box-shadow:0 6px 22px rgba(230,57,70,.35)}
+.back-to-top svg{width:20px;height:20px}
+.back-to-top span{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.8;line-height:1}
 .cat-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;gap:4px;height:44px;align-items:center}
 .cat-pill{white-space:nowrap;padding:5px 16px;border-radius:50px;border:none;background:none;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif}
 .cat-pill:hover,.cat-pill.active{background:var(--dark);color:#fff}
@@ -120,8 +121,14 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .sec-title{font-size:20px;font-weight:700}
 .sec-title span{color:var(--red)}
 
-/* CAT CARDS */
-.cat-cards{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
+/* CAT CARDS CAROUSEL */
+.cat-carousel-wrap{position:relative;padding:0 44px}
+.cat-carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:var(--white);border:2px solid var(--border);color:var(--dark);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:var(--tr);box-shadow:var(--sh2);font-size:20px;font-weight:700;line-height:1}
+.cat-carousel-arrow:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.cat-carousel-arrow.prev{left:0}
+.cat-carousel-arrow.next{right:0}
+.cat-cards-viewport{overflow:hidden}
+.cat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .cat-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;transition:var(--tr)}
 .cat-card:hover{border-color:var(--dark);transform:translateY(-3px);box-shadow:var(--sh2)}
 .cat-card-icon{font-size:24px;margin-bottom:6px}
@@ -305,26 +312,51 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .btn-checkout:hover{background:var(--red)}
 .cart-empty{text-align:center;padding:44px 20px;color:var(--gray)}
 
-/* LOGIN MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}
+/* LOGIN MODAL — new premium design */
+.modal-bg{position:fixed;inset:0;background:rgba(10,10,20,.65);backdrop-filter:blur(8px);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-bg.show{display:flex}
-.login-box{background:var(--white);border-radius:20px;padding:34px;max-width:400px;width:100%;animation:slideUp .25s ease}
-@keyframes slideUp{from{transform:translateY(22px);opacity:0}to{transform:translateY(0);opacity:1}}
-.login-box h2{font-size:21px;font-weight:700;margin-bottom:4px}
-.login-box .sub-txt{font-size:13px;color:var(--gray);margin-bottom:22px}
-.login-tabs{display:flex;background:var(--light);border-radius:10px;padding:3px;margin-bottom:20px}
-.l-tab{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--gray);transition:var(--tr)}
-.l-tab.on{background:var(--white);color:var(--dark);box-shadow:var(--sh1)}
-.fg{margin-bottom:13px}
-.fg label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
-.finp{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'DM Sans',sans-serif;transition:var(--tr);color:var(--dark)}
-.finp:focus{outline:none;border-color:var(--dark)}
-.finp.err{border-color:var(--red)}
-.err-msg{font-size:11px;color:var(--red);margin-top:3px}
-.btn-login{width:100%;background:var(--dark);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:var(--tr);font-family:'DM Sans',sans-serif;margin-top:4px}
-.btn-login:hover{background:var(--red)}
-.login-note{text-align:center;font-size:12px;color:var(--gray);margin-top:14px}
-.login-note button{background:none;border:none;color:var(--dark);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.login-box{background:#fff;border-radius:28px;padding:0;max-width:400px;width:100%;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.18)}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* Clean light header */
+.login-box-header{background:#F7F8FA;padding:36px 28px 24px;text-align:center;border-bottom:1px solid #EFEFEF}
+/* Dynamic Island style logo */
+.login-brand-logo{margin:0 auto 18px;display:flex;align-items:center;justify-content:center}
+.login-island{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;background:#111;border-radius:26px;padding:10px 28px 10px;gap:1px;box-shadow:0 4px 20px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.07)}
+.login-island-name{font-size:22px;font-weight:900;color:#fff;letter-spacing:1.5px;font-family:'DM Sans',sans-serif;line-height:1.1}
+.login-island-bn{font-size:11px;font-weight:500;color:rgba(255,255,255,.5);letter-spacing:3px;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.login-box-header h2{font-size:20px;font-weight:800;color:#111;margin-bottom:5px;font-family:'DM Sans',sans-serif}
+.login-box-header .sub-txt{font-size:13px;color:#888;font-family:'Hind Siliguri','DM Sans',sans-serif}
+/* Body */
+.login-box-body{padding:26px 28px 28px;background:#fff}
+.login-tabs{display:flex;background:#F3F4F6;border-radius:10px;padding:3px;margin-bottom:20px}
+.l-tab{flex:1;padding:9px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Hind Siliguri','DM Sans',sans-serif;color:#888;transition:var(--tr)}
+.l-tab.on{background:#fff;color:#111;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:12.5px;font-weight:700;margin-bottom:7px;color:#333;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.finp-wrap{position:relative}
+.finp-icon{display:none}
+.finp{width:100%;padding:13px 18px;border:1.5px solid #E8EAED;border-radius:50px;font-size:14px;font-family:'Hind Siliguri','DM Sans',sans-serif;transition:all .2s;color:#111;background:#F9FAFB;outline:none}
+.finp.no-icon{padding-left:18px}
+.finp:focus{border-color:#6366F1;background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.finp.err{border-color:#F59E0B}
+.finp::placeholder{color:#B0B7C3;font-size:13px}
+.err-msg{font-size:11.5px;color:#F59E0B;margin-top:5px;min-height:15px;font-family:'Hind Siliguri','DM Sans',sans-serif}
+/* Remember + Forgot */
+.login-remember-row{display:flex;align-items:center;justify-content:space-between;margin:6px 0 18px}
+.login-remember-row label{display:flex;align-items:center;gap:7px;font-size:13px;color:#555;cursor:pointer;font-weight:500;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.login-remember-row input[type=checkbox]{width:15px;height:15px;accent-color:#6366F1;cursor:pointer}
+.login-forgot{font-size:13px;color:#6366F1;font-weight:600;cursor:pointer;background:none;border:none;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.login-forgot:hover{text-decoration:underline}
+/* Buttons */
+.btn-login{width:100%;background:#111;color:#fff;border:none;padding:14px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Hind Siliguri','DM Sans',sans-serif;letter-spacing:.3px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.btn-login:hover{background:#333;transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.login-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#C5C9D0;font-size:11px;font-weight:700;letter-spacing:1.5px;font-family:'DM Sans',sans-serif}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#EFEFEF}
+.btn-google{width:100%;background:#fff;color:#111;border:1.5px solid #E8EAED;padding:12px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Hind Siliguri','DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-google:hover{background:#F9FAFB;border-color:#ccc}
+.login-note{text-align:center;font-size:13px;color:#999;margin-top:16px;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.login-note button{background:none;border:none;color:#6366F1;font-weight:700;cursor:pointer;font-family:'Hind Siliguri','DM Sans',sans-serif;font-size:13px}
+.login-note button:hover{text-decoration:underline}
 
 /* ACCOUNT PAGE */
 .acc-page{position:fixed;inset:0;background:var(--cream);z-index:1700;display:none;overflow-y:auto}
@@ -495,8 +527,8 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 
 /* RESPONSIVE */
 @media(max-width:1024px){.cat-cards{grid-template-columns:repeat(4,1fr)}.footer-top{grid-template-columns:1fr 1fr}.pp-inner{grid-template-columns:1fr}.pp-gallery{position:static}}
-@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(4,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}}
-@media(max-width:480px){.prod-grid{grid-template-columns:repeat(2,1fr)}.cat-cards{grid-template-columns:repeat(4,1fr)}.hero-stats{display:none}.hero-slide-fallback{padding:32px 22px}
+@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}}
+@media(max-width:480px){.prod-grid{grid-template-columns:repeat(2,1fr)}.cat-cards{grid-template-columns:repeat(2,1fr)}.hero-stats{display:none}.hero-slide-fallback{padding:32px 22px}
   @keyframes slideUpSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
 }
 .prod-spec{font-size:11px;color:var(--gray);margin-bottom:10px;line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -661,6 +693,9 @@ body.dark .prod-badge{opacity:.88}
         <span class="cart-dot" id="cartDot">0</span>
       </button>
       <div id="navAuth"><button class="nav-login-btn" onclick="openLogin()">লগইন করুন</button></div>
+      <button class="nav-icon-btn" onclick="openTrackOrder()" title="অর্ডার ট্র্যাক করুন" style="position:relative">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 017 7h2"/><path d="M15 7h2a5 5 0 010 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      </button>
       <button class="nav-search-icon" onclick="toggleMobileSearch()" title="Search">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
@@ -715,6 +750,46 @@ body.dark .prod-badge{opacity:.88}
         </div>
       </div>
       <!-- Additional image slides will be injected here by JS -->
+      <!-- Static Slide 2: Smart Devices -->
+      <div class="hero-slide">
+        <div class="hero-slide-fallback" style="background:linear-gradient(135deg,#0A0A2E 0%,#1a1a5e 55%,#0A0A2E 100%)">
+          <div style="position:absolute;top:-20%;right:-5%;width:420px;height:420px;background:radial-gradient(circle,rgba(59,130,246,.18) 0%,transparent 65%);border-radius:50%;pointer-events:none"></div>
+          <div class="hero-content" style="z-index:1">
+            <div class="hero-tag" style="background:#3B82F6">🌟 স্মার্ট ডিভাইস</div>
+            <h1 class="hero-title">আপনার জীবনকে<br>করুন <span style="color:#60A5FA">Smart</span></h1>
+            <p class="hero-sub">Smartwatch, TWS Earbuds, Power Bank — সব স্মার্ট ডিভাইস এক জায়গায়। দ্রুত ডেলিভারি, বিশ্বস্ত সেবা।</p>
+            <div class="hero-btns">
+              <button class="h-btn h-btn-red" onclick="filterCat('smartwatch',null);document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">Smartwatch দেখুন</button>
+              <button class="h-btn h-btn-out" onclick="filterCat('tws',null);document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">TWS দেখুন</button>
+            </div>
+            <div class="hero-stats">
+              <div><div class="h-stat-num">IP68</div><div class="h-stat-label">ওয়াটারপ্রুফ</div></div>
+              <div><div class="h-stat-num">৬ মাস</div><div class="h-stat-label">ওয়ারেন্টি</div></div>
+              <div><div class="h-stat-num">Cash</div><div class="h-stat-label">অন ডেলিভারি</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Static Slide 3: RGB & Lights -->
+      <div class="hero-slide">
+        <div class="hero-slide-fallback" style="background:linear-gradient(135deg,#0D1B0D 0%,#1a3a1a 50%,#0D1B0D 100%)">
+          <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 60% 40%,rgba(16,185,129,.12) 0%,transparent 60%);pointer-events:none"></div>
+          <div class="hero-content" style="z-index:1">
+            <div class="hero-tag" style="background:#10B981">🌈 আলোর দুনিয়া</div>
+            <h1 class="hero-title">ঘর সাজান<br><span style="color:#34D399">RGB আলোয়</span></h1>
+            <p class="hero-sub">WiFi ও Bluetooth কন্ট্রোল RGB লাইট, App থেকে ১ কোটি+ রঙ কাস্টমাইজ করুন। সারা বাংলাদেশে ডেলিভারি।</p>
+            <div class="hero-btns">
+              <button class="h-btn h-btn-red" onclick="filterCat('rgb',null);document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">RGB Lights দেখুন</button>
+              <button class="h-btn h-btn-out" onclick="filterCat('lamp',null);document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">Acrylic Lamp</button>
+            </div>
+            <div class="hero-stats">
+              <div><div class="h-stat-num">16M+</div><div class="h-stat-label">রঙের বিকল্প</div></div>
+              <div><div class="h-stat-num">IP65</div><div class="h-stat-label">ওয়াটারপ্রুফ</div></div>
+              <div><div class="h-stat-num">App</div><div class="h-stat-label">কন্ট্রোল</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <button class="slider-arrow prev" id="sliderPrev" onclick="heroSlide(-1)">&#8249;</button>
     <button class="slider-arrow next" id="sliderNext" onclick="heroSlide(1)">&#8250;</button>
@@ -737,15 +812,21 @@ body.dark .prod-badge{opacity:.88}
 <!-- CATEGORIES -->
 <div class="section">
   <div class="sec-head"><h2 class="sec-title">ক্যাটাগরি <span>সমূহ</span></h2></div>
-  <div class="cat-cards">
-    <div class="cat-card" onclick="filterCat('all',null)"><div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div></div>
-    <div class="cat-card" onclick="filterCat('rgb',null)"><div class="cat-card-icon">💡</div><div class="cat-card-name">RGB Lights</div></div>
-    <div class="cat-card" onclick="filterCat('smartwatch',null)"><div class="cat-card-icon">⌚</div><div class="cat-card-name">Smartwatches</div></div>
-    <div class="cat-card" onclick="filterCat('powerbank',null)"><div class="cat-card-icon">🔋</div><div class="cat-card-name">Power Bank</div></div>
-    <div class="cat-card" onclick="filterCat('tws',null)"><div class="cat-card-icon">🎧</div><div class="cat-card-name">TWS Earbuds</div></div>
-    <div class="cat-card" onclick="filterCat('headphone',null)"><div class="cat-card-icon">🎵</div><div class="cat-card-name">BT Headphones</div></div>
-    <div class="cat-card" onclick="filterCat('lamp',null)"><div class="cat-card-icon">🪔</div><div class="cat-card-name">Acrylic Lamp</div></div>
-    <div class="cat-card" onclick="filterCat('fan',null)"><div class="cat-card-icon">💨</div><div class="cat-card-name">Recharge. Fan</div></div>
+  <div class="cat-carousel-wrap">
+    <button class="cat-carousel-arrow prev" id="catPrevBtn" onclick="catCarouselSlide(-1)">&#8249;</button>
+    <div class="cat-cards-viewport">
+      <div class="cat-cards" id="catCardsGrid">
+        <div class="cat-card" onclick="filterCat('all',null)"><div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div></div>
+        <div class="cat-card" onclick="filterCat('rgb',null)"><div class="cat-card-icon">💡</div><div class="cat-card-name">RGB Lights</div></div>
+        <div class="cat-card" onclick="filterCat('smartwatch',null)"><div class="cat-card-icon">⌚</div><div class="cat-card-name">Smartwatches</div></div>
+        <div class="cat-card" onclick="filterCat('powerbank',null)"><div class="cat-card-icon">🔋</div><div class="cat-card-name">Power Bank</div></div>
+        <div class="cat-card" onclick="filterCat('tws',null)"><div class="cat-card-icon">🎧</div><div class="cat-card-name">TWS Earbuds</div></div>
+        <div class="cat-card" onclick="filterCat('headphone',null)"><div class="cat-card-icon">🎵</div><div class="cat-card-name">BT Headphones</div></div>
+        <div class="cat-card" onclick="filterCat('lamp',null)"><div class="cat-card-icon">🪔</div><div class="cat-card-name">Acrylic Lamp</div></div>
+        <div class="cat-card" onclick="filterCat('fan',null)"><div class="cat-card-icon">💨</div><div class="cat-card-name">Recharge. Fan</div></div>
+      </div>
+    </div>
+    <button class="cat-carousel-arrow next" id="catNextBtn" onclick="catCarouselSlide(1)">&#8250;</button>
   </div>
 </div>
 
@@ -796,14 +877,17 @@ body.dark .prod-badge{opacity:.88}
       <a href="mailto:vangcurbd@gmail.com">✉️ vangcurbd@gmail.com</a>
       <a href="https://wa.me/8801816365504" target="_blank">💬 WhatsApp Support</a>
       <a href="https://facebook.com/vangcurbdofficial" target="_blank">📘 Facebook Page</a>
-      <p style="color:rgba(255,255,255,.3);font-size:11px;margin-top:8px">📍 Dhaka, Bangladesh</p>
+      <p style="color:rgba(255,255,255,.75);font-size:12px;margin-top:8px">📍 Dhaka, Bangladesh</p>
     </div>
   </div>
   <div class="footer-bottom"><div class="f-copy">© 2026 Vangcur - ভাঙচুর. All rights reserved.</div></div>
 </footer>
 
 <!-- BACK TO TOP -->
-<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="উপরে যান">↑</button>
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="উপরে যান">
+  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+  <span>TOP</span>
+</button>
 
 <!-- FLOAT BTNS -->
 <div class="float-btns">
@@ -952,26 +1036,67 @@ body.dark .prod-badge{opacity:.88}
 <!-- LOGIN MODAL -->
 <div class="modal-bg" id="loginModal" onclick="if(event.target===this)closeLogin()">
   <div class="login-box">
-    <h2>স্বাগতম 👋</h2>
-    <p class="sub-txt">আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
-    <div class="login-tabs">
-      <button class="l-tab on" onclick="switchTab('login',this)">লগইন</button>
-      <button class="l-tab" onclick="switchTab('reg',this)">রেজিস্ট্রেশন</button>
+    <div class="login-box-header">
+      <!-- Dynamic Island style logo -->
+      <div class="login-brand-logo">
+        <div class="login-island">
+          <div class="login-island-name">VangCur</div>
+          <div class="login-island-bn">ভাঙচুর</div>
+        </div>
+      </div>
+      <h2 id="loginModalTitle">স্বাগতম 👋</h2>
+      <p class="sub-txt" id="loginModalSub">আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
     </div>
-    <div id="loginForm">
-      <div class="fg"><label>ইমেইল</label><input class="finp" id="lEmail" type="email" placeholder="your@email.com"></div>
-      <div class="fg"><label>পাসওয়ার্ড</label><input class="finp" id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="err-msg" id="lErr"></div>
-      <button class="btn-login" onclick="doLogin()">লগইন করুন</button>
+    <div class="login-box-body">
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm">
+        <div class="fg">
+          <label>ইমেইল</label>
+          <input class="finp no-icon" id="lEmail" type="email" placeholder="name@example.com" autocomplete="email">
+        </div>
+        <div class="fg">
+          <label>পাসওয়ার্ড</label>
+          <input class="finp no-icon" id="lPass" type="password" placeholder="আপনার পাসওয়ার্ড দিন" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password">
+        </div>
+        <div class="login-remember-row">
+          <label><input type="checkbox" id="rememberMe"> মনে রাখুন</label>
+          <button class="login-forgot" onclick="showToast('পাসওয়ার্ড রিসেট সুবিধা শীঘ্রই আসছে')">পাসওয়ার্ড ভুলে গেছেন?</button>
+        </div>
+        <div class="err-msg" id="lErr"></div>
+        <button class="btn-login" onclick="doLogin()">লগইন করুন</button>
+        <div class="login-divider">অথবা</div>
+        <button class="btn-google" onclick="showToast('Google লগইন শীঘ্রই আসছে')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google দিয়ে লগইন করুন
+        </button>
+        <div class="login-note">অ্যাকাউন্ট নেই? <button onclick="switchToRegister()">রেজিস্ট্রেশন করুন</button></div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="regForm" style="display:none">
+        <div class="fg">
+          <label>পূর্ণ নাম</label>
+          <input class="finp no-icon" id="rName" placeholder="আপনার পূর্ণ নাম লিখুন">
+        </div>
+        <div class="fg">
+          <label>মোবাইল নম্বর</label>
+          <input class="finp no-icon" id="rPhone" type="tel" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="fg">
+          <label>ইমেইল</label>
+          <input class="finp no-icon" id="rEmail" type="email" placeholder="name@example.com">
+        </div>
+        <div class="fg">
+          <label>পাসওয়ার্ড</label>
+          <input class="finp no-icon" id="rPass" type="password" placeholder="কমপক্ষে ৬ অক্ষর">
+        </div>
+        <div class="err-msg" id="rErr"></div>
+        <button class="btn-login" onclick="doRegister()">অ্যাকাউন্ট তৈরি করুন</button>
+        <div class="login-note" style="margin-top:16px">ইতিমধ্যে অ্যাকাউন্ট আছে? <button onclick="switchToLogin()">লগইন করুন</button></div>
+      </div>
+
     </div>
-    <div id="regForm" style="display:none">
-      <div class="fg"><label>পূর্ণ নাম</label><input class="finp" id="rName" placeholder="আপনার নাম"></div>
-      <div class="fg"><label>ইমেইল</label><input class="finp" id="rEmail" type="email" placeholder="your@email.com"></div>
-      <div class="fg"><label>পাসওয়ার্ড</label><input class="finp" id="rPass" type="password" placeholder="কমপক্ষে ৬ অক্ষর"></div>
-      <div class="err-msg" id="rErr"></div>
-      <button class="btn-login" onclick="doRegister()">অ্যাকাউন্ট তৈরি করুন</button>
-    </div>
-    <div class="login-note">অ্যাডমিন? <button onclick="window.open('admin.html','_blank')">Admin Panel</button></div>
   </div>
 </div>
 
@@ -1117,7 +1242,6 @@ body.dark .prod-badge{opacity:.88}
       <h2 style="color:var(--green)">অর্ডার কনফার্ম হয়েছে! 🎉</h2>
       <p>আপনার পেমেন্ট যাচাই হয়েছে।</p>
       <button class="btn-next" onclick="dlInvoice()" style="width:100%;margin-top:16px">📄 ইনভয়েস ডাউনলোড করুন</button>
-      <button onclick="closeWait()" style="width:100%;margin-top:10px;background:none;border:none;color:var(--gray);font-size:13px;cursor:pointer">হোমপেজে ফিরে যান</button>
     </div>
     <div class="rejected-state" id="rejectedState">
       <div class="pulse" style="background:#FEE2E2;animation:none">❌</div>
@@ -1140,7 +1264,6 @@ body.dark .prod-badge{opacity:.88}
       📹 <strong>গুরুত্বপূর্ণ:</strong> প্রোডাক্ট পাওয়ার সাথে সাথে একটানা আনবক্সিং ভিডিও করুন (কোনো কাট বা পজ নয়)। ওয়ারেন্টি ক্লেইমের জন্য এই ভিডিও বাধ্যতামূলক।
     </div>
     <button onclick="dlInvoiceFromPopup()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px">📄 ইনভয়েস ডাউনলোড করুন</button>
-    <button onclick="closeBgConfirmPopup()" style="width:100%;background:none;border:none;color:var(--gray);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">পরে ডাউনলোড করব</button>
   </div>
 </div>
 
@@ -1166,6 +1289,22 @@ body.dark .prod-badge{opacity:.88}
       </ul>
     </div>
     <button onclick="closePost()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:18px;font-family:'DM Sans',sans-serif">বুঝেছি ✓</button>
+  </div>
+</div>
+
+<!-- ORDER TRACKING MODAL -->
+<div class="modal-bg" id="trackOrderModal" onclick="if(event.target===this)closeTrackOrder()">
+  <div style="background:var(--white);border-radius:22px;max-width:480px;width:100%;padding:32px 28px;animation:slideUp .3s ease;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h2 style="font-size:18px;font-weight:700">🔍 অর্ডার ট্র্যাক করুন</h2>
+      <button onclick="closeTrackOrder()" style="background:var(--light);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.7">আপনার অর্ডার নম্বর বা ফোন নম্বর দিয়ে অর্ডার খুঁজুন।</p>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="trackInput" class="fctrl" placeholder="অর্ডার নম্বর (যেমন: #VC-...) অথবা ফোন নম্বর" style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif" onkeydown="if(event.key==='Enter')doTrackOrder()">
+      <button onclick="doTrackOrder()" style="background:var(--dark);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">খুঁজুন</button>
+    </div>
+    <div id="trackResult"></div>
   </div>
 </div>
 
@@ -1439,11 +1578,21 @@ function updateNavAuth(){
 }
 function openLogin(){document.getElementById('loginModal').classList.add('show');document.body.style.overflow='hidden';}
 function closeLogin(){document.getElementById('loginModal').classList.remove('show');document.body.style.overflow='';}
-function switchTab(t,el){
-  document.querySelectorAll('.l-tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');
-  document.getElementById('loginForm').style.display=t==='login'?'block':'none';
-  document.getElementById('regForm').style.display=t==='reg'?'block':'none';
+function switchToRegister(){
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('regForm').style.display='block';
+  document.getElementById('loginModalTitle').textContent='অ্যাকাউন্ট তৈরি করুন';
+  document.getElementById('loginModalSub').textContent='নতুন অ্যাকাউন্ট খুলুন';
+  document.getElementById('rErr').textContent='';
 }
+function switchToLogin(){
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('regForm').style.display='none';
+  document.getElementById('loginModalTitle').textContent='স্বাগতম 👋';
+  document.getElementById('loginModalSub').textContent='আপনার অ্যাকাউন্টে প্রবেশ করুন';
+  document.getElementById('lErr').textContent='';
+}
+function switchTab(t,el){switchToLogin();}
 async function hashPw(pw){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
 async function doLogin(){
   const em=document.getElementById('lEmail').value.trim();
@@ -1457,21 +1606,26 @@ async function doLogin(){
   if(u.pass===pw){u.pass=h;const all=JSON.parse(localStorage.getItem('vc_users')||'[]');const idx=all.findIndex(x=>x.email===em);if(idx>=0){all[idx]=u;localStorage.setItem('vc_users',JSON.stringify(all));}}
   const safeUser={id:u.id,name:u.name,email:u.email,createdAt:u.createdAt};
   currentUser=safeUser;localStorage.setItem('vc_user',JSON.stringify(safeUser));
+  mergeGuestOrdersToUser(safeUser.email, safeUser.id);
   closeLogin();updateNavAuth();showToast('✅ লগইন সফল!');
 }
 async function doRegister(){
   const nm=document.getElementById('rName').value.trim();
+  const ph=document.getElementById('rPhone').value.trim();
   const em=document.getElementById('rEmail').value.trim();
   const pw=document.getElementById('rPass').value;
-  if(!nm||!em||!pw){document.getElementById('rErr').textContent='সব তথ্য দিন';return;}
+  if(!nm){document.getElementById('rErr').textContent='নাম দিন';return;}
+  if(!ph||!/^01[3-9]\d{8}$/.test(ph)){document.getElementById('rErr').textContent='সঠিক মোবাইল নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)';return;}
+  if(!em){document.getElementById('rErr').textContent='ইমেইল দিন';return;}
   if(pw.length<6){document.getElementById('rErr').textContent='পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে';return;}
   const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
   if(users.find(x=>x.email===em)){document.getElementById('rErr').textContent='এই ইমেইল ইতিমধ্যে নিবন্ধিত';return;}
   const h=await hashPw(pw);
-  const nu={id:Date.now(),name:nm,email:em,pass:h,createdAt:new Date().toISOString()};
+  const nu={id:Date.now(),name:nm,phone:ph,email:em,pass:h,createdAt:new Date().toISOString()};
   users.push(nu);localStorage.setItem('vc_users',JSON.stringify(users));
-  const safeUser={id:nu.id,name:nm,email:em,createdAt:nu.createdAt};
+  const safeUser={id:nu.id,name:nm,phone:ph,email:em,createdAt:nu.createdAt};
   currentUser=safeUser;localStorage.setItem('vc_user',JSON.stringify(safeUser));
+  mergeGuestOrdersToUser(safeUser.email, safeUser.id);
   closeLogin();updateNavAuth();showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!');
 }
 function doLogout(){currentUser=null;localStorage.removeItem('vc_user');closeAcc();updateNavAuth();showToast('লগআউট হয়েছে');}
@@ -1591,9 +1745,13 @@ function showSearchDropdown(q, source) {
   }
 
   const lower = q.toLowerCase().trim();
+  const words = lower.split(/\s+/).filter(Boolean);
   const allProds = typeof PRODS !== 'undefined' ? PRODS : [];
   const matches = allProds
-    .filter(p => p.name.toLowerCase().includes(lower) || (p.desc && p.desc.toLowerCase().includes(lower)))
+    .filter(p => {
+      const hay = (p.name + ' ' + (p.desc||'') + ' ' + (p.cat||'')).toLowerCase();
+      return words.every(w => hay.includes(w));
+    })
     .slice(0, 6);
 
   if(!matches.length) {
@@ -1673,7 +1831,13 @@ document.addEventListener('click', (e) => {
 
 function filterProducts(q){
   const l=q.toLowerCase().trim();
-  renderProds(l?PRODS.filter(p=>p.name.toLowerCase().includes(l)):PRODS);
+  if(!l){renderProds(PRODS);return;}
+  // Split query into words — match if ALL words found anywhere in name or desc
+  const words=l.split(/\s+/).filter(Boolean);
+  renderProds(PRODS.filter(p=>{
+    const hay=(p.name+' '+(p.desc||'')+' '+(p.cat||'')).toLowerCase();
+    return words.every(w=>hay.includes(w));
+  }));
 }
 
 // PRODUCT FULL PAGE
@@ -2309,6 +2473,11 @@ function confirmOrder(){
     status:'pending',ip:'client-ip'};
   const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
   orders.push(order);localStorage.setItem('vc_orders',JSON.stringify(orders));
+  // Also save to guest orders if not logged in (for later merge)
+  if(!currentUser){
+    const guestOrders=JSON.parse(localStorage.getItem('vc_guest_orders')||'[]');
+    guestOrders.push(order);localStorage.setItem('vc_guest_orders',JSON.stringify(guestOrders));
+  }
   localStorage.setItem('vc_last_order_time',String(Date.now())); // S-10: rate limit timestamp
   pendingOrdId=oid;sessionStorage.setItem('vc_pending',oid);sessionStorage.setItem('vc_pending_num',num);
   // Reduce stock (S-5: persist)
@@ -2410,38 +2579,189 @@ function dlInvoice(){
 }
 function dlInvoiceById(id){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===id);if(o)genInvoice(o);}
 function genInvoice(o){
-  const ds=new Date(o.date).toLocaleDateString('bn-BD');
-  const pi=`<div style="margin-top:18px;padding:13px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:12px;line-height:1.8"><strong>📦 প্রোডাক্ট পাওয়ার পর করণীয়:</strong><br>
-  • প্রোডাক্ট হাতে পাওয়ার সাথে সাথে একটানা আনবক্সিং ভিডিও করুন (কোনো কাট বা পজ নয়)<br>
-  • আনবক্সিং প্রমাণ ছাড়া ওয়ারেন্টি ক্লেইম গ্রহণযোগ্য নয়<br>
-  • ৬ মাসের ওয়ারেন্টিযুক্ত প্রোডাক্টের বক্স সংরক্ষণ করুন<br>
-  • সমস্যায় WhatsApp: 01816-365504</div>`;
+  const ds=new Date(o.date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const advancePaid=o.advancePaid||200;
+  const balanceDue=Math.max(0,o.total-advancePaid);
+  const pi=`<div style="margin-top:18px;padding:13px 16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:12px;line-height:1.9"><strong>📦 Post-Delivery Instructions:</strong><br>
+  • Record an unboxing video immediately upon receiving the product (no cuts or pauses)<br>
+  • Warranty claims are not valid without unboxing video proof<br>
+  • Keep box & documents for products with 6-month warranty<br>
+  • For issues, WhatsApp: 01816-365504</div>`;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice ${o.orderNum}</title>
-  <style>body{font-family:Arial,sans-serif;max-width:580px;margin:40px auto;color:#1a1a1a;font-size:13px;}.hdr{text-align:center;border-bottom:2px solid #1a1a1a;padding-bottom:16px;margin-bottom:16px;}.badge{background:#E63946;color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;display:inline-block;margin-bottom:6px;}.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;}.tr{display:flex;justify-content:space-between;padding:10px 0;font-weight:bold;font-size:15px;}.ib{background:#f9f9f9;padding:12px;border-radius:8px;margin-bottom:14px;line-height:1.8;}.ft{margin-top:26px;text-align:center;font-size:11px;color:#aaa;}</style>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6fa;min-height:100vh;padding:30px 12px;}
+    .invoice-wrap{max-width:620px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.10);overflow:hidden;position:relative;}
+    /* Top nav bar inside invoice page */
+    .inv-topbar{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 20px;}
+    .inv-back-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;transition:background .2s;}
+    .inv-back-btn:hover{background:rgba(255,255,255,.22);}
+    .inv-dl-btn{width:40px;height:40px;border-radius:10px;background:#E63946;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+    .inv-dl-btn:hover{background:#c1121f;}
+    .inv-body{padding:32px 30px 28px;}
+    .hdr{text-align:center;border-bottom:2px solid #f0f0f0;padding-bottom:20px;margin-bottom:22px;}
+    .brand-name{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#1a1a1a;}
+    .brand-sub{font-size:10px;letter-spacing:3px;color:#aaa;text-transform:uppercase;margin-top:2px;margin-bottom:10px;}
+    .badge{background:#E63946;color:#fff;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;letter-spacing:1px;}
+    .order-meta{margin-top:12px;font-size:12.5px;color:#555;}
+    .section-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#999;margin-bottom:10px;}
+    .info-card{background:#f8f9fb;border:1px solid #eee;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:2;}
+    .info-card strong{color:#333;min-width:70px;display:inline-block;}
+    .prod-table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+    .prod-table th{background:#f8f9fb;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#888;padding:9px 10px;text-align:left;border-bottom:2px solid #eee;}
+    .prod-table td{padding:10px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:middle;}
+    .prod-table tr:last-child td{border-bottom:none;}
+    .totals-box{background:#f8f9fb;border-radius:10px;border:1px solid #eee;padding:14px 16px;margin-bottom:16px;}
+    .total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#444;border-bottom:1px solid #eee;}
+    .total-row:last-child{border-bottom:none;}
+    .total-row.grand{font-weight:800;font-size:15px;color:#1a1a1a;padding-top:10px;}
+    .total-row.paid{color:#10B981;font-weight:600;}
+    .total-row.balance{color:#E63946;font-weight:700;font-size:14px;}
+    .payment-badge{display:inline-flex;align-items:center;gap:6px;background:#e6f7ef;color:#065f46;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;margin-bottom:20px;}
+    .footer-note{margin-top:0;font-size:11.5px;color:#888;text-align:center;line-height:2;border-top:1px solid #f0f0f0;padding-top:16px;}
+    @media print{.inv-topbar{display:none}.invoice-wrap{box-shadow:none;border-radius:0}}
+  </style>
   </head><body>
-  <div class="hdr"><h1 style="font-size:24px;margin:0">Vangcur - ভাঙচুর</h1><div style="font-size:10px;letter-spacing:2px;color:#888">YOUR FIRST CHOICE FOR GADGETS</div><div class="badge">INVOICE</div><br>অর্ডার নম্বর: <strong>${o.orderNum}</strong> | তারিখ: ${ds}</div>
-  <div class="ib"><strong>গ্রাহক:</strong> ${escHtml(o.customer.name)}<br><strong>ফোন:</strong> ${escHtml(o.customer.phone)}<br><strong>জেলা:</strong> ${escHtml(o.customer.district)}<br><strong>ঠিকানা:</strong> ${escHtml(o.customer.address)}</div>
-  <div style="font-weight:bold;margin-bottom:8px;font-size:11px;color:#888">প্রোডাক্ট বিবরণ</div>
-  ${(o.items||[]).map(i=>`<div class="row"><span>${i.emoji||''} ${i.name} × ${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
-  <div class="row"><span>Shipping (${o.shipping==='dhaka'?'ঢাকা সিটি':'সারা বাংলাদেশ'})</span><span>৳${o.shippingCost}</span></div>
-  <div class="tr"><span>মোট</span><span>৳${o.total.toLocaleString()}</span></div>
-  <div class="row" style="color:#10B981;font-weight:600"><span>✅ Paid (bKash Advance)</span><span>৳২০০</span></div>
-  <div class="row" style="color:#E63946;font-weight:700;font-size:14px"><span>Balance Due (COD)</span><span>৳${Math.max(0,o.total-200).toLocaleString()}</span></div>
-  <div style="margin-top:12px;background:#f0f0f0;padding:9px;border-radius:7px;font-size:12px">Payment Method: bKash | Courier: Pathao</div>
-  ${pi}<div class="ft">📞 01816-365504 | ✉️ vangcurbd@gmail.com | 📘 facebook.com/vangcurbdofficial<br>📍 Dhaka, Bangladesh</div></body></html>`;
-  const a=document.createElement('a');
-  // Open in new tab — user can Print → Save as PDF on Android
+  <div class="invoice-wrap">
+    <div class="inv-topbar">
+      <button class="inv-back-btn" onclick="window.close()">← Back</button>
+      <button class="inv-dl-btn" title="Download Invoice" onclick="downloadInvoiceFile()">
+        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
+    <div class="inv-body">
+      <div class="hdr">
+        <div class="brand-name">Vangcur — ভাঙচুর</div>
+        <div class="brand-sub">Your First Choice for Gadgets</div>
+        <div class="badge">INVOICE</div>
+        <div class="order-meta" style="margin-top:10px">Order No: <strong>${o.orderNum}</strong> &nbsp;|&nbsp; Date: ${ds}</div>
+      </div>
+      <div class="section-title">Customer Details</div>
+      <div class="info-card">
+        <div><strong>Name:</strong> ${escHtml(o.customer.name)}</div>
+        <div><strong>Phone:</strong> ${escHtml(o.customer.phone)}</div>
+        <div><strong>District:</strong> ${escHtml(o.customer.district)}</div>
+        <div><strong>Address:</strong> ${escHtml(o.customer.address)}</div>
+      </div>
+      <div class="section-title">Product Details</div>
+      <table class="prod-table">
+        <thead><tr><th>Product</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th></tr></thead>
+        <tbody>
+          ${(o.items||[]).map(i=>`<tr><td>${i.emoji||''} ${escHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.qty).toLocaleString()}</td></tr>`).join('')}
+          <tr><td colspan="2" style="color:#888">Shipping (${o.shipping==='dhaka'?'Dhaka City':'All Bangladesh'})</td><td style="text-align:right">৳${o.shippingCost}</td></tr>
+        </tbody>
+      </table>
+      <div class="totals-box">
+        <div class="total-row grand"><span>Total</span><span>৳${o.total.toLocaleString()}</span></div>
+        <div class="total-row paid"><span>✅ Paid (bKash Advance)</span><span>৳${advancePaid.toLocaleString()}</span></div>
+        <div class="total-row balance"><span>Balance Due (COD)</span><span>৳${balanceDue.toLocaleString()}</span></div>
+      </div>
+      <div class="payment-badge">💳 Payment: bKash &nbsp;|&nbsp; 🚚 Courier: Pathao</div>
+      ${pi}
+      <div class="footer-note" style="margin-top:18px">📞 01816-365504 &nbsp;|&nbsp; ✉️ vangcurbd@gmail.com<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 Dhaka, Bangladesh</div>
+    </div>
+  </div>
+  <script>
+  function downloadInvoiceFile(){
+    const html=document.documentElement.outerHTML;
+    const a=document.createElement('a');
+    a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
+    a.download='Vangcur_Invoice_${o.orderNum.replace('#','')}.html';
+    a.click();
+  }
+  // Auto-trigger download on open
+  window.addEventListener('load',function(){
+    setTimeout(downloadInvoiceFile,600);
+  });
+  <\/script>
+  </body></html>`;
+
+  // 1) Directly trigger download
+  const dlLink=document.createElement('a');
+  dlLink.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
+  dlLink.download=`Vangcur_Invoice_${o.orderNum.replace('#','')}.html`;
+  dlLink.click();
+
+  // 2) Also open the invoice page in a new tab
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  const win=window.open(url,'_blank');
-  if(!win){
-    // Popup blocked — fallback to download
-    a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
-    a.download=`Vangcur_Invoice_${o.orderNum.replace('#','')}.html`;a.click();
-  }
-  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
 }
 function closePost(){document.getElementById('postOverlay').classList.remove('show');document.body.style.overflow='';}
+
+// ============ ORDER TRACKING ============
+function openTrackOrder(){
+  document.getElementById('trackOrderModal').classList.add('show');
+  document.body.style.overflow='hidden';
+  document.getElementById('trackResult').innerHTML='';
+  document.getElementById('trackInput').value='';
+  setTimeout(()=>document.getElementById('trackInput').focus(),100);
+}
+function closeTrackOrder(){
+  document.getElementById('trackOrderModal').classList.remove('show');
+  document.body.style.overflow='';
+}
+
+function doTrackOrder(){
+  const q=(document.getElementById('trackInput').value||'').trim().toLowerCase();
+  if(!q){document.getElementById('trackResult').innerHTML='<p style="color:var(--red);font-size:13px">অর্ডার নম্বর বা ফোন নম্বর লিখুন।</p>';return;}
+
+  const allOrders=[
+    ...JSON.parse(localStorage.getItem('vc_orders')||'[]'),
+    ...JSON.parse(localStorage.getItem('vc_guest_orders')||'[]')
+  ];
+
+  const found=allOrders.filter(o=>{
+    const num=(o.orderNum||'').toLowerCase();
+    const phone=(o.customer?.phone||'').replace(/\D/g,'');
+    const qPhone=q.replace(/\D/g,'');
+    return num.includes(q) || (qPhone.length>=5 && phone.includes(qPhone));
+  });
+
+  if(!found.length){
+    document.getElementById('trackResult').innerHTML=`<div style="text-align:center;padding:20px 0;color:var(--gray);font-size:13px">😔 কোনো অর্ডার পাওয়া যায়নি।<br><small>অর্ডার নম্বর বা রেজিস্টার্ড ফোন নম্বর দিয়ে খুঁজুন।</small></div>`;
+    return;
+  }
+
+  const statusLabel={pending:'⏳ পেন্ডিং',confirmed:'✅ কনফার্ম',shipped:'🚚 শিপড',delivered:'📦 ডেলিভার্ড',rejected:'❌ বাতিল'};
+  const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',rejected:'#E63946'};
+
+  document.getElementById('trackResult').innerHTML=found.map(o=>`
+    <div style="border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--dark)">${escHtml(o.orderNum)}</div>
+        <div style="font-size:11px;font-weight:700;background:${statusColor[o.status]||'#888'}20;color:${statusColor[o.status]||'#888'};padding:4px 10px;border-radius:20px">${statusLabel[o.status]||o.status}</div>
+      </div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:8px">তারিখ: ${new Date(o.date).toLocaleDateString('en-GB')} | গ্রাহক: ${escHtml(o.customer?.name||'')} | ফোন: ${escHtml(o.customer?.phone||'')}</div>
+      <div style="font-size:12px;margin-bottom:10px">${(o.items||[]).map(i=>`${i.emoji||'📦'} ${escHtml(i.name)} × ${i.qty}`).join('<br>')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
+        <div style="font-size:13px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
+        ${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============ GUEST ORDER MERGE ON LOGIN ============
+function mergeGuestOrdersToUser(userEmail, userId){
+  try{
+    const guestOrders=JSON.parse(localStorage.getItem('vc_guest_orders')||'[]');
+    if(!guestOrders.length)return;
+    // Tag guest orders with user info
+    const tagged=guestOrders.map(o=>({...o,userId:userId,userEmail:userEmail,mergedFromGuest:true}));
+    // Merge into main orders
+    const mainOrders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
+    // Avoid duplicates
+    const existingIds=new Set(mainOrders.map(o=>o.id));
+    const newOnes=tagged.filter(o=>!existingIds.has(o.id));
+    if(newOnes.length){
+      localStorage.setItem('vc_orders',JSON.stringify([...mainOrders,...newOnes]));
+      localStorage.removeItem('vc_guest_orders');
+      console.log(`✅ ${newOnes.length}টি গেস্ট অর্ডার অ্যাকাউন্টে যুক্ত হয়েছে`);
+    }
+  }catch(e){console.error('mergeGuestOrders error:',e);}
+}
 
 // FAQ
 const FAQS=[
@@ -2732,6 +3052,84 @@ function toggleMobileSearch(){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart();closeOrder();closeInfo();closeWait();closePost();closeLogin();closeAcc();closeWishlist();closeBgConfirmPopup();const mb=document.getElementById('mobileSearchBar');if(mb)mb.classList.remove('show');}});
+
+// CATEGORY CAROUSEL
+let catPage=0;
+const CAT_PER_PAGE=4;
+function getCatItems(){return document.querySelectorAll('#catCardsGrid .cat-card');}
+function updateCatCarousel(){
+  const items=getCatItems();
+  const total=items.length;
+  const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
+  catPage=Math.max(0,Math.min(catPage,maxPage));
+  const offset=catPage*(100/Math.ceil(total/CAT_PER_PAGE));
+  // Update grid to show 4 per row based on page
+  const grid=document.getElementById('catCardsGrid');
+  if(grid){
+    // Set columns dynamically based on viewport
+    const cols=window.innerWidth<=768?2:4;
+    grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+    const itemWidth=100/cols;
+    // Show/hide items by page
+    let shown=0;
+    items.forEach((item,i)=>{
+      const startIdx=catPage*CAT_PER_PAGE;
+      const endIdx=startIdx+CAT_PER_PAGE;
+      if(i>=startIdx&&i<endIdx){item.style.display='';shown++;}
+      else{item.style.display='none';}
+    });
+  }
+  const prev=document.getElementById('catPrevBtn');
+  const next=document.getElementById('catNextBtn');
+  if(prev)prev.style.opacity=catPage<=0?'0.3':'1';
+  if(next)next.style.opacity=catPage>=maxPage?'0.3':'1';
+}
+function catCarouselSlide(dir){
+  const items=getCatItems();
+  const total=items.length;
+  const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
+  catPage=Math.max(0,Math.min(catPage+dir,maxPage));
+  updateCatCarousel();
+}
+// Init carousel on load
+document.addEventListener('DOMContentLoaded',function(){
+  updateCatCarousel();
+  // Load custom categories from admin
+  loadCustomCategories();
+});
+// Rebuild carousel when categories are loaded from admin
+function loadCustomCategories(){
+  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  if(!saved||!saved.length)return;
+  const grid=document.getElementById('catCardsGrid');
+  const catBar=document.querySelector('.cat-inner');
+  if(!grid)return;
+  // Clear existing cards and rebuild
+  grid.innerHTML='';
+  const allCard=document.createElement('div');
+  allCard.className='cat-card';
+  allCard.innerHTML='<div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div>';
+  allCard.onclick=()=>filterCat('all',null);
+  grid.appendChild(allCard);
+  saved.forEach(cat=>{
+    // Add to grid
+    const card=document.createElement('div');
+    card.className='cat-card';
+    card.innerHTML=`<div class="cat-card-icon">${cat.icon||'📦'}</div><div class="cat-card-name">${cat.name}</div>`;
+    card.onclick=()=>filterCat(cat.id,null);
+    grid.appendChild(card);
+    // Add to cat-bar if not exists
+    if(catBar&&!catBar.querySelector(`[data-cat="${cat.id}"]`)){
+      const pill=document.createElement('button');
+      pill.className='cat-pill';
+      pill.dataset.cat=cat.id;
+      pill.textContent=cat.name;
+      pill.onclick=()=>filterCat(cat.id,pill);
+      catBar.appendChild(pill);
+    }
+  });
+  updateCatCarousel();
+}
 </script>
 
 <!-- FLOATING CART BADGE -->

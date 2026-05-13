@@ -24,7 +24,7 @@
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
   // ✅ Connection Test — Console-এ দেখুন
-  console.log("✅ Supabase Admin connected:", supabaseClient);
+  // Supabase Admin ready
 </script>
 <style>
 :root{--bg:#F4F5F7;--side:#1A1A1A;--white:#fff;--border:#E5E7EB;--red:#E63946;--green:#10B981;--warn:#F59E0B;--gray:#6B7280;--light:#F3F4F6;--blue:#3B82F6;--purple:#8B5CF6;--sh1:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 16px rgba(0,0,0,.10);--r:10px;--tr:all .2s ease}
@@ -290,6 +290,7 @@ tr:hover td{background:#FAFAFA}
   <div class="sb-section">ডিজাইন</div>
   <button class="nav-item" onclick="showPage('design-logo',this)">🏷️ লোগো ও ব্র্যান্ড</button>
   <button class="nav-item" onclick="showPage('design-hero',this)">🖼️ Hero Slider</button>
+  <button class="nav-item" onclick="showPage('design-categories',this)">🗂️ ক্যাটাগরি</button>
   <button class="nav-item" onclick="showPage('design-header',this)">📌 Header</button>
   <button class="nav-item" onclick="showPage('design-footer',this)">🔻 Footer</button>
   <button class="nav-item" onclick="showPage('design-colors',this)">🎨 রঙ ও ফন্ট</button>
@@ -736,6 +737,45 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
     </div>
   </div>
 
+  <!-- ===== CATEGORIES ===== -->
+  <div class="page" id="page-design-categories">
+    <div class="page-head">
+      <div><div class="page-title">ক্যাটাগরি ম্যানেজমেন্ট</div><div class="page-sub">ক্যাটাগরি যোগ করুন, সম্পাদনা করুন</div></div>
+      <button class="btn btn-dark" onclick="addNewCategory()">+ নতুন ক্যাটাগরি যোগ করুন</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">বর্তমান ক্যাটাগরি সমূহ</span><span class="card-sub">এই ক্যাটাগরিগুলো ওয়েবসাইটের কার্ড ও ন্যাভে দেখা যাবে</span></div>
+      <div id="catList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card" id="catEditor" style="display:none">
+      <div class="card-head"><span class="card-title" id="catEditorTitle">নতুন ক্যাটাগরি</span></div>
+      <div class="fg2c">
+        <div class="fg"><label>ক্যাটাগরির নাম <span class="hint">(বাংলা বা ইংরেজি)</span></label><input class="finp" id="catName" placeholder="যেমন: Gaming Accessories"></div>
+        <div class="fg"><label>ID <span class="hint">(ছোট হাতে, কোনো স্পেস নয়)</span></label><input class="finp" id="catId" placeholder="যেমন: gaming" oninput="this.value=this.value.toLowerCase().replace(/\s/g,'')"></div>
+      </div>
+      <div class="fg2c">
+        <div class="fg"><label>আইকন (Emoji)</label><input class="finp" id="catIcon" placeholder="🎮" style="font-size:18px"></div>
+        <div class="fg"><label>প্রিভিউ</label>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg);padding:10px;border-radius:8px;border:1.5px solid var(--border)">
+            <span id="catPreviewIcon" style="font-size:24px">📦</span>
+            <span id="catPreviewName" style="font-size:13px;font-weight:600">ক্যাটাগরির নাম</span>
+          </div>
+        </div>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded',()=>{
+          const ni=document.getElementById('catName');const ii=document.getElementById('catIcon');
+          if(ni)ni.addEventListener('input',()=>{const el=document.getElementById('catPreviewName');if(el)el.textContent=ni.value||'ক্যাটাগরির নাম';});
+          if(ii)ii.addEventListener('input',()=>{const el=document.getElementById('catPreviewIcon');if(el)el.textContent=ii.value||'📦';});
+        });
+      </script>
+      <div class="modal-foot">
+        <button class="btn btn-dark" onclick="saveCategoryEdit()">💾 সেভ করুন</button>
+        <button class="btn btn-outline" onclick="document.getElementById('catEditor').style.display='none'">বাতিল</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== COLORS & FONTS ===== -->
   <div class="page" id="page-design-colors">
     <div class="page-head"><div><div class="page-title">রঙ ও ফন্ট</div><div class="page-sub">সাইটের থিম রঙ ও টাইপোগ্রাফি</div></div></div>
@@ -1007,6 +1047,7 @@ function showPage(id,btn){
   if(id==='customers')renderCustomers();
   if(id==='dashboard')initDash();
   if(id==='design-hero')renderHeroSlides();
+  if(id==='design-categories')renderCategoryList();
   if(id==='faq-settings')renderFAQSettings();
   // Auto close sidebar on mobile after nav
   if(window.innerWidth<=768)closeMobSidebar();
@@ -1490,6 +1531,90 @@ function saveFooter(){
   showAdminToast('✅ Footer সেভ হয়েছে!');
 }
 
+// ======= CATEGORY MANAGEMENT =======
+const DEFAULT_CATS=[
+  {id:'all',name:'All Products',icon:'🛍️',locked:true},
+  {id:'rgb',name:'RGB Lights',icon:'💡',locked:true},
+  {id:'smartwatch',name:'Smartwatches',icon:'⌚',locked:true},
+  {id:'powerbank',name:'Power Bank',icon:'🔋',locked:true},
+  {id:'tws',name:'TWS Earbuds',icon:'🎧',locked:true},
+  {id:'headphone',name:'BT Headphones',icon:'🎵',locked:true},
+  {id:'lamp',name:'Acrylic Lamp',icon:'🪔',locked:true},
+  {id:'fan',name:'Rechargeable Fan',icon:'💨',locked:true},
+];
+let editCatIdx=-1;
+function getCats(){
+  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  if(!saved)return [...DEFAULT_CATS];
+  return saved;
+}
+function saveCats(cats){localStorage.setItem('vc_categories',JSON.stringify(cats));syncCatsToSite(cats);}
+function syncCatsToSite(cats){/* Site reads vc_categories on load */}
+function renderCategoryList(){
+  const cats=getCats();
+  const list=document.getElementById('catList');
+  if(!list)return;
+  list.innerHTML=cats.map((c,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:9px;border:1.5px solid var(--border)">
+    <span style="font-size:22px;min-width:32px;text-align:center">${c.icon}</span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700">${c.name}</div>
+      <div style="font-size:11px;color:var(--gray)">ID: ${c.id}${c.locked?' · Built-in':''}</div>
+    </div>
+    ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️ এডিট</button>
+    <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:
+    '<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
+  </div>`).join('');
+}
+function addNewCategory(){
+  editCatIdx=-1;
+  document.getElementById('catEditorTitle').textContent='নতুন ক্যাটাগরি যোগ করুন';
+  document.getElementById('catName').value='';
+  document.getElementById('catId').value='';
+  document.getElementById('catIcon').value='';
+  document.getElementById('catPreviewIcon').textContent='📦';
+  document.getElementById('catPreviewName').textContent='ক্যাটাগরির নাম';
+  document.getElementById('catEditor').style.display='block';
+}
+function editCategory(i){
+  editCatIdx=i;
+  const cats=getCats();const c=cats[i];
+  document.getElementById('catEditorTitle').textContent='ক্যাটাগরি এডিট করুন';
+  document.getElementById('catName').value=c.name;
+  document.getElementById('catId').value=c.id;
+  document.getElementById('catIcon').value=c.icon;
+  document.getElementById('catPreviewIcon').textContent=c.icon;
+  document.getElementById('catPreviewName').textContent=c.name;
+  document.getElementById('catEditor').style.display='block';
+}
+function saveCategoryEdit(){
+  const name=document.getElementById('catName').value.trim();
+  const id=document.getElementById('catId').value.trim().toLowerCase().replace(/\s/g,'');
+  const icon=document.getElementById('catIcon').value.trim()||'📦';
+  if(!name){showAdminToast('ক্যাটাগরির নাম দিন');return;}
+  if(!id){showAdminToast('ক্যাটাগরির ID দিন');return;}
+  const cats=getCats();
+  if(editCatIdx===-1){
+    // Check ID uniqueness
+    if(cats.find(c=>c.id===id)){showAdminToast('এই ID ইতিমধ্যে আছে!');return;}
+    cats.push({id,name,icon,locked:false});
+    showAdminToast('✅ নতুন ক্যাটাগরি যোগ হয়েছে!');
+  } else {
+    cats[editCatIdx]={...cats[editCatIdx],name,icon};
+    showAdminToast('✅ ক্যাটাগরি আপডেট হয়েছে!');
+  }
+  saveCats(cats);
+  document.getElementById('catEditor').style.display='none';
+  renderCategoryList();
+}
+function deleteCategory(i){
+  if(!confirm('এই ক্যাটাগরি মুছে দিবেন?'))return;
+  const cats=getCats();
+  cats.splice(i,1);
+  saveCats(cats);
+  renderCategoryList();
+  showAdminToast('🗑️ ক্যাটাগরি মুছে গেছে');
+}
+
 // ======= SHIPPING SETTINGS =======
 function saveShippingSettings(){
   const dhaka=parseInt(document.getElementById('shipDhaka')?.value)||90;
@@ -1804,6 +1929,65 @@ function switchProdTab(tab,btn){
 
 // Auto refresh pending badge
 setInterval(()=>{if(document.getElementById('sidebar').classList.contains('show')){const p=getOrders().filter(o=>o.status==='pending').length;const pb=document.getElementById('pendBadge');pb.style.display=p>0?'inline':'none';pb.textContent=p;}},5000);
+
+// ============ REAL-TIME ORDER SYNC ============
+// Admin toast notification
+function showToast(msg, dur=3500){
+  let t=document.getElementById('adminToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='adminToast';
+    t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .3s;font-family:DM Sans,sans-serif;display:flex;align-items:center;gap:8px';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',dur);
+}
+window.addEventListener('storage', function(e){
+  if(e.key === 'vc_orders' || e.key === 'vc_last_order_time'){
+    const isLoggedIn = document.getElementById('sidebar').classList.contains('show');
+    if(!isLoggedIn) return;
+
+    // Refresh current visible page
+    const activePage = document.querySelector('.page.show');
+    if(activePage){
+      const pid = activePage.id;
+      if(pid === 'page-orders') renderOrders();
+      if(pid === 'page-dashboard') initDash();
+    }
+
+    // Update pending badge
+    const p = getOrders().filter(o=>o.status==='pending').length;
+    const pb = document.getElementById('pendBadge');
+    if(pb){pb.style.display=p>0?'inline':'none'; pb.textContent=p;}
+
+    // Show toast notification for new order
+    if(e.key === 'vc_last_order_time'){
+      showToast('🔔 নতুন অর্ডার এসেছে!');
+    }
+  }
+});
+
+// Also poll every 8 seconds as fallback (same-tab detection)
+let _lastOrderCount = getOrders().length;
+setInterval(()=>{
+  const isLoggedIn = document.getElementById('sidebar').classList.contains('show');
+  if(!isLoggedIn) return;
+  const current = getOrders().length;
+  if(current !== _lastOrderCount){
+    _lastOrderCount = current;
+    const activePage = document.querySelector('.page.show');
+    if(activePage){
+      const pid = activePage.id;
+      if(pid === 'page-orders') renderOrders();
+      if(pid === 'page-dashboard') initDash();
+    }
+    const p = getOrders().filter(o=>o.status==='pending').length;
+    const pb = document.getElementById('pendBadge');
+    if(pb){pb.style.display=p>0?'inline':'none'; pb.textContent=p;}
+    if(current > _lastOrderCount - 1) showToast('🔔 নতুন অর্ডার এসেছে!');
+  }
+}, 8000);
 
 // ESC close modals
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();document.getElementById('delSlideModal').classList.remove('show');}});
