@@ -172,7 +172,7 @@ tr:hover td{background:#FAFAFA}
 .mob-overlay.show{display:block}
 
 @media(max-width:768px){
-  body{flex-direction:column}
+  body{flex-direction:column;overflow-x:hidden;width:100%}
   .sidebar{
     width:260px;height:100vh;position:fixed;top:0;left:-270px;
     transition:left .3s ease;z-index:160;padding-top:16px;
@@ -180,7 +180,10 @@ tr:hover td{background:#FAFAFA}
   }
   .sidebar.mob-open{left:0}
   .sidebar.show{display:block !important}
-  .main{margin-left:0;padding:12px}
+  .main{margin-left:0;padding:12px;width:100%;overflow-x:hidden;box-sizing:border-box}
+
+  /* ── Dashboard 2-col grid → single col on mobile ── */
+  .dash-grid{grid-template-columns:1fr !important}
 
   /* ── Stats grid ── */
   .stats{grid-template-columns:1fr 1fr;gap:10px}
@@ -192,10 +195,10 @@ tr:hover td{background:#FAFAFA}
   .mob-topbar{display:flex}
   .page-head{flex-direction:column;gap:8px;margin-bottom:14px}
   .page-head .btn{align-self:flex-start;font-size:12px;padding:7px 12px}
-  .page-head h2{font-size:16px}
+  .page-head h2,.page-title{font-size:16px}
 
   /* ── Cards ── */
-  .card{padding:12px;margin-bottom:12px}
+  .card{padding:12px;margin-bottom:12px;overflow:hidden}
   .card-head{flex-wrap:wrap;gap:8px}
   .card-head .btn{font-size:12px;padding:6px 10px}
 
@@ -227,11 +230,15 @@ tr:hover td{background:#FAFAFA}
   .btn-row{flex-wrap:wrap;gap:8px}
   .btn-row .btn{flex:1 1 auto;justify-content:center;min-width:100px}
 
+  /* ── Search bar ── */
+  .search-bar{flex-wrap:wrap;gap:8px}
+  .search-bar .s-inp,.search-bar .s-sel{width:100%;box-sizing:border-box}
+
   /* ── Order detail table ── */
   .o-det td,.o-det th{font-size:11px;padding:7px 8px}
 
   /* ── Overflow prevention ── */
-  *{max-width:100%;word-break:break-word}
+  *{max-width:100%;word-break:break-word;box-sizing:border-box}
   img,svg{max-width:100%;height:auto}
   pre,code{white-space:pre-wrap;word-break:break-all}
 }
@@ -320,7 +327,7 @@ tr:hover td{background:#FAFAFA}
       <div class="stat-card"><div class="stat-icon-wrap" style="background:#D1FAE5">💰</div><div class="stat-label">নিশ্চিত রেভিনিউ</div><div class="stat-val" id="stRev">৳০</div><div id="stRevNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
       <div class="stat-card"><div class="stat-icon-wrap" style="background:#DBEAFE">👥</div><div class="stat-label">কাস্টমার</div><div class="stat-val" id="stCust">0</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+    <div class="dash-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
       <div class="card">
         <div class="card-head"><span class="card-title">সর্বশেষ ৫টি অর্ডার</span><button class="btn btn-outline btn-sm" onclick="showPage('orders',null)">সব দেখুন →</button></div>
         <div class="tbl-wrap"><table><thead><tr><th>অর্ডার</th><th>গ্রাহক</th><th>মোট</th><th>স্ট্যাটাস</th><th></th></tr></thead>
@@ -1056,12 +1063,40 @@ function showPage(id,btn){
 }
 
 // ======= DASHBOARD =======
+// Supabase থেকে orders load করে, localStorage fallback
+async function getOrdersAsync(){
+  try{
+    const {data}=await supabaseClient.from('orders').select('*').order('created_at',{ascending:false});
+    if(data&&data.length){
+      // Normalize Supabase format to match existing code
+      return data.map(o=>({
+        id:o.id, orderNum:o.order_num, date:o.created_at,
+        customer:{name:o.customer_name,phone:o.customer_phone,district:o.customer_district,address:o.customer_address,email:o.customer_email},
+        items:typeof o.items==='string'?JSON.parse(o.items):o.items||[],
+        shipping:o.shipping, shippingCost:o.shipping_cost,
+        subtotal:o.subtotal, total:o.total,
+        payment:{txnId:o.payment_txn,last4:o.payment_last4},
+        status:o.status||'pending', ip:o.ip||''
+      }));
+    }
+  }catch(e){console.warn('Supabase getOrders failed:',e);}
+  return JSON.parse(localStorage.getItem('vc_orders')||'[]');
+}
 function getOrders(){return JSON.parse(localStorage.getItem('vc_orders')||'[]');}
 function saveOrders(o){localStorage.setItem('vc_orders',JSON.stringify(o));}
 
-function initDash(){
+async function loadAndRenderOrders(){
+  const orders=await getOrdersAsync();
+  // Sync to localStorage for other functions
+  localStorage.setItem('vc_orders',JSON.stringify(orders));
+  renderOrders();
+}
+
+async function initDash(){
   document.getElementById('dashDate').textContent=new Date().toLocaleDateString('bn-BD',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const orders=getOrders();
+  const orders=await getOrdersAsync();
+  // Sync to localStorage
+  localStorage.setItem('vc_orders',JSON.stringify(orders));
   const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
   const pend=orders.filter(o=>o.status==='pending').length;
   document.getElementById('stTotal').textContent=orders.length;
@@ -1167,12 +1202,19 @@ function viewOrder(id){
   document.getElementById('ordModal').classList.add('show');
 }
 
-function setOrderStatus(id,status){
+async function setOrderStatus(id,status){
+  // Supabase update (cross-device realtime)
+  try{
+    await supabaseClient.from('orders').update({status}).eq('id',id);
+  }catch(e){console.warn('Supabase status update failed:',e);}
+  // Also update localStorage
   const orders=getOrders();
   const o=orders.find(x=>x.id===id);
   if(o)o.status=status;
   saveOrders(orders);
-  viewOrder(id);renderOrders();initDash();
+  viewOrder(id);
+  await loadAndRenderOrders();
+  initDash();
   showAdminToast(`✅ স্ট্যাটাস "${status}" করা হয়েছে`);
 }
 function closeOrdModal(){document.getElementById('ordModal').classList.remove('show');}
@@ -1223,28 +1265,13 @@ function renderProdTbl(scrollToLast=false){
 
 // Default website products (hardcoded in index.html PRODS array)
 const DEFAULT_PRODS=[
-  {id:100,cat:'rgb',name:'SONOFF L2 WiFi + Bluetooth RGB LED Strip Light — 16 Feet (Alexa & Google Home, Music Sync)',imgs:['💡','🌈','✨'],price:1890,old:2500,specs:{'Length':'5M','Waterproof':'IP65','Control':'WiFi+BT+Remote','Voice':'Alexa & Google'},warranty:'১ মাস (Driver)',badge:'HOT',stock:15,rating:4.6,features:9,faqs:5,desc:true},
   {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex'},warranty:'৬ মাস',badge:'HOT',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:2,cat:'rgb',name:'GearUP SL50W 5M Waterproof RGB Strip Light — Music Sync',imgs:['🌈','💡'],price:1390,old:1700,specs:{দৈর্ঘ্য:'৫ মিটার'},warranty:'৬ মাস',badge:'NEW',stock:15,rating:4.5,features:0,faqs:0,desc:false},
-  {id:3,cat:'rgb',name:'GearUP SL50 RGB LED Strip Light with Remote — 5 Meter',imgs:['✨','💡'],price:990,old:1290,specs:{},warranty:'১ সপ্তাহ',badge:'SALE',stock:25,rating:4.5,features:0,faqs:0,desc:false},
   {id:4,cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',imgs:['⌚','📱'],price:2490,old:3200,specs:{ডিসপ্লে:'1.96" AMOLED'},warranty:'৬ মাস',badge:'HOT',stock:18,rating:4.5,features:0,faqs:0,desc:false},
-  {id:5,cat:'smartwatch',name:'GearUP W29 Max Smartwatch Round Dial',imgs:['⌚'],price:1890,old:2400,specs:{},warranty:'৬ মাস',badge:'NEW',stock:22,rating:4.5,features:0,faqs:0,desc:false},
-  {id:6,cat:'smartwatch',name:'GearUP HK9 Pro Max Smartwatch Ultra Thin',imgs:['⌚'],price:3200,old:4500,specs:{},warranty:'৬ মাস',badge:'',stock:10,rating:4.5,features:0,faqs:0,desc:false},
-  {id:7,cat:'smartwatch',name:'GearUP FK85 Smartwatch Fitness Tracker',imgs:['⌚'],price:1290,old:1800,specs:{},warranty:'১ সপ্তাহ',badge:'',stock:30,rating:4.5,features:0,faqs:0,desc:false},
-  {id:8,cat:'smartwatch',name:'GearUP DT7 Max Smartwatch Square AMOLED',imgs:['⌚'],price:2190,old:2800,specs:{},warranty:'৬ মাস',badge:'HOT',stock:14,rating:4.5,features:0,faqs:0,desc:false},
-  {id:9,cat:'smartwatch',name:'GearUP T800 Ultra Smartwatch Series 8',imgs:['⌚'],price:1690,old:2200,specs:{},warranty:'৬ মাস',badge:'',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:10,cat:'smartwatch',name:'GearUP X8 Pro Kids Smartwatch',imgs:['⌚'],price:1190,old:1500,specs:{},warranty:'১ সপ্তাহ',badge:'KIDS',stock:25,rating:4.5,features:0,faqs:0,desc:false},
-  {id:11,cat:'smartwatch',name:'GearUP GT3 Pro Smartwatch 7-in-1 ECG',imgs:['⌚'],price:2890,old:3600,specs:{},warranty:'৬ মাস',badge:'BEST',stock:12,rating:4.5,features:0,faqs:0,desc:false},
-  {id:12,cat:'smartwatch',name:'GearUP HW3 Max Smartwatch Always-On Display',imgs:['⌚'],price:1990,old:2600,specs:{},warranty:'৬ মাস',badge:'',stock:18,rating:4.5,features:0,faqs:0,desc:false},
-  {id:13,cat:'smartwatch',name:'GearUP N76 Smart Band Activity Tracker',imgs:['⌚'],price:890,old:1200,specs:{},warranty:'১ সপ্তাহ',badge:'',stock:35,rating:4.5,features:0,faqs:0,desc:false},
   {id:14,cat:'powerbank',name:'GearUP PB20K 20000mAh Fast Charge Power Bank',imgs:['🔋'],price:1690,old:2200,specs:{},warranty:'৬ মাস',badge:'HOT',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:15,cat:'powerbank',name:'GearUP PB10K Slim 10000mAh Power Bank',imgs:['🔋'],price:990,old:1400,specs:{},warranty:'৬ মাস',badge:'SLIM',stock:25,rating:4.5,features:0,faqs:0,desc:false},
-  {id:16,cat:'powerbank',name:'GearUP PB30K 30000mAh Laptop Power Bank',imgs:['🔋'],price:2490,old:3200,specs:{},warranty:'৬ মাস',badge:'PRO',stock:12,rating:4.5,features:0,faqs:0,desc:false},
-  {id:17,cat:'powerbank',name:'GearUP PB5K Mini Pocket Power Bank',imgs:['🔋'],price:590,old:800,specs:{},warranty:'১ সপ্তাহ',badge:'MINI',stock:40,rating:4.5,features:0,faqs:0,desc:false},
-  {id:18,cat:'powerbank',name:'GearUP PB15K Wireless 15000mAh Power Bank',imgs:['🔋'],price:1990,old:2700,specs:{},warranty:'৬ মাস',badge:'NEW',stock:15,rating:4.5,features:0,faqs:0,desc:false},
-  {id:19,cat:'powerbank',name:'GearUP Solar Power Bank 25000mAh',imgs:['🔋','☀️'],price:2190,old:2900,specs:{},warranty:'৬ মাস',badge:'ECO',stock:10,rating:4.5,features:0,faqs:0,desc:false},
-  {id:20,cat:'powerbank',name:'GearUP PB20K Pro Digital Display Power Bank',imgs:['🔋'],price:1890,old:2400,specs:{},warranty:'৬ মাস',badge:'',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:21,cat:'powerbank',name:'GearUP PB8K Magnetic MagSafe Power Bank',imgs:['🔋'],price:1490,old:2000,specs:{},warranty:'৬ মাস',badge:'HOT',stock:18,rating:4.5,features:0,faqs:0,desc:false},
+  {id:24,cat:'tws',name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',imgs:['🎧','✨'],price:1890,old:2500,specs:{},warranty:'৬ মাস',badge:'HOT',stock:15,rating:4.5,features:0,faqs:0,desc:false},
+  {id:34,cat:'headphone',name:'GearUP HP80 Over-Ear ANC Headphone',imgs:['🎧'],price:2990,old:3800,specs:{},warranty:'৬ মাস',badge:'HOT',stock:12,rating:4.5,features:0,faqs:0,desc:false},
+  {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:890,old:1200,specs:{},warranty:'৩ মাস',badge:'NEW',stock:25,rating:4.5,features:0,faqs:0,desc:false},
+  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1290,old:1700,specs:{},warranty:'৬ মাস',badge:'HOT',stock:18,rating:4.5,features:0,faqs:0,desc:false},
 ];
 
 function renderDefaultProdTbl(){
@@ -1346,7 +1373,7 @@ function addSpecRow(k='',v=''){
   document.getElementById('specEd').appendChild(d);
 }
 
-function saveProd(){
+async function saveProd(){
   const name=document.getElementById('pName').value.trim();
   const price=parseInt(document.getElementById('pPrice').value);
   if(!name||!price){showAdminToast('❌ নাম ও মূল্য আবশ্যক');return;}
@@ -1404,7 +1431,6 @@ function saveProd(){
   }
   // Save to BOTH keys so index.html can read it
   localStorage.setItem('vc_admin_prods',JSON.stringify(adminProds));
-  // Also sync to vc_custom_prods (what index.html reads)
   const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
   if(eidNum){
     const ci=custom.findIndex(p=>p.id===eidNum);
@@ -1415,16 +1441,30 @@ function saveProd(){
     if(newest&&!custom.find(p=>p.id===newest.id))custom.push(newest);
   }
   localStorage.setItem('vc_custom_prods',JSON.stringify(custom));
-  closeProdModal();renderProdTbl(!eidNum);showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
+  // Supabase sync
+  const sbProd=eidNum?adminProds.find(p=>p.id===eidNum):adminProds[adminProds.length-1];
+  if(sbProd){
+    try{
+      await supabaseClient.from('custom_products').upsert([{
+        id:sbProd.id,name:sbProd.name,price:sbProd.price,old:sbProd.old,
+        cat:sbProd.cat,stock:sbProd.stock,warranty:sbProd.warranty,
+        imgs:sbProd.imgs,specs:sbProd.specs,desc_text:sbProd.desc||'',
+        features:sbProd.features||[],badge:sbProd.badge||''
+      }],{onConflict:'id'});
+    }catch(e){console.warn('Supabase product save failed:',e);}
+  }
+  closeProdModal();renderProdTbl(!eidNum);if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
 }
 
-function delProd(id){
+async function delProd(id){
   if(!confirm('নিশ্চিতভাবে মুছবেন?'))return;
   adminProds=adminProds.filter(p=>p.id!==id);
   localStorage.setItem('vc_admin_prods',JSON.stringify(adminProds));
-  // Also remove from vc_custom_prods
   const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]').filter(p=>p.id!==id);
   localStorage.setItem('vc_custom_prods',JSON.stringify(custom));
+  // Supabase delete
+  try{await supabaseClient.from('custom_products').delete().eq('id',id);}
+  catch(e){console.warn('Supabase product delete failed:',e);}
   renderProdTbl();showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে');
 }
 function closeProdModal(){document.getElementById('prodModal').classList.remove('show');}
@@ -1550,20 +1590,42 @@ function getCats(){
 }
 function saveCats(cats){localStorage.setItem('vc_categories',JSON.stringify(cats));syncCatsToSite(cats);}
 function syncCatsToSite(cats){/* Site reads vc_categories on load */}
+function getCatProdCount(catId){
+  const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
+  const defaultCount=DEFAULT_PRODS.filter(p=>p.cat===catId).length;
+  const customCount=custom.filter(p=>p.cat===catId).length;
+  return defaultCount+customCount;
+}
 function renderCategoryList(){
   const cats=getCats();
   const list=document.getElementById('catList');
   if(!list)return;
-  list.innerHTML=cats.map((c,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:9px;border:1.5px solid var(--border)">
-    <span style="font-size:22px;min-width:32px;text-align:center">${c.icon}</span>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:700">${c.name}</div>
-      <div style="font-size:11px;color:var(--gray)">ID: ${c.id}${c.locked?' · Built-in':''}</div>
+  list.innerHTML=cats.map((c,i)=>{
+    const prodCount=getCatProdCount(c.id);
+    return`<div style="background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:2px">
+    <div style="display:flex;align-items:center;gap:12px;padding:12px">
+      <span style="font-size:22px;min-width:32px;text-align:center">${c.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${c.name}</div>
+        <div style="font-size:11px;color:var(--gray)">ID: ${c.id}${c.locked?' · Built-in':''} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
+      </div>
+      <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${c.id}','${c.name}')">+ প্রোডাক্ট</button>
+      ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️</button>
+      <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:
+      '<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
     </div>
-    ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️ এডিট</button>
-    <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:
-    '<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
-  </div>`).join('');
+    </div>`;
+  }).join('');
+}
+// Category page এ product add — modal খুলবে category pre-selected করে
+function openAddProdForCat(catId,catName){
+  openAddProd();
+  // Pre-select the category
+  setTimeout(()=>{
+    const sel=document.getElementById('pCat');
+    if(sel){sel.value=catId;}
+    document.getElementById('prodModalTitle').textContent=`প্রোডাক্ট যোগ করুন — ${catName}`;
+  },50);
 }
 function addNewCategory(){
   editCatIdx=-1;
@@ -1968,26 +2030,42 @@ window.addEventListener('storage', function(e){
   }
 });
 
-// Also poll every 8 seconds as fallback (same-tab detection)
+// Supabase Realtime — নতুন order এলে admin panel auto-update
 let _lastOrderCount = getOrders().length;
-setInterval(()=>{
-  const isLoggedIn = document.getElementById('sidebar').classList.contains('show');
-  if(!isLoggedIn) return;
-  const current = getOrders().length;
-  if(current !== _lastOrderCount){
-    _lastOrderCount = current;
-    const activePage = document.querySelector('.page.show');
-    if(activePage){
-      const pid = activePage.id;
-      if(pid === 'page-orders') renderOrders();
-      if(pid === 'page-dashboard') initDash();
-    }
-    const p = getOrders().filter(o=>o.status==='pending').length;
-    const pb = document.getElementById('pendBadge');
-    if(pb){pb.style.display=p>0?'inline':'none'; pb.textContent=p;}
-    if(current > _lastOrderCount - 1) showToast('🔔 নতুন অর্ডার এসেছে!');
+try{
+  supabaseClient
+    .channel('admin-orders-watch')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},async (payload)=>{
+      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
+      if(!isLoggedIn)return;
+      // Reload orders from Supabase
+      await loadAndRenderOrders();
+      await initDash();
+      showAdminToast('🔔 নতুন অর্ডার এসেছে!');
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},async ()=>{
+      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
+      if(!isLoggedIn)return;
+      await loadAndRenderOrders();
+      await initDash();
+    })
+    .subscribe();
+}catch(e){console.warn('Admin realtime failed:',e);}
+
+// Fallback: poll every 10 seconds
+setInterval(async ()=>{
+  const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
+  if(!isLoggedIn)return;
+  const orders=await getOrdersAsync();
+  const current=orders.length;
+  if(current!==_lastOrderCount){
+    _lastOrderCount=current;
+    localStorage.setItem('vc_orders',JSON.stringify(orders));
+    renderOrders();
+    await initDash();
+    showAdminToast('🔔 নতুন অর্ডার এসেছে!');
   }
-}, 8000);
+},10000);
 
 // ESC close modals
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();document.getElementById('delSlideModal').classList.remove('show');}});

@@ -69,14 +69,14 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .back-to-top svg{width:20px;height:20px}
 .back-to-top span{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.8;line-height:1}
 .cat-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;gap:4px;height:44px;align-items:center}
-.cat-pill{white-space:nowrap;padding:5px 16px;border-radius:50px;border:none;background:none;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif}
+.cat-pill{white-space:nowrap;padding:5px 16px;border-radius:50px;border:none;background:none;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .cat-pill:hover,.cat-pill.active{background:var(--dark);color:#fff}
 
 /* HERO SLIDER */
 .hero-wrap{max-width:1300px;margin:22px auto;padding:0 20px}
-.hero-slider{position:relative;border-radius:18px;overflow:hidden;min-height:268px;background:#111;user-select:none}
-.hero-slides{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);height:100%}
-.hero-slide{min-width:100%;position:relative;min-height:268px;overflow:hidden;flex-shrink:0}
+.hero-slider{position:relative;border-radius:18px;overflow:hidden;min-height:268px;background:#111;user-select:none;height:auto}
+.hero-slides{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;align-items:stretch}
+.hero-slide{min-width:100%;width:100%;position:relative;min-height:268px;flex-shrink:0;overflow:hidden}
 .hero-slide img{width:100%;height:100%;object-fit:cover;display:block;min-height:268px}
 .hero-slide-fallback{width:100%;min-height:268px;background:linear-gradient(135deg,#111 0%,#2a2a2a 55%,#111 100%);display:flex;align-items:center;padding:44px 52px;position:relative}
 .hero-slide-fallback::before{content:'';position:absolute;top:-40%;right:0;width:360px;height:360px;background:radial-gradient(circle,rgba(230,57,70,.14) 0%,transparent 65%);border-radius:50%;pointer-events:none}
@@ -99,6 +99,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .slider-arrow:hover{background:rgba(255,255,255,.35)}
 .slider-arrow.prev{left:14px}
 .slider-arrow.next{right:14px}
+@media(max-width:768px){.slider-arrow{display:none !important}}
 /* Slider dots */
 .slider-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:10}
 .slider-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);border:none;cursor:pointer;transition:var(--tr);padding:0}
@@ -125,6 +126,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-carousel-wrap{position:relative;padding:0 44px}
 .cat-carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:var(--white);border:2px solid var(--border);color:var(--dark);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:var(--tr);box-shadow:var(--sh2);font-size:20px;font-weight:700;line-height:1}
 .cat-carousel-arrow:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.cat-carousel-arrow.clicked{background:var(--dark);color:#fff;border-color:var(--dark)}
 .cat-carousel-arrow.prev{left:0}
 .cat-carousel-arrow.next{right:0}
 .cat-cards-viewport{overflow:hidden}
@@ -715,14 +717,14 @@ body.dark .prod-badge{opacity:.88}
 <!-- CAT BAR -->
 <div class="cat-bar">
   <div class="cat-inner">
-    <button class="cat-pill active" onclick="filterCat('all',this)">সকল পণ্য</button>
-    <button class="cat-pill" onclick="filterCat('rgb',this)">RGB Lights</button>
-    <button class="cat-pill" onclick="filterCat('smartwatch',this)">Smartwatches</button>
-    <button class="cat-pill" onclick="filterCat('powerbank',this)">Power Bank</button>
-    <button class="cat-pill" onclick="filterCat('tws',this)">TWS</button>
-    <button class="cat-pill" onclick="filterCat('headphone',this)">BT Headphones</button>
-    <button class="cat-pill" onclick="filterCat('lamp',this)">Acrylic Lamp</button>
-    <button class="cat-pill" onclick="filterCat('fan',this)">Rechargeable Fan</button>
+    <button class="cat-pill active" onclick="filterCat('all',this,event)" ontouchend="filterCat('all',this,event)">সকল পণ্য</button>
+    <button class="cat-pill" onclick="filterCat('rgb',this,event)" ontouchend="filterCat('rgb',this,event)">RGB Lights</button>
+    <button class="cat-pill" onclick="filterCat('smartwatch',this,event)" ontouchend="filterCat('smartwatch',this,event)">Smartwatches</button>
+    <button class="cat-pill" onclick="filterCat('powerbank',this,event)" ontouchend="filterCat('powerbank',this,event)">Power Bank</button>
+    <button class="cat-pill" onclick="filterCat('tws',this,event)" ontouchend="filterCat('tws',this,event)">TWS</button>
+    <button class="cat-pill" onclick="filterCat('headphone',this,event)" ontouchend="filterCat('headphone',this,event)">BT Headphones</button>
+    <button class="cat-pill" onclick="filterCat('lamp',this,event)" ontouchend="filterCat('lamp',this,event)">Acrylic Lamp</button>
+    <button class="cat-pill" onclick="filterCat('fan',this,event)" ontouchend="filterCat('fan',this,event)">Rechargeable Fan</button>
   </div>
 </div>
 
@@ -813,7 +815,7 @@ body.dark .prod-badge{opacity:.88}
 <div class="section">
   <div class="sec-head"><h2 class="sec-title">ক্যাটাগরি <span>সমূহ</span></h2></div>
   <div class="cat-carousel-wrap">
-    <button class="cat-carousel-arrow prev" id="catPrevBtn" onclick="catCarouselSlide(-1)">&#8249;</button>
+    <button class="cat-carousel-arrow prev" id="catPrevBtn" onclick="catCarouselSlide(-1,this)">&#8249;</button>
     <div class="cat-cards-viewport">
       <div class="cat-cards" id="catCardsGrid">
         <div class="cat-card" onclick="filterCat('all',null)"><div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div></div>
@@ -826,7 +828,7 @@ body.dark .prod-badge{opacity:.88}
         <div class="cat-card" onclick="filterCat('fan',null)"><div class="cat-card-icon">💨</div><div class="cat-card-name">Recharge. Fan</div></div>
       </div>
     </div>
-    <button class="cat-carousel-arrow next" id="catNextBtn" onclick="catCarouselSlide(1)">&#8250;</button>
+    <button class="cat-carousel-arrow next" id="catNextBtn" onclick="catCarouselSlide(1,this)">&#8250;</button>
   </div>
 </div>
 
@@ -1328,84 +1330,13 @@ body.dark .prod-badge{opacity:.88}
 <script>
 // ============ PRODUCTS DATA ============
 const PRODS=[
-  {id:100,cat:'rgb',name:'SONOFF L2 WiFi + Bluetooth RGB LED Strip Light — 16 Feet (Works with Alexa & Google Home, Music Sync)',imgs:['💡','🌈','✨'],price:1890,old:2500,specs:{'Length':'5 Meters (16 Feet)','Waterproof':'IP65','Music Sync':'হ্যাঁ','Control':'WiFi + BT + Remote','Voice':'Alexa & Google Home','Color':'16 Million+ RGB','LED':'SMD5050','Voltage':'AC 100-240V / DC 12V','Wattage':'24W','Brand':'SONOFF / L2'},warranty:'১ মাস ওয়ারেন্টি (Driver)',badge:'HOT',stock:15,rating:4.6,
-    desc:'GearUP SONOFF L2 প্রিমিয়াম স্মার্ট RGB LED স্ট্রিপ লাইট।',
-    longDesc:'আপনার ঘর কি এখনো সাধারণ আলোতে আলোকিত? এবার সেই ধারা বদলানোর সময় এসেছে! SONOFF L2 হলো একটি smart RGB LED strip light যেটা দিয়ে আপনি আপনার ঘর, balcony, swimming pool বা outdoor area-কে সাজাতে পারবেন ১ কোটি ৬০ লাখেরও বেশি color দিয়ে। শুধু color না — এই light গানের তালে তালে নাচে, voice command-এ চলে, আর app দিয়ে দুনিয়ার যেকোনো জায়গা থেকে control করা যায়। IP65 waterproof হওয়ায় বৃষ্টি বা আর্দ্রতার ভয় নেই, আর 3M adhesive-এর কারণে installation একদম সহজ — কোনো electrician দরকার নেই!\n\nSONOFF L2-এর সবচেয়ে বড় সুবিধা হলো এর triple control system। Alexa বা Google Home-এ শুধু বলুন "Turn on the lights" — ব্যস, কাজ হয়ে যাবে! Internet না থাকলেও চিন্তা নেই, Bluetooth দিয়ে সরাসরি control করুন অথবা 24-key remote ব্যবহার করুন। eWeLink app দিয়ে 21টি preset scene mode, 8টি DIY scene, timer setting, আর real-time color sync — সবকিছু আঙুলের ডগায়। এটা শুধু একটা light না, এটা আপনার smart home-এর একটা গুরুত্বপূর্ণ অংশ।',
-    features:['🗣️ **Voice Control সুবিধা** — Amazon Alexa ও Google Home-এর সাথে perfectly কাজ করে; হাত না লাগিয়েই voice দিয়ে on/off ও color change করুন','🌈 **16 Million+ RGB Color** — color palette, color circle, R/G/B data bar সহ নানাভাবে color select করা যায়; camera দিয়ে যেকোনো জিনিসের color capture করে instantly sync করা যায়!','🎵 **Music Sync Technology** — গানের rhythm ও beat বুঝে light নিজেই নাচে, party বা movie night-এ অসাধারণ feel দেয়','📱 **Triple Control System** — eWeLink App (iOS/Android) + Bluetooth + 24-Key Remote — তিনটি উপায়ে control করুন, যেটা সুবিধা সেটা বেছে নিন','💧 **IP65 Waterproof** — outdoor, balcony, swimming pool-এর আশেপাশেও নিশ্চিন্তে ব্যবহার করা যাবে','🎤 **21 Preset Scene + 8 DIY Scene** — festival, relaxing, party — নানা occasion-এর জন্য আলাদা আলাদা scene ready আছে, নিজেও বানাতে পারবেন','⏰ **Timer & Schedule** — নির্দিষ্ট সময়ে automatically on/off হওয়ার schedule set করুন, electricity wastage নেই','✂️ **Cut & Paste Flexibility** — প্রয়োজন অনুযায়ী কেটে যেকোনো shape-এ লাগানো যায়, 3M adhesive দিয়ে installation অত্যন্ত সহজ','🔒 **Safety Protection** — Over-voltage, overload ও over-temperature protection আছে, সম্পূর্ণ নিরাপদ ব্যবহার নিশ্চিত'],
-    faqs:[{q:'Internet ছাড়া কি এই light control করা যাবে?',a:'হ্যাঁ! Internet না থাকলেও Bluetooth দিয়ে সরাসরি control করা যাবে, অথবা দেওয়া 24-key remote ব্যবহার করা যাবে। শুধু App-এর advanced features-এর জন্য internet দরকার হবে।'},{q:'এটা কি বাইরে বা swimming pool-এর পাশে লাগানো যাবে?',a:'হ্যাঁ, IP65 waterproof rating থাকায় outdoor, balcony, এমনকি swimming pool-এর চারপাশেও নিরাপদে ব্যবহার করা যাবে। তবে সরাসরি পানিতে ডুবিয়ে রাখা যাবে না।'},{q:'eWeLink app কি Android ও iPhone দুটোতেই কাজ করে?',a:'হ্যাঁ, eWeLink app iOS ও Android উভয় platform-এই পাওয়া যায় এবং সম্পূর্ণভাবে কাজ করে।'},{q:'Alexa বা Google Home ছাড়া কি এটা ব্যবহার করা যাবে?',a:'অবশ্যই! Alexa বা Google Home না থাকলেও app বা remote দিয়ে সমস্ত features উপভোগ করা যাবে। Voice control একটি extra সুবিধা, এটি ছাড়াও product সম্পূর্ণ কার্যকর।'},{q:'Warranty কতদিনের এবং কোন অংশে প্রযোজ্য?',a:'শুধুমাত্র Driver-এর জন্য ১ মাসের warranty আছে। LED strip নিজে warranty-র আওতায় পড়ে না, তাই ব্যবহারের সময় সতর্ক থাকুন।'}],
-    closing:'আপনার ঘরকে smart করতে, সুন্দর করতে, আর আনন্দময় করতে SONOFF L2 এখনই সেরা বিনিয়োগ। Voice control, music sync, ১ কোটি ৬০ লাখ color — এত কিছু একসাথে এই দামে খুব বেশিদিন পাওয়া যাবে না। আজই Order করুন, আর আপনার ঘরকে দিন একটা নতুন smart জীবন! 🌈✨🏠'},
   {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex',নিয়ন্ত্রণ:'App + Remote',ভোল্টেজ:'DC 12V / 220V',রং:'16 Million Color'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'GearUP NRGB50 প্রিমিয়াম মানের ৫ মিটার RGB নিয়ন লাইট। অ্যাপ ও রিমোট উভয়ে নিয়ন্ত্রণযোগ্য। ঘরের সাজসজ্জায় অসাধারণ আলোর পরিবেশ তৈরি করে।'},
-  {id:2,cat:'rgb',name:'GearUP SL50W 5M Waterproof RGB Strip Light — Music Sync',imgs:['🌈','💡'],price:1390,old:1700,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Waterproof Strip',নিয়ন্ত্রণ:'App + Remote',বিশেষত্ব:'Music Sync',রেটিং:'IP65'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:15,desc:'মিউজিক সিঙ্ক ফিচারযুক্ত স্ট্রিপ লাইট। গান বা সাউন্ডের সাথে রঙ পরিবর্তন করে।'},
-  {id:3,cat:'rgb',name:'GearUP SL50 RGB LED Strip Light with Remote — 5 Meter',imgs:['✨','💡'],price:990,old:1290,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Non-Waterproof Strip',নিয়ন্ত্রণ:'Remote Only',ভোল্টেজ:'220V',ব্যবহার:'ইনডোর'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'SALE',stock:25,desc:'বাজেট-বান্ধব RGB LED স্ট্রিপ লাইট। রিমোট কন্ট্রোলে সহজে পরিচালিত।'},
   {id:4,cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',imgs:['⌚','📱'],price:2490,old:3200,specs:{ডিসপ্লে:'1.96" AMOLED',ব্যাটারি:'300mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2 + BP',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:18,desc:'প্রিমিয়াম AMOLED ডিসপ্লে সহ স্মার্টওয়াচ। হার্ট রেট, অক্সিজেন, ব্লাড প্রেশার মনিটরিং।'},
-  {id:5,cat:'smartwatch',name:'GearUP W29 Max Smartwatch Round Dial',imgs:['⌚'],price:1890,old:2400,specs:{ডিসপ্লে:'1.52" Round IPS',ব্যাটারি:'280mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2',ওয়াটার:'IP67'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:22,desc:'ক্লাসিক রাউন্ড ডিজাইনের স্মার্টওয়াচ। ফোন কল রিসিভ ও ডায়াল সুবিধা।'},
-  {id:6,cat:'smartwatch',name:'GearUP HK9 Pro Max Smartwatch Ultra Thin',imgs:['⌚'],price:3200,old:4500,specs:{ডিসপ্লে:'2.0" AMOLED',ব্যাটারি:'450mAh',কল:'হ্যাঁ',স্বাস্থ্য:'Full Health Suite',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:10,desc:'আল্ট্রা-থিন ডিজাইনে ২" AMOLED স্ক্রিন ও সম্পূর্ণ হেলথ স্যুট।'},
-  {id:7,cat:'smartwatch',name:'GearUP FK85 Smartwatch Fitness Tracker',imgs:['⌚'],price:1290,old:1800,specs:{ডিসপ্লে:'1.44" TFT',ব্যাটারি:'200mAh',কল:'না',স্বাস্থ্য:'Steps + HR',ওয়াটার:'IP67'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:30,desc:'ফিটনেস ট্র্যাকার হিসেবে আদর্শ। পদক্ষেপ গণনা ও হার্ট রেট মনিটরিং।'},
-  {id:8,cat:'smartwatch',name:'GearUP DT7 Max Smartwatch Square AMOLED',imgs:['⌚'],price:2190,old:2800,specs:{ডিসপ্লে:'1.9" AMOLED',ব্যাটারি:'350mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2 + Sleep',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:14,desc:'স্কয়ার AMOLED ডিসপ্লে, স্লিপ মনিটরিং ও কল ফিচার সহ।'},
-  {id:9,cat:'smartwatch',name:'GearUP T800 Ultra Smartwatch Series 8',imgs:['⌚'],price:1690,old:2200,specs:{ডিসপ্লে:'1.99" IPS',ব্যাটারি:'320mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:20,desc:'Series 8 ডিজাইনের স্মার্টওয়াচ। বড় স্ক্রিন, দীর্ঘস্থায়ী ব্যাটারি।'},
-  {id:10,cat:'smartwatch',name:'GearUP X8 Pro Kids Smartwatch',imgs:['⌚'],price:1190,old:1500,specs:{ডিসপ্লে:'1.44" Color',ব্যাটারি:'180mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR',ওয়াটার:'IP67'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'KIDS',stock:25,desc:'শিশুদের জন্য বিশেষ স্মার্টওয়াচ।'},
-  {id:11,cat:'smartwatch',name:'GearUP GT3 Pro Smartwatch 7-in-1 ECG',imgs:['⌚'],price:2890,old:3600,specs:{ডিসপ্লে:'1.96" AMOLED',ব্যাটারি:'400mAh',কল:'হ্যাঁ',স্বাস্থ্য:'Full Suite + ECG',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'BEST',stock:12,desc:'ECG সহ সর্বোচ্চ হেলথ মনিটরিং।'},
-  {id:12,cat:'smartwatch',name:'GearUP HW3 Max Smartwatch Always-On Display',imgs:['⌚'],price:1990,old:2600,specs:{ডিসপ্লে:'1.83" LCD',ব্যাটারি:'280mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2 + BP',ওয়াটার:'IP67'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:18,desc:'Always-On Display ফিচার সহ স্মার্টওয়াচ।'},
-  {id:13,cat:'smartwatch',name:'GearUP N76 Smart Band Activity Tracker',imgs:['⌚'],price:890,old:1200,specs:{ডিসপ্লে:'1.1" OLED',ব্যাটারি:'180mAh',কল:'না',স্বাস্থ্য:'Steps + HR + Sleep',ওয়াটার:'IP67'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:35,desc:'স্লিম স্মার্ট ব্যান্ড। হাঁটা, ঘুম ও হার্ট রেট ট্র্যাকিং।'},
   {id:14,cat:'powerbank',name:'GearUP PB20K 20000mAh Fast Charge Power Bank',imgs:['🔋'],price:1690,old:2200,specs:{ক্যাপাসিটি:'20000mAh',আউটপুট:'22.5W PD',পোর্ট:'USB-A + USB-C',ডিসপ্লে:'LED Indicator',ওজন:'450g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'বড় ক্যাপাসিটির ফাস্ট চার্জ পাওয়ার ব্যাংক। স্মার্টফোন ৪-৫ বার চার্জ।'},
-  {id:15,cat:'powerbank',name:'GearUP PB10K Slim 10000mAh Power Bank',imgs:['🔋'],price:990,old:1400,specs:{ক্যাপাসিটি:'10000mAh',আউটপুট:'18W',পোর্ট:'2x USB-A + USB-C',ডিসপ্লে:'LED Bar',ওজন:'220g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'SLIM',stock:25,desc:'স্লিম পকেট-ফ্রেন্ডলি পাওয়ার ব্যাংক।'},
-  {id:16,cat:'powerbank',name:'GearUP PB30K 30000mAh Laptop Power Bank',imgs:['🔋'],price:2490,old:3200,specs:{ক্যাপাসিটি:'30000mAh',আউটপুট:'65W PD',পোর্ট:'2x USB-C + 2x USB-A',ডিসপ্লে:'Digital',ওজন:'700g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'PRO',stock:12,desc:'ল্যাপটপ চার্জযোগ্য 65W PD পাওয়ার ব্যাংক।'},
-  {id:17,cat:'powerbank',name:'GearUP PB5K Mini Pocket Power Bank',imgs:['🔋'],price:590,old:800,specs:{ক্যাপাসিটি:'5000mAh',আউটপুট:'10W',পোর্ট:'USB-A',ডিসপ্লে:'LED',ওজন:'120g'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'MINI',stock:40,desc:'পকেটে বহনযোগ্য মিনি পাওয়ার ব্যাংক।'},
-  {id:18,cat:'powerbank',name:'GearUP PB15K Wireless 15000mAh Power Bank',imgs:['🔋'],price:1990,old:2700,specs:{ক্যাপাসিটি:'15000mAh',আউটপুট:'15W Wireless',পোর্ট:'USB-C + USB-A + Wireless',ওজন:'350g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:15,desc:'ওয়্যারলেস চার্জিং সহ পাওয়ার ব্যাংক।'},
-  {id:19,cat:'powerbank',name:'GearUP Solar Power Bank 25000mAh',imgs:['🔋','☀️'],price:2190,old:2900,specs:{ক্যাপাসিটি:'25000mAh',আউটপুট:'20W',পোর্ট:'2x USB-A + USB-C',বৈশিষ্ট্য:'Solar Panel',ওজন:'550g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'ECO',stock:10,desc:'সোলার প্যানেল সহ পাওয়ার ব্যাংক।'},
-  {id:20,cat:'powerbank',name:'GearUP PB20K Pro Digital Display Power Bank',imgs:['🔋'],price:1890,old:2400,specs:{ক্যাপাসিটি:'20000mAh',আউটপুট:'22.5W',পোর্ট:'USB-C + 2x USB-A',ডিসপ্লে:'Digital %',ওজন:'430g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:20,desc:'ডিজিটাল পার্সেন্টেজ ডিসপ্লে সহ পাওয়ার ব্যাংক।'},
-  {id:21,cat:'powerbank',name:'GearUP PB8K Magnetic MagSafe Power Bank',imgs:['🔋'],price:1490,old:2000,specs:{ক্যাপাসিটি:'8000mAh',আউটপুট:'15W Magnetic',বৈশিষ্ট্য:'MagSafe Compatible',ওজন:'180g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:18,desc:'iPhone MagSafe এর সাথে ম্যাগনেটিক্যালি সংযুক্ত হয়।'},
-  {id:22,cat:'powerbank',name:'GearUP PB10K Built-in Cable Power Bank',imgs:['🔋'],price:1190,old:1600,specs:{ক্যাপাসিটি:'10000mAh',আউটপুট:'20W',বৈশিষ্ট্য:'Built-in Cable (C+L)',ওজন:'250g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:22,desc:'বিল্ট-ইন ক্যাবল সহ পাওয়ার ব্যাংক।'},
-  {id:23,cat:'powerbank',name:'GearUP Car Jump Starter 20000mAh',imgs:['🔋','🚗'],price:3490,old:4500,specs:{ক্যাপাসিটি:'20000mAh',আউটপুট:'18W',বৈশিষ্ট্য:'Car Jump Start',পিক:'800A',ওজন:'600g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'PRO',stock:8,desc:'গাড়ি জাম্প স্টার্ট ও পাওয়ার ব্যাংক একসাথে।'},
   {id:24,cat:'tws',name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',imgs:['🎧'],price:1890,old:2500,specs:{ড্রাইভার:'13mm Dynamic',ANC:'Active Noise Cancelling',ব্যাটারি:'6+30h',সংযোগ:'Bluetooth 5.3',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'ANC ফিচার সহ প্রিমিয়াম TWS ইয়ারবাড। বাইরের শব্দ বন্ধ করে মিউজিক উপভোগ।'},
-  {id:25,cat:'tws',name:'GearUP TWS Gaming Earbuds Low Latency',imgs:['🎮','🎧'],price:1290,old:1800,specs:{ড্রাইভার:'12mm',লেটেন্সি:'30ms Gaming Mode',ব্যাটারি:'6+24h',সংযোগ:'Bluetooth 5.3',পানি:'IPX4'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'GAMING',stock:15,desc:'গেমিংয়ের জন্য মাত্র 30ms লেটেন্সি।'},
-  {id:26,cat:'tws',name:'GearUP TWS A6 Pro True Wireless Earbuds',imgs:['🎧'],price:990,old:1400,specs:{ড্রাইভার:'10mm',ব্যাটারি:'5+20h',সংযোগ:'Bluetooth 5.1',মাইক:'ENC Dual Mic',পানি:'IPX4'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:30,desc:'বাজেট-বান্ধব TWS ইয়ারবাড।'},
-  {id:27,cat:'tws',name:'GearUP TWS Open Ear Air Conduction',imgs:['🎧'],price:1590,old:2100,specs:{ধরন:'Open Ear',ড্রাইভার:'16.2mm',ব্যাটারি:'8+32h',সংযোগ:'Bluetooth 5.3',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:12,desc:'ওপেন ইয়ার ডিজাইন। আশেপাশের শব্দও শোনা যায়।'},
-  {id:28,cat:'tws',name:'GearUP TWS ENC Business Earbuds',imgs:['🎧'],price:1190,old:1600,specs:{ড্রাইভার:'12mm',বৈশিষ্ট্য:'ENC + AI Noise Cancel',ব্যাটারি:'6+24h',সংযোগ:'Bluetooth 5.2'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:18,desc:'অফিস ও বিজনেস মিটিংয়ের জন্য আদর্শ।'},
-  {id:29,cat:'tws',name:'GearUP TWS Bone Conduction Sport',imgs:['🎧'],price:2190,old:2900,specs:{ধরন:'Bone Conduction',ব্যাটারি:'8h',সংযোগ:'Bluetooth 5.3',পানি:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'SPORT',stock:10,desc:'হাড়ের মাধ্যমে শব্দ পরিবাহিত। দৌড় ও ব্যায়ামের জন্য আদর্শ।'},
-  {id:30,cat:'tws',name:'GearUP TWS X6 Wireless Earbuds HD Sound',imgs:['🎧'],price:890,old:1200,specs:{ড্রাইভার:'10mm',ব্যাটারি:'5+20h',সংযোগ:'Bluetooth 5.1',পানি:'IPX4'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:35,desc:'সাশ্রয়ী মূল্যে HD সাউন্ড।'},
-  {id:31,cat:'tws',name:'GearUP TWS Crystal 6-Mic Array Earbuds',imgs:['🎧'],price:1690,old:2200,specs:{ড্রাইভার:'13mm',বৈশিষ্ট্য:'6-Mic Array',ব্যাটারি:'7+28h',সংযোগ:'Bluetooth 5.3',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:14,desc:'৬ মাইক্রোফোন সহ সুপার ক্লিয়ার কল।'},
-  {id:32,cat:'tws',name:'GearUP TWS Kids Safe Volume Earbuds',imgs:['🎧'],price:890,old:1200,specs:{ড্রাইভার:'10mm',বৈশিষ্ট্য:'85dB Safe Volume',ব্যাটারি:'4+16h',সংযোগ:'Bluetooth 5.1'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'KIDS',stock:20,desc:'শিশুদের কানের সুরক্ষায় 85dB ভলিউম লিমিট।'},
-  {id:33,cat:'tws',name:'GearUP TWS Master Pro HiFi LDAC Earbuds',imgs:['🎧'],price:2990,old:4000,specs:{ড্রাইভার:'14.2mm Dual Driver',ব্যাটারি:'8+40h',সংযোগ:'BT 5.3 LDAC',অডিও:'HiFi 24bit',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HIFI',stock:8,desc:'LDAC হাই-রেজ অডিও সহ অডিওফাইল TWS।'},
   {id:34,cat:'headphone',name:'GearUP HP80 Over-Ear ANC Headphone',imgs:['🎵'],price:2990,old:3800,specs:{ড্রাইভার:'40mm',ANC:'Hybrid ANC',ব্যাটারি:'30h',সংযোগ:'BT5.3 + 3.5mm',ভাঁজ:'Foldable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:15,desc:'Hybrid ANC হেডফোন। ৩০ ঘণ্টার ব্যাটারি ব্যাকআপ।'},
-  {id:35,cat:'headphone',name:'GearUP HP50 On-Ear Wireless Headphone',imgs:['🎵'],price:1690,old:2200,specs:{ড্রাইভার:'40mm',ব্যাটারি:'20h',সংযোগ:'BT5.1 + 3.5mm',মাইক:'Built-in',ভাঁজ:'Foldable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:20,desc:'হালকা ওজনের অন-ইয়ার ওয়্যারলেস হেডফোন।'},
-  {id:36,cat:'headphone',name:'GearUP HP Gaming RGB Headphone 7.1 Surround',imgs:['🎮','🎵'],price:1990,old:2600,specs:{ড্রাইভার:'50mm',সাউন্ড:'7.1 Virtual Surround',সংযোগ:'USB + 3.5mm',বৈশিষ্ট্য:'RGB Light',মাইক:'Detachable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'GAMING',stock:12,desc:'গেমারদের জন্য 7.1 সারাউন্ড ও RGB লাইটিং।'},
-  {id:37,cat:'headphone',name:'GearUP HP30 Kids Headphone Volume Limited',imgs:['🎵'],price:890,old:1200,specs:{ড্রাইভার:'32mm',বৈশিষ্ট্য:'85dB Safe Volume',ব্যাটারি:'15h',সংযোগ:'BT5.0'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'KIDS',stock:25,desc:'শিশুদের জন্য নিরাপদ ভলিউম লিমিট সহ হেডফোন।'},
-  {id:38,cat:'headphone',name:'GearUP HP Pro Max Studio Monitor Headphone',imgs:['🎵'],price:3490,old:4500,specs:{ড্রাইভার:'45mm Beryllium',ফ্রিকোয়েন্সি:'10Hz–40kHz',ইম্পেডেন্স:'32Ω',সংযোগ:'3.5mm + 6.35mm',ক্যাবল:'Detachable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'STUDIO',stock:8,desc:'প্রফেশনাল স্টুডিও মনিটর হেডফোন।'},
-  {id:39,cat:'headphone',name:'GearUP HP60 Bass Boost DJ Headphone',imgs:['🎵'],price:2190,old:2800,specs:{ড্রাইভার:'40mm Dynamic',বেস:'Deep Bass Enhanced',ব্যাটারি:'25h',সংযোগ:'BT5.2 + 3.5mm'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'DJ',stock:14,desc:'DJ ও বেস মিউজিক লাভারদের জন্য।'},
-  {id:40,cat:'headphone',name:'GearUP HP20 Budget Wireless Headphone',imgs:['🎵'],price:990,old:1400,specs:{ড্রাইভার:'40mm',ব্যাটারি:'15h',সংযোগ:'BT5.0 + 3.5mm',ভাঁজ:'Foldable'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:30,desc:'সাশ্রয়ী মূল্যে ওয়্যারলেস হেডফোন।'},
-  {id:41,cat:'headphone',name:'GearUP HP Sport Neckband Wireless Headphone',imgs:['🎵'],price:1190,old:1600,specs:{ধরন:'Neckband',ড্রাইভার:'13mm',ব্যাটারি:'12h',সংযোগ:'BT5.2',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'SPORT',stock:18,desc:'স্পোর্টস নেকব্যান্ড হেডফোন।'},
-  {id:42,cat:'headphone',name:'GearUP HP Transparent Open Back Headphone',imgs:['🎵'],price:2490,old:3200,specs:{ধরন:'Open Back',ড্রাইভার:'40mm',সংযোগ:'3.5mm',ইম্পেডেন্স:'62Ω',ডিজাইন:'Transparent Shell'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:10,desc:'ট্রান্সপারেন্ট শেল ওপেন-ব্যাক হেডফোন।'},
-  {id:43,cat:'headphone',name:'GearUP HP Call Center Headset with Boom Mic',imgs:['🎵'],price:1390,old:1800,specs:{ধরন:'On-Ear',ড্রাইভার:'40mm',মাইক:'Boom Adjustable',সংযোগ:'USB + 3.5mm'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:20,desc:'কল সেন্টার ও অনলাইন মিটিংয়ের জন্য বুম মাইক সহ হেডসেট।'},
   {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:790,old:1100,specs:{ডিজাইন:'Heart Shape',আলো:'RGB 16 Colors',নিয়ন্ত্রণ:'Touch + Remote',পাওয়ার:'USB',সাইজ:'15cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:30,desc:'হার্ট শেপের রোমান্টিক অ্যাক্রিলিক ল্যাম্প। উপহার হিসেবে আদর্শ।'},
-  {id:45,cat:'lamp',name:'GearUP AL-Moon 3D Illusion Moon Lamp',imgs:['🌙','✨'],price:1290,old:1700,specs:{ডিজাইন:'3D Moon',আলো:'Warm + Cool + RGB',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB',সাইজ:'16cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:20,desc:'3D প্রিন্টেড চাঁদের ল্যাম্প।'},
-  {id:46,cat:'lamp',name:'GearUP AL-Galaxy Projector Night Lamp',imgs:['🌌','⭐'],price:1890,old:2400,specs:{ডিজাইন:'Galaxy Projector',আলো:'Stars + Nebula',নিয়ন্ত্রণ:'App + Remote',পাওয়ার:'USB',কভারেজ:'360°'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'COOL',stock:15,desc:'ঘরে গ্যালাক্সি প্রজেক্ট করে অপূর্ব পরিবেশ।'},
-  {id:47,cat:'lamp',name:'GearUP AL-Custom Text Acrylic Lamp',imgs:['✍️','🪔'],price:990,old:1400,specs:{ডিজাইন:'Custom Text/Logo',আলো:'RGB 7 Colors',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'GIFT',stock:25,desc:'কাস্টম লেখা বা লোগো সহ অ্যাক্রিলিক ল্যাম্প।'},
-  {id:48,cat:'lamp',name:'GearUP AL-Bear Paw Acrylic Night Lamp',imgs:['🐻','🪔'],price:790,old:1100,specs:{ডিজাইন:'Bear Paw',আলো:'Warm White',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB',সাইজ:'12cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:30,desc:'ভালুকের পা আকৃতির মিষ্টি নাইট ল্যাম্প।'},
-  {id:49,cat:'lamp',name:'GearUP AL-Diamond Rotating Crystal Lamp',imgs:['💎','✨'],price:1490,old:2000,specs:{ডিজাইন:'Crystal Diamond',আলো:'RGB Rotating',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB',ইফেক্ট:'Prism Light'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'LUXURY',stock:12,desc:'ক্রিস্টাল ডায়মন্ড আকৃতির ঘূর্ণায়মান ল্যাম্প।'},
-  {id:50,cat:'lamp',name:'GearUP AL-Sakura Cherry Blossom Lamp',imgs:['🌸','🌺'],price:890,old:1200,specs:{ডিজাইন:'Sakura Tree',আলো:'Warm RGB',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB',সাইজ:'20cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:20,desc:'চেরি ব্লসম গাছের সুন্দর অ্যাক্রিলিক ল্যাম্প।'},
-  {id:51,cat:'lamp',name:'GearUP AL-Sunset Projection Lamp',imgs:['🌅','☀️'],price:1690,old:2200,specs:{ডিজাইন:'Sunset Projector',আলো:'Warm Gradient',নিয়ন্ত্রণ:'Rotation',পাওয়ার:'USB',বৈশিষ্ট্য:'360° Rotation'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:14,desc:'সূর্যাস্তের আলো ঘরে প্রজেক্ট করে।'},
-  {id:52,cat:'lamp',name:'GearUP AL-Butterfly Night Lamp',imgs:['🦋','🪔'],price:790,old:1100,specs:{ডিজাইন:'Butterfly',আলো:'RGB 16 Color',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB',সাইজ:'15cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:25,desc:'প্রজাপতি আকৃতির অ্যাক্রিলিক ল্যাম্প।'},
-  {id:53,cat:'lamp',name:'GearUP AL-Eye Optical Illusion LED Lamp',imgs:['👁️','✨'],price:1190,old:1600,specs:{ডিজাইন:'Eye Illusion',আলো:'RGB Flowing',নিয়ন্ত্রণ:'Touch',পাওয়ার:'USB'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:18,desc:'চোখ আকৃতির অপটিক্যাল ইলিউশন ল্যাম্প।'},
-  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।'},
-  {id:55,cat:'fan',name:'GearUP RF08 8-Inch Desk Fan with LED Light',imgs:['💨','💡'],price:1290,old:1800,specs:{সাইজ:'8 Inch',ব্যাটারি:'5000mAh',রানটাইম:'6–10 ঘণ্টা',স্পিড:'৩ স্তর',বৈশিষ্ট্য:'LED Night Light'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'NEW',stock:25,desc:'LED লাইট সহ রিচার্জেবল ডেস্ক ফ্যান।'},
-  {id:56,cat:'fan',name:'GearUP RF16 16-Inch Pedestal Rechargeable Fan',imgs:['💨'],price:3490,old:4500,specs:{সাইজ:'16 Inch',ব্যাটারি:'15000mAh',রানটাইম:'10–15 ঘণ্টা',স্পিড:'৩ স্তর',স্ট্যান্ড:'Height Adjustable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'PRO',stock:10,desc:'বড় পেডেস্টাল ফ্যান, দীর্ঘ ব্যাটারি ব্যাকআপ।'},
-  {id:57,cat:'fan',name:'GearUP RF-Mini Clip Fan Portable',imgs:['💨'],price:590,old:800,specs:{সাইজ:'Mini Clip',ব্যাটারি:'1200mAh',রানটাইম:'4–6 ঘণ্টা',স্পিড:'৩ স্তর',মাউন্ট:'Clip / Desk / Hang'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'MINI',stock:40,desc:'পোর্টেবল মিনি ক্লিপ ফ্যান।'},
-  {id:58,cat:'fan',name:'GearUP RF-Neck Wearable Neck Fan',imgs:['💨'],price:1890,old:2500,specs:{ধরন:'Wearable Neck',ব্যাটারি:'4000mAh',রানটাইম:'6–8 ঘণ্টা',স্পিড:'৩ স্তর',শব্দ:'<25dB Quiet'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:15,desc:'গলায় পরার ফ্যান। হাত মুক্ত রেখে ঠান্ডা বাতাস।'},
-  {id:59,cat:'fan',name:'GearUP RF10 Bladeless Tower Fan',imgs:['💨'],price:2890,old:3800,specs:{ধরন:'Bladeless Tower',ব্যাটারি:'12000mAh',রানটাইম:'10–14 ঘণ্টা',স্পিড:'১০ স্তর',সেফটি:'Child Safe'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:8,desc:'ব্লেডলেস টাওয়ার ফ্যান। শিশুদের জন্য নিরাপদ।'},
-  {id:60,cat:'fan',name:'GearUP RF-Solar Outdoor Fan',imgs:['☀️','💨'],price:2490,old:3200,specs:{সাইজ:'10 Inch',পাওয়ার:'Solar + Battery',ব্যাটারি:'8000mAh',রানটাইম:'12h+',ব্যবহার:'Outdoor / Camping'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'ECO',stock:12,desc:'সোলার চালিত আউটডোর ফ্যান।'},
-  {id:61,cat:'fan',name:'GearUP RF-Car 12V Rechargeable Car Fan',imgs:['💨','🚗'],price:890,old:1200,specs:{ধরন:'Car Fan',ভোল্টেজ:'12V DC + USB',স্পিড:'২ স্তর',মাউন্ট:'Dashboard Clip',সাইজ:'6 Inch'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:25,desc:'গাড়ির ড্যাশবোর্ডে ব্যবহারের জন্য ফ্যান।'},
-  {id:62,cat:'fan',name:'GearUP RF10W 10-Inch Wall Mount Fan',imgs:['💨'],price:2190,old:2800,specs:{সাইজ:'10 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',মাউন্ট:'Wall + Desk'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:14,desc:'দেয়াল ও টেবিল উভয়ে ব্যবহারযোগ্য ফ্যান।'},
-  {id:63,cat:'fan',name:'GearUP RF-Mist Cool Spray Misting Fan',imgs:['🌊','💨'],price:1490,old:2000,specs:{সাইজ:'8 Inch',ব্যাটারি:'5000mAh',রানটাইম:'6 ঘণ্টা',বৈশিষ্ট্য:'Water Mist Spray',ট্যাংক:'500ml'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'COOL',stock:16,desc:'মিস্ট স্প্রে সহ ফ্যান। তাৎক্ষণিক ঠান্ডা অনুভূতি।'},
-  {id:64,cat:'rgb',name:'SONOFF L2 WiFi+BT RGB LED Strip 16Ft (Alexa, Google Home, Music Sync)',imgs:['💡','🌈'],price:1890,old:2500,
-   specs:{দৈর্ঘ্য:'5 Meters (16 Feet)',ওয়াটারপ্রুফ:'IP65',মিউজিক_সিঙ্ক:'হ্যাঁ',নিয়ন্ত্রণ:'WiFi App + BT + Remote + Voice',ভয়েস:'Alexa & Google Home',রঙ:'16 Million+ RGB',LED:'SMD5050 | 300 Lumens/m',ভোল্টেজ:'AC 100–240V | DC 12V',ওয়্যারেন্টি:'১ মাস (Driver)'},
-   warranty:'১ মাস রিপ্লেসমেন্ট ওয়ারেন্টি (Driver)',badge:'NEW',stock:20,rating:4.7,
-   desc:'SONOFF L2 smart RGB LED strip — ১ কোটি ৬০ লাখ+ color, গানের তালে নাচে, Alexa ও Google Home সাপোর্ট। IP65 waterproof, সহজ ইনস্টলেশন।',
-   features:'✅ Voice Control (Alexa/Google Home)\n🌈 16M+ RGB Colors\n🎵 Music Sync\n📱 Triple Control (App+BT+Remote)\n💧 IP65 Waterproof\n⏰ Timer & Schedule\n✂️ Cut & Paste Flexible',
-   longDesc:'আপনার ঘর কি এখনো সাধারণ আলোতে আলোকিত? SONOFF L2 হলো একটি smart RGB LED strip light যেটা দিয়ে ঘর, balcony বা outdoor area সাজাতে পারবেন। শুধু color না — এই light গানের তালে তালে নাচে, voice command এ চলে, app দিয়ে দুনিয়ার যেকোনো জায়গা থেকে control করা যায়। IP65 waterproof হওয়ায় বৃষ্টির ভয় নেই।',
-   techSpecs:[['Brand','SONOFF'],['Model','L2'],['Length','5 Meters (16 Feet)'],['LED Chip','SMD5050'],['Light Color','RGB (16M+ Colors)'],['Luminous Flux','300 Lumens/m'],['Input Voltage','AC 100–240V, 50–60Hz'],['Output Voltage','DC 12V'],['Wattage','24W'],['Waterproof','IP65'],['WiFi','802.11 b/g/n 2.4GHz'],['App','eWeLink (iOS & Android)'],['Voice Control','Amazon Alexa, Google Home'],['Music Sync','Yes'],['Remote','24-Key IR Remote'],['Warranty','1 Month (Driver Only)']],
-   faq:[{q:'Internet ছাড়া control করা যাবে?',a:'হ্যাঁ! Bluetooth দিয়ে সরাসরি control করা যাবে, অথবা 24-key remote ব্যবহার করা যাবে।'},{q:'Swimming pool এর পাশে লাগানো যাবে?',a:'হ্যাঁ, IP65 waterproof হওয়ায় outdoor ও swimming pool এর চারপাশেও নিরাপদ। তবে সরাসরি পানিতে ডুবানো যাবে না।'},{q:'eWeLink app Android ও iPhone এ কাজ করে?',a:'হ্যাঁ, iOS ও Android উভয়েই পাওয়া যায়।'},{q:'Alexa ছাড়াও ব্যবহার করা যাবে?',a:'অবশ্যই! App বা remote দিয়ে সব features উপভোগ করা যাবে।'},{q:'Warranty কতদিনের?',a:'শুধুমাত্র Driver এর জন্য ১ মাসের warranty। LED strip নিজে warranty এর আওতায় পড়ে না।'}],
-   whyBuy:'আপনার ঘরকে smart করতে, সুন্দর করতে SONOFF L2 এখনই সেরা বিনিয়োগ। Voice control, music sync, ১ কোটি ৬০ লাখ color — এত কিছু একসাথে এই দামে! আজই Order করুন 🌈✨'},
+  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।'}
 ];
 
 const DISTRICTS=['ঢাকা','চট্টগ্রাম','রাজশাহী','খুলনা','বরিশাল','সিলেট','রংপুর','ময়মনসিংহ','কুমিল্লা','ফেনী','নোয়াখালী','লক্ষ্মীপুর','চাঁদপুর','ব্রাহ্মণবাড়িয়া','কিশোরগঞ্জ','নরসিংদী','নারায়ণগঞ্জ','মুন্সীগঞ্জ','মানিকগঞ্জ','গাজীপুর','টাঙ্গাইল','ফরিদপুর','মাদারীপুর','শরীয়তপুর','রাজবাড়ী','গোপালগঞ্জ','বগুড়া','নওগাঁ','নাটোর','পাবনা','সিরাজগঞ্জ','জয়পুরহাট','চাঁপাইনবাবগঞ্জ','যশোর','সাতক্ষীরা','মেহেরপুর','নড়াইল','চুয়াডাঙ্গা','কুষ্টিয়া','মাগুরা','ঝিনাইদহ','বাগেরহাট','পিরোজপুর','ঝালকাঠি','পটুয়াখালী','বরগুনা','ভোলা','সুনামগঞ্জ','হবিগঞ্জ','মৌলভীবাজার','নেত্রকোনা','জামালপুর','শেরপুর','গাইবান্ধা','নীলফামারী','লালমনিরহাট','কুড়িগ্রাম','ঠাকুরগাঁও','পঞ্চগড়','দিনাজপুর','কক্সবাজার','বান্দরবান','রাঙ্গামাটি','খাগড়াছড়ি'];
@@ -1506,18 +1437,61 @@ function initHeroSlider(){
     dots.appendChild(d);
   }
   if(total<=1){document.getElementById('sliderPrev').style.display='none';document.getElementById('sliderNext').style.display='none';}
-  // Touch/swipe support
-  let tx=0;
+  // Touch/swipe support — manual swipe pause করবে, ছেড়ে দিলে resume
+  let tx=0,ty=0,heroManualPause=false;
   const sl=document.getElementById('heroSlider');
-  sl.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
-  sl.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)heroSlide(dx<0?1:-1);},{passive:true});
+  sl.addEventListener('touchstart',e=>{
+    tx=e.touches[0].clientX;
+    ty=e.touches[0].clientY;
+    // Pause auto on touch start
+    clearInterval(heroTimer);heroManualPause=true;
+  },{passive:true});
+  sl.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    const dy=e.changedTouches[0].clientY-ty;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))heroSlide(dx<0?1:-1);
+    // Resume auto after 2s
+    heroManualPause=false;
+    clearInterval(heroTimer);
+    heroTimer=setTimeout(()=>{startHeroAuto();},2000);
+  },{passive:true});
+  // Mouse drag support (desktop)
+  let mx=0,mDragging=false;
+  sl.addEventListener('mousedown',e=>{mx=e.clientX;mDragging=true;clearInterval(heroTimer);});
+  sl.addEventListener('mouseup',e=>{
+    if(!mDragging)return;mDragging=false;
+    const dx=e.clientX-mx;
+    if(Math.abs(dx)>40)heroSlide(dx<0?1:-1);
+    clearInterval(heroTimer);heroTimer=setTimeout(()=>{startHeroAuto();},2000);
+  });
+  sl.addEventListener('mouseleave',()=>{if(mDragging){mDragging=false;clearInterval(heroTimer);heroTimer=setTimeout(()=>{startHeroAuto();},2000);}});
   startHeroAuto();
 }
 function goHeroSlide(n){
   const slides=document.getElementById('heroSlides');
   const total=slides.children.length;
-  heroIdx=(n+total)%total;
-  slides.style.transform=`translateX(-${heroIdx*100}%)`;
+  const nextIdx=(n+total)%total;
+  // Always animate left (ডান → বাম), even when wrapping last→first
+  if(nextIdx===0&&heroIdx===total-1){
+    // wrap-around: clone first slide, append at end, slide to it, then snap back
+    const firstClone=slides.children[0].cloneNode(true);
+    firstClone.setAttribute('data-clone','1');
+    slides.appendChild(firstClone);
+    slides.style.transition='transform .45s cubic-bezier(.4,0,.2,1)';
+    slides.style.transform=`translateX(-${total*100}%)`;
+    setTimeout(()=>{
+      slides.style.transition='none';
+      slides.style.transform='translateX(0)';
+      // remove clone
+      const clone=slides.querySelector('[data-clone]');
+      if(clone)slides.removeChild(clone);
+    },460);
+    heroIdx=0;
+  } else {
+    slides.style.transition='transform .45s cubic-bezier(.4,0,.2,1)';
+    slides.style.transform=`translateX(-${nextIdx*100}%)`;
+    heroIdx=nextIdx;
+  }
   document.querySelectorAll('.slider-dot').forEach((d,i)=>d.classList.toggle('active',i===heroIdx));
   resetHeroAuto();
 }
@@ -1527,17 +1501,25 @@ function resetHeroAuto(){clearInterval(heroTimer);startHeroAuto();}
 
 
 // INIT
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async ()=>{
   loadStock();
   applyAdminSettings();
-  // Load custom products added via AI Parser
-  (function(){
-    const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
-    custom.forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
-  })();
+  // ১. প্রথমেই localStorage থেকে custom products যোগ করো (instant)
+  const customLocal=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
+  customLocal.forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
+  // ২. সাথে সাথেই render করো — লোডিং delay নেই
   DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
   renderProds(PRODS);
   renderFAQ();
+  // ৩. Background এ Supabase থেকে নতুন products আনো, পেলে update করো
+  (async()=>{try{
+    const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
+    if(sbProds&&sbProds.length){
+      let changed=false;
+      sbProds.forEach(p=>{if(!PRODS.find(x=>x.id===p.id)){PRODS.push(p);changed=true;}});
+      if(changed){loadStock();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+    }
+  }catch(e){}})();
   updateCartUI();
   updateWishDot();
   updateNavAuth();
@@ -1698,9 +1680,20 @@ function renderProds(list){
     g.appendChild(d);
   });
 }
-function filterCat(cat,btn){
+let _filterCatLock=false;
+function filterCat(cat,btn,evt){
+  // Prevent double-fire from touch+click
+  if(evt&&evt.type==='click'&&_filterCatLock){return;}
+  if(evt&&evt.type==='touchend'){_filterCatLock=true;setTimeout(()=>{_filterCatLock=false;},400);}
+  activeCat=cat;
   document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
+  if(btn){btn.classList.add('active');}
+  else{
+    // Sync the pill bar to match category
+    document.querySelectorAll('.cat-pill').forEach(b=>{
+      if(b.onclick){const fn=b.getAttribute('onclick')||'';if(fn.includes("'"+cat+"'")||fn.includes('"'+cat+'"'))b.classList.add('active');}
+    });
+  }
   const titles={all:'সকল',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
   const list=cat==='all'?PRODS:PRODS.filter(p=>p.cat===cat);
   document.getElementById('secTitle').innerHTML=`${titles[cat]||'প্রোডাক্ট'} <span>সমূহ</span>`;
@@ -2441,16 +2434,20 @@ function goS3(){
   goS(3);
 }
 let _confirmLock=false;
-function confirmOrder(){
+async function confirmOrder(){
   if(_confirmLock){showToast('⏳ অর্ডার প্রক্রিয়া হচ্ছে...');return;}
-  // S-10: Rate limit — prevent spam orders (1 order per 30s)
-  const lastOrderTime=parseInt(localStorage.getItem('vc_last_order_time')||'0');
-  const now=Date.now();
-  if(now-lastOrderTime<30000){
-    showToast('⏳ একটু অপেক্ষা করুন, তারপর আবার চেষ্টা করুন');
-    return;
-  }
   _confirmLock=true;
+  // S-10: Server-side rate limit via Supabase
+  const phoneForRL=document.getElementById('cPhone')?.value?.trim();
+  if(phoneForRL){
+    try{
+      const rlRes=await supabaseClient.rpc('check_and_set_rate_limit',{p_phone:phoneForRL});
+      if(rlRes.data===false){showToast('⏳ একটু অপেক্ষা করুন, তারপর আবার চেষ্টা করুন');_confirmLock=false;return;}
+    }catch(e){
+      const lastOrderTime=parseInt(localStorage.getItem('vc_last_order_time')||'0');
+      if(Date.now()-lastOrderTime<30000){showToast('⏳ একটু অপেক্ষা করুন, তারপর আবার চেষ্টা করুন');_confirmLock=false;return;}
+    }
+  }
   // B-2: Lock permanently until order completes — no timeout reset
   // B-1: Race-condition safe order number — timestamp + random suffix (no shared counter)
   const ts=Date.now().toString(36).toUpperCase();
@@ -3169,12 +3166,18 @@ function updateCatCarousel(){
   if(prev)prev.style.opacity=catPage<=0?'0.3':'1';
   if(next)next.style.opacity=catPage>=maxPage?'0.3':'1';
 }
-function catCarouselSlide(dir){
+function catCarouselSlide(dir,btn){
   const items=getCatItems();
   const total=items.length;
   const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
   catPage=Math.max(0,Math.min(catPage+dir,maxPage));
   updateCatCarousel();
+  // Click feedback: color ২.৫ সেকেন্ড পরে reset হবে
+  if(btn){
+    btn.classList.add('clicked');
+    clearTimeout(btn._resetTimer);
+    btn._resetTimer=setTimeout(()=>btn.classList.remove('clicked'),2500);
+  }
 }
 // Init carousel on load
 document.addEventListener('DOMContentLoaded',function(){
