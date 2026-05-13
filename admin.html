@@ -981,12 +981,7 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
 
 <script>
 // ======= STATE =======
-// ✅ Security: Admin password SHA-256 hash হিসেবে store করা হচ্ছে (plaintext নয়)
-// Default: 'vangcur2025' এর hash — পরিবর্তন করতে Settings থেকে করুন
-let adminPassHash=localStorage.getItem('vc_admin_pass_hash')||'7f6cd88fdcce2a09d49a5d5a8264ab07e4c6c14cc66b576e3f07c6832d14e61a'; // sha256 of 'vangcur2025'
-// TEMP RESET: force default password
-localStorage.removeItem('vc_admin_pass_hash');
-adminPassHash='7f6cd88fdcce2a09d49a5d5a8264ab07e4c6c14cc66b576e3f07c6832d14e61a';
+let adminPass=localStorage.getItem('vc_admin_pass')||'vangcur2025';
 let heroSlides=JSON.parse(localStorage.getItem('vc_hero_slides')||'null')||[
   {tag:'⚡ গ্যাজেট স্পেশালিস্ট',title:'Your First Choice for Gadgets',sub:'অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ।',img:'',btn1:'প্রোডাক্ট দেখুন',stats:'3000+|খুশি গ্রাহক,7|ক্যাটাগরি,100%|অথেনটিক'}
 ];
@@ -997,15 +992,10 @@ let adminFAQs=JSON.parse(localStorage.getItem('vc_faqs')||'null')||[
 let delSlideIdx=null;
 
 // ======= LOGIN =======
-async function hashPw(pw){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function doLogin(){
+function doLogin(){
   const u=document.getElementById('lUser').value.trim();
   const p=document.getElementById('lPass').value;
-  const h=await hashPw(p);
-  if(u==='admin'&&h===adminPassHash){
+  if(u==='admin'&&p===adminPass){
     // S-8: set session flag
     sessionStorage.setItem('vc_admin_session','1');
     document.getElementById('loginScreen').style.display='none';
@@ -1140,12 +1130,6 @@ function bulkChangeStatus(){
   orders.forEach(o=>{if(ids.includes(o.id)){o.status=sel;changed++;}});
   saveOrders(orders);renderOrders();initDash();
   showAdminToast(`✅ ${changed}টি অর্ডার → ${sel}`);
-  // ✅ Supabase bulk update
-  (async()=>{
-    try{
-      await supabaseClient.from('orders').update({status:sel}).in('id',ids);
-    }catch(e){console.warn('Supabase bulk update failed:',e);}
-  })();
   document.getElementById('selAll').checked=false;
   document.getElementById('bulkStatus').value='';
 }
@@ -1190,19 +1174,6 @@ function setOrderStatus(id,status){
   saveOrders(orders);
   viewOrder(id);renderOrders();initDash();
   showAdminToast(`✅ স্ট্যাটাস "${status}" করা হয়েছে`);
-  // ✅ Supabase তে status update করো — customer screen instantly update হবে (cross-device)
-  (async()=>{
-    try{
-      const res=await supabaseClient
-        .from('orders')
-        .update({status:status})
-        .eq('id',id);
-      if(res.error)throw res.error;
-    }catch(e){
-      console.warn('Supabase status update failed (only localStorage updated):',e);
-      showAdminToast('⚠️ Supabase sync fail — localStorage updated only');
-    }
-  })();
 }
 function closeOrdModal(){document.getElementById('ordModal').classList.remove('show');}
 
@@ -1659,20 +1630,10 @@ function addTrustItem(){
   d.innerHTML='<input placeholder="Emoji" style="max-width:60px"><input placeholder="শিরোনাম"><input placeholder="সাব-টেক্সট"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>';
   document.getElementById('trustItems').appendChild(d);
 }
-async function saveSettings(){
+function saveSettings(){
   const np=document.getElementById('nPw').value;
   const cp=document.getElementById('cPw').value;
-  if(np){
-    if(np!==cp){showAdminToast('❌ পাসওয়ার্ড মিলছে না');return;}
-    if(np.length<6){showAdminToast('❌ কমপক্ষে ৬ অক্ষর দিন');return;}
-    // ✅ Hash করে save করা হচ্ছে — plaintext নয়
-    const h=await hashPw(np);
-    localStorage.setItem('vc_admin_pass_hash',h);
-    adminPassHash=h;
-    // Legacy key মুছে দাও
-    localStorage.removeItem('vc_admin_pass');
-    document.getElementById('nPw').value='';document.getElementById('cPw').value='';
-  }
+  if(np){if(np!==cp){alert('পাসওয়ার্ড মিলছে না');return;}if(np.length<6){alert('কমপক্ষে ৬ অক্ষর');return;}localStorage.setItem('vc_admin_pass',np);adminPass=np;document.getElementById('nPw').value='';document.getElementById('cPw').value='';}
   localStorage.setItem('vc_contact',JSON.stringify({wa:document.getElementById('setWa').value,bk:document.getElementById('setBk').value,email:document.getElementById('setEmail').value,addr:document.getElementById('setAddr').value}));
   showAdminToast('✅ সেটিংস সেভ হয়েছে!');
 }
