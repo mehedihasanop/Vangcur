@@ -1008,7 +1008,6 @@ async function syncAdminData(){
 }
 
 // ======= STATE =======
-let adminPass=localStorage.getItem('vc_admin_pass')||'vangcur2025';
 let heroSlides=JSON.parse(localStorage.getItem('vc_hero_slides')||'null')||[
   {tag:'⚡ গ্যাজেট স্পেশালিস্ট',title:'Your First Choice for Gadgets',sub:'অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ।',img:'',btn1:'প্রোডাক্ট দেখুন',stats:'3000+|খুশি গ্রাহক,7|ক্যাটাগরি,100%|অথেনটিক'}
 ];
@@ -1019,23 +1018,31 @@ let adminFAQs=JSON.parse(localStorage.getItem('vc_faqs')||'null')||[
 let delSlideIdx=null;
 
 // ======= LOGIN =======
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('lUser').value.trim();
   const p=document.getElementById('lPass').value;
-  if(u==='admin'&&p===adminPass){
-    // S-8: set session flag
+  
+  // 'admin' লিখলে সেটাকে ইমেইলে কনভার্ট করে নিবে
+  const email = u === 'admin' ? 'admin@vangcur.com' : u;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: p
+  });
+
+  if(error){
+    document.getElementById('lErr').textContent='ভুল username বা password';
+  } else {
     sessionStorage.setItem('vc_admin_session','1');
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('sidebar').classList.add('show');
     document.getElementById('mainArea').classList.add('show');
     if(window.innerWidth<=768){document.getElementById('mobTopbar').style.display='flex';}
     initDash();
-  } else {
-    document.getElementById('lErr').textContent='ভুল username বা password';
   }
 }
 document.getElementById('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-// S-8: check if session exists on page load (handles F5 refresh while logged in, but resets on new tab)
+
 if(sessionStorage.getItem('vc_admin_session')==='1'){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('sidebar').classList.add('show');
@@ -1043,15 +1050,15 @@ if(sessionStorage.getItem('vc_admin_session')==='1'){
   if(window.innerWidth<=768)document.getElementById('mobTopbar').style.display='flex';
   initDash();
 }
-function adminLogout(){
-  // S-8: Properly clear session so back button can't restore panel
+
+async function adminLogout(){
+  await supabaseClient.auth.signOut();
   sessionStorage.removeItem('vc_admin_session');
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('mainArea').classList.remove('show');
   document.getElementById('mobTopbar').style.display='none';
   closeMobSidebar();
-  // Replace history so back button goes out of admin, not to logged-in state
   history.replaceState(null,'',window.location.href);
 }
 function toggleMobSidebar(){
@@ -1713,11 +1720,24 @@ function addTrustItem(){
   d.innerHTML='<input placeholder="Emoji" style="max-width:60px"><input placeholder="শিরোনাম"><input placeholder="সাব-টেক্সট"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>';
   document.getElementById('trustItems').appendChild(d);
 }
-function saveSettings(){
+
+async function saveSettings(){
   const np=document.getElementById('nPw').value;
   const cp=document.getElementById('cPw').value;
-  if(np){if(np!==cp){alert('পাসওয়ার্ড মিলছে না');return;}if(np.length<6){alert('কমপক্ষে ৬ অক্ষর');return;}localStorage.setItem('vc_admin_pass',np);adminPass=np;document.getElementById('nPw').value='';document.getElementById('cPw').value='';}
-  localStorage.setItem('vc_contact',JSON.stringify({wa:document.getElementById('setWa').value,bk:document.getElementById('setBk').value,email:document.getElementById('setEmail').value,addr:document.getElementById('setAddr').value}));
+  if(np){
+    if(np!==cp){alert('পাসওয়ার্ড মিলছে না');return;}
+    if(np.length<6){alert('কমপক্ষে ৬ অক্ষর');return;}
+    
+    // Supabase Auth Password Update
+    const { error } = await supabaseClient.auth.updateUser({ password: np });
+    if(error){alert('পাসওয়ার্ড পরিবর্তন ব্যর্থ: '+error.message);return;}
+    
+    document.getElementById('nPw').value='';
+    document.getElementById('cPw').value='';
+    showAdminToast('✅ পাসওয়ার্ড পরিবর্তন সফল!');
+  }
+  
+  saveSettingToSupabase('vc_contact', {wa:document.getElementById('setWa').value,bk:document.getElementById('setBk').value,email:document.getElementById('setEmail').value,addr:document.getElementById('setAddr').value});
   showAdminToast('✅ সেটিংস সেভ হয়েছে!');
 }
 

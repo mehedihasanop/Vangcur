@@ -1587,42 +1587,64 @@ function switchToLogin(){
   document.getElementById('lErr').textContent='';
 }
 function switchTab(t,el){switchToLogin();}
-async function hashPw(pw){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
 async function doLogin(){
   const em=document.getElementById('lEmail').value.trim();
   const pw=document.getElementById('lPass').value;
-  const h=await hashPw(pw);
-  const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
-  // Support both hashed and legacy plain text (migration)
-  const u=users.find(x=>x.email===em&&(x.pass===h||x.pass===pw));
-  if(!u){document.getElementById('lErr').textContent='ইমেইল বা পাসওয়ার্ড ভুল';return;}
-  // Upgrade legacy plain-text password to hash on login
-  if(u.pass===pw){u.pass=h;const all=JSON.parse(localStorage.getItem('vc_users')||'[]');const idx=all.findIndex(x=>x.email===em);if(idx>=0){all[idx]=u;localStorage.setItem('vc_users',JSON.stringify(all));}}
-  const safeUser={id:u.id,name:u.name,email:u.email,createdAt:u.createdAt};
-  currentUser=safeUser;localStorage.setItem('vc_user',JSON.stringify(safeUser));
+  
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: em,
+    password: pw
+  });
+
+  if(error){
+    document.getElementById('lErr').textContent='ইমেইল বা পাসওয়ার্ড ভুল';
+    return;
+  }
+  
+  const safeUser = { id: data.user.id, email: data.user.email, name: data.user.user_metadata?.name || 'Customer', phone: data.user.user_metadata?.phone || '' };
+  currentUser=safeUser;
+  localStorage.setItem('vc_user',JSON.stringify(safeUser));
   mergeGuestOrdersToUser(safeUser.email, safeUser.id);
   closeLogin();updateNavAuth();showToast('✅ লগইন সফল!');
 }
+
 async function doRegister(){
   const nm=document.getElementById('rName').value.trim();
   const ph=document.getElementById('rPhone').value.trim();
   const em=document.getElementById('rEmail').value.trim();
   const pw=document.getElementById('rPass').value;
+  
   if(!nm){document.getElementById('rErr').textContent='নাম দিন';return;}
-  if(!ph||!/^01[3-9]\d{8}$/.test(ph)){document.getElementById('rErr').textContent='সঠিক মোবাইল নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)';return;}
+  if(!ph||!/^01[3-9]\d{8}$/.test(ph)){document.getElementById('rErr').textContent='সঠিক মোবাইল নম্বর দিন';return;}
   if(!em){document.getElementById('rErr').textContent='ইমেইল দিন';return;}
   if(pw.length<6){document.getElementById('rErr').textContent='পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে';return;}
-  const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
-  if(users.find(x=>x.email===em)){document.getElementById('rErr').textContent='এই ইমেইল ইতিমধ্যে নিবন্ধিত';return;}
-  const h=await hashPw(pw);
-  const nu={id:Date.now(),name:nm,phone:ph,email:em,pass:h,createdAt:new Date().toISOString()};
-  users.push(nu);localStorage.setItem('vc_users',JSON.stringify(users));
-  const safeUser={id:nu.id,name:nm,phone:ph,email:em,createdAt:nu.createdAt};
-  currentUser=safeUser;localStorage.setItem('vc_user',JSON.stringify(safeUser));
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: em,
+    password: pw,
+    options: {
+      data: { name: nm, phone: ph }
+    }
+  });
+
+  if(error){
+    document.getElementById('rErr').textContent= error.message.includes('already registered') ? 'এই ইমেইল ইতিমধ্যে নিবন্ধিত' : 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে';
+    return;
+  }
+
+  const safeUser = { id: data.user.id, email: data.user.email, name: nm, phone: ph, createdAt: new Date().toISOString() };
+  currentUser=safeUser;
+  localStorage.setItem('vc_user',JSON.stringify(safeUser));
   mergeGuestOrdersToUser(safeUser.email, safeUser.id);
   closeLogin();updateNavAuth();showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!');
 }
-function doLogout(){currentUser=null;localStorage.removeItem('vc_user');closeAcc();updateNavAuth();showToast('লগআউট হয়েছে');}
+
+async function doLogout(){
+  await supabaseClient.auth.signOut();
+  currentUser=null;
+  localStorage.removeItem('vc_user');
+  closeAcc();updateNavAuth();showToast('লগআউট হয়েছে');
+}
 
 // ACCOUNT PAGE
 function openAcc(){
