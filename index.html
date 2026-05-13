@@ -1397,7 +1397,7 @@ const PRODS=[
   {id:61,cat:'fan',name:'GearUP RF-Car 12V Rechargeable Car Fan',imgs:['💨','🚗'],price:890,old:1200,specs:{ধরন:'Car Fan',ভোল্টেজ:'12V DC + USB',স্পিড:'২ স্তর',মাউন্ট:'Dashboard Clip',সাইজ:'6 Inch'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:25,desc:'গাড়ির ড্যাশবোর্ডে ব্যবহারের জন্য ফ্যান।'},
   {id:62,cat:'fan',name:'GearUP RF10W 10-Inch Wall Mount Fan',imgs:['💨'],price:2190,old:2800,specs:{সাইজ:'10 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',মাউন্ট:'Wall + Desk'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'',stock:14,desc:'দেয়াল ও টেবিল উভয়ে ব্যবহারযোগ্য ফ্যান।'},
   {id:63,cat:'fan',name:'GearUP RF-Mist Cool Spray Misting Fan',imgs:['🌊','💨'],price:1490,old:2000,specs:{সাইজ:'8 Inch',ব্যাটারি:'5000mAh',রানটাইম:'6 ঘণ্টা',বৈশিষ্ট্য:'Water Mist Spray',ট্যাংক:'500ml'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'COOL',stock:16,desc:'মিস্ট স্প্রে সহ ফ্যান। তাৎক্ষণিক ঠান্ডা অনুভূতি।'},
-  {id:64,cat:'rgb',name:'SONOFF L2 WiFi+BT RGB LED Strip 16Ft (Alexa, Google Home, Music Sync)',imgs:['💡','🌈'],price:0,old:0,
+  {id:64,cat:'rgb',name:'SONOFF L2 WiFi+BT RGB LED Strip 16Ft (Alexa, Google Home, Music Sync)',imgs:['💡','🌈'],price:1890,old:2500,
    specs:{দৈর্ঘ্য:'5 Meters (16 Feet)',ওয়াটারপ্রুফ:'IP65',মিউজিক_সিঙ্ক:'হ্যাঁ',নিয়ন্ত্রণ:'WiFi App + BT + Remote + Voice',ভয়েস:'Alexa & Google Home',রঙ:'16 Million+ RGB',LED:'SMD5050 | 300 Lumens/m',ভোল্টেজ:'AC 100–240V | DC 12V',ওয়্যারেন্টি:'১ মাস (Driver)'},
    warranty:'১ মাস রিপ্লেসমেন্ট ওয়ারেন্টি (Driver)',badge:'NEW',stock:20,rating:4.7,
    desc:'SONOFF L2 smart RGB LED strip — ১ কোটি ৬০ লাখ+ color, গানের তালে নাচে, Alexa ও Google Home সাপোর্ট। IP65 waterproof, সহজ ইনস্টলেশন।',
@@ -2473,6 +2473,29 @@ function confirmOrder(){
     status:'pending',ip:'client-ip'};
   const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
   orders.push(order);localStorage.setItem('vc_orders',JSON.stringify(orders));
+  // ✅ Supabase তে order save করো (admin cross-device দেখতে পাবে)
+  (async()=>{
+    try{
+      await supabaseClient.from('orders').insert([{
+        id:order.id,
+        order_num:order.orderNum,
+        date:order.date,
+        customer_name:order.customer.name,
+        customer_phone:order.customer.phone,
+        customer_district:order.customer.district,
+        customer_address:order.customer.address,
+        customer_email:order.customer.email||'',
+        items:JSON.stringify(order.items),
+        shipping:order.shipping,
+        shipping_cost:order.shippingCost,
+        subtotal:order.subtotal,
+        total:order.total,
+        payment_txn:order.payment.txnId||'',
+        payment_last4:order.payment.last4||'',
+        status:'pending'
+      }]);
+    }catch(e){console.warn('Supabase order save failed (localStorage fallback active):',e);}
+  })();
   // Also save to guest orders if not logged in (for later merge)
   if(!currentUser){
     const guestOrders=JSON.parse(localStorage.getItem('vc_guest_orders')||'[]');
@@ -2498,37 +2521,92 @@ function confirmOrder(){
   startPolling();
 }
 let _pollInterval=null;
+let _supabaseChannel=null;
+
+// ✅ Cross-device polling: Supabase থেকে order status চেক করে (localStorage নয়)
+async function checkOrderStatusFromSupabase(ordId){
+  try{
+    const res=await supabaseClient
+      .from('orders')
+      .select('id,status')
+      .eq('id',ordId)
+      .single();
+    if(res.data)return res.data.status;
+  }catch(e){}
+  // Fallback: localStorage (same device)
+  const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
+  const o=orders.find(x=>x.id===ordId);
+  return o?o.status:null;
+}
+
+function handleOrderStatusUpdate(status,ordId){
+  if(['confirmed','shipped','delivered'].includes(status)){
+    clearInterval(_pollInterval);_pollInterval=null;
+    if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+    sessionStorage.removeItem('vc_pending');
+    // Sync localStorage status too
+    try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
+    if(document.getElementById('waitOverlay').classList.contains('show')){
+      document.getElementById('pendingState').style.display='none';
+      document.getElementById('confirmedState').style.display='block';
+    } else {
+      // find order for popup
+      const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
+      const o=orders.find(x=>x.id===ordId);
+      if(o)showBgConfirmPopup(o);
+    }
+    pendingOrdId=null;
+  } else if(status==='cancelled'){
+    clearInterval(_pollInterval);_pollInterval=null;
+    if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+    sessionStorage.removeItem('vc_pending');
+    if(document.getElementById('waitOverlay').classList.contains('show')){
+      document.getElementById('pendingState').style.display='none';
+      document.getElementById('rejectedState').style.display='block';
+    }
+    pendingOrdId=null;
+  }
+}
+
 function startPolling(){
   if(!pendingOrdId)return;
   if(_pollInterval)clearInterval(_pollInterval);
+  if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+
   const MAX_POLL=30*60*1000;
   const pollStart=Date.now();
-  _pollInterval=setInterval(()=>{
+  const ordId=pendingOrdId;
+
+  // ✅ Method 1: Supabase Realtime (instant cross-device update)
+  try{
+    _supabaseChannel=supabaseClient
+      .channel('order-status-'+ordId)
+      .on('postgres_changes',{
+        event:'UPDATE',schema:'public',table:'orders',
+        filter:'id=eq.'+ordId
+      },(payload)=>{
+        if(payload.new&&payload.new.status){
+          handleOrderStatusUpdate(payload.new.status,ordId);
+        }
+      })
+      .subscribe();
+  }catch(e){
+    console.warn('Supabase realtime subscribe failed:',e);
+  }
+
+  // ✅ Method 2: HTTP polling as fallback (works even without realtime)
+  _pollInterval=setInterval(async ()=>{
     if(Date.now()-pollStart>MAX_POLL){
       clearInterval(_pollInterval);_pollInterval=null;
+      if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
       sessionStorage.removeItem('vc_pending');pendingOrdId=null;
       const p=document.getElementById('pendingState');
-      if(p)p.querySelector('p').textContent='অর্ডার যাচাই সময়সীমা শেষ। WhatsApp এ যোগাযোগ করুন: 01816-365504';
+      if(p){const pEl=p.querySelector('p');if(pEl)pEl.textContent='অর্ডার যাচাই সময়সীমা শেষ। WhatsApp এ যোগাযোগ করুন: 01816-365504';}
       return;
     }
-    const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
-    const o=orders.find(x=>x.id===pendingOrdId);if(!o)return;
-    if(['confirmed','shipped','delivered'].includes(o.status)){
-      clearInterval(_pollInterval);_pollInterval=null;sessionStorage.removeItem('vc_pending');
-      if(document.getElementById('waitOverlay').classList.contains('show')){
-        document.getElementById('pendingState').style.display='none';
-        document.getElementById('confirmedState').style.display='block';
-      } else {showBgConfirmPopup(o);}
-      pendingOrdId=null;
-    } else if(o.status==='cancelled'){
-      clearInterval(_pollInterval);_pollInterval=null;sessionStorage.removeItem('vc_pending');
-      if(document.getElementById('waitOverlay').classList.contains('show')){
-        document.getElementById('pendingState').style.display='none';
-        document.getElementById('rejectedState').style.display='block';
-      }
-      pendingOrdId=null;
-    }
-  },3000);
+    const status=await checkOrderStatusFromSupabase(ordId);
+    if(status)handleOrderStatusUpdate(status,ordId);
+  },5000);
 }
 // S-11: Intercept browser back button when wait overlay is open
 window.addEventListener('popstate',function(e){
@@ -2538,10 +2616,17 @@ window.addEventListener('popstate',function(e){
   }
 });
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='hidden'&&_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
-  else if(document.visibilityState==='visible'&&pendingOrdId&&!_pollInterval){startPolling();}
+  if(document.visibilityState==='hidden'){
+    if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
+    if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+  } else if(document.visibilityState==='visible'&&pendingOrdId&&!_pollInterval){
+    startPolling();
+  }
 });
-window.addEventListener('pagehide',()=>{if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}});
+window.addEventListener('pagehide',()=>{
+  if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
+  if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+});
 function exitWaitAndBrowse(){
   // Close overlay but keep polling in background
   document.getElementById('waitOverlay').classList.remove('show');
