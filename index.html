@@ -1800,6 +1800,19 @@ function renderProds(list){
 }
 let _filterCatLock=false;
 // ✅ Category bar re-render (vc_categories Supabase থেকে পরিবর্তন হলে)
+function updateCatPillCounts(){
+  const catLabels={all:'সকল পণ্য',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
+  document.querySelectorAll('.cat-pill').forEach(b=>{
+    const fn=b.getAttribute('onclick')||'';
+    const m=fn.match(/'([^']+)'/);
+    if(!m)return;
+    const cat=m[1];
+    const cnt=cat==='all'?PRODS.length:PRODS.filter(p=>p.cat===cat).length;
+    const label=catLabels[cat]||cat;
+    b.textContent=label+' ('+cnt+')';
+  });
+}
+
 function renderCatBar(){
   // Custom categories যদি থাকে apply করো
   const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
