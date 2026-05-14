@@ -746,261 +746,465 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
   </div>
 
   <!-- ===== HERO CATH-CARDS ===== -->
+  <!-- ===== HERO CARDS MANAGER (NEW) ===== -->
   <div class="page" id="page-design-cath-cards">
+
+    <!-- Page Header -->
     <div class="page-head">
-      <div><div class="page-title">হিরো ক্যাটাগরি কার্ড</div><div class="page-sub">হোমপেজের ক্যাটাগরি কার্ডগুলো কাস্টমাইজ করুন</div></div>
-      <button class="btn btn-dark" onclick="addNewCathCard()">+ নতুন কার্ড যোগ করুন</button>
+      <div>
+        <div class="page-title">🖼️ হিরো সেকশন কার্ড</div>
+        <div class="page-sub">হোমপেজের স্লাইডার কার্ডগুলো ম্যানেজ করুন</div>
+      </div>
+      <button class="btn btn-dark" onclick="openCathCardDrawer(-1)">+ নতুন কার্ড যোগ করুন</button>
     </div>
 
-    <!-- Card List -->
+    <!-- Image size guide banner -->
+    <div style="background:linear-gradient(135deg,#e8f4fd,#d6ebf8);border:1.5px solid #a8d4f0;border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:24px;flex-shrink:0">📐</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:4px">ছবির সাইজ গাইড</div>
+        <div style="font-size:12px;color:#2a5a8c;line-height:1.7">
+          <b>প্রস্তাবিত সাইজ:</b> <code style="background:#fff;padding:2px 6px;border-radius:4px;font-size:11px">600 × 900 px</code> (Portrait/Vertical)<br>
+          <b>Aspect Ratio:</b> <code style="background:#fff;padding:2px 6px;border-radius:4px;font-size:11px">2:3</code> — কার্ড লম্বালম্বি হওয়ায় tall ছবি সবচেয়ে ভালো দেখায়<br>
+          <b>ফরম্যাট:</b> JPG বা WebP (ছোট ফাইল সাইজের জন্য) · সর্বোচ্চ 2MB
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Grid (existing cards) -->
     <div class="card">
-      <div class="card-head"><span class="card-title">বর্তমান কার্ডসমূহ</span><span class="card-sub">কার্ডের ছবি ও টেক্সট এডিট করুন</span></div>
-      <div id="cathCardList" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-
-    <!-- Card Editor -->
-    <div class="card" id="cathCardEditor" style="display:none">
       <div class="card-head">
-        <span class="card-title" id="cathCardEditorTitle">কার্ড এডিট করুন</span>
+        <span class="card-title">বর্তমান কার্ডসমূহ</span>
+        <span class="card-sub" id="cathCardCount">লোড হচ্ছে…</span>
       </div>
-      <input type="hidden" id="editCathCardIdx">
-
-      <!-- Image Upload -->
-      <div class="fg">
-        <label>কার্ডের ছবি আপলোড করুন <span class="hint">(বা URL দিন)</span></label>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <!-- File Upload -->
-          <div style="border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:var(--bg);transition:border-color .2s" id="cathImgDropZone" onclick="document.getElementById('cathImgFileInput').click()">
-            <input type="file" id="cathImgFileInput" accept="image/*" style="display:none" onchange="handleCathImgUpload(this)">
-            <div id="cathImgPreviewWrap" style="display:none;margin-bottom:10px">
-              <img id="cathImgPreview" style="max-height:120px;max-width:100%;border-radius:8px;object-fit:contain" src="" alt="preview">
-            </div>
-            <div id="cathImgDropText">
-              <div style="font-size:28px;margin-bottom:6px">🖼️</div>
-              <div style="font-size:13px;font-weight:600;color:var(--dark)">ছবি আপলোড করুন</div>
-              <div style="font-size:11px;color:var(--gray);margin-top:3px">JPG, PNG, WebP সাপোর্টেড</div>
-            </div>
-          </div>
-          <!-- URL Input -->
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="flex:1;height:1px;background:var(--border)"></div>
-            <span style="font-size:11px;color:var(--gray)">অথবা</span>
-            <div style="flex:1;height:1px;background:var(--border)"></div>
-          </div>
-          <input class="finp" id="cathImgUrl" placeholder="https://... (ছবির URL)" oninput="previewCathImgUrl(this.value)">
-        </div>
-      </div>
-
-      <!-- 3 Text Inputs -->
-      <div class="fg">
-        <label>টেক্সট ১ — মূল শিরোনাম <span class="hint">(বড় হাতে দেখায়)</span></label>
-        <input class="finp" id="cathCardLine1" placeholder="যেমন: RGB আলোর দুনিয়া">
-      </div>
-      <div class="fg">
-        <label>টেক্সট ২ — সাব-টাইটেল <span class="hint">(ছোট হাতে দেখায়)</span></label>
-        <input class="finp" id="cathCardLine2" placeholder="যেমন: App কন্ট্রোল, ১৬M+ রঙ">
-      </div>
-      <div class="fg">
-        <label>টেক্সট ৩ — ফুটার লেবেল <span class="hint">(নিচের বারে দেখায়)</span></label>
-        <input class="finp" id="cathCardLabel" placeholder="যেমন: 💡 RGB Lights">
-      </div>
-
-      <!-- Live Preview -->
-      <div class="card-head" style="margin-top:4px"><span class="card-title">লাইভ প্রিভিউ</span></div>
-      <div style="display:flex;justify-content:center;padding:10px 0">
-        <div id="cathCardLivePreview" style="width:180px;min-height:260px;border-radius:16px;background:linear-gradient(155deg,#0d1b0d 0%,#1a3a1a 50%,#0d2d1a 100%);padding:18px 14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
-          <div id="cathPrevImgWrap" style="width:100%;height:100px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;margin-bottom:4px;flex-shrink:0">
-            <span id="cathPrevEmoji" style="font-size:44px">📦</span>
-          </div>
-          <div style="flex:1;padding:6px 0 6px">
-            <div id="cathPrevLine1" style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;text-shadow:0 1px 6px rgba(0,0,0,.5)">মূল শিরোনাম</div>
-            <div id="cathPrevLine2" style="font-size:11px;color:rgba(255,255,255,.8)">সাব-টাইটেল</div>
-          </div>
-          <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.1)">
-            <span id="cathPrevLabel" style="font-size:11px;font-weight:700;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📦 লেবেল</span>
-            <span style="font-size:14px;color:rgba(255,255,255,.85)">→</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-foot" style="margin-top:12px">
-        <button class="btn btn-outline" onclick="closeCathCardEditor()">বাতিল</button>
-        <button class="btn btn-dark" onclick="saveCathCard()">💾 কার্ড সেভ করুন</button>
+      <div id="cathCardGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;padding:4px 0"></div>
+      <div id="cathCardEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--gray)">
+        <div style="font-size:40px;margin-bottom:10px">🃏</div>
+        <div style="font-size:14px;font-weight:600">কোনো কার্ড নেই</div>
+        <div style="font-size:12px;margin-top:4px">উপরের বাটন থেকে নতুন কার্ড যোগ করুন</div>
       </div>
     </div>
+
+    <!-- ── DRAWER / EDITOR MODAL ── -->
+    <div id="cathDrawerBg" onclick="closeCathDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;backdrop-filter:blur(3px)"></div>
+
+    <div id="cathDrawer" style="
+      display:none;position:fixed;bottom:0;left:0;right:0;
+      background:var(--white);border-radius:22px 22px 0 0;
+      z-index:901;max-height:92vh;overflow-y:auto;
+      box-shadow:0 -8px 40px rgba(0,0,0,.18);
+      padding:0 0 env(safe-area-inset-bottom,0);
+      transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)">
+
+      <!-- Handle bar -->
+      <div style="display:flex;justify-content:center;padding:12px 0 0">
+        <div style="width:40px;height:4px;background:var(--border);border-radius:10px"></div>
+      </div>
+
+      <!-- Drawer Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px">
+        <div>
+          <div class="card-title" id="cathDrawerTitle" style="font-size:16px">নতুন কার্ড যোগ করুন</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:2px" id="cathDrawerSub">ছবি ও বাটন টেক্সট দিন</div>
+        </div>
+        <button onclick="closeCathDrawer()" style="background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray)">×</button>
+      </div>
+
+      <div style="padding:0 20px 20px">
+
+        <!-- ── IMAGE SECTION ── -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="background:#e8f4fd;color:#1a6fad;padding:2px 8px;border-radius:20px;font-size:11px">STEP 1</span>
+            কার্ডের ছবি বেছে নিন
+          </div>
+
+          <!-- Drop zone -->
+          <div id="cathDropZone" onclick="document.getElementById('cathFileIn').click()"
+            style="border:2.5px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--bg);transition:all .2s;position:relative;overflow:hidden">
+            <input type="file" id="cathFileIn" accept="image/*" style="display:none" onchange="handleCathFile(this)">
+
+            <!-- Preview (hidden by default) -->
+            <div id="cathImgPreviewWrap" style="display:none">
+              <div style="position:relative;display:inline-block">
+                <img id="cathImgPreview" style="max-height:160px;max-width:100%;border-radius:10px;object-fit:cover;display:block" src="" alt="">
+                <button onclick="event.stopPropagation();removeCathImg()" style="position:absolute;top:-8px;right:-8px;background:#e53e3e;color:#fff;border:none;width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2">×</button>
+              </div>
+              <div style="font-size:11px;color:var(--gray);margin-top:8px">ছবি পরিবর্তন করতে এখানে ক্লিক করুন</div>
+            </div>
+
+            <!-- Upload prompt -->
+            <div id="cathDropPrompt">
+              <div style="font-size:36px;margin-bottom:8px">📸</div>
+              <div style="font-size:13px;font-weight:700;color:var(--dark)">ছবি আপলোড করুন</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:4px">JPG, PNG, WebP · সর্বোচ্চ 2MB</div>
+              <div style="margin-top:10px;display:inline-block;background:var(--dark);color:#fff;padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600">ফাইল বেছে নিন</div>
+            </div>
+          </div>
+
+          <!-- OR divider -->
+          <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+            <span style="font-size:11px;color:var(--gray);font-weight:600">অথবা URL দিন</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+          <input class="finp" id="cathImgUrl" placeholder="https://example.com/image.jpg" oninput="onCathUrlInput(this.value)" style="margin-bottom:0">
+        </div>
+
+        <!-- ── BUTTON TEXT ── -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="background:#f0faf0;color:#276749;padding:2px 8px;border-radius:20px;font-size:11px">STEP 2</span>
+            কার্ডের নিচে বাটন টেক্সট
+          </div>
+          <input class="finp" id="cathCardLabel" placeholder="যেমন: Shop Now  বা  Explore"
+            oninput="updateCathPreview()" style="margin-bottom:6px">
+          <div style="font-size:11px;color:var(--gray)">এই টেক্সটটা কার্ডের নিচে "→" সহ দেখাবে</div>
+        </div>
+
+        <!-- ── CATEGORY LINK (optional) ── -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="background:#fdf6ec;color:#b7791f;padding:2px 8px;border-radius:20px;font-size:11px">STEP 3</span>
+            ক্লিক করলে কোন ক্যাটাগরিতে যাবে? <span style="font-weight:400;color:var(--gray)">(optional)</span>
+          </div>
+          <input class="finp" id="cathCardCatId" placeholder="যেমন: rgb  বা  smartwatch  বা  all" style="margin-bottom:6px">
+          <div style="font-size:11px;color:var(--gray)">ক্যাটাগরি ID দিন — ফাঁকা রাখলে সব পণ্য দেখাবে</div>
+        </div>
+
+        <!-- ── LIVE PREVIEW ── -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:10px">লাইভ প্রিভিউ</div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+
+            <!-- Mobile card preview -->
+            <div style="flex-shrink:0">
+              <div style="font-size:10px;color:var(--gray);text-align:center;margin-bottom:5px">📱 Mobile</div>
+              <div id="cathPreviewCard" style="
+                width:130px;height:210px;border-radius:16px;overflow:hidden;
+                position:relative;background:#111;
+                box-shadow:0 6px 20px rgba(0,0,0,.25);flex-shrink:0">
+                <img id="cathPreviewBg" src="" alt=""
+                  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
+                <div id="cathPreviewEmoji" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px">🖼️</div>
+                <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(0,0,0,.65) 100%)"></div>
+                <div style="position:absolute;bottom:12px;left:10px;right:10px">
+                  <div id="cathPreviewLabel" style="
+                    display:inline-flex;align-items:center;gap:4px;
+                    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+                    backdrop-filter:blur(6px);color:#fff;
+                    font-size:9px;font-weight:700;padding:4px 9px;border-radius:50px;
+                    letter-spacing:.3px;text-transform:uppercase">
+                    SHOP NOW →
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info panel -->
+            <div style="flex:1;font-size:12px;color:var(--gray);line-height:1.9;padding-top:4px">
+              <div>✅ <b>ছবি</b> কার্ডের পুরোটা ভরবে</div>
+              <div>✅ নিচে <b>gradient overlay</b> থাকবে</div>
+              <div>✅ বাটন কার্ডের <b>একদম নিচে</b> থাকবে</div>
+              <div style="margin-top:10px;padding:8px 10px;background:#fff8e1;border-radius:8px;border-left:3px solid #f6c90e;color:#7a5800;font-size:11px;line-height:1.6">
+                💡 <b>সেরা ছবি:</b> প্রোডাক্টের tall portrait ছবি, সাদা বা dark background
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="closeCathDrawer()" style="flex:1">বাতিল</button>
+          <button class="btn btn-dark" onclick="saveCathCardNew()" style="flex:2">💾 কার্ড সেভ করুন</button>
+        </div>
+
+        <!-- Delete button (only when editing) -->
+        <div id="cathDeleteWrap" style="display:none;margin-top:10px">
+          <button onclick="deleteCathCardNew()" style="width:100%;padding:10px;background:none;border:1.5px solid #e53e3e;color:#e53e3e;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">
+            🗑️ এই কার্ড মুছে ফেলুন
+          </button>
+        </div>
+
+      </div><!-- end drawer inner -->
+    </div><!-- end drawer -->
 
     <script>
-    // ======= HERO CATH-CARD MANAGEMENT =======
+    // ======= HERO CARD MANAGER (NEW) =======
     const DEFAULT_CATH_CARDS = [
-      {line1:'সকল গ্যাজেট',line2:'এক জায়গায় সব প্রোডাক্ট',label:'🛍️ সকল পণ্য',img:'',emoji:'🛍️',catId:'all',bg:'linear-gradient(155deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)'},
-      {line1:'RGB আলোর দুনিয়া',line2:'App কন্ট্রোল, ১৬M+ রঙ',label:'💡 RGB Lights',img:'',emoji:'💡',catId:'rgb',bg:'linear-gradient(155deg,#0d1b0d 0%,#1a3a1a 50%,#0d2d1a 100%)'},
-      {line1:'স্মার্ট লাইফস্টাইল',line2:'AMOLED ডিসপ্লে, IP68',label:'⌚ Smartwatches',img:'',emoji:'⌚',catId:'smartwatch',bg:'linear-gradient(155deg,#0a0a2e 0%,#1a1a5e 50%,#0a2240 100%)'},
-      {line1:'চার্জ থাকুক সবসময়',line2:'20000mAh, Fast Charge',label:'🔋 Power Bank',img:'',emoji:'🔋',catId:'powerbank',bg:'linear-gradient(155deg,#1a0a00 0%,#3d1f00 50%,#5c2d00 100%)'},
-      {line1:'নিরেট সাউন্ড অভিজ্ঞতা',line2:'ANC, BT 5.3, 36h ব্যাটারি',label:'🎧 TWS Earbuds',img:'',emoji:'🎧',catId:'tws',bg:'linear-gradient(155deg,#1a0020 0%,#3d0050 50%,#2d0070 100%)'},
-      {line1:'প্রিমিয়াম অডিও',line2:'Hybrid ANC, 30h ব্যাটারি',label:'🎵 BT Headphones',img:'',emoji:'🎵',catId:'headphone',bg:'linear-gradient(155deg,#00101a 0%,#001f3d 50%,#003366 100%)'},
-      {line1:'রোমান্টিক আলো',line2:'গিফট হিসেবে আদর্শ',label:'🪔 Acrylic Lamp',img:'',emoji:'🪔',catId:'lamp',bg:'linear-gradient(155deg,#1a0010 0%,#3d0030 50%,#1a0040 100%)'},
-      {line1:'লোডশেডিং সমাধান',line2:'8000mAh, ১২ ঘণ্টা রানটাইম',label:'💨 Recharge. Fan',img:'',emoji:'💨',catId:'fan',bg:'linear-gradient(155deg,#001a1a 0%,#003d3d 50%,#005252 100%)'},
+      {label:'Shop Now', img:'', emoji:'🛍️', catId:'all',      bg:'linear-gradient(155deg,#1a1a2e,#0f3460)'},
+      {label:'Explore',  img:'', emoji:'✨',  catId:'smartwatch',bg:'linear-gradient(155deg,#0d0520,#2a1060)'},
+      {label:'RGB Lights',img:'',emoji:'💡', catId:'rgb',       bg:'linear-gradient(155deg,#0d1b0d,#0d2d1a)'},
+      {label:'Power Bank',img:'',emoji:'🔋', catId:'powerbank', bg:'linear-gradient(155deg,#1a0a00,#5c2d00)'},
+      {label:'TWS Earbuds',img:'',emoji:'🎧',catId:'tws',       bg:'linear-gradient(155deg,#1a0020,#2d0070)'},
+      {label:'Headphones',img:'',emoji:'🎵', catId:'headphone', bg:'linear-gradient(155deg,#00101a,#003366)'},
+      {label:'Acrylic Lamp',img:'',emoji:'🪔',catId:'lamp',     bg:'linear-gradient(155deg,#1a0010,#1a0040)'},
+      {label:'Recharge. Fan',img:'',emoji:'💨',catId:'fan',     bg:'linear-gradient(155deg,#001a1a,#005252)'},
     ];
-    let cathCards=[];
-    let editCathIdx=-1;
+
+    let _cathCards = [];
+    let _cathEditIdx = -1;
+    let _cathImgData = ''; // base64 or URL of current upload
 
     function getCathCards(){
-      const saved=JSON.parse(localStorage.getItem('vc_cath_cards')||'null');
-      return saved && saved.length ? saved : [...DEFAULT_CATH_CARDS];
+      const s = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
+      return (s && s.length) ? s : JSON.parse(JSON.stringify(DEFAULT_CATH_CARDS));
     }
     function saveCathCardsData(cards){
       localStorage.setItem('vc_cath_cards', JSON.stringify(cards));
-      if(typeof saveSettingToSupabase==='function') saveSettingToSupabase('vc_cath_cards', cards);
+      if(typeof saveSettingToSupabase === 'function') saveSettingToSupabase('vc_cath_cards', cards);
     }
 
-    function renderCathCardList(){
-      cathCards=getCathCards();
-      const list=document.getElementById('cathCardList');
-      if(!list)return;
-      list.innerHTML=cathCards.map((c,i)=>`
-        <div style="background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:2px">
-          <div style="display:flex;align-items:center;gap:12px;padding:12px">
-            <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              ${c.img ? `<img src="${escHtml(c.img)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='${c.emoji||'📦'}'">` : `<span style="font-size:22px">${escHtml(c.emoji||'📦')}</span>`}
+    // ── Render grid ──
+    function renderCathCardGrid(){
+      _cathCards = getCathCards();
+      const grid = document.getElementById('cathCardGrid');
+      const empty = document.getElementById('cathCardEmpty');
+      const count = document.getElementById('cathCardCount');
+      if(!grid) return;
+
+      if(!_cathCards.length){
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        if(count) count.textContent = '০টি কার্ড';
+        return;
+      }
+      grid.style.display = 'grid';
+      empty.style.display = 'none';
+      if(count) count.textContent = _cathCards.length + 'টি কার্ড';
+
+      grid.innerHTML = _cathCards.map((c, i) => {
+        const imgHtml = c.img
+          ? `<img src="${escHtml(c.img)}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" onerror="this.style.display='none'">`
+          : `<span style="font-size:32px;position:absolute;top:50%;left:50%;transform:translate(-50%,-60%)">${escHtml(c.emoji||'📦')}</span>`;
+        return `
+        <div style="border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.10);cursor:pointer;position:relative" onclick="openCathCardDrawer(${i})">
+          <!-- Card visual -->
+          <div style="height:160px;background:${escHtml(c.bg||'#111')};position:relative;overflow:hidden">
+            ${imgHtml}
+            <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.6) 100%)"></div>
+            <!-- CTA pill preview -->
+            <div style="position:absolute;bottom:10px;left:8px;right:8px">
+              <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:50px;letter-spacing:.2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                ${escHtml(c.label || 'Shop Now')} →
+              </span>
             </div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.line1||'')}</div>
-              <div style="font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.line2||'')} · ${escHtml(c.label||'')}</div>
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="editCathCard(${i})">✏️ এডিট</button>
-            ${i>=8?`<button class="btn btn-red btn-sm" onclick="deleteCathCard(${i})">🗑️</button>`:''}
+            <!-- Edit badge -->
+            <div style="position:absolute;top:7px;right:7px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:#fff;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600">✏️ এডিট</div>
+            <!-- Card number -->
+            <div style="position:absolute;top:7px;left:7px;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px">#${i+1}</div>
           </div>
-        </div>
-      `).join('');
+          <!-- Label under card -->
+          <div style="padding:8px 10px;background:var(--white);border-top:1px solid var(--border)">
+            <div style="font-size:11px;font-weight:700;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.label || '—')}</div>
+            <div style="font-size:10px;color:var(--gray);margin-top:1px">${escHtml(c.catId || 'all')}</div>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    function addNewCathCard(){
-      editCathIdx=-1;
-      document.getElementById('cathCardEditorTitle').textContent='নতুন কার্ড যোগ করুন';
-      document.getElementById('cathImgUrl').value='';
-      document.getElementById('cathCardLine1').value='';
-      document.getElementById('cathCardLine2').value='';
-      document.getElementById('cathCardLabel').value='';
-      resetCathImgPreview();
-      updateCathLivePreview();
-      document.getElementById('cathCardEditor').style.display='block';
-      document.getElementById('cathCardEditor').scrollIntoView({behavior:'smooth'});
-    }
+    // ── Open drawer ──
+    function openCathCardDrawer(idx){
+      _cathEditIdx = idx;
+      _cathImgData = '';
 
-    function editCathCard(i){
-      editCathIdx=i;
-      const c=getCathCards()[i];
-      document.getElementById('cathCardEditorTitle').textContent='কার্ড এডিট করুন';
-      document.getElementById('cathImgUrl').value=c.img||'';
-      document.getElementById('cathCardLine1').value=c.line1||'';
-      document.getElementById('cathCardLine2').value=c.line2||'';
-      document.getElementById('cathCardLabel').value=c.label||'';
-      // preview
-      if(c.img){
-        document.getElementById('cathImgPreview').src=c.img;
-        document.getElementById('cathImgPreviewWrap').style.display='block';
-        document.getElementById('cathImgDropText').style.display='none';
-        document.getElementById('cathPrevImgWrap').innerHTML=`<img src="${escHtml(c.img)}" style="width:100%;height:100%;object-fit:cover">`;
+      const drawer = document.getElementById('cathDrawer');
+      const bg     = document.getElementById('cathDrawerBg');
+      const title  = document.getElementById('cathDrawerTitle');
+      const sub    = document.getElementById('cathDrawerSub');
+      const delWrap= document.getElementById('cathDeleteWrap');
+
+      // Reset fields
+      document.getElementById('cathImgUrl').value = '';
+      document.getElementById('cathCardLabel').value = '';
+      document.getElementById('cathCardCatId').value = '';
+      resetCathDropzone();
+
+      if(idx >= 0){
+        const c = getCathCards()[idx];
+        title.textContent = 'কার্ড এডিট করুন';
+        sub.textContent   = '#' + (idx+1) + ' — পরিবর্তন করুন';
+        document.getElementById('cathCardLabel').value = c.label || '';
+        document.getElementById('cathCardCatId').value = c.catId || '';
+        delWrap.style.display = 'block';
+        if(c.img){
+          _cathImgData = c.img;
+          showCathPreviewImg(c.img);
+        }
       } else {
-        resetCathImgPreview();
-        document.getElementById('cathPrevEmoji').textContent=c.emoji||'📦';
+        title.textContent = 'নতুন কার্ড যোগ করুন';
+        sub.textContent   = 'ছবি ও বাটন টেক্সট দিন';
+        delWrap.style.display = 'none';
       }
-      updateCathLivePreview();
-      document.getElementById('cathCardEditor').style.display='block';
-      document.getElementById('cathCardEditor').scrollIntoView({behavior:'smooth'});
+      updateCathPreview();
+
+      // Show drawer with animation
+      bg.style.display = 'block';
+      drawer.style.display = 'block';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { drawer.style.transform = 'translateY(0)'; });
+      });
+      document.body.style.overflow = 'hidden';
     }
 
-    function deleteCathCard(i){
-      if(!confirm('এই কার্ড মুছে ফেলবেন?'))return;
-      const cards=getCathCards();
-      cards.splice(i,1);
-      saveCathCardsData(cards);
-      renderCathCardList();
-      showAdminToast('কার্ড মুছে ফেলা হয়েছে');
+    function closeCathDrawer(){
+      const drawer = document.getElementById('cathDrawer');
+      const bg     = document.getElementById('cathDrawerBg');
+      drawer.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        drawer.style.display = 'none';
+        bg.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 350);
     }
 
-    function saveCathCard(){
-      const line1=document.getElementById('cathCardLine1').value.trim();
-      const line2=document.getElementById('cathCardLine2').value.trim();
-      const label=document.getElementById('cathCardLabel').value.trim();
-      const img=document.getElementById('cathImgUrl').value.trim();
-      if(!line1){showAdminToast('মূল শিরোনাম দিন');return;}
-      const cards=getCathCards();
-      const cardData={
-        ...(editCathIdx>=0 ? cards[editCathIdx] : {}),
-        line1, line2, label, img
-      };
-      if(editCathIdx>=0){
-        cards[editCathIdx]=cardData;
-        showAdminToast('✅ কার্ড আপডেট হয়েছে!');
-      } else {
-        cardData.emoji='📦';
-        cardData.catId='custom_'+Date.now();
-        cardData.bg='linear-gradient(155deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)';
-        cards.push(cardData);
-        showAdminToast('✅ নতুন কার্ড যোগ হয়েছে!');
+    // ── File upload handler ──
+    function handleCathFile(input){
+      const file = input.files[0];
+      if(!file) return;
+      if(file.size > 3 * 1024 * 1024){
+        showAdminToast('⚠️ ছবির সাইজ ৩MB এর বেশি — ছোট করে দিন'); return;
       }
-      saveCathCardsData(cards);
-      renderCathCardList();
-      closeCathCardEditor();
-    }
-
-    function closeCathCardEditor(){
-      document.getElementById('cathCardEditor').style.display='none';
-    }
-
-    function handleCathImgUpload(input){
-      const file=input.files[0];
-      if(!file)return;
-      const reader=new FileReader();
-      reader.onload=function(e){
-        const dataUrl=e.target.result;
-        document.getElementById('cathImgUrl').value=dataUrl;
-        document.getElementById('cathImgPreview').src=dataUrl;
-        document.getElementById('cathImgPreviewWrap').style.display='block';
-        document.getElementById('cathImgDropText').style.display='none';
-        document.getElementById('cathPrevImgWrap').innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-        updateCathLivePreview();
+      const reader = new FileReader();
+      reader.onload = e => {
+        _cathImgData = e.target.result;
+        showCathPreviewImg(_cathImgData);
+        document.getElementById('cathImgUrl').value = '';
+        updateCathPreview();
       };
       reader.readAsDataURL(file);
     }
 
-    function previewCathImgUrl(url){
-      if(!url){resetCathImgPreview();updateCathLivePreview();return;}
-      document.getElementById('cathImgPreview').src=url;
-      document.getElementById('cathImgPreviewWrap').style.display='block';
-      document.getElementById('cathImgDropText').style.display='none';
-      document.getElementById('cathPrevImgWrap').innerHTML=`<img src="${escHtml(url)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span style=font-size:44px>📦</span>'">`;
-      updateCathLivePreview();
+    // ── URL input handler ──
+    function onCathUrlInput(url){
+      if(!url){ _cathImgData = ''; resetCathDropzone(); updateCathPreview(); return; }
+      _cathImgData = url;
+      showCathPreviewImg(url);
+      updateCathPreview();
     }
 
-    function resetCathImgPreview(){
-      document.getElementById('cathImgPreviewWrap').style.display='none';
-      document.getElementById('cathImgDropText').style.display='block';
-      document.getElementById('cathPrevImgWrap').innerHTML='<span id="cathPrevEmoji" style="font-size:44px">📦</span>';
+    function showCathPreviewImg(src){
+      document.getElementById('cathImgPreviewWrap').style.display = 'block';
+      document.getElementById('cathDropPrompt').style.display = 'none';
+      document.getElementById('cathImgPreview').src = src;
     }
 
-    function updateCathLivePreview(){
-      const l1=document.getElementById('cathCardLine1').value||'মূল শিরোনাম';
-      const l2=document.getElementById('cathCardLine2').value||'সাব-টাইটেল';
-      const lb=document.getElementById('cathCardLabel').value||'📦 লেবেল';
-      const pl1=document.getElementById('cathPrevLine1');
-      const pl2=document.getElementById('cathPrevLine2');
-      const plb=document.getElementById('cathPrevLabel');
-      if(pl1)pl1.textContent=l1;
-      if(pl2)pl2.textContent=l2;
-      if(plb)plb.textContent=lb;
+    function removeCathImg(){
+      _cathImgData = '';
+      document.getElementById('cathImgUrl').value = '';
+      resetCathDropzone();
+      updateCathPreview();
     }
 
-    // Live preview updates
-    document.addEventListener('DOMContentLoaded',()=>{
-      ['cathCardLine1','cathCardLine2','cathCardLabel'].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el)el.addEventListener('input',updateCathLivePreview);
+    function resetCathDropzone(){
+      document.getElementById('cathImgPreviewWrap').style.display = 'none';
+      document.getElementById('cathDropPrompt').style.display = 'block';
+    }
+
+    // ── Live preview updater ──
+    function updateCathPreview(){
+      const label = document.getElementById('cathCardLabel').value || 'SHOP NOW';
+      const lp = document.getElementById('cathPreviewLabel');
+      if(lp) lp.textContent = label.toUpperCase() + ' →';
+
+      const bg = document.getElementById('cathPreviewBg');
+      const em = document.getElementById('cathPreviewEmoji');
+      if(_cathImgData){
+        bg.src = _cathImgData;
+        bg.style.display = 'block';
+        em.style.display = 'none';
+        bg.onerror = () => { bg.style.display='none'; em.style.display='flex'; };
+      } else {
+        bg.style.display = 'none';
+        em.style.display = 'flex';
+        // set emoji from existing card if editing
+        if(_cathEditIdx >= 0){
+          const c = getCathCards()[_cathEditIdx];
+          em.textContent = c.emoji || '🖼️';
+        } else {
+          em.textContent = '🖼️';
+        }
+      }
+    }
+
+    // ── Save card ──
+    function saveCathCardNew(){
+      const label = document.getElementById('cathCardLabel').value.trim();
+      const catId = document.getElementById('cathCardCatId').value.trim() || 'all';
+      if(!label){ showAdminToast('⚠️ বাটন টেক্সট দিন'); return; }
+
+      const cards = getCathCards();
+
+      if(_cathEditIdx >= 0){
+        // Edit existing
+        cards[_cathEditIdx] = {
+          ...cards[_cathEditIdx],
+          label,
+          catId,
+          img: _cathImgData || cards[_cathEditIdx].img || '',
+        };
+        showAdminToast('✅ কার্ড আপডেট হয়েছে!');
+      } else {
+        // Add new
+        const emojis = ['🛍️','💡','⌚','🔋','🎧','🎵','🪔','💨','📦'];
+        cards.push({
+          label,
+          catId,
+          img: _cathImgData || '',
+          emoji: emojis[cards.length % emojis.length],
+          bg: 'linear-gradient(155deg,#1a1a2e,#0f3460)',
+        });
+        showAdminToast('✅ নতুন কার্ড যোগ হয়েছে!');
+      }
+
+      saveCathCardsData(cards);
+      renderCathCardGrid();
+      closeCathDrawer();
+
+      // Sync to index.html live (if open in same tab somehow — via localStorage event)
+      window.dispatchEvent(new StorageEvent('storage', { key:'vc_cath_cards' }));
+    }
+
+    // ── Delete card ──
+    function deleteCathCardNew(){
+      if(_cathEditIdx < 0) return;
+      if(!confirm('এই কার্ড মুছে ফেলবেন?')) return;
+      const cards = getCathCards();
+      cards.splice(_cathEditIdx, 1);
+      saveCathCardsData(cards);
+      renderCathCardGrid();
+      closeCathDrawer();
+      showAdminToast('🗑️ কার্ড মুছে ফেলা হয়েছে');
+    }
+
+    // ── Drag-over highlight ──
+    (function(){
+      const dz = document.getElementById('cathDropZone');
+      if(!dz) return;
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--dark)'; dz.style.background='#f0f4ff'; });
+      dz.addEventListener('dragleave', () => { dz.style.borderColor=''; dz.style.background=''; });
+      dz.addEventListener('drop', e => {
+        e.preventDefault(); dz.style.borderColor=''; dz.style.background='';
+        const file = e.dataTransfer.files[0];
+        if(!file || !file.type.startsWith('image/')) return;
+        const inp = document.getElementById('cathFileIn');
+        const dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files;
+        handleCathFile(inp);
+      });
+    })();
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCathCardGrid();
+      // live preview bindings
+      ['cathCardLabel','cathCardCatId'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('input', updateCathPreview);
       });
     });
     </script>
   </div>
+  <!-- ===== END HERO CARDS MANAGER ===== -->
 
   <!-- ===== CATEGORIES ===== -->
   <div class="page" id="page-design-categories">

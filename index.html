@@ -3907,53 +3907,51 @@ function renderRelated(prod){
 function loadCathCardData(){
   const saved = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
   if(!saved || !saved.length) return;
-  saved.forEach((card, i) => {
-    // Update hidden track elements (for JS compat)
-    const l1 = document.getElementById('cath-line1-' + i);
-    if(l1 && card.line1) l1.textContent = card.line1;
-    const l2 = document.getElementById('cath-line2-' + i);
-    if(l2 && card.line2) l2.textContent = card.line2;
-    const lb = document.getElementById('cath-label-' + i);
-    if(lb && card.label){
-      lb.innerHTML = escHtml(card.label) + ' <span class="cath-arrow">→</span>';
-    }
-    // Update VISIBLE hero duo cards (first 2 admin cards map to duo card 0 & 1)
-    if(i < 2){
-      const duoL1 = document.getElementById('heroDuoLine1-' + i);
-      if(duoL1 && card.line1) duoL1.innerHTML = escHtml(card.line1).replace(/\s/g, '<br>');
-      const duoL2 = document.getElementById('heroDuoLine2-' + i);
-      if(duoL2 && card.line2) duoL2.textContent = card.line2;
-      const duoLb = document.getElementById('heroDuoLabel-' + i);
-      if(duoLb && card.label){
-        duoLb.innerHTML = escHtml(card.label) + ' <span class="cath-arrow">→</span>';
-      }
-      // Sync image on duo card
+
+  // Rebuild the entire duo track from saved card data
+  const track = document.getElementById('cathDuoTrack');
+  if(!track || track.dataset.infinite === '1') {
+    // Already cloned — update visible cards via DOM
+    _syncCathCardsToDOM(saved); return;
+  }
+  _syncCathCardsToDOM(saved);
+}
+
+function _syncCathCardsToDOM(cards){
+  // Update the real card nodes inside cathDuoTrack
+  // Real cards start at index DUO_TOTAL (after head clones) when infinite is built,
+  // or at 0 if not yet built
+  const track = document.getElementById('cathDuoTrack');
+  if(!track) return;
+  const allCardEls = Array.from(track.querySelectorAll('.cath-card'));
+  const isInfinite = track.dataset.infinite === '1';
+  const offset = isInfinite ? cards.length : 0; // head clone count = DUO_TOTAL
+
+  cards.forEach((card, i) => {
+    // Update real card (offset + i) and both clone copies
+    const indices = isInfinite ? [i, i + cards.length, i + cards.length * 2] : [i];
+    indices.forEach(domIdx => {
+      const el = allCardEls[domIdx];
+      if(!el) return;
+      // Update CTA label
+      const lb = el.querySelector('.cath-cat-label');
+      if(lb && card.label) lb.innerHTML = escHtml(card.label) + ' <span class="cath-arrow">→</span>';
+      // Update onclick category
+      if(card.catId) el.setAttribute('onclick', `cathGoCategory('${card.catId}')`);
+      // Update image
       if(card.img){
-        const duoCard = document.getElementById('heroDuoCard-' + i);
-        const duoEmoji = document.getElementById('heroDuoEmoji-' + i);
-        if(duoCard && duoEmoji){
-          duoEmoji.remove();
-          const img = document.createElement('img');
-          img.className = 'cath-bg-img';
-          img.src = card.img;
-          img.alt = card.line1 || '';
-          img.onerror = function(){ this.style.display='none'; };
-          duoCard.insertBefore(img, duoCard.firstChild);
+        let imgEl = el.querySelector('.cath-bg-img');
+        let emojiEl = el.querySelector('.cath-emoji-bg');
+        if(!imgEl){
+          imgEl = document.createElement('img');
+          imgEl.className = 'cath-bg-img';
+          imgEl.alt = card.label || '';
+          el.insertBefore(imgEl, el.firstChild);
+          if(emojiEl) emojiEl.style.display = 'none';
         }
+        imgEl.src = card.img;
       }
-    }
-    // Sync image on hidden track card
-    const imgEl = document.getElementById('cathImg-' + i);
-    if(imgEl && card.img) {
-      const cardEl = document.getElementById('cathCard-' + i);
-      imgEl.remove();
-      const img = document.createElement('img');
-      img.className = 'cath-bg-img';
-      img.src = card.img;
-      img.alt = card.line1 || '';
-      img.onerror = function(){ this.style.display='none'; };
-      cardEl.insertBefore(img, cardEl.firstChild);
-    }
+    });
   });
 }
 
