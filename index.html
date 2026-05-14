@@ -1389,7 +1389,7 @@ function applyAdminSettings(){
   }
   // FAQs — সবসময় default দিয়ে শুরু করো, admin এ valid FAQ থাকলে replace করো
   FAQS.length=0;
-  DEFAULT_FAQS.forEach(f=>FAQS.push(f)); // প্রথমে default restore
+  DEFAULT_FAQS.forEach(f=>FAQS.push(f));
   try{
     const rawFaqs=localStorage.getItem('vc_faqs');
     if(rawFaqs){
@@ -1400,8 +1400,6 @@ function applyAdminSettings(){
       }
     }
   }catch(e){}
-  // faqGrid render হওয়ার পরে call হলে re-render করো
-  if(document.getElementById('faqGrid') && document.getElementById('faqGrid').innerHTML!=='')renderFAQ();
 }
 
 // HERO SLIDER — reads from admin's vc_hero_slides localStorage
@@ -1519,7 +1517,15 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   try {
     const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
-      settings.forEach(item => localStorage.setItem(item.setting_key, JSON.stringify(item.setting_value)));
+      settings.forEach(item => {
+        const val = item.setting_value;
+        // vc_faqs empty array হলে localStorage এ save করো না — default দেখাবে
+        if(item.setting_key === 'vc_faqs' && Array.isArray(val) && val.length === 0){
+          localStorage.removeItem('vc_faqs');
+          return;
+        }
+        localStorage.setItem(item.setting_key, JSON.stringify(val));
+      });
     }
   } catch (e) { console.warn('Supabase settings load failed, using localStorage cache', e); }
 
