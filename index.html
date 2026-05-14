@@ -17,7 +17,7 @@
   const SUPABASE_URL = "https://gzdujkwjplobonvghyhx.supabase.co";
 
   // 👇 আপনার Supabase Public Key
-  const SUPABASE_PUBLIC_KEY = "sb_publishable_KF1pFUO6N77m216FxBeyTA_vJQ4Rzok";
+  const SUPABASE_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6ZHVqa3dqcGxvYm9udmdoeWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzQzODUsImV4cCI6MjA5NDE1MDM4NX0.evLb7_gv5vtFrpsyCeX3h6mLxqCuOXQuY-w9ygvDqak";
 
   // Supabase Client তৈরি করা হচ্ছে
   const { createClient } = supabase;
@@ -1412,11 +1412,11 @@ function initHeroSlider(){
       } else {
         // Fallback content slide
         div.innerHTML=`<div class="hero-slide-fallback"><div class="hero-content">
-          ${s.tag?`<div class="hero-tag">⚡ ${s.tag}</div>`:''}
-          <h1 class="hero-title">${s.title||'Vangcur'}</h1>
-          ${s.sub?`<p class="hero-sub">${s.sub}</p>`:''}
-          <div class="hero-btns"><button class="h-btn h-btn-red" onclick="document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">${s.btn1||'প্রোডাক্ট দেখুন'}</button></div>
-          ${s.stats?`<div class="hero-stats">${s.stats.split(',').map(st=>{const[n,l]=st.split('|');return`<div><div class="h-stat-num">${n||''}</div><div class="h-stat-label">${l||''}</div></div>`;}).join('')}</div>`:''}
+          ${s.tag?`<div class="hero-tag">⚡ ${escHtml(s.tag)}</div>`:''}
+          <h1 class="hero-title">${escHtml(s.title||'Vangcur')}</h1>
+          ${s.sub?`<p class="hero-sub">${escHtml(s.sub)}</p>`:''}
+          <div class="hero-btns"><button class="h-btn h-btn-red" onclick="document.getElementById('prodSec').scrollIntoView({behavior:'smooth'})">${escHtml(s.btn1||'প্রোডাক্ট দেখুন')}</button></div>
+          ${s.stats?`<div class="hero-stats">${s.stats.split(',').map(st=>{const[n,l]=st.split('|');return`<div><div class="h-stat-num">${escHtml(n||'')}</div><div class="h-stat-label">${escHtml(l||'')}</div></div>`;}).join('')}</div>`:''}
         </div></div>`;
       }
       slides.appendChild(div);
@@ -1505,33 +1505,88 @@ function resetHeroAuto(){clearInterval(heroTimer);startHeroAuto();}
 
 // INIT
 document.addEventListener('DOMContentLoaded',async ()=>{
-  // --- Supabase থেকে সেটিংস ফেচ করা শুরু ---
+  // ✅ Fix: Supabase থেকে আগে সব settings আনো, তারপর apply করো
   try {
     const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
       settings.forEach(item => localStorage.setItem(item.setting_key, JSON.stringify(item.setting_value)));
     }
-  } catch (e) { console.warn('Failed to load settings', e); }
-  // --- Supabase থেকে সেটিংস ফেচ করা শেষ ---
+  } catch (e) { console.warn('Supabase settings load failed, using localStorage cache', e); }
 
   loadStock();
-  applyAdminSettings();
-  // ১. প্রথমেই localStorage থেকে custom products যোগ করো (instant)
+  applyAdminSettings(); // ✅ Supabase fetch এর পরে call হচ্ছে এখন
+  // ১. localStorage থেকে custom products যোগ করো (instant)
   const customLocal=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
   customLocal.forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
-  // ২. সাথে সাথেই render করো — লোডিং delay নেই
   DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
   renderProds(PRODS);
+  updateCatPillCounts();
   renderFAQ();
-  // ৩. Background এ Supabase থেকে নতুন products আনো, পেলে update করো
+  // ২. Background এ Supabase থেকে নতুন products আনো
   (async()=>{try{
     const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
     if(sbProds&&sbProds.length){
       let changed=false;
       sbProds.forEach(p=>{if(!PRODS.find(x=>x.id===p.id)){PRODS.push(p);changed=true;}});
-      if(changed){loadStock();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+      if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
     }
   }catch(e){}})();
+
+  // ✅ Fix #15: Login থাকলে Supabase থেকে wishlist load করো
+  if(currentUser){
+    syncWishlistFromSupabase();
+  }
+
+  // ৩. Supabase Realtime — সব settings + stock + products live watch
+  try{
+    supabaseClient
+      .channel('store-all-watch')
+      .on('postgres_changes',{event:'*',schema:'public',table:'store_settings'},async(payload)=>{
+        if(!payload.new||!payload.new.setting_key)return;
+        const key=payload.new.setting_key;
+        const val=payload.new.setting_value;
+        // localStorage sync
+        localStorage.setItem(key, JSON.stringify(val));
+        // ✅ যেকোনো settings change হলে live apply
+        if(key==='vc_stock'){
+          PRODS.forEach(p=>{if(val[p.id]!==undefined)p.stock=val[p.id];});
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          renderProds(cur);
+        } else if(key==='vc_hero_slides'){
+          initHeroSlider(); // hero slide বদলালে তাৎক্ষণিক update
+        } else if(key==='vc_logo'||key==='vc_brand'||key==='vc_faqs'||key==='vc_contact'){
+          applyAdminSettings(); // logo/brand/faqs বদলালে apply
+        } else if(key==='vc_categories'){
+          renderCatBar(); // category bar re-render
+        } else if(key==='vc_shipping'){
+          // shipping cost cache clear — পরের order এ নতুন দাম দেখাবে
+        }
+      })
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'custom_products'},async(payload)=>{
+        if(payload.new&&!PRODS.find(x=>x.id===payload.new.id)){
+          PRODS.push(payload.new);
+          updateCatPillCounts();
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          renderProds(cur);
+        }
+      })
+      .on('postgres_changes',{event:'DELETE',schema:'public',table:'custom_products'},async(payload)=>{
+        if(payload.old&&payload.old.id){
+          const idx=PRODS.findIndex(x=>x.id===payload.old.id);
+          if(idx>-1){PRODS.splice(idx,1);updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+        }
+      })
+      // ✅ Fix #15: wishlist Supabase realtime sync
+      .on('postgres_changes',{event:'*',schema:'public',table:'wishlists'},async(payload)=>{
+        if(currentUser&&payload.new&&payload.new.user_id===currentUser.id){
+          const items=payload.new.items||[];
+          localStorage.setItem('vc_wish',JSON.stringify(items));
+          updateWishDot();
+          if(document.getElementById('wishlistOverlay').classList.contains('show'))renderWishlist();
+        }
+      })
+      .subscribe();
+  }catch(e){}
   updateCartUI();
   updateWishDot();
   updateNavAuth();
@@ -1565,7 +1620,7 @@ function updateNavAuth(){
   const a=document.getElementById('navAuth');
   if(currentUser){
     const ini=(currentUser.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    a.innerHTML=`<button class="nav-user-btn" onclick="openAcc()"><div class="u-avatar">${ini}</div>${currentUser.name||'আমার অ্যাকাউন্ট'}</button>`;
+    a.innerHTML=`<button class="nav-user-btn" onclick="openAcc()"><div class="u-avatar">${escHtml(ini)}</div>${escHtml(currentUser.name||'আমার অ্যাকাউন্ট')}</button>`;
   } else {
     a.innerHTML=`<button class="nav-login-btn" onclick="openLogin()">লগইন করুন</button>`;
   }
@@ -1605,6 +1660,7 @@ async function doLogin(){
   currentUser=safeUser;
   localStorage.setItem('vc_user',JSON.stringify(safeUser));
   mergeGuestOrdersToUser(safeUser.email, safeUser.id);
+  syncWishlistFromSupabase(); // ✅ login হলে wishlist Supabase থেকে load
   closeLogin();updateNavAuth();showToast('✅ লগইন সফল!');
 }
 
@@ -1636,6 +1692,10 @@ async function doRegister(){
   currentUser=safeUser;
   localStorage.setItem('vc_user',JSON.stringify(safeUser));
   mergeGuestOrdersToUser(safeUser.email, safeUser.id);
+  // ✅ register এর পরে local wishlist থাকলে Supabase এ save করো
+  const localWish=getWishlist();
+  if(localWish.length)saveWishlistToSupabase(localWish);
+  else syncWishlistFromSupabase();
   closeLogin();updateNavAuth();showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!');
 }
 
@@ -1643,6 +1703,8 @@ async function doLogout(){
   await supabaseClient.auth.signOut();
   currentUser=null;
   localStorage.removeItem('vc_user');
+  localStorage.removeItem('vc_wish'); // ✅ logout এ wishlist cache clear
+  updateWishDot();
   closeAcc();updateNavAuth();showToast('লগআউট হয়েছে');
 }
 
@@ -1668,12 +1730,12 @@ function renderMyOrders(){
     <td style="font-size:11px;color:var(--gray)">${new Date(o.date).toLocaleDateString('bn-BD')}</td>
     <td style="max-width:130px;font-size:11.5px">${(o.items||[]).map(i=>{
       const prod=PRODS.find(p=>p.id===i.id);
-      const name=i.name.length>20?i.name.slice(0,20)+'...':i.name;
+      const name=escHtml(i.name.length>20?i.name.slice(0,20)+'...':i.name);
       return prod?`<span onclick="closeAcc();setTimeout(()=>openPP(${prod.id}),100)" style="cursor:pointer;color:var(--dark);text-decoration:underline;text-underline-offset:2px;display:block;margin-bottom:2px">${name}</span>`:`<span style="display:block;margin-bottom:2px">${name}</span>`;
     }).join('')}</td>
     <td>৳${(o.total||0).toLocaleString()}</td>
     <td><span class="s-pill ${sm[o.status]||'s-pending'}">${lm[o.status]||'Pending'}</span></td>
-    <td>${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">📄 ডাউনলোড</button>`:'-'}</td>
+    <td>${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${escHtml(o.id)}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">📄 ডাউনলোড</button>`:'-'}</td>
   </tr>`).join('');
 }
 
@@ -1699,8 +1761,8 @@ function renderProds(list){
       <button class="wish-btn ${isWishlisted(p.id)?'wishlisted':''}" onclick="toggleWish(${p.id},this)" title="Wishlist">${isWishlisted(p.id)?'❤️':'🤍'}</button>
     </div>
     <div class="prod-info">
-      <div class="prod-name" onclick="openPP(${p.id})">${p.name}</div>
-      <div class="prod-spec">${Object.entries(p.specs).slice(0,2).map(([k,v])=>`${k}: ${v}`).join(' • ')}</div>
+      <div class="prod-name" onclick="openPP(${p.id})">${escHtml(p.name)}</div>
+      <div class="prod-spec">${Object.entries(p.specs).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
       <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
         <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
         <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${Math.floor((p.id*37+p.stock*13)%80+20)})</span>
@@ -1715,6 +1777,23 @@ function renderProds(list){
   });
 }
 let _filterCatLock=false;
+// ✅ Category bar re-render (vc_categories Supabase থেকে পরিবর্তন হলে)
+function renderCatBar(){
+  // Custom categories যদি থাকে apply করো
+  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  if(!saved||!saved.length)return;
+  // cat-bar এর pills update করো label অনুযায়ী
+  const pills=document.querySelectorAll('.cat-pill');
+  pills.forEach(pill=>{
+    const fn=pill.getAttribute('onclick')||'';
+    const m=fn.match(/'([^']+)'/);if(!m)return;
+    const cat=m[1];if(cat==='all')return;
+    const match=saved.find(c=>c.key===cat||c.slug===cat);
+    if(match){const txt=pill.textContent.replace(/\s*\(\d+\)\s*$/,'');pill.textContent=match.name||(txt);}
+  });
+  updateCatPillCounts();
+}
+
 function filterCat(cat,btn,evt){
   // Prevent double-fire from touch+click
   if(evt&&evt.type==='click'&&_filterCatLock){return;}
@@ -1731,6 +1810,12 @@ function filterCat(cat,btn,evt){
   const titles={all:'সকল',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
   const list=cat==='all'?PRODS:PRODS.filter(p=>p.cat===cat);
   document.getElementById('secTitle').innerHTML=`${titles[cat]||'প্রোডাক্ট'} <span>সমূহ</span>`;
+  // Update count to show filtered count, not total
+  const countEl=document.getElementById('prodCount');
+  if(countEl){
+    if(cat==='all') countEl.textContent=PRODS.length+'টি প্রোডাক্ট';
+    else countEl.textContent=list.length+'টি প্রোডাক্ট ('+((titles[cat]||cat))+')';
+  }
   renderProds(list);
   document.getElementById('prodSec').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -1790,13 +1875,13 @@ function showSearchDropdown(q, source) {
   // Highlight matching text
   function highlight(text, q) {
     const idx = text.toLowerCase().indexOf(q.toLowerCase());
-    if(idx === -1) return text.slice(0, 45) + (text.length > 45 ? '...' : '');
+    if(idx === -1) return escHtml(text.slice(0, 45) + (text.length > 45 ? '...' : ''));
     const before = text.slice(0, idx);
     const match = text.slice(idx, idx + q.length);
     const after = text.slice(idx + q.length);
     const truncBefore = before.length > 20 ? '...' + before.slice(-20) : before;
     const truncAfter = after.length > 25 ? after.slice(0, 25) + '...' : after;
-    return truncBefore + '<span class="search-highlight">' + match + '</span>' + truncAfter;
+    return escHtml(truncBefore) + '<span class="search-highlight">' + escHtml(match) + '</span>' + escHtml(truncAfter);
   }
 
   const catNames = {rgb:'RGB Lights',smartwatch:'Smartwatch',powerbank:'Power Bank',tws:'TWS',headphone:'Headphone',lamp:'Lamp',fan:'Fan'};
@@ -1812,7 +1897,7 @@ function showSearchDropdown(q, source) {
         <div class="sd-emoji">${(p.imgs||['📦'])[0]}</div>
         <div class="sd-info">
           <div class="sd-name">${highlight(p.name, q)}</div>
-          <div class="sd-meta">${catNames[p.cat]||p.cat}${p.stock<=0?' · <span style="color:var(--red)">স্টক শেষ</span>':''}</div>
+          <div class="sd-meta">${escHtml(catNames[p.cat]||p.cat)}${p.stock<=0?' · <span style="color:var(--red)">স্টক শেষ</span>':''}</div>
         </div>
         <div>
           <div class="sd-price">৳${p.price.toLocaleString()}</div>
@@ -1822,7 +1907,7 @@ function showSearchDropdown(q, source) {
     `).join('')}
     <div class="sd-footer">
       <button class="sd-view-all-btn" onclick="viewAllSearch('${q.replace(/'/g,"\'")}')">
-        🔍 "${q}" এর সব ফলাফল দেখুন
+        🔍 "${escHtml(q)}" এর সব ফলাফল দেখুন
       </button>
     </div>`;
   dd.classList.add('show');
@@ -1856,15 +1941,43 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function filterProducts(q){
+async function filterProducts(q){
   const l=q.toLowerCase().trim();
   if(!l){renderProds(PRODS);return;}
-  // Split query into words — match if ALL words found anywhere in name or desc
   const words=l.split(/\s+/).filter(Boolean);
-  renderProds(PRODS.filter(p=>{
-    const hay=(p.name+' '+(p.desc||'')+' '+(p.cat||'')).toLowerCase();
+  // Search in-memory PRODS first (instant)
+  const localResults=PRODS.filter(p=>{
+    const hay=(p.name+' '+(p.nameBn||'')+' '+(p.desc||'')+' '+(p.cat||'')).toLowerCase();
     return words.every(w=>hay.includes(w));
-  }));
+  });
+  renderProds(localResults);
+  // Also search Supabase custom_products (async)
+  try{
+    const searchTerm=words.join(' & ');
+    const{data,error}=await supabaseClient
+      .from('custom_products')
+      .select('*')
+      .or(words.map(w=>`name.ilike.%${w}%`).join(','))
+      .limit(20);
+    if(!error&&data&&data.length){
+      // Convert Supabase rows to PRODS format
+      const sbProds=data.map(row=>({
+        id:'sb_'+row.id,cat:row.category||row.cat||'all',
+        name:row.name||'',nameBn:row.name_bn||row.name||'',
+        price:row.price||0,old:row.original_price||row.old||row.price||0,
+        stock:row.stock??20,rating:row.rating||4.5,
+        imgs:Array.isArray(row.images)?row.images:(row.imgs||['📦']),
+        warranty:row.warranty||'৭ দিন',badge:row.badge||'',
+        desc:row.description||row.desc||''
+      }));
+      // Merge — avoid duplicates already in PRODS
+      const existingIds=new Set(PRODS.map(p=>p.id));
+      const newSbProds=sbProds.filter(p=>!existingIds.has(p.id));
+      if(newSbProds.length){
+        renderProds([...localResults,...newSbProds]);
+      }
+    }
+  }catch(e){/* Supabase unavailable — local results shown */}
 }
 
 // PRODUCT FULL PAGE
@@ -1928,14 +2041,14 @@ function openPP(id){
         if(boldMatch){
           const [,pre,title,rest]=boldMatch;
           const emoji=pre.trim()||'✅';
-          return`<div class="pp-feature-item"><div class="pp-feature-icon">${emoji}</div><div class="pp-feature-text"><strong>${title}</strong>${rest}</div></div>`;
+          return`<div class="pp-feature-item"><div class="pp-feature-icon">${escHtml(emoji)}</div><div class="pp-feature-text"><strong>${escHtml(title)}</strong>${escHtml(rest)}</div></div>`;
         }
         // Check for emoji at start
         const emojiMatch=f.match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})\s*(.*)/u);
         if(emojiMatch){
-          return`<div class="pp-feature-item"><div class="pp-feature-icon">${emojiMatch[1]}</div><div class="pp-feature-text">${emojiMatch[2]}</div></div>`;
+          return`<div class="pp-feature-item"><div class="pp-feature-icon">${escHtml(emojiMatch[1])}</div><div class="pp-feature-text">${escHtml(emojiMatch[2])}</div></div>`;
         }
-        return`<div class="pp-feature-item"><div class="pp-feature-icon">✅</div><div class="pp-feature-text">${f}</div></div>`;
+        return`<div class="pp-feature-item"><div class="pp-feature-icon">✅</div><div class="pp-feature-text">${escHtml(f)}</div></div>`;
       }).join('');
     } else {
       featEl.innerHTML='<div style="color:var(--gray);font-size:13px">ফিচারস শীঘ্রই যোগ করা হবে।</div>';
@@ -1946,7 +2059,7 @@ function openPP(id){
   const techBody=document.getElementById('ppTechBody');
   if(techBody){
     const specs=curProd.specs||{};
-    techBody.innerHTML=Object.entries(specs).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+    techBody.innerHTML=Object.entries(specs).map(([k,v])=>`<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`).join('');
     if(!Object.keys(specs).length) techBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:var(--gray);padding:16px">স্পেসিফিকেশন শীঘ্রই যোগ করা হবে।</td></tr>';
   }
 
@@ -1957,9 +2070,9 @@ function openPP(id){
     if(faqs.length){
       faqListEl.innerHTML=faqs.map((f,i)=>`<div class="pp-faq-item" id="ppfaq${i}">
         <div class="pp-faq-q" onclick="togglePpFaq(${i})">
-          <span>${f.q}</span><span class="faq-icon">+</span>
+          <span>${escHtml(f.q)}</span><span class="faq-icon">+</span>
         </div>
-        <div class="pp-faq-a">${f.a}</div>
+        <div class="pp-faq-a">${escHtml(f.a)}</div>
       </div>`).join('');
     } else {
       faqListEl.innerHTML='<div style="color:var(--gray);font-size:13px">FAQ শীঘ্রই যোগ করা হবে।</div>';
@@ -2204,7 +2317,7 @@ function showQuickOrderModal(){
     </div>
     <div id="qoList" style="overflow-y:auto;flex:1;padding:0 18px">${itemsHTML}</div>
     <div style="padding:14px 18px 20px;border-top:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px"><span>মোট:</span><span id="qoTotal" style="color:var(--dark)">৳${tot.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px"><span class=\"bn\">মোট:</span><span id="qoTotal" style="color:var(--dark)">৳${tot.toLocaleString()}</span></div>
       <button onclick="qoCheckout()" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr)" onmouseover="this.style.background='#E63946'" onmouseout="this.style.background='var(--dark)'">⚡ অর্ডার নিশ্চিত করুন</button>
       <button onclick="document.getElementById('quickOrderModal').remove()" style="width:100%;background:none;border:1.5px solid var(--border);border-radius:12px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">কেনাকাটা চালিয়ে যান</button>
     </div>
@@ -2308,9 +2421,9 @@ function renderCartItems(){
   if(!cart.length){body.innerHTML='<div class="cart-empty"><div style="font-size:44px;margin-bottom:10px">🛒</div><p style="margin-bottom:16px">আপনার কার্ট খালি</p><button onclick="closeCart();document.getElementById(\'prodSec\').scrollIntoView({behavior:\'smooth\'})" style="background:var(--dark);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">প্রোডাক্ট দেখুন →</button></div>';foot.style.display='none';return;}
   foot.style.display='block';let tot=0;
   body.innerHTML=cart.map(item=>{tot+=item.price*item.qty;return`<div class="cart-item">
-    <div class="ci-img">${item.emoji}</div>
+    <div class="ci-img">${escHtml(item.emoji)}</div>
     <div class="ci-info">
-      <div class="ci-name">${item.name}</div>
+      <div class="ci-name">${escHtml(item.name)}</div>
       <div class="ci-price">৳${(item.price*item.qty).toLocaleString()}</div>
       <div class="ci-qty-row">
         <button class="ci-q-btn" onclick="updQty(${item.id},-1)">−</button>
@@ -2355,7 +2468,7 @@ function openOrder(warn){
   if(summaryEl&&listEl&&totalEl&&orderItems.length>0){
     summaryEl.style.display='block';
     summaryEl.dataset.hasItems='1';
-    listEl.innerHTML=orderItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12.5px"><span>${i.emoji||''} ${i.name.length>30?i.name.slice(0,30)+'...':i.name} × ${i.qty}</span><span style="font-weight:600">৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+    listEl.innerHTML=orderItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12.5px"><span>${escHtml(i.emoji||'')} ${escHtml(i.name.length>30?i.name.slice(0,30)+'...':i.name)} × ${i.qty}</span><span style="font-weight:600">৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
     const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
     totalEl.innerHTML=`<span>Subtotal</span><span style="color:var(--red)">৳${sub.toLocaleString()}</span>`;
   } else if(summaryEl){
@@ -2456,7 +2569,7 @@ function goS3(){
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
   const tot=sub+sc;
-  document.getElementById('sumItems').innerHTML=orderItems.map(i=>`<div class="sum-row"><span>${i.emoji||''} ${i.name.length>28?i.name.slice(0,28)+'...':i.name} × ${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+  document.getElementById('sumItems').innerHTML=orderItems.map(i=>`<div class="sum-row"><span>${escHtml(i.emoji||'')} ${escHtml(i.name.length>28?i.name.slice(0,28)+'...':i.name)} × ${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
   document.getElementById('sumSub').textContent=`৳${sub.toLocaleString()}`;
   document.getElementById('sumShip').textContent=`৳${sc}`;
   document.getElementById('sumTotal').textContent=`৳${tot.toLocaleString()}`;
@@ -2704,9 +2817,11 @@ function genInvoice(o){
   • Keep box & documents for products with 6-month warranty<br>
   • For issues, WhatsApp: 01816-365504</div>`;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice ${o.orderNum}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6fa;min-height:100vh;padding:30px 12px;}
+    body{font-family:'Inter','Segoe UI',Arial,sans-serif;background:#f4f6fa;min-height:100vh;padding:30px 12px;}
+    .bn{font-family:'Hind Siliguri','Inter',Arial,sans-serif;}
     .invoice-wrap{max-width:620px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.10);overflow:hidden;position:relative;}
     /* Top nav bar inside invoice page */
     .inv-topbar{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 20px;}
@@ -2819,21 +2934,51 @@ function closeTrackOrder(){
   document.body.style.overflow='';
 }
 
-function doTrackOrder(){
+async function doTrackOrder(){
   const q=(document.getElementById('trackInput').value||'').trim().toLowerCase();
   if(!q){document.getElementById('trackResult').innerHTML='<p style="color:var(--red);font-size:13px">অর্ডার নম্বর বা ফোন নম্বর লিখুন।</p>';return;}
+  document.getElementById('trackResult').innerHTML='<p style="color:var(--gray);font-size:13px;text-align:center">🔍 খোঁজা হচ্ছে...</p>';
 
-  const allOrders=[
+  // Search localStorage first
+  const localOrders=[
     ...JSON.parse(localStorage.getItem('vc_orders')||'[]'),
     ...JSON.parse(localStorage.getItem('vc_guest_orders')||'[]')
   ];
-
-  const found=allOrders.filter(o=>{
+  const qPhone=q.replace(/\D/g,'');
+  const localFound=localOrders.filter(o=>{
     const num=(o.orderNum||'').toLowerCase();
     const phone=(o.customer?.phone||'').replace(/\D/g,'');
-    const qPhone=q.replace(/\D/g,'');
-    return num.includes(q) || (qPhone.length>=5 && phone.includes(qPhone));
+    return num.includes(q)||(qPhone.length>=5&&phone.includes(qPhone));
   });
+
+  // Also search Supabase
+  let sbFound=[];
+  try{
+    let qb=supabaseClient.from('orders').select('*');
+    if(q.startsWith('#')||q.startsWith('vc')||q.includes('-')){
+      qb=qb.ilike('order_num','%'+q.toUpperCase().replace('#','')+'%');
+    } else if(qPhone.length>=10){
+      qb=qb.eq('customer_phone',qPhone);
+    } else {
+      qb=qb.or(`order_num.ilike.%${q}%,customer_phone.ilike.%${qPhone}%`);
+    }
+    const{data,error}=await qb.limit(10);
+    if(!error&&data){
+      sbFound=data.map(row=>({
+        id:row.id,
+        orderNum:row.order_num||row.orderNum||'',
+        date:row.created_at||row.date,
+        status:row.status||'pending',
+        total:row.total_amount||row.total||0,
+        items:row.items||[],
+        customer:{name:row.customer_name||'',phone:row.customer_phone||'',district:row.customer_district||'',address:row.customer_address||''}
+      }));
+    }
+  }catch(e){console.log('Supabase track search skipped:',e.message);}
+
+  // Merge — Supabase takes priority over localStorage
+  const sbIds=new Set(sbFound.map(o=>o.orderNum));
+  const found=[...sbFound,...localFound.filter(o=>!sbIds.has(o.orderNum))];
 
   if(!found.length){
     document.getElementById('trackResult').innerHTML=`<div style="text-align:center;padding:20px 0;color:var(--gray);font-size:13px">😔 কোনো অর্ডার পাওয়া যায়নি।<br><small>অর্ডার নম্বর বা রেজিস্টার্ড ফোন নম্বর দিয়ে খুঁজুন।</small></div>`;
@@ -3039,9 +3184,38 @@ function toggleWishFromPP(){
   renderProds(PRODS);
 }
 
+// ✅ Fix #15: WISHLIST — Supabase sync (login থাকলে cross-device, না থাকলে localStorage)
+async function syncWishlistFromSupabase(){
+  if(!currentUser)return;
+  try{
+    const {data}=await supabaseClient
+      .from('wishlists')
+      .select('items')
+      .eq('user_id',currentUser.id)
+      .single();
+    if(data&&data.items){
+      localStorage.setItem('vc_wish',JSON.stringify(data.items));
+      updateWishDot();
+    }
+  }catch(e){}
+}
+
+async function saveWishlistToSupabase(items){
+  if(!currentUser)return;
+  try{
+    await supabaseClient
+      .from('wishlists')
+      .upsert({user_id:currentUser.id,items:items},{onConflict:'user_id'});
+  }catch(e){console.warn('Wishlist Supabase sync failed:',e);}
+}
+
 // WISHLIST
 function getWishlist(){return JSON.parse(localStorage.getItem('vc_wish')||'[]');}
-function saveWishlist(w){localStorage.setItem('vc_wish',JSON.stringify(w));}
+function saveWishlist(w){
+  localStorage.setItem('vc_wish',JSON.stringify(w));
+  // ✅ Login থাকলে Supabase তেও save করো (cross-device sync)
+  if(currentUser)saveWishlistToSupabase(w);
+}
 function isWishlisted(id){return getWishlist().some(x=>x.id===id);}
 function toggleWish(id,btn){
   let w=getWishlist();
@@ -3088,9 +3262,9 @@ function renderWishlist(){
   const body=document.getElementById('wishlistBody');
   if(!w.length){body.innerHTML='<div class="wl-empty"><div style="font-size:44px;margin-bottom:10px">🤍</div><p>আপনার Wishlist খালি</p></div>';return;}
   body.innerHTML=w.map(item=>`<div class="wl-item" id="wli_${item.id}">
-    <div class="wl-img" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer">${item.emoji}</div>
+    <div class="wl-img" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer">${escHtml(item.emoji)}</div>
     <div class="wl-info" style="flex:1;min-width:0">
-      <div class="wl-name" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;text-decoration:none" title="প্রোডাক্ট দেখুন">${item.name}</div>
+      <div class="wl-name" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;text-decoration:none" title="প্রোডাক্ট দেখুন">${escHtml(item.name)}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
         <div class="wl-price">৳${item.price.toLocaleString()}</div>
         <button onclick="removeFromWishlistInModal(${item.id})" title="Wishlist থেকে সরান" style="background:none;border:none;cursor:pointer;color:#9CA3AF;padding:2px;display:flex;align-items:center;border-radius:5px;transition:color .18s,background .18s" onmouseover="this.style.color='#E63946';this.style.background='#FEF2F2'" onmouseout="this.style.color='#9CA3AF';this.style.background='none'">
@@ -3146,7 +3320,7 @@ function renderRelated(prod){
         <div class="prod-img">${p.imgs[0]}</div>
       </div>
       <div class="prod-info" style="flex:1;display:flex;flex-direction:column;">
-        <div class="prod-name" style="flex:1">${p.name}</div>
+        <div class="prod-name" style="flex:1">${escHtml(p.name)}</div>
         <div class="prod-price-row"><span class="prod-price">৳${p.price.toLocaleString()}</span><span class="prod-old">৳${p.old.toLocaleString()}</span></div>
         <div class="prod-cta-row">
           <button class="prod-cta" onclick="event.stopPropagation();quickOrder(${p.id})" ${sold?'disabled':''}>${sold?'স্টক শেষ':'⚡ অর্ডার করুন'}</button>
@@ -3237,7 +3411,7 @@ function loadCustomCategories(){
     // Add to grid
     const card=document.createElement('div');
     card.className='cat-card';
-    card.innerHTML=`<div class="cat-card-icon">${cat.icon||'📦'}</div><div class="cat-card-name">${cat.name}</div>`;
+    card.innerHTML=`<div class="cat-card-icon">${escHtml(cat.icon||'📦')}</div><div class="cat-card-name">${escHtml(cat.name)}</div>`;
     card.onclick=()=>filterCat(cat.id,null);
     grid.appendChild(card);
     // Add to cat-bar if not exists

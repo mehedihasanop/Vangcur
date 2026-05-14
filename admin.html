@@ -17,7 +17,7 @@
   const SUPABASE_URL = "https://gzdujkwjplobonvghyhx.supabase.co";
 
   // 👇 আপনার Supabase Public Key
-  const SUPABASE_PUBLIC_KEY = "sb_publishable_KF1pFUO6N77m216FxBeyTA_vJQ4Rzok";
+  const SUPABASE_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6ZHVqa3dqcGxvYm9udmdoeWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzQzODUsImV4cCI6MjA5NDE1MDM4NX0.evLb7_gv5vtFrpsyCeX3h6mLxqCuOXQuY-w9ygvDqak";
 
   // Supabase Client তৈরি করা হচ্ছে
   const { createClient } = supabase;
@@ -845,6 +845,13 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
         <div class="fg"><label>নতুন পাসওয়ার্ড</label><input class="finp" type="password" id="nPw" placeholder="কমপক্ষে ৬ অক্ষর"></div>
         <div class="fg"><label>নিশ্চিত করুন</label><input class="finp" type="password" id="cPw" placeholder="পুনরায় দিন"></div>
       </div>
+      <div class="card-head" style="margin-top:20px"><span class="card-title">🔔 Browser Notification</span></div>
+      <p style="font-size:12.5px;color:var(--gray);margin-bottom:10px">নতুন অর্ডার এলে browser notification ও sound alert পেতে চালু করুন।</p>
+      <button id="notifPermBtn" class="btn btn-dark" onclick="enableNotification()" style="margin-bottom:6px">🔔 Notification চালু করুন</button>
+      <br>
+      <button class="btn btn-outline btn-sm" onclick="playOrderSound();showAdminToast('🔊 Sound test করা হলো!')">🔊 Sound Test</button>
+      <button class="btn btn-dark btn-sm" style="margin-left:8px" onclick="alertNewOrder('ORD-TEST001')">🔔 Notification Test</button>
+      <br><br>
       <button class="btn btn-dark" onclick="saveSettings()">💾 সেটিংস সেভ করুন</button>
     </div>
   </div>
@@ -1038,6 +1045,8 @@ async function doLogin(){
     document.getElementById('sidebar').classList.add('show');
     document.getElementById('mainArea').classList.add('show');
     if(window.innerWidth<=768){document.getElementById('mobTopbar').style.display='flex';}
+    requestNotifPermission();
+    updateNotifBtn();
     initDash();
   }
 }
@@ -1048,6 +1057,7 @@ if(sessionStorage.getItem('vc_admin_session')==='1'){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('mainArea').classList.add('show');
   if(window.innerWidth<=768)document.getElementById('mobTopbar').style.display='flex';
+  updateNotifBtn();
   initDash();
 }
 
@@ -1145,7 +1155,7 @@ async function initDash(){
   document.getElementById('recentOrd').innerHTML=rec.length?rec.map(o=>`<tr>
     <td><strong>${escHtml(o.orderNum)}</strong></td><td>${escHtml(o.customer?.name||'-')}</td>
     <td>৳${(o.total||0).toLocaleString()}</td><td>${sPill(o.status)}</td>
-    <td><button class="btn btn-outline btn-xs" onclick="viewOrder('${o.id}')">দেখুন</button></td>
+    <td><button class="btn btn-outline btn-xs" onclick="viewOrder('${escHtml(o.id)}')">দেখুন</button></td>
   </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:18px">কোনো অর্ডার নেই</td></tr>';
 }
 
@@ -1169,14 +1179,14 @@ function renderOrders(){
     return mq&&(f==='all'||o.status===f);
   }).reverse();
   document.getElementById('ordTbl').innerHTML=list.length?list.map(o=>`<tr>
-    <td><input type="checkbox" class="ord-chk" data-id="${o.id}" onchange="updateBulkCount()"></td>
-    <td><strong>${o.orderNum}</strong></td>
+    <td><input type="checkbox" class="ord-chk" data-id="${escHtml(o.id)}" onchange="updateBulkCount()"></td>
+    <td><strong>${escHtml(o.orderNum)}</strong></td>
     <td style="font-size:11px;color:var(--gray);white-space:nowrap">${new Date(o.date||Date.now()).toLocaleDateString('bn-BD')}</td>
-    <td>${o.customer?.name||'-'}</td>
-    <td>${o.customer?.phone||'-'} <button class="copy-btn" onclick="copyTxt('${o.customer?.phone||''}')">Copy</button></td>
+    <td>${escHtml(o.customer?.name||'-')}</td>
+    <td>${escHtml(o.customer?.phone||'-')} <button class="copy-btn" onclick="copyTxt('${escHtml(o.customer?.phone||'')}')">Copy</button></td>
     <td>৳${(o.total||0).toLocaleString()}</td>
     <td>${sPill(o.status||'pending')}</td>
-    <td><button class="btn btn-outline btn-xs" onclick="viewOrder('${o.id}')">বিস্তারিত</button></td>
+    <td><button class="btn btn-outline btn-xs" onclick="viewOrder('${escHtml(o.id)}')">বিস্তারিত</button></td>
   </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো অর্ডার নেই</td></tr>';
   updateBulkCount();
 }
@@ -1273,8 +1283,8 @@ function renderProdTbl(scrollToLast=false){
       `<span class="pill p-delivered">${stock} পিস</span>`;
     return`<tr ${stock===0?'style="opacity:.65"':''}>
       <td style="font-size:22px">${(p.imgs||['📦'])[0]}</td>
-      <td style="max-width:200px"><div style="font-size:12px;font-weight:600;line-height:1.4">${p.name}</div>${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${p.badge}</span>`:''}</td>
-      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${catNames[p.cat]||p.cat}</span></td>
+      <td style="max-width:200px"><div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}</div>${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>`:''}</td>
+      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat]||p.cat)}</span></td>
       <td>৳${p.price?.toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${p.old?.toLocaleString()}</span></td>
       <td>${stockPill}</td>
       <td>${p.rating||4.5}⭐</td>
@@ -1312,7 +1322,7 @@ function renderDefaultProdTbl(){
   if(statsEl){
     const catCounts={};
     DEFAULT_PRODS.forEach(p=>{catCounts[p.cat]=(catCounts[p.cat]||0)+1;});
-    statsEl.innerHTML=Object.entries(catCounts).map(([c,n])=>`<span class="pill" style="background:#E0E7FF;color:#3730A3;padding:4px 10px">${catNames[c]||c}: ${n}টি</span>`).join('');
+    statsEl.innerHTML=Object.entries(catCounts).map(([c,n])=>`<span class="pill" style="background:#E0E7FF;color:#3730A3;padding:4px 10px">${escHtml(catNames[c]||c)}: ${n}টি</span>`).join('');
   }
 
   document.getElementById('defaultPTbl').innerHTML=list.length?list.map(p=>{
@@ -1324,15 +1334,15 @@ function renderDefaultProdTbl(){
     return`<tr>
       <td style="font-size:22px">${(p.imgs||['📦'])[0]}</td>
       <td style="max-width:220px">
-        <div style="font-size:12px;font-weight:600;line-height:1.4">${p.name}</div>
+        <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}</div>
         <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">
-          ${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E">${p.badge}</span>`:''}
+          ${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E">${escHtml(p.badge)}</span>`:''}
           ${p.desc?'<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">📝 Desc</span>':'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No Desc</span>'}
           ${p.features>0?`<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">⭐ ${p.features} Features</span>`:'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No Features</span>'}
           ${p.faqs>0?`<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">❓ ${p.faqs} FAQs</span>`:'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No FAQs</span>'}
         </div>
       </td>
-      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${catNames[p.cat]||p.cat}</span></td>
+      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat]||p.cat)}</span></td>
       <td>৳${p.price?.toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${p.old?.toLocaleString()}</span></td>
       <td>${stockPill}</td>
       <td>${p.rating||4.5}⭐</td>
@@ -1387,10 +1397,60 @@ function editProd(id){
 
 function addImgRow(v=''){
   const d=document.createElement('div');d.className='img-row';
-  d.innerHTML=`<div class="img-prev img-prev-icon">${v||'📦'}</div>
-    <input placeholder="Emoji (💡) বা ছবির URL" value="${v}" oninput="this.previousElementSibling.textContent=this.value||'📦'">
+  const isUrl=v&&(v.startsWith('http')||v.startsWith('data:'));
+  const preview=isUrl?`<img src="${v}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`:
+    `<div class="img-prev img-prev-icon">${v||'📦'}</div>`;
+  d.innerHTML=`${preview}
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+      <input placeholder="Emoji (💡) বা ছবির URL পেস্ট করুন" value="${v}" class="img-url-input"
+        oninput="updateImgPreview(this)">
+      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600">
+        <input type="file" accept="image/*" style="display:none" onchange="uploadProdImage(this)">
+        📤 ছবি আপলোড করুন (Supabase)
+      </label>
+    </div>
     <button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>`;
   document.getElementById('imgMgr').appendChild(d);
+}
+
+function updateImgPreview(inp){
+  const v=inp.value.trim();
+  const prev=inp.closest('.img-row').firstElementChild;
+  if(v.startsWith('http')||v.startsWith('data:')){
+    prev.outerHTML=`<img src="${v}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`;
+  } else {
+    prev.textContent=v||'📦';
+  }
+}
+
+async function uploadProdImage(fileInput){
+  const file=fileInput.files[0];
+  if(!file)return;
+  const row=fileInput.closest('.img-row');
+  const urlInput=row.querySelector('.img-url-input');
+  const label=fileInput.parentElement;
+  label.textContent='⏳ আপলোড হচ্ছে...';
+  try{
+    const ext=file.name.split('.').pop();
+    const path=`products/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const{data,error}=await supabaseClient.storage
+      .from('product-images')
+      .upload(path,file,{cacheControl:'3600',upsert:false});
+    if(error)throw error;
+    const{data:{publicUrl}}=supabaseClient.storage
+      .from('product-images')
+      .getPublicUrl(path);
+    urlInput.value=publicUrl;
+    updateImgPreview(urlInput);
+    label.innerHTML='✅ আপলোড সফল!';
+    label.style.color='var(--success)';
+    showAdminToast('✅ ছবি আপলোড হয়েছে!');
+  }catch(e){
+    label.innerHTML='❌ আপলোড ব্যর্থ — URL ব্যবহার করুন';
+    label.style.color='var(--red)';
+    showAdminToast('❌ আপলোড ব্যর্থ: '+e.message);
+    console.error('Image upload error:',e);
+  }
 }
 
 function addSpecRow(k='',v=''){
@@ -1504,7 +1564,7 @@ function renderCustomers(){
   document.getElementById('custTbl').innerHTML=users.length?users.map(u=>{
     const mo=orders.filter(o=>o.userId===u.id||o.custEmail===u.email);
     const spent=mo.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
-    return`<tr><td>${u.name||'-'}</td><td>${u.email||'-'}</td>
+    return`<tr><td>${escHtml(u.name||'-')}</td><td>${escHtml(u.email||'-')}</td>
       <td style="font-size:11px;color:var(--gray)">${new Date(u.createdAt||Date.now()).toLocaleDateString('bn-BD')}</td>
       <td><span class="pill p-confirmed">${mo.length}টি</span></td>
       <td>৳${spent.toLocaleString()}</td></tr>`;
@@ -1535,8 +1595,8 @@ function renderHeroSlides(){
   list.innerHTML=heroSlides.length?heroSlides.map((s,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px">
     <div style="width:36px;height:36px;background:#1A1A1A;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">${i+1}</div>
     <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title||'(শিরোনাম নেই)'}</div>
-      <div style="font-size:11px;color:var(--gray)">${s.tag||''} ${s.img?'🖼️ ছবি আছে':''}</div>
+      <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(s.title||'(শিরোনাম নেই)')}</div>
+      <div style="font-size:11px;color:var(--gray)">${escHtml(s.tag||'')} ${s.img?'🖼️ ছবি আছে':''}</div>
     </div>
     <button class="btn btn-outline btn-xs" onclick="editSlide(${i})" style="flex-shrink:0">✏️ এডিট</button>
     <button class="btn btn-red btn-xs" onclick="askDelSlide(${i})" style="flex-shrink:0">🗑️</button>
@@ -1632,12 +1692,12 @@ function renderCategoryList(){
     const prodCount=getCatProdCount(c.id);
     return`<div style="background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:2px">
     <div style="display:flex;align-items:center;gap:12px;padding:12px">
-      <span style="font-size:22px;min-width:32px;text-align:center">${c.icon}</span>
+      <span style="font-size:22px;min-width:32px;text-align:center">${escHtml(c.icon)}</span>
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:700">${c.name}</div>
-        <div style="font-size:11px;color:var(--gray)">ID: ${c.id}${c.locked?' · Built-in':''} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
+        <div style="font-size:13px;font-weight:700">${escHtml(c.name)}</div>
+        <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)}${c.locked?' · Built-in':''} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
       </div>
-      <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${c.id}','${c.name}')">+ প্রোডাক্ট</button>
+      <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${escHtml(c.id)}','${escHtml(c.name)}')">+ প্রোডাক্ট</button>
       ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️</button>
       <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:
       '<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
@@ -1746,8 +1806,8 @@ function renderFAQSettings(){
   document.getElementById('faqList').innerHTML=adminFAQs.map((f,i)=>`<div style="border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:10px">
     <div style="display:flex;gap:10px;align-items:flex-start">
       <div style="flex:1">
-        <input class="finp" value="${f.q.replace(/"/g,'&quot;')}" oninput="adminFAQs[${i}].q=this.value" style="margin-bottom:7px" placeholder="প্রশ্ন">
-        <textarea class="finp" rows="2" oninput="adminFAQs[${i}].a=this.value" placeholder="উত্তর">${f.a}</textarea>
+        <input class="finp" value="${escHtml(f.q)}" oninput="adminFAQs[${i}].q=this.value" style="margin-bottom:7px" placeholder="প্রশ্ন">
+        <textarea class="finp" rows="2" oninput="adminFAQs[${i}].a=this.value" placeholder="উত্তর">${escHtml(f.a)}</textarea>
       </div>
       <button class="btn btn-red btn-xs" onclick="adminFAQs.splice(${i},1);saveFAQs();renderFAQSettings()">🗑️</button>
     </div>
@@ -2031,81 +2091,137 @@ function switchProdTab(tab,btn){
 // ======= AI PARSER - END =======
 
 // Auto refresh pending badge
-setInterval(()=>{if(document.getElementById('sidebar').classList.contains('show')){const p=getOrders().filter(o=>o.status==='pending').length;const pb=document.getElementById('pendBadge');pb.style.display=p>0?'inline':'none';pb.textContent=p;}},5000);
+// ============================================================
+// REAL-TIME ORDER SYNC + BROWSER NOTIFICATION + SOUND
+// ============================================================
 
-// ============ REAL-TIME ORDER SYNC ============
-// Admin toast notification
-function showToast(msg, dur=3500){
-  let t=document.getElementById('adminToast');
-  if(!t){
-    t=document.createElement('div');
-    t.id='adminToast';
-    t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .3s;font-family:DM Sans,sans-serif;display:flex;align-items:center;gap:8px';
-    document.body.appendChild(t);
-  }
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',dur);
+// --- Sound Alert (Web Audio API — no file needed) ---
+function playOrderSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // 3-beep notification sound
+    [0,0.25,0.5].forEach(t=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.frequency.value=880;
+      osc.type='sine';
+      gain.gain.setValueAtTime(0,ctx.currentTime+t);
+      gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+t+0.02);
+      gain.gain.linearRampToValueAtTime(0,ctx.currentTime+t+0.18);
+      osc.start(ctx.currentTime+t);
+      osc.stop(ctx.currentTime+t+0.2);
+    });
+  }catch(e){}
 }
-window.addEventListener('storage', function(e){
-  if(e.key === 'vc_orders' || e.key === 'vc_last_order_time'){
-    const isLoggedIn = document.getElementById('sidebar').classList.contains('show');
-    if(!isLoggedIn) return;
 
-    // Refresh current visible page
-    const activePage = document.querySelector('.page.show');
-    if(activePage){
-      const pid = activePage.id;
-      if(pid === 'page-orders') renderOrders();
-      if(pid === 'page-dashboard') initDash();
-    }
-
-    // Update pending badge
-    const p = getOrders().filter(o=>o.status==='pending').length;
-    const pb = document.getElementById('pendBadge');
-    if(pb){pb.style.display=p>0?'inline':'none'; pb.textContent=p;}
-
-    // Show toast notification for new order
-    if(e.key === 'vc_last_order_time'){
-      showToast('🔔 নতুন অর্ডার এসেছে!');
-    }
+// --- Browser Push Notification ---
+function sendBrowserNotification(title, body){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted'){
+    const n=new Notification(title,{
+      body: body,
+      icon: '🛒',
+      badge: '🔔',
+      tag: 'new-order',
+      renotify: true,
+      requireInteraction: true
+    });
+    n.onclick=()=>{window.focus();showPage('orders',null);n.close();};
+    setTimeout(()=>n.close(), 10000);
   }
+}
+
+// --- Request notification permission (call on login) ---
+function requestNotifPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+// --- Notification permission status UI ---
+function updateNotifBtn(){
+  const btn=document.getElementById('notifPermBtn');
+  if(!btn) return;
+  if(!('Notification' in window)){btn.textContent='❌ এই Browser সাপোর্ট করে না';btn.disabled=true;return;}
+  const p=Notification.permission;
+  if(p==='granted'){btn.textContent='✅ Notification চালু আছে';btn.style.background='#10B981';btn.disabled=false;}
+  else if(p==='denied'){btn.textContent='🚫 Notification বন্ধ — Browser Settings থেকে চালু করুন';btn.style.background='#EF4444';btn.disabled=true;}
+  else{btn.textContent='🔔 Notification চালু করুন';btn.style.background='#F59E0B';btn.disabled=false;}
+}
+function enableNotification(){
+  if(!('Notification' in window)) return;
+  Notification.requestPermission().then(()=>updateNotifBtn());
+}
+
+// --- Main new-order alert function ---
+function alertNewOrder(orderNum){
+  playOrderSound();
+  sendBrowserNotification('🛒 নতুন অর্ডার!', `অর্ডার নং: ${orderNum||'নতুন'} — এখনই দেখুন`);
+  showAdminToast('🔔 নতুন অর্ডার এসেছে! ' + (orderNum||''));
+}
+
+// --- localStorage storage event (same device, different tab) ---
+window.addEventListener('storage', function(e){
+  if(e.key!=='vc_orders' && e.key!=='vc_last_order_time') return;
+  const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
+  if(!isLoggedIn) return;
+  const activePage=document.querySelector('.page.show');
+  if(activePage){
+    if(activePage.id==='page-orders') renderOrders();
+    if(activePage.id==='page-dashboard') initDash();
+  }
+  const p=getOrders().filter(o=>o.status==='pending').length;
+  const pb=document.getElementById('pendBadge');
+  if(pb){pb.style.display=p>0?'inline':'none';pb.textContent=p;}
+  if(e.key==='vc_last_order_time') alertNewOrder('');
 });
 
-// Supabase Realtime — নতুন order এলে admin panel auto-update
-let _lastOrderCount = getOrders().length;
+// --- Supabase Realtime (cross-device) ---
+let _lastOrderCount=getOrders().length;
 try{
   supabaseClient
     .channel('admin-orders-watch')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},async (payload)=>{
       const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-      if(!isLoggedIn)return;
-      // Reload orders from Supabase
+      if(!isLoggedIn) return;
       await loadAndRenderOrders();
       await initDash();
-      showAdminToast('🔔 নতুন অর্ডার এসেছে!');
+      alertNewOrder(payload.new?.order_num||payload.new?.id||'');
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},async ()=>{
       const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-      if(!isLoggedIn)return;
+      if(!isLoggedIn) return;
       await loadAndRenderOrders();
       await initDash();
     })
     .subscribe();
 }catch(e){console.warn('Admin realtime failed:',e);}
 
-// Fallback: poll every 10 seconds
+// --- Fallback polling every 10s (when Supabase realtime unavailable) ---
 setInterval(async ()=>{
   const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-  if(!isLoggedIn)return;
+  if(!isLoggedIn) return;
   const orders=await getOrdersAsync();
   const current=orders.length;
-  if(current!==_lastOrderCount){
+  if(current>_lastOrderCount){
+    const newOrder=orders[orders.length-1];
     _lastOrderCount=current;
     localStorage.setItem('vc_orders',JSON.stringify(orders));
     renderOrders();
     await initDash();
-    showAdminToast('🔔 নতুন অর্ডার এসেছে!');
+    alertNewOrder(newOrder?.orderNum||'');
+  } else if(current!==_lastOrderCount){
+    _lastOrderCount=current;
+    localStorage.setItem('vc_orders',JSON.stringify(orders));
+    renderOrders();
+    await initDash();
   }
+  // Pending badge update
+  const p=orders.filter(o=>o.status==='pending').length;
+  const pb=document.getElementById('pendBadge');
+  if(pb){pb.style.display=p>0?'inline':'none';pb.textContent=p;}
 },10000);
 
 // ESC close modals
