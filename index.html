@@ -1387,11 +1387,21 @@ function applyAdminSettings(){
       });
     }
   }
-  // FAQs from admin
-  const savedFAQs=JSON.parse(localStorage.getItem('vc_faqs')||'null');
-  if(savedFAQs&&savedFAQs.length){
-    FAQS.length=0;savedFAQs.forEach(f=>FAQS.push(f));
-  }
+  // FAQs — সবসময় default দিয়ে শুরু করো, admin এ valid FAQ থাকলে replace করো
+  FAQS.length=0;
+  DEFAULT_FAQS.forEach(f=>FAQS.push(f)); // প্রথমে default restore
+  try{
+    const rawFaqs=localStorage.getItem('vc_faqs');
+    if(rawFaqs){
+      const savedFAQs=JSON.parse(rawFaqs);
+      if(Array.isArray(savedFAQs) && savedFAQs.length>0 && savedFAQs[0].q && savedFAQs[0].a){
+        FAQS.length=0;
+        savedFAQs.forEach(f=>FAQS.push(f));
+      }
+    }
+  }catch(e){}
+  // faqGrid render হওয়ার পরে call হলে re-render করো
+  if(document.getElementById('faqGrid') && document.getElementById('faqGrid').innerHTML!=='')renderFAQ();
 }
 
 // HERO SLIDER — reads from admin's vc_hero_slides localStorage
@@ -1554,8 +1564,14 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           renderProds(cur);
         } else if(key==='vc_hero_slides'){
           initHeroSlider(); // hero slide বদলালে তাৎক্ষণিক update
-        } else if(key==='vc_logo'||key==='vc_brand'||key==='vc_faqs'||key==='vc_contact'){
-          applyAdminSettings(); // logo/brand/faqs বদলালে apply
+        } else if(key==='vc_logo'||key==='vc_brand'||key==='vc_contact'){
+          applyAdminSettings();
+        } else if(key==='vc_faqs'){
+          // FAQ আলাদাভাবে handle করো
+          if(Array.isArray(val)&&val.length){
+            FAQS.length=0;val.forEach(f=>FAQS.push(f));
+          }
+          if(document.getElementById('faqGrid'))renderFAQ();
         } else if(key==='vc_categories'){
           renderCatBar(); // category bar re-render
         } else if(key==='vc_shipping'){
@@ -3025,7 +3041,7 @@ function mergeGuestOrdersToUser(userEmail, userId){
 }
 
 // FAQ
-const FAQS=[
+const DEFAULT_FAQS=[
   {q:'কী কী পেমেন্ট পদ্ধতি গ্রহণযোগ্য?',a:'আমরা bKash এর মাধ্যমে ন্যূনতম ২০০ টাকা এডভান্স পেমেন্ট গ্রহণ করি (Send Money: 01816-365504)। বাকি টাকা ডেলিভারির সময় Cash on Delivery (COD) পরিশোধ করা যাবে।'},
   {q:'ডেলিভারি কতদিনে হবে এবং চার্জ কত?',a:'ঢাকা সিটি কর্পোরেশনের মধ্যে ১-৩ কার্যদিবস, চার্জ ৯০ টাকা। সারা বাংলাদেশে ২-৫ কার্যদিবস, চার্জ ১৩০ টাকা। Pathao Courier ব্যবহার করা হয়। অর্ডার কনফার্মের পর ২৪ ঘণ্টার মধ্যে কুরিয়ারে হস্তান্তর।'},
   {q:'প্রোডাক্টে কি ওয়ারেন্টি আছে?',a:'হ্যাঁ! সকল প্রোডাক্টে ন্যূনতম ১ সপ্তাহের রিপ্লেসমেন্ট ওয়ারেন্টি আছে। অনেক প্রোডাক্টে ৬ মাসের ওয়ারেন্টিও রয়েছে। ওয়ারেন্টি ক্লেইম করতে আনবক্সিং ভিডিও প্রমাণ বাধ্যতামূলক।'},
@@ -3035,6 +3051,8 @@ const FAQS=[
   {q:'প্রোডাক্ট কি অথেনটিক?',a:'হ্যাঁ! Vangcur সম্পূর্ণ অথেনটিক প্রোডাক্ট বিক্রি করে। GearUP সহ বিভিন্ন ব্র্যান্ডের গ্যাজেট সরবরাহ করা হয় এবং প্রতিটিতে ওয়ারেন্টি দেওয়া হয়।'},
   {q:'কাস্টমার সার্ভিস কখন পাওয়া যায়?',a:'WhatsApp (01816-365504) এ সকাল ৯টা থেকে রাত ১০টা পর্যন্ত। ইমেইল: vangcurbd@gmail.com'},
 ];
+// FAQS — admin override করতে পারে, না করলে default ব্যবহার হবে
+let FAQS=[...DEFAULT_FAQS];
 function renderFAQ(){
   document.getElementById('faqGrid').innerHTML=FAQS.map((f,i)=>`<div class="faq-item">
     <div class="faq-q" onclick="togFAQ(${i},this)"><span>${f.q}</span><span class="faq-arr" id="farr${i}">▼</span></div>
