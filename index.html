@@ -2301,7 +2301,7 @@ async function loginWithGoogle(){
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: 'https://vangcur.netlify.app'
       }
     });
     if(error){
