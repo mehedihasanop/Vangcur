@@ -3947,15 +3947,24 @@ function renderRelated(prod){
 // HERO CATH-CARD DATA LOADER — Admin থেকে customize করা ডেটা লোড করে
 function loadCathCardData(){
   const saved = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
-  if(!saved || !saved.length) return;
 
-  // Rebuild the entire duo track from saved card data
+  // ✅ Fix: localStorage-এ কম কার্ড থাকলেও সব HTML কার্ড দেখানো হবে
+  // HTML-এ ১৩টি কার্ড আছে — localStorage-এ যতটা থাকুক, বাকিগুলো নিজেই দেখাবে
   const track = document.getElementById('cathDuoTrack');
-  if(!track || track.dataset.infinite === '1') {
-    // Already cloned — update visible cards via DOM
-    _syncCathCardsToDOM(saved); return;
+  if(!track) return;
+
+  // সব HTML কার্ড visible করো (display:none সরাও)
+  const allCards = track.querySelectorAll('.cath-card');
+  allCards.forEach(card => { card.style.display = ''; });
+
+  // যদি saved data থাকে, শুধু সেটুকু আপডেট করো
+  if(saved && saved.length) {
+    if(track.dataset.infinite === '1') {
+      _syncCathCardsToDOM(saved); return;
+    }
+    _syncCathCardsToDOM(saved);
   }
-  _syncCathCardsToDOM(saved);
+  // saved না থাকলে HTML-এর default কার্ডই দেখাবে — কিছু করতে হবে না
 }
 
 function _syncCathCardsToDOM(cards){
@@ -3966,11 +3975,13 @@ function _syncCathCardsToDOM(cards){
   if(!track) return;
   const allCardEls = Array.from(track.querySelectorAll('.cath-card'));
   const isInfinite = track.dataset.infinite === '1';
-  const offset = isInfinite ? cards.length : 0; // head clone count = DUO_TOTAL
+  // ✅ Fix: offset সবসময় DUO_TOTAL (১৩) — cards.length নয়
+  // কারণ head clone count = HTML-এর মোট কার্ড সংখ্যা = DUO_TOTAL
+  const offset = isInfinite ? DUO_TOTAL : 0;
 
   cards.forEach((card, i) => {
     // Update real card (offset + i) and both clone copies
-    const indices = isInfinite ? [i, i + cards.length, i + cards.length * 2] : [i];
+    const indices = isInfinite ? [i + offset, i + DUO_TOTAL + offset, i + DUO_TOTAL * 2] : [i];
     indices.forEach(domIdx => {
       const el = allCardEls[domIdx];
       if(!el) return;
