@@ -2317,44 +2317,45 @@ async function loginWithGoogle(){
 }
 
 // ============================================================
-//  OAuth Callback — Google redirect-এর পরে session check করে user সেট করে
+//  OAuth Callback — onAuthStateChange দিয়ে Google session ধরা হচ্ছে
+//  (getSession() দিয়ে redirect-এর পরে session miss হতো, তাই fix করা হয়েছে)
 // ============================================================
-(async function handleOAuthCallback(){
-  const { data: { session }, error } = await supabaseClient.auth.getSession();
-  if(error || !session) return;
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+    const u = session.user;
 
-  const u = session.user;
-  // Google থেকে আসা user data
-  const safeUser = {
-    id: u.id,
-    email: u.email,
-    name: u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0],
-    phone: u.user_metadata?.phone || '',
-    avatar: u.user_metadata?.avatar_url || '',
-    provider: u.app_metadata?.provider || 'google'
-  };
+    // Google থেকে আসা user data
+    const safeUser = {
+      id: u.id,
+      email: u.email,
+      name: u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0],
+      phone: u.user_metadata?.phone || '',
+      avatar: u.user_metadata?.avatar_url || '',
+      provider: u.app_metadata?.provider || 'google'
+    };
 
-  // ইতিমধ্যে একই user logged in থাকলে আর কিছু করার দরকার নেই
-  const existing = JSON.parse(localStorage.getItem('vc_user') || 'null');
-  if(existing && existing.id === safeUser.id) return;
+    // ইতিমধ্যে একই user logged in থাকলে আর কিছু করার দরকার নেই
+    const existing = JSON.parse(localStorage.getItem('vc_user') || 'null');
+    if (existing && existing.id === safeUser.id) return;
 
-  currentUser = safeUser;
-  localStorage.setItem('vc_user', JSON.stringify(safeUser));
+    currentUser = safeUser;
+    localStorage.setItem('vc_user', JSON.stringify(safeUser));
 
-  // Wishlist ও orders sync করো
-  if(typeof syncWishlistFromSupabase === 'function') syncWishlistFromSupabase();
-  if(typeof mergeGuestOrdersToUser === 'function') mergeGuestOrdersToUser(safeUser.email, safeUser.id);
+    // Wishlist ও orders sync করো
+    if (typeof syncWishlistFromSupabase === 'function') syncWishlistFromSupabase();
+    if (typeof mergeGuestOrdersToUser === 'function') mergeGuestOrdersToUser(safeUser.email, safeUser.id);
 
-  // Nav আপডেট করো
-  if(typeof updateNavAuth === 'function') updateNavAuth();
+    // Nav আপডেট করো
+    if (typeof updateNavAuth === 'function') updateNavAuth();
 
-  // URL-এ থাকা OAuth hash/query params পরিষ্কার করো (optional)
-  if(window.location.hash && window.location.hash.includes('access_token')){
-    window.history.replaceState({}, document.title, window.location.pathname);
+    // URL-এ থাকা OAuth hash/query params পরিষ্কার করো
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    showToast('✅ Google দিয়ে লগইন সফল!');
   }
-
-  showToast('✅ Google দিয়ে লগইন সফল!');
-})();
+});
 
 // ACCOUNT PAGE
 function openAcc(){
