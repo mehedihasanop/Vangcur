@@ -1806,7 +1806,7 @@ window.addEventListener('resize', () => {
 // Touch: pause on touchstart, resume 2s after touchend
 // Desktop hover: slow interval to 7s; leave → back to 3.5s
 
-const DUO_TOTAL = 8;
+let DUO_TOTAL = 8; // dynamic — actual card count after admin data loads
 let duoIdx = 0;          // "virtual" index — counts cards, not pages
 let duoAutoTimer = null;
 let duoPaused = false;
@@ -1824,6 +1824,9 @@ function buildDuoInfiniteTrack() {
 
   const origCards = Array.from(track.querySelectorAll('.cath-card'));
   if (!origCards.length) return;
+
+  // DUO_TOTAL কে actual card count দিয়ে update করো
+  DUO_TOTAL = origCards.length;
 
   // Clone all originals and append (tail clones)
   origCards.forEach(c => track.appendChild(c.cloneNode(true)));
@@ -2097,6 +2100,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateWishDot();
   updateNavAuth();
   initCathSlider();
+  loadCathCardData(); // ✅ initDuoSlider এর আগে call করো — নতুন কার্ড যোগ হলে track সঠিকভাবে build হবে
   initDuoSlider();
   if(pid){
     pendingOrdId=pid;
@@ -3908,37 +3912,116 @@ function loadCathCardData(){
   const saved = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
   if(!saved || !saved.length) return;
 
-  // Rebuild the entire duo track from saved card data
   const track = document.getElementById('cathDuoTrack');
-  if(!track || track.dataset.infinite === '1') {
-    // Already cloned — update visible cards via DOM
-    _syncCathCardsToDOM(saved); return;
+  if(!track) return;
+
+  // infinite track ইতিমধ্যে build হয়ে থাকলে পুরোটা নতুন করে তৈরি করো
+  if(track.dataset.infinite === '1'){
+    _rebuildDuoTrackFromData(saved);
+    return;
   }
-  _syncCathCardsToDOM(saved);
+
+  // infinite build হওয়ার আগেই call হলে, কার্ড গুলো replace করে দাও
+  _replaceHardcodedCards(saved);
+}
+
+// হার্ডকোড করা কার্ডগুলো admin data দিয়ে replace করে (initDuoSlider এর আগে)
+function _replaceHardcodedCards(cards){
+  const track = document.getElementById('cathDuoTrack');
+  if(!track) return;
+  track.innerHTML = '';
+  cards.forEach((card, i) => {
+    track.appendChild(_buildCathCardEl(card, i));
+  });
+}
+
+// Track ইতিমধ্যে infinite হলে, পুরোটা নতুন করে তৈরি করো
+function _rebuildDuoTrackFromData(cards){
+  const track = document.getElementById('cathDuoTrack');
+  if(!track) return;
+
+  delete track.dataset.infinite;
+  track.innerHTML = '';
+  track.style.transform = '';
+  track.style.transition = '';
+
+  cards.forEach((card, i) => {
+    track.appendChild(_buildCathCardEl(card, i));
+  });
+
+  clearInterval(duoAutoTimer);
+  duoIdx = 0;
+
+  buildDuoInfiniteTrack();
+  duoSetPosition(false);
+  startDuoAuto();
+}
+
+// একটি কার্ড DOM element তৈরি করে return করে
+function _buildCathCardEl(card, i){
+  const bgColors = [
+    'linear-gradient(155deg,#0a1628,#0f2a5e,#1a3a8f)',
+    'linear-gradient(155deg,#0d0520,#1a0a45,#2a1060)',
+    'linear-gradient(155deg,#0d1b0d,#1a3a1a,#0d2d1a)',
+    'linear-gradient(155deg,#1a0a00,#3d1f00,#5c2d00)',
+    'linear-gradient(155deg,#1a0020,#3d0050,#2d0070)',
+    'linear-gradient(155deg,#00101a,#001f3d,#003366)',
+    'linear-gradient(155deg,#1a0010,#3d0030,#1a0040)',
+    'linear-gradient(155deg,#001a1a,#003d3d,#005252)',
+  ];
+  const emojis = ['🛍️','✨','💡','🔋','🎧','🎵','🪔','💨','📦'];
+
+  const bg = card.bg || bgColors[i % bgColors.length];
+  const emoji = card.emoji || emojis[i % emojis.length];
+  const label = card.label || 'Shop Now';
+  const catId = card.catId || 'all';
+
+  const div = document.createElement('div');
+  div.className = 'cath-card';
+  div.id = 'heroDuoCard-' + i;
+  div.setAttribute('onclick', `cathGoCategory('${catId}')`);
+  div.style.background = bg;
+
+  if(card.img){
+    const imgEl = document.createElement('img');
+    imgEl.className = 'cath-bg-img';
+    imgEl.alt = label;
+    imgEl.src = card.img;
+    div.appendChild(imgEl);
+  }
+
+  const overlayDiv = document.createElement('div');
+  overlayDiv.className = 'cath-overlay';
+  div.appendChild(overlayDiv);
+
+  const emojiDiv = document.createElement('div');
+  emojiDiv.className = 'cath-emoji-bg';
+  emojiDiv.textContent = emoji;
+  if(card.img) emojiDiv.style.display = 'none';
+  div.appendChild(emojiDiv);
+
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'cath-cat-label';
+  labelSpan.innerHTML = escHtml(label) + ' <span class="cath-arrow">→</span>';
+  div.appendChild(labelSpan);
+
+  return div;
 }
 
 function _syncCathCardsToDOM(cards){
-  // Update the real card nodes inside cathDuoTrack
-  // Real cards start at index DUO_TOTAL (after head clones) when infinite is built,
-  // or at 0 if not yet built
   const track = document.getElementById('cathDuoTrack');
   if(!track) return;
   const allCardEls = Array.from(track.querySelectorAll('.cath-card'));
   const isInfinite = track.dataset.infinite === '1';
-  const offset = isInfinite ? cards.length : 0; // head clone count = DUO_TOTAL
 
   cards.forEach((card, i) => {
-    // Update real card (offset + i) and both clone copies
     const indices = isInfinite ? [i, i + cards.length, i + cards.length * 2] : [i];
     indices.forEach(domIdx => {
       const el = allCardEls[domIdx];
       if(!el) return;
-      // Update CTA label
       const lb = el.querySelector('.cath-cat-label');
       if(lb && card.label) lb.innerHTML = escHtml(card.label) + ' <span class="cath-arrow">→</span>';
-      // Update onclick category
       if(card.catId) el.setAttribute('onclick', `cathGoCategory('${card.catId}')`);
-      // Update image
       if(card.img){
         let imgEl = el.querySelector('.cath-bg-img');
         let emojiEl = el.querySelector('.cath-emoji-bg');
@@ -4014,8 +4097,7 @@ document.addEventListener('DOMContentLoaded',function(){
   updateCatCarousel();
   // Load custom categories from admin
   loadCustomCategories();
-  // Load hero cath-card customizations from admin
-  loadCathCardData();
+  // vc_cath_cards এখন main DOMContentLoaded এ initDuoSlider এর আগে load হয়
 });
 // Rebuild carousel when categories are loaded from admin
 function loadCustomCategories(){
