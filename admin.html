@@ -755,7 +755,10 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
         <div class="page-title">🖼️ হিরো সেকশন কার্ড</div>
         <div class="page-sub">হোমপেজের স্লাইডার কার্ডগুলো ম্যানেজ করুন</div>
       </div>
-      <button class="btn btn-dark" onclick="openCathCardDrawer(-1)">+ নতুন কার্ড যোগ করুন</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="resetCathCardsToDefault()" title="মেইন ওয়েবসাইটের ১৩টি কার্ডে রিসেট করুন">🔄 ডিফল্ট ১৩ কার্ড রিসেট</button>
+        <button class="btn btn-dark" onclick="openCathCardDrawer(-1)">+ নতুন কার্ড যোগ করুন</button>
+      </div>
     </div>
 
     <!-- Image size guide banner -->
@@ -940,15 +943,38 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
       {label:'Headphones',img:'',emoji:'🎵', catId:'headphone', bg:'linear-gradient(155deg,#00101a,#003366)'},
       {label:'Acrylic Lamp',img:'',emoji:'🪔',catId:'lamp',     bg:'linear-gradient(155deg,#1a0010,#1a0040)'},
       {label:'Recharge. Fan',img:'',emoji:'💨',catId:'fan',     bg:'linear-gradient(155deg,#001a1a,#005252)'},
+      {label:'Unique Collection',img:'',emoji:'🌟',catId:'unique',   bg:'linear-gradient(155deg,#1a0a1a,#5c007a)'},
+      {label:'Mini Printer',img:'',emoji:'🖨️', catId:'miniprinter', bg:'linear-gradient(155deg,#0a1a0a,#0a2a0a)'},
+      {label:'Crystal Ball',img:'',emoji:'🔮',  catId:'crystalball', bg:'linear-gradient(155deg,#0a0a2a,#0a0a3d)'},
+      {label:'Moon Lamp',  img:'',emoji:'🌙',   catId:'moonlamp',    bg:'linear-gradient(155deg,#1a1a0a,#2a2a00)'},
+      {label:'Water Bottle',img:'',emoji:'🍶',  catId:'waterbottle', bg:'linear-gradient(155deg,#001a3d,#003d7a)'},
     ];
 
     let _cathCards = [];
     let _cathEditIdx = -1;
     let _cathImgData = ''; // base64 or URL of current upload
 
+    function resetCathCardsToDefault(){
+      if(!confirm('মেইন ওয়েবসাইটের ১৩টি ডিফল্ট কার্ডে রিসেট করবেন? বর্তমান পরিবর্তনগুলো মুছে যাবে।')) return;
+      const fresh = JSON.parse(JSON.stringify(DEFAULT_CATH_CARDS));
+      saveCathCardsData(fresh);
+      renderCathCardGrid();
+      showAdminToast('✅ ১৩টি ডিফল্ট কার্ডে রিসেট হয়েছে!');
+    }
+
     function getCathCards(){
       const s = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
-      return (s && s.length) ? s : JSON.parse(JSON.stringify(DEFAULT_CATH_CARDS));
+      if(s && s.length){
+        // মেইন ওয়েবসাইটে ১৩টি কার্ড আছে — বেশি হলে কেটে ঠিক করো
+        const MAX_CARDS = DEFAULT_CATH_CARDS.length; // ১৩
+        if(s.length > MAX_CARDS){
+          const trimmed = s.slice(0, MAX_CARDS);
+          saveCathCardsData(trimmed);
+          return trimmed;
+        }
+        return s;
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_CATH_CARDS));
     }
     function saveCathCardsData(cards){
       localStorage.setItem('vc_cath_cards', JSON.stringify(cards));
