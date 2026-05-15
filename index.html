@@ -1354,7 +1354,7 @@ body.dark .prod-badge{opacity:.88}
         <div class="err-msg" id="lErr" style="text-align:center;margin-bottom:4px"></div>
         <button class="btn-login" onclick="doLogin()">লগইন করুন</button>
         <div class="login-divider">অথবা</div>
-        <button class="btn-google" onclick="showToast('Google লগইন শীঘ্রই আসছে')">
+        <button class="btn-google" onclick="loginWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Google দিয়ে লগইন করুন
         </button>
@@ -2290,6 +2290,71 @@ async function doLogout(){
   updateWishDot();
   closeAcc();updateNavAuth();showToast('লগআউট হয়েছে');
 }
+
+// ============================================================
+//  Google OAuth Login
+// ============================================================
+async function loginWithGoogle(){
+  const btn = document.querySelector('.btn-google');
+  if(btn){ btn.disabled = true; btn.style.opacity = '0.7'; }
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    });
+    if(error){
+      showToast('❌ Google লগইন ব্যর্থ হয়েছে');
+      console.error('Google OAuth Error:', error.message);
+      if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+    }
+    // সফল হলে Google-এ redirect হবে — এই পেজে আর কোড চলবে না
+  } catch(e){
+    showToast('❌ কিছু একটা সমস্যা হয়েছে');
+    if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+  }
+}
+
+// ============================================================
+//  OAuth Callback — Google redirect-এর পরে session check করে user সেট করে
+// ============================================================
+(async function handleOAuthCallback(){
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  if(error || !session) return;
+
+  const u = session.user;
+  // Google থেকে আসা user data
+  const safeUser = {
+    id: u.id,
+    email: u.email,
+    name: u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0],
+    phone: u.user_metadata?.phone || '',
+    avatar: u.user_metadata?.avatar_url || '',
+    provider: u.app_metadata?.provider || 'google'
+  };
+
+  // ইতিমধ্যে একই user logged in থাকলে আর কিছু করার দরকার নেই
+  const existing = JSON.parse(localStorage.getItem('vc_user') || 'null');
+  if(existing && existing.id === safeUser.id) return;
+
+  currentUser = safeUser;
+  localStorage.setItem('vc_user', JSON.stringify(safeUser));
+
+  // Wishlist ও orders sync করো
+  if(typeof syncWishlistFromSupabase === 'function') syncWishlistFromSupabase();
+  if(typeof mergeGuestOrdersToUser === 'function') mergeGuestOrdersToUser(safeUser.email, safeUser.id);
+
+  // Nav আপডেট করো
+  if(typeof updateNavAuth === 'function') updateNavAuth();
+
+  // URL-এ থাকা OAuth hash/query params পরিষ্কার করো (optional)
+  if(window.location.hash && window.location.hash.includes('access_token')){
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  showToast('✅ Google দিয়ে লগইন সফল!');
+})();
 
 // ACCOUNT PAGE
 function openAcc(){
