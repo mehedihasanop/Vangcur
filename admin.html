@@ -296,7 +296,6 @@ tr:hover td{background:#FAFAFA}
 
   <div class="sb-section">ডিজাইন</div>
   <button class="nav-item" onclick="showPage('design-logo',this)">🏷️ লোগো ও ব্র্যান্ড</button>
-  <button class="nav-item" onclick="showPage('design-hero',this)">🖼️ Hero Slider</button>
   <button class="nav-item" onclick="showPage('design-cath-cards',this)">🃏 হিরো ক্যাটাগরি কার্ড</button>
   <button class="nav-item" onclick="showPage('design-categories',this)">🗂️ ক্যাটাগরি</button>
   <button class="nav-item" onclick="showPage('design-header',this)">📌 Header</button>
@@ -338,7 +337,6 @@ tr:hover td{background:#FAFAFA}
         <div class="card-head"><span class="card-title">দ্রুত কাজ</span></div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <button class="btn btn-dark" style="justify-content:center;padding:11px" onclick="showPage('products',null);openAddProd()">+ নতুন প্রোডাক্ট</button>
-          <button class="btn btn-outline" style="justify-content:center;padding:11px" onclick="showPage('design-hero',null)">🖼️ Hero Slider এডিট</button>
           <button class="btn btn-outline" style="justify-content:center;padding:11px" onclick="exportCSV()">📊 CSV Export</button>
           <button class="btn btn-outline" style="justify-content:center;padding:11px" onclick="showPage('orders',null)">📦 পেন্ডিং অর্ডার</button>
         </div>
@@ -391,7 +389,7 @@ tr:hover td{background:#FAFAFA}
     <div class="page-head">
       <div>
         <div class="page-title">🤖 AI Product Planner</div>
-        <div class="page-sub">প্রোডাক্টের তথ্য পেস্ট করুন — Gemini AI স্বয়ংক্রিয়ভাবে সব ফিল্ড পূরণ করে দেবে এবং সরাসরি ওয়েবসাইটে দেখাবে</div>
+        <div class="page-sub">প্রোডাক্টের তথ্য পেস্ট করুন — AI স্বয়ংক্রিয়ভাবে সব ফিল্ড পূরণ করে প্রোডাক্ট ফর্ম খুলবে</div>
       </div>
     </div>
 
@@ -412,13 +410,6 @@ tr:hover td{background:#FAFAFA}
           <button class="btn btn-outline btn-sm" onclick="loadExample()">📝 উদাহরণ</button>
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('masterInput').value=''">🗑️ মুছুন</button>
         </div>
-      </div>
-      <div style="background:#F9F7FF;border:1px dashed #C4B5FD;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#7C3AED;line-height:1.9">
-        <strong>📌 নিচের যেকোনো ফরম্যাটে তথ্য দিন:</strong><br>
-        ✔ Product Name + Price + Old Price + Badge + Warranty + Rating<br>
-        ✔ Specifications (Brand, Model, Connectivity, Power, ইত্যাদি)<br>
-        ✔ বিস্তারিত বর্ণনা (বাংলা বা English যেকোনো ভাষায়)<br>
-        ✔ Features / FAQ যা আছে সব পেস্ট করুন — AI নিজেই বের করবে
       </div>
       <textarea id="masterInput" style="width:100%;min-height:280px;padding:14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.8;transition:var(--tr)" placeholder="এখানে প্রোডাক্টের সমস্ত তথ্য পেস্ট করুন...
 
@@ -442,29 +433,29 @@ Features:
 FAQ:
 Q: কীভাবে কন্ট্রোল করা যায়?
 A: App ও Remote দিয়ে..."></textarea>
-
-      <button class="btn btn-dark" onclick="runAIParser()" id="parseBtn" style="background:linear-gradient(135deg,#4CAF50,#2E7D32);width:100%;justify-content:center;padding:14px;font-size:15px;margin-top:12px;border-radius:10px">
-        ⚡ Parse করুন — সাথে সাথে ফলাফল দেখুন
-      </button>
     </div>
 
-    <!-- STEP 2: IMAGE MANAGER (always visible, filled before/after parse) -->
+    <!-- STEP 2: IMAGE MANAGER — নতুন ডিজাইন -->
     <div class="card" id="imgManagerCard">
       <div class="card-head">
         <span class="card-title">🖼️ ধাপ ২ — প্রোডাক্ট ছবি যোগ করুন</span>
         <button class="btn btn-outline btn-sm" onclick="addRImgRow()">+ ছবি যোগ করুন</button>
       </div>
-      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#92400E;line-height:1.8">
-        💡 <strong>ছবির URL দিন</strong> — একাধিক ছবি দিতে পারবেন। নিচে ড্র্যাগ করে ছবির ক্রম বদলাতে পারবেন।<br>
-        <strong>টিপস:</strong> imgbb.com বা imgur.com এ ছবি আপলোড করে সেই URL দিন।
-      </div>
-      <!-- Image rows container -->
-      <div id="r_imgMgr" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
-      <button type="button" onclick="addRImgRow()" class="btn btn-outline btn-sm">+ আরেকটি ছবি যোগ করুন</button>
 
-      <!-- Image preview strip -->
-      <div id="imgPreviewStrip" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"></div>
+      <!-- Image rows container -->
+      <div id="r_imgMgr" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
+      <button type="button" onclick="addRImgRow()" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;padding:10px">+ আরেকটি ছবি যোগ করুন</button>
+
+      <!-- Image preview strip — বড় প্রিভিউ -->
+      <div id="imgPreviewStrip" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <span style="color:var(--gray);font-size:12px;align-self:center">ছবি যোগ করলে এখানে দেখাবে</span>
+      </div>
     </div>
+
+    <!-- PARSE BUTTON — image preview এর নিচে -->
+    <button class="btn btn-dark" onclick="runAIParser()" id="parseBtn" style="background:linear-gradient(135deg,#4CAF50,#2E7D32);width:100%;justify-content:center;padding:16px;font-size:15px;border-radius:12px;margin-bottom:16px">
+      ⚡ Parse করুন — প্রোডাক্ট ফর্ম খুলবে, এডিট করে সেভ করুন
+    </button>
 
     <!-- LOADING STATE -->
     <div id="parserLoading" style="display:none">
@@ -476,72 +467,8 @@ A: App ও Remote দিয়ে..."></textarea>
     </div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
-    <!-- PARSED RESULT PREVIEW -->
-    <div id="parsedResult" style="display:none">
-      <div class="card" style="border:2px solid #4CAF50">
-        <div class="card-head">
-          <span class="card-title" style="color:#2E7D32">✅ Parse সম্পন্ন — প্রিভিউ ও এডিট করুন</span>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-outline btn-sm" onclick="resetParser()">🔄 Reset</button>
-          </div>
-        </div>
-
-        <!-- TOP SECTION -->
-        <div style="background:#F9F7FF;border-radius:10px;padding:16px;margin-bottom:14px">
-          <div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🔝 মূল তথ্য (নাম → মূল্য → ওয়ারেন্টি → Quick Specs)</div>
-          <div class="fg2c">
-            <div class="fg"><label>প্রোডাক্টের নাম</label><input class="finp" id="r_name" placeholder="Auto-filled..."></div>
-            <div class="fg"><label>ক্যাটাগরি</label>
-              <select class="finp" id="r_cat">
-                <!-- dynamic — getCats() থেকে পপুলেট হয় -->
-              </select>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
-            <div class="fg"><label>মূল্য (৳)</label><input class="finp" id="r_price" type="number"></div>
-            <div class="fg"><label>পুরনো মূল্য (৳)</label><input class="finp" id="r_old" type="number"></div>
-            <div class="fg"><label>স্টক</label><input class="finp" id="r_stock" type="number" value="20"></div>
-            <div class="fg"><label>রেটিং (১-৫)</label><input class="finp" id="r_rating" type="number" step="0.1" min="1" max="5" value="4.5"></div>
-          </div>
-          <div class="fg2c">
-            <div class="fg"><label>ওয়ারেন্টি</label><input class="finp" id="r_warranty" placeholder="6 Months Replacement Warranty"></div>
-            <div class="fg"><label>Badge</label>
-              <select class="finp" id="r_badge">
-                <option value="">— কোনো Badge নেই —</option>
-                <option value="HOT">🔥 HOT</option>
-                <option value="NEW">🆕 NEW</option>
-                <option value="SALE">💸 SALE</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg"><label>Quick Specs <span class="hint">(কমা দিয়ে আলাদা — ওয়েবসাইটে ছোট ট্যাগ হিসেবে দেখায়)</span></label>
-            <textarea class="finp" id="r_quick_specs" rows="2" placeholder="দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth, ওয়ারেন্টি 6 Months"></textarea>
-          </div>
-        </div>
-
-        <!-- BOTTOM SECTION -->
-        <div style="background:#F0FDF4;border-radius:10px;padding:16px;margin-bottom:14px">
-          <div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⬇️ বিস্তারিত (Description → Features → Technical Specs → FAQs)</div>
-          <div class="fg"><label>বর্ণনা (Description)</label><textarea class="finp" id="r_desc" rows="3"></textarea></div>
-          <div class="fg"><label>Features <span class="hint">(প্রতিটি লাইনে একটি)</span></label><textarea class="finp" id="r_features" rows="5" placeholder="প্রতিটি feature আলাদা লাইনে লিখুন"></textarea></div>
-          <div class="fg"><label>Technical Specs <span class="hint">(Key: Value, প্রতিটি লাইনে একটি)</span></label><textarea class="finp" id="r_tech_specs" rows="5" placeholder="Brand: GearUP&#10;Model: NRGB50&#10;Power: 24W&#10;Length: 5m"></textarea></div>
-          <div class="fg"><label>FAQ <span class="hint">(Q: প্রশ্ন? A: উত্তর — আলাদা লাইনে)</span></label><textarea class="finp" id="r_faqs" rows="5" placeholder="Q: প্রশ্ন?&#10;A: উত্তর&#10;&#10;Q: আরেকটি প্রশ্ন?&#10;A: উত্তর"></textarea></div>
-          <div class="fg"><label>Closing Statement <span class="hint">(শেষ আকর্ষণীয় বাক্য)</span></label><input class="finp" id="r_closing" placeholder="আজই অর্ডার করুন..."></div>
-        </div>
-
-        <!-- FINAL SAVE -->
-        <div style="background:#1A1A1A;border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
-          <div>
-            <div style="color:#fff;font-size:14px;font-weight:700">সব ঠিক আছে? প্রোডাক্ট পাবলিশ করুন!</div>
-            <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:2px">সেভ করলে সাথে সাথে ওয়েবসাইটে দেখাবে।</div>
-          </div>
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-outline" onclick="resetParser()" style="color:#fff;border-color:rgba(255,255,255,.3)">বাতিল</button>
-            <button class="btn btn-green" style="padding:12px 24px;font-size:14px" onclick="sendToProductForm()">✅ পাবলিশ করুন</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- PARSED RESULT PREVIEW (kept hidden, no longer shown) -->
+    <div id="parsedResult" style="display:none"></div>
 
     <!-- ERROR STATE -->
     <div id="parserError" style="display:none">
@@ -558,7 +485,10 @@ A: App ও Remote দিয়ে..."></textarea>
   <div class="page" id="page-products">
     <div class="page-head">
       <div><div class="page-title">প্রোডাক্ট ম্যানেজমেন্ট</div><div class="page-sub">প্রোডাক্ট যোগ, এডিট, মুছুন ও সাজান</div></div>
-      <button class="btn btn-dark" onclick="openAddProd()">+ প্রোডাক্ট যোগ করুন</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="cleanupExtraProducts()" title="ডিফল্ট ৭টি ছাড়া অতিরিক্ত টেস্ট প্রোডাক্ট মুছুন">🧹 Extra Products পরিষ্কার</button>
+        <button class="btn btn-dark" onclick="openAddProd()">+ প্রোডাক্ট যোগ করুন</button>
+      </div>
     </div>
     <div class="card">
       <div class="search-bar" style="margin-bottom:10px">
@@ -627,32 +557,6 @@ A: App ও Remote দিয়ে..."></textarea>
       <div class="fg"><label>Tagline (SEO Description)</label><input class="finp" id="brandTagline" value="Your First Choice for Gadgets — বাংলাদেশে গ্যাজেট কেনার সেরা জায়গা"></div>
       <div class="fg"><label>Page Title (Browser Tab)</label><input class="finp" id="pageTitle" value="Vangcur - ভাঙচুর | Your First Choice for Gadgets"></div>
       <button class="btn btn-dark" onclick="saveBrand()">💾 ব্র্যান্ড তথ্য সেভ করুন</button>
-    </div>
-  </div>
-
-  <!-- ===== HERO SLIDER ===== -->
-  <div class="page" id="page-design-hero">
-    <div class="page-head"><div><div class="page-title">Hero Slider</div><div class="page-sub">হোমপেজের ব্যানার স্লাইড এডিট করুন</div></div><button class="btn btn-dark" onclick="addHeroSlide()">+ নতুন স্লাইড</button></div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">স্লাইড তালিকা</span><span class="card-sub">ড্র্যাগ করে সাজাতে পারবেন</span></div>
-      <div id="heroSlidesList"></div>
-    </div>
-    <!-- Current slide editor -->
-    <div class="card" id="heroSlideEditor" style="display:none">
-      <div class="card-head"><span class="card-title" id="slideEditorTitle">স্লাইড এডিট করুন</span></div>
-      <input type="hidden" id="editSlideIdx">
-      <div class="fg2c">
-        <div class="fg"><label>ট্যাগলাইন</label><input class="finp" id="sTag" placeholder="⚡ গ্যাজেট স্পেশালিস্ট"></div>
-        <div class="fg"><label>বাটন ১ টেক্সট</label><input class="finp" id="sBtn1" placeholder="প্রোডাক্ট দেখুন"></div>
-      </div>
-      <div class="fg"><label>মূল শিরোনাম</label><input class="finp" id="sTitle" placeholder="Your First Choice for Gadgets"></div>
-      <div class="fg"><label>সাব-টাইটেল</label><textarea class="finp" id="sSub" rows="2" placeholder="অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট..."></textarea></div>
-      <div class="fg"><label>ব্যানার ছবি URL <span class="hint">(খালি রাখলে Default Dark Background)</span></label><input class="finp" id="sImg" placeholder="https://..."></div>
-      <div class="fg"><label>Stats (Stat|Value পাইপ দিয়ে আলাদা করুন, কমা দিয়ে পরবর্তী)</label><input class="finp" id="sStats" placeholder="3000+|খুশি গ্রাহক, 7|ক্যাটাগরি, 100%|অথেনটিক"></div>
-      <div class="modal-foot" style="margin-top:12px">
-        <button class="btn btn-outline" onclick="document.getElementById('heroSlideEditor').style.display='none'">বাতিল</button>
-        <button class="btn btn-dark" onclick="saveSlide()">💾 স্লাইড সেভ করুন</button>
-      </div>
     </div>
   </div>
 
@@ -1418,12 +1322,8 @@ A: App ও Remote দিয়ে..."></textarea>
 
     <!-- TAB: IMAGES -->
     <div id="ptab-images" style="display:none">
-      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🖼️ প্রোডাক্ট ছবি — স্লাইড হিসেবে দেখাবে</div>
-        <div style="font-size:12px;color:#78350F;margin-bottom:10px;line-height:1.65">Emoji (💡), external URL (https://...) বা base64 image যোগ করুন। প্রথমটি main image হিসেবে দেখাবে।</div>
-        <div class="img-manager" id="imgMgr"></div>
-        <button type="button" onclick="addImgRow()" class="btn btn-outline btn-sm" style="margin-top:7px">+ ছবি/Emoji যোগ করুন</button>
-      </div>
+      <div id="imgMgr" style="display:flex;flex-direction:column;gap:12px"></div>
+      <button type="button" onclick="addImgRow()" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;padding:10px;margin-top:10px">+ ছবি / Emoji যোগ করুন</button>
     </div>
 
     <div class="modal-foot">
@@ -1443,18 +1343,6 @@ A: App ও Remote দিয়ে..."></textarea>
   </div>
 </div>
 
-<!-- HERO SLIDE CONFIRM DELETE -->
-<div class="modal-bg" id="delSlideModal">
-  <div class="modal-c" style="max-width:380px;text-align:center">
-    <div style="font-size:36px;margin-bottom:12px">🗑️</div>
-    <h3>স্লাইড মুছবেন?</h3>
-    <p style="color:var(--gray);font-size:13px;margin:8px 0 20px">এই স্লাইডটি স্থায়ীভাবে মুছে যাবে।</p>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-outline" onclick="document.getElementById('delSlideModal').classList.remove('show')" style="flex:1;justify-content:center">বাতিল</button>
-      <button class="btn btn-red" onclick="confirmDelSlide()" style="flex:1;justify-content:center">হ্যাঁ, মুছুন</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ======= SUPABASE SYNC =======
@@ -1477,12 +1365,13 @@ async function syncAdminData(){
   } catch(e){}
 
   // ✅ FIX: Supabase থেকে custom_products load করো (cross-device sync)
-  // Desktop এ mobile এর add করা product দেখানোর জন্য এটা জরুরি
+  // Default IDs বাদ দিয়ে শুধু custom products merge করো
   try {
+    const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
     const { data: sbProds } = await supabaseClient.from('custom_products').select('*');
     if (sbProds && sbProds.length) {
-      // Supabase থেকে আসা product গুলো adminProds এ merge করো
       sbProds.forEach(p => {
+        if (defaultIds.has(p.id)) return; // Default products skip করো
         if (p.desc_text && !p.desc) p.desc = p.desc_text;
         const idx = adminProds.findIndex(x => x.id === p.id);
         if (idx > -1) {
@@ -1491,8 +1380,10 @@ async function syncAdminData(){
           adminProds.push(p);
         }
       });
-      // localStorage আপডেট করো
+      // ✅ Default IDs admin list এ না রাখো
+      adminProds = adminProds.filter(p => !defaultIds.has(p.id));
       localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+      localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
     }
   } catch(e) { console.warn('custom_products sync failed:', e); }
 }
@@ -1605,7 +1496,6 @@ function populateCatDropdown(selectId, selectedVal){
     o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
     sel.appendChild(o);
   });
-  // পুরানো/নির্দিষ্ট value ফিরিয়ে দাও
   if(curVal && sel.querySelector(`option[value="${curVal}"]`)){
     sel.value = curVal;
   }
@@ -1778,7 +1668,6 @@ function exportCSV(){
 }
 
 // ======= PRODUCTS =======
-let adminProds = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
 
 // ── Default products (hardcoded in index.html PRODS array) ──
 const DEFAULT_PRODS = [
@@ -1788,8 +1677,24 @@ const DEFAULT_PRODS = [
   {id:24, _isDefault:true, cat:'tws',       name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',                imgs:['🎧'],           price:1890, old:2500, warranty:'৬ মাস', badge:'HOT', stock:15},
   {id:34, _isDefault:true, cat:'headphone', name:'GearUP HP80 Over-Ear ANC Headphone',                         imgs:['🎵'],           price:2990, old:3800, warranty:'৬ মাস', badge:'HOT', stock:12},
   {id:44, _isDefault:true, cat:'lamp',      name:'GearUP AL-Love Heart Acrylic LED Lamp',                      imgs:['🪔','❤️'],      price:890,  old:1200, warranty:'৩ মাস', badge:'NEW', stock:25},
-  {id:54, _isDefault:true, cat:'fan',       name:'GearUP RF12 12-Inch Rechargeable Table Fan',                 imgs:['💨'],           price:1290, old:1700, warranty:'৬ মাস', badge:'HOT', stock:18},
+  {id:54, _isDefault:true, cat:'fan',       name:'GearUP RF12 12-Inch Rechargeable Table Fan',                 imgs:['💨'],           price:1290, old:1700, warranty:'৬ মাস', badge:'HOT', stock:0},
 ];
+
+// ✅ FIX: vc_admin_prods থেকে শুধু non-default products রাখো (default IDs বাদ দাও)
+(function cleanAdminProds(){
+  try {
+    const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
+    const raw = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
+    // শুধু custom (non-default) products রাখো
+    const cleaned = raw.filter(p => !defaultIds.has(p.id));
+    if (cleaned.length !== raw.length) {
+      localStorage.setItem('vc_admin_prods', JSON.stringify(cleaned));
+      localStorage.setItem('vc_custom_prods', JSON.stringify(cleaned));
+    }
+  } catch(e) {}
+})();
+
+let adminProds = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
 
 // ── Which default IDs have been deleted by admin ──
 function getDeletedDefaults() { return JSON.parse(localStorage.getItem('vc_deleted_defaults') || '[]'); }
@@ -1798,6 +1703,15 @@ function saveDeletedDefaults(arr) {
   // Also notify index.html via Supabase
   saveSettingToSupabase('vc_deleted_defaults', arr);
 }
+
+// ── Admin Stock Load — saved stock default ও custom products এ apply করো ──
+function loadAdminStock(){
+  const saved=JSON.parse(localStorage.getItem('vc_stock')||'{}');
+  DEFAULT_PRODS.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
+  adminProds.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
+}
+// Page load এ stock load করো
+document.addEventListener('DOMContentLoaded',()=>loadAdminStock());
 
 // ── Product order (drag & drop) ──
 function getProdOrder() { return JSON.parse(localStorage.getItem('vc_prod_order') || 'null'); }
@@ -2060,6 +1974,7 @@ function openAddProd(){
   document.getElementById('imgMgr').innerHTML='';addImgRow('💡');addImgRow('');
   document.getElementById('specEd').innerHTML='';addSpecRow('','');addSpecRow('','');addSpecRow('','');
   populateCatDropdown('pCat'); // ✅ Dynamic categories
+  switchProdTab('basic', document.querySelector('#prodModal .tab-btn'));
   document.getElementById('prodModal').classList.add('show');
 }
 
@@ -2068,7 +1983,7 @@ function editProd(id){
   document.getElementById('prodModalTitle').textContent='প্রোডাক্ট এডিট করুন';
   document.getElementById('editId').value=id;
   document.getElementById('pName').value=p.name||'';
-  populateCatDropdown('pCat', p.cat||'rgb'); // ✅ Dynamic + সঠিক category select
+  populateCatDropdown('pCat', p.cat||'rgb'); // ✅ Dynamic + correct selection
   document.getElementById('pPrice').value=p.price||'';
   document.getElementById('pOld').value=p.old||'';
   document.getElementById('pStock').value=p.stock||20;
@@ -2095,31 +2010,103 @@ function editProd(id){
 }
 
 function addImgRow(v=''){
-  const d=document.createElement('div');d.className='img-row';
-  const isUrl=v&&(v.startsWith('http')||v.startsWith('data:'));
-  const preview=isUrl?`<img src="${v}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`:
-    `<div class="img-prev img-prev-icon">${v||'📦'}</div>`;
-  d.innerHTML=`${preview}
-    <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
-      <input placeholder="Emoji (💡) বা ছবির URL পেস্ট করুন" value="${v}" class="img-url-input"
-        oninput="updateImgPreview(this)">
-      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600">
-        <input type="file" accept="image/*" style="display:none" onchange="uploadProdImage(this)">
-        📤 ছবি আপলোড করুন (Supabase)
-      </label>
-    </div>
-    <button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>`;
+  const d = document.createElement('div');
+  d.className = 'img-card-row';
+  const uid = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const isUrl = v && (v.startsWith('http') || v.startsWith('data:'));
+  const isEmoji = v && !v.startsWith('http') && !v.startsWith('data:');
+
+  d.style.cssText = 'background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)';
+  d.innerHTML = `
+    <div style="display:flex;gap:0">
+      <!-- LEFT: বড় প্রিভিউ -->
+      <div id="prev_${uid}" style="width:130px;height:130px;flex-shrink:0;background:#F9FAFB;border-right:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+        ${isUrl
+          ? `<img id="pimg_${uid}" src="${v}" style="width:100%;height:100%;object-fit:cover;object-position:center center" onerror="this.parentElement.innerHTML='<span style=\\'font-size:32px\\'>❌</span>'">`
+          : `<span id="pemj_${uid}" style="font-size:52px">${isEmoji ? v : '🖼️'}</span>`
+        }
+        ${isUrl ? `<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.5);color:#fff;font-size:9px;padding:2px 5px;border-radius:4px;font-weight:700">PREVIEW</div>` : ''}
+      </div>
+
+      <!-- RIGHT: controls -->
+      <div style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0">
+        <!-- URL input -->
+        <input class="finp img-url-input" id="url_${uid}" placeholder="https://... বা Emoji (💡)" value="${v}"
+          oninput="updateImgCardPreview('${uid}', this.value)"
+          style="font-size:12.5px;padding:8px 10px">
+
+        <!-- Crop / Zoom controls — শুধু URL থাকলে দেখাবে -->
+        <div id="cropCtrl_${uid}" style="display:${isUrl ? 'flex' : 'none'};flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--gray);font-weight:600;min-width:52px">🔍 Zoom</span>
+            <input type="range" min="100" max="250" value="100" step="5"
+              style="flex:1;accent-color:#1A1A1A;height:4px"
+              oninput="applyImgCrop('${uid}','zoom',this.value);document.getElementById('zoomVal_${uid}').textContent=this.value+'%'">
+            <span id="zoomVal_${uid}" style="font-size:10px;color:var(--gray);min-width:34px">100%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--gray);font-weight:600;min-width:52px">↔ অনুভূমিক</span>
+            <input type="range" min="0" max="100" value="50" step="1"
+              style="flex:1;accent-color:#1A1A1A;height:4px"
+              oninput="applyImgCrop('${uid}','x',this.value)">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--gray);font-weight:600;min-width:52px">↕ উল্লম্ব</span>
+            <input type="range" min="0" max="100" value="50" step="1"
+              style="flex:1;accent-color:#1A1A1A;height:4px"
+              oninput="applyImgCrop('${uid}','y',this.value)">
+          </div>
+        </div>
+
+        <!-- Delete button -->
+        <button type="button" onclick="this.closest('.img-card-row').remove()"
+          style="align-self:flex-end;background:none;border:1.5px solid #FCA5A5;color:#EF4444;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='none'">🗑️ সরান</button>
+      </div>
+    </div>`;
   document.getElementById('imgMgr').appendChild(d);
 }
 
-function updateImgPreview(inp){
-  const v=inp.value.trim();
-  const prev=inp.closest('.img-row').firstElementChild;
-  if(v.startsWith('http')||v.startsWith('data:')){
-    prev.outerHTML=`<img src="${v}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`;
+function updateImgCardPreview(uid, val){
+  const prev = document.getElementById('prev_' + uid);
+  const cropCtrl = document.getElementById('cropCtrl_' + uid);
+  if(!prev) return;
+  const isUrl = val && (val.startsWith('http') || val.startsWith('data:'));
+  if(isUrl){
+    prev.innerHTML = `<img id="pimg_${uid}" src="${val}" style="width:100%;height:100%;object-fit:cover;object-position:center center" onerror="this.parentElement.innerHTML='<span style=\\'font-size:32px\\'>❌</span>'">
+      <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.5);color:#fff;font-size:9px;padding:2px 5px;border-radius:4px;font-weight:700">PREVIEW</div>`;
+    if(cropCtrl) cropCtrl.style.display = 'flex';
   } else {
-    prev.textContent=v||'📦';
+    prev.innerHTML = `<span style="font-size:52px">${val || '🖼️'}</span>`;
+    if(cropCtrl) cropCtrl.style.display = 'none';
   }
+}
+
+function applyImgCrop(uid, axis, val){
+  const img = document.getElementById('pimg_' + uid);
+  if(!img) return;
+  const style = img.style;
+  // Parse current object-position
+  const pos = style.objectPosition || 'center center';
+  let [cx, cy] = pos.split(' ');
+  const zoom = parseFloat(style.width) || 100;
+  if(axis === 'zoom'){
+    style.width = val + '%';
+    style.height = val + '%';
+    style.objectFit = 'none';
+  } else if(axis === 'x'){
+    cx = val + '%';
+    style.objectPosition = cx + ' ' + (cy || '50%');
+    style.objectFit = 'none';
+  } else if(axis === 'y'){
+    cy = val + '%';
+    style.objectPosition = (cx || '50%') + ' ' + cy;
+    style.objectFit = 'none';
+  }
+}
+
+function updateImgPreview(inp){
+  // Legacy — নতুন updateImgCardPreview ব্যবহার করুন
 }
 
 async function uploadProdImage(fileInput){
@@ -2164,7 +2151,7 @@ async function saveProd(){
   const name=document.getElementById('pName').value.trim();
   const price=parseInt(document.getElementById('pPrice').value);
   if(!name||!price){showAdminToast('❌ নাম ও মূল্য আবশ্যক');return;}
-  const imgs=[...document.querySelectorAll('#imgMgr .img-row input')].map(i=>i.value.trim()).filter(Boolean);
+  const imgs=[...document.querySelectorAll('#imgMgr .img-url-input')].map(i=>i.value.trim()).filter(Boolean);
   if(!imgs.length)imgs.push('📦');
   const specs={};
   document.querySelectorAll('#specEd .spec-row').forEach(r=>{const k=r.querySelector('.sk')?.value.trim();const v=r.querySelector('.sv')?.value.trim();if(k&&v)specs[k]=v;});
@@ -2216,45 +2203,97 @@ async function saveProd(){
     const newId=adminProds.length?Math.max(...adminProds.map(p=>p.id))+1:Date.now();
     adminProds.push({id:newId,...data});
   }
-  // Save to BOTH keys so index.html can read it
-  localStorage.setItem('vc_admin_prods',JSON.stringify(adminProds));
-  const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
-  if(eidNum){
-    const ci=custom.findIndex(p=>p.id===eidNum);
-    const updated={...adminProds.find(p=>p.id===eidNum)};
-    if(ci>-1)custom[ci]=updated; else custom.push(updated);
-  } else {
-    const newest=adminProds[adminProds.length-1];
-    if(newest&&!custom.find(p=>p.id===newest.id))custom.push(newest);
-  }
-  localStorage.setItem('vc_custom_prods',JSON.stringify(custom));
-  // Supabase sync
-  const sbProd=eidNum?adminProds.find(p=>p.id===eidNum):adminProds[adminProds.length-1];
+  // ✅ FIX: Default IDs কখনো vc_admin_prods এ যাবে না
+  const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
+  const safeAdminProds = adminProds.filter(p => !defaultIds.has(p.id));
+  adminProds = safeAdminProds;
+  localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+  localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
+
+  // Supabase sync — custom_products টেবিলে save করো
+  const sbProd = eidNum ? adminProds.find(p=>p.id===eidNum) : adminProds[adminProds.length-1];
   if(sbProd){
     try{
       await supabaseClient.from('custom_products').upsert([{
-        id:sbProd.id,name:sbProd.name,price:sbProd.price,old:sbProd.old,
-        cat:sbProd.cat,stock:sbProd.stock,warranty:sbProd.warranty,
-        imgs:sbProd.imgs,specs:sbProd.specs,desc_text:sbProd.desc||'',
-        features:sbProd.features||[],badge:sbProd.badge||''
+        id:sbProd.id,
+        name:sbProd.name,
+        price:sbProd.price,
+        old:sbProd.old,
+        cat:sbProd.cat,
+        stock:sbProd.stock,
+        warranty:sbProd.warranty,
+        imgs:sbProd.imgs,
+        specs:sbProd.specs,
+        desc_text:sbProd.desc||sbProd.longDesc||'',
+        features:sbProd.features||[],
+        badge:sbProd.badge||'',
+        rating:sbProd.rating||4.5,
+        long_desc:sbProd.longDesc||sbProd.desc||'',
+        faqs:sbProd.faqs||[],
+        closing:sbProd.closing||''
       }],{onConflict:'id'});
-    }catch(e){console.warn('Supabase product save failed:',e);}
+      showAdminToast('✅ Supabase sync সম্পন্ন — সব ডিভাইসে দেখা যাবে');
+    }catch(e){
+      console.warn('Supabase product save failed:',e);
+      showAdminToast('⚠️ Supabase sync ব্যর্থ — শুধু এই ডিভাইসে সেভ হয়েছে');
+    }
   }
   closeProdModal();renderProdTbl(!eidNum);if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
 }
 
 async function delProd(id){
   if(!confirm('নিশ্চিতভাবে মুছবেন?'))return;
-  adminProds=adminProds.filter(p=>p.id!==id);
-  localStorage.setItem('vc_admin_prods',JSON.stringify(adminProds));
-  const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]').filter(p=>p.id!==id);
-  localStorage.setItem('vc_custom_prods',JSON.stringify(custom));
-  // Supabase delete
-  try{await supabaseClient.from('custom_products').delete().eq('id',id);}
-  catch(e){console.warn('Supabase product delete failed:',e);}
-  renderProdTbl();showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে');
+  const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
+  if(defaultIds.has(id)){
+    // Default product — deleted_defaults list এ যোগ করো
+    const del = getDeletedDefaults();
+    if(!del.includes(id)){del.push(id);saveDeletedDefaults(del);}
+    showAdminToast('🗑️ ডিফল্ট প্রোডাক্ট লুকানো হয়েছে — মেইন সাইটেও সরে যাবে');
+  } else {
+    // Custom product — localStorage + Supabase থেকে মুছো
+    adminProds = adminProds.filter(p=>p.id!==id);
+    localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+    localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
+    try {
+      await supabaseClient.from('custom_products').delete().eq('id', id);
+      showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে — সব ডিভাইস থেকে সরে যাবে');
+    } catch(e) {
+      console.warn('Supabase product delete failed:', e);
+      showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে (শুধু এই ডিভাইস)');
+    }
+  }
+  renderProdTbl();
 }
 function closeProdModal(){document.getElementById('prodModal').classList.remove('show');}
+
+// ✅ Extra/test products পরিষ্কার করার function
+async function cleanupExtraProducts(){
+  const extraCount = adminProds.length;
+  if(extraCount === 0){
+    showAdminToast('✅ কোনো extra product নেই — সব পরিষ্কার আছে');
+    return;
+  }
+  if(!confirm(`${extraCount}টি custom/extra প্রোডাক্ট পাওয়া গেছে। এগুলো মুছে শুধু ডিফল্ট ৭টি রাখবেন?\n\nএই কাজ ফিরিয়ে আনা যাবে না।`)) return;
+  
+  // Supabase থেকে সব custom products মুছো
+  for(const p of adminProds){
+    try { await supabaseClient.from('custom_products').delete().eq('id', p.id); } catch(e){}
+  }
+  
+  // localStorage পরিষ্কার করো
+  adminProds = [];
+  localStorage.setItem('vc_admin_prods', '[]');
+  localStorage.setItem('vc_custom_prods', '[]');
+  
+  // vc_deleted_defaults ও পরিষ্কার করো (সব default product ফিরিয়ে আনো)
+  localStorage.removeItem('vc_deleted_defaults');
+  try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_deleted_defaults', setting_value:[]}); } catch(e){}
+  try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_prod_order', setting_value:[]}); } catch(e){}
+  localStorage.removeItem('vc_prod_order');
+  
+  renderProdTbl();
+  showAdminToast(`✅ ${extraCount}টি extra প্রোডাক্ট মুছে ফেলা হয়েছে — শুধু ৭টি ডিফল্ট প্রোডাক্ট থাকবে`);
+}
 
 // ======= CUSTOMERS =======
 function renderCustomers(){
@@ -2600,17 +2639,73 @@ async function runAIParser(){
   let si = 0;
   const st = setInterval(()=>{ if(si < statuses.length) statusEl.textContent = statuses[si++]; }, 600);
 
-  // Small delay to show loading UI
   await new Promise(r => setTimeout(r, 2200));
   clearInterval(st);
 
   try{
     const parsed = smartParse(raw);
-    fillParsedForm(parsed);
+
+    // ── AI parsed data সরাসরি Product Modal এ ভরে দাও ──
+    document.getElementById('prodModalTitle').textContent = '🤖 AI Parse — প্রোডাক্ট যোগ করুন';
+    document.getElementById('editId').value = '';
+
+    // Category dropdown populate + select
+    populateCatDropdown('pCat', parsed.cat || 'rgb');
+
+    // Basic Info fields
+    document.getElementById('pName').value = parsed.name || '';
+    document.getElementById('pPrice').value = parsed.price || '';
+    document.getElementById('pOld').value = parsed.old || '';
+    document.getElementById('pStock').value = parsed.stock || 20;
+    document.getElementById('pRating').value = parsed.rating || 4.5;
+    document.getElementById('pWarranty').value = parsed.warranty || '';
+    document.getElementById('pBadge').value = (parsed.badge || '').toUpperCase();
+    const pQS = document.getElementById('pQuickSpecs');
+    if(pQS) pQS.value = parsed.quick_specs || '';
+
+    // Full Layout fields
+    const pDesc = document.getElementById('pDesc');
+    if(pDesc) pDesc.value = parsed.desc || '';
+    const pLongDesc = document.getElementById('pLongDesc');
+    if(pLongDesc) pLongDesc.value = parsed.desc || '';
+    const pFeat = document.getElementById('pFeatures');
+    if(pFeat) pFeat.value = Array.isArray(parsed.features) ? parsed.features.join('\n') : (parsed.features || '');
+    const pTech = document.getElementById('pTechSpecs');
+    if(pTech) pTech.value = parsed.tech_specs || '';
+    const pFaqs = document.getElementById('pFaqs');
+    if(pFaqs) pFaqs.value = parsed.faqs || '';
+    const pClose = document.getElementById('pClosing');
+    if(pClose) pClose.value = parsed.closing || '';
+
+    // Specs editor (legacy)
+    const specEd = document.getElementById('specEd');
+    if(specEd){
+      specEd.innerHTML = '';
+      if(parsed.tech_specs){
+        parsed.tech_specs.split('\n').forEach(line => {
+          const [k, ...vs] = line.split(':');
+          if(k && vs.length) addSpecRow(k.trim(), vs.join(':').trim());
+        });
+      }
+      if(!specEd.children.length){ addSpecRow('',''); addSpecRow('',''); }
+    }
+
+    // Images: AI page এর image manager থেকে নিয়ে modal এ দাও
+    const aiImgs = [...document.querySelectorAll('#r_imgMgr .img-url-input')]
+      .map(i => i.value.trim()).filter(v => v);
+    const imgMgr = document.getElementById('imgMgr');
+    if(imgMgr){
+      imgMgr.innerHTML = '';
+      if(aiImgs.length){ aiImgs.forEach(url => addImgRow(url)); }
+      else { addImgRow(''); addImgRow(''); }
+    }
+
+    // Basic Info tab সক্রিয় করো
+    switchProdTab('basic', document.querySelector('#prodModal .tab-btn'));
+
     document.getElementById('parserLoading').style.display = 'none';
-    document.getElementById('parsedResult').style.display = 'block';
-    document.getElementById('parsedResult').scrollIntoView({ behavior:'smooth' });
-    showAdminToast('✅ Parse সম্পন্ন!');
+    document.getElementById('prodModal').classList.add('show');
+    showAdminToast('✅ Parse সম্পন্ন! এডিট করুন তারপর সেভ করুন।');
   }catch(e){
     document.getElementById('parserLoading').style.display = 'none';
     document.getElementById('parserError').style.display = 'block';
@@ -2825,32 +2920,40 @@ function fillParsedForm(p){
 function addRImgRow(val){
   const mgr = document.getElementById('r_imgMgr');
   if(!mgr) return;
-  const idx = mgr.children.length + 1;
+  const uid = 'rimg_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const isUrl = val && (val.startsWith('http') || val.startsWith('data:'));
+  const isEmoji = val && !val.startsWith('http') && !val.startsWith('data:');
+
   const row = document.createElement('div');
-  row.className = 'img-row-item';
-  row.style.cssText = 'display:flex;gap:8px;align-items:center;background:var(--light);padding:8px 10px;border-radius:8px';
-  row.draggable = true;
+  row.style.cssText = 'background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)';
   row.innerHTML = `
-    <span style="cursor:grab;color:var(--gray);font-size:16px;flex-shrink:0" title="ড্র্যাগ করে সাজান">⠿</span>
-    <span style="font-size:11px;font-weight:700;color:var(--gray);flex-shrink:0;min-width:20px">#${idx}</span>
-    <div id="imgThumb_${Date.now()}" style="width:40px;height:40px;background:#fff;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">🖼️</div>
-    <input class="finp img-url-input" placeholder="https://i.ibb.co/... বা অন্য image URL" value="${val||''}" style="flex:1" oninput="updateThumb(this)">
-    <button type="button" onclick="removeImgRow(this);updateImgPreviewStrip()" class="btn btn-red btn-xs" title="সরিয়ে দিন">✕</button>`;
-  // drag events
-  row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', ''); row.style.opacity='0.4'; window._dragRow = row; });
-  row.addEventListener('dragend', () => { row.style.opacity='1'; updateRowNumbers(); updateImgPreviewStrip(); });
-  row.addEventListener('dragover', e => { e.preventDefault(); });
-  row.addEventListener('drop', e => {
-    e.preventDefault();
-    const dragged = window._dragRow;
-    if(dragged && dragged !== row){ mgr.insertBefore(dragged, row); }
-    updateRowNumbers();
-    updateImgPreviewStrip();
-  });
+    <div style="display:flex;gap:0">
+      <div id="rprev_${uid}" style="width:100px;height:100px;flex-shrink:0;background:#F9FAFB;border-right:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+        ${isUrl
+          ? `<img src="${val}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span style=\\'font-size:28px\\'>❌</span>'">`
+          : `<span style="font-size:40px">${val || '🖼️'}</span>`
+        }
+      </div>
+      <div style="flex:1;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0">
+        <input class="finp img-url-input" placeholder="https://... বা Emoji" value="${val||''}"
+          oninput="updateRImgPreview('${uid}',this.value)"
+          style="font-size:12.5px;padding:8px 10px">
+        <button type="button" onclick="this.closest('div[style*=border-radius]').remove();updateImgPreviewStrip()"
+          style="align-self:flex-end;background:none;border:1.5px solid #FCA5A5;color:#EF4444;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif"
+          onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='none'">🗑️ সরান</button>
+      </div>
+    </div>`;
   mgr.appendChild(row);
-  // auto-update thumb if value given
-  const inp = row.querySelector('.img-url-input');
-  if(inp && val) updateThumb(inp);
+  if(val) setTimeout(()=>updateImgPreviewStrip(), 100);
+}
+
+function updateRImgPreview(uid, val){
+  const prev = document.getElementById('rprev_' + uid);
+  if(!prev) return;
+  const isUrl = val && (val.startsWith('http') || val.startsWith('data:'));
+  prev.innerHTML = isUrl
+    ? `<img src="${val}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span style=\\'font-size:28px\\'>❌</span>'">`
+    : `<span style="font-size:40px">${val || '🖼️'}</span>`;
   updateImgPreviewStrip();
 }
 
@@ -2886,13 +2989,18 @@ function updateImgPreviewStrip(){
   if(!strip) return;
   const urls = [...document.querySelectorAll('#r_imgMgr .img-url-input')]
     .map(i => i.value.trim()).filter(v => v);
-  if(!urls.length){ strip.innerHTML = '<span style="color:var(--gray);font-size:12px">ছবি যোগ করলে এখানে প্রিভিউ দেখাবে</span>'; return; }
+  if(!urls.length){
+    strip.innerHTML = '<span style="color:var(--gray);font-size:12px">ছবি যোগ করলে এখানে দেখাবে</span>';
+    return;
+  }
   strip.innerHTML = urls.map((url, i) => `
     <div style="text-align:center">
-      <div style="width:64px;height:64px;background:#fff;border-radius:8px;border:2px solid ${i===0?'#4CAF50':'var(--border)'};overflow:hidden;display:flex;align-items:center;justify-content:center">
-        ${url.startsWith('http') ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='❌'">` : url}
+      <div style="width:90px;height:90px;background:#fff;border-radius:10px;border:2.5px solid ${i===0?'#4CAF50':'var(--border)'};overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.08)">
+        ${url.startsWith('http') || url.startsWith('data:')
+          ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='❌'">`
+          : `<span style="font-size:36px">${url}</span>`}
       </div>
-      <div style="font-size:10px;color:var(--gray);margin-top:3px">${i===0?'প্রথম':'#'+(i+1)}</div>
+      <div style="font-size:10px;font-weight:700;color:${i===0?'#4CAF50':'var(--gray)'};margin-top:5px">${i===0?'✅ মূল ছবি':'#'+(i+1)}</div>
     </div>`).join('');
 }
 
@@ -3101,6 +3209,26 @@ try{
     .subscribe();
 }catch(e){console.warn('Admin realtime failed:',e);}
 
+// --- Realtime Stock Sync — store_settings এর vc_stock পরিবর্তন হলে admin আপডেট ---
+try{
+  supabaseClient
+    .channel('admin-stock-watch')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'store_settings',filter:'setting_key=eq.vc_stock'},async(payload)=>{
+      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
+      if(!isLoggedIn)return;
+      const stockMap=payload.new?.setting_value||{};
+      // adminProds এবং DEFAULT_PRODS এর stock আপডেট
+      [...DEFAULT_PRODS,...adminProds].forEach(p=>{
+        if(stockMap[p.id]!==undefined)p.stock=stockMap[p.id];
+      });
+      localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+      // Products page খোলা থাকলে re-render করো
+      const prodPage=document.getElementById('page-products');
+      if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
+    })
+    .subscribe();
+}catch(e){console.warn('Admin stock realtime failed:',e);}
+
 // --- Fallback polling every 10s (when Supabase realtime unavailable) ---
 setInterval(async ()=>{
   const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
@@ -3124,10 +3252,21 @@ setInterval(async ()=>{
   const p=orders.filter(o=>o.status==='pending').length;
   const pb=document.getElementById('pendBadge');
   if(pb){pb.style.display=p>0?'inline':'none';pb.textContent=p;}
+  // Stock sync — Supabase থেকে latest stock pull করো
+  try{
+    const{data:stockRow}=await supabaseClient.from('store_settings').select('setting_value').eq('setting_key','vc_stock').single();
+    if(stockRow&&stockRow.setting_value){
+      const stockMap=stockRow.setting_value;
+      [...DEFAULT_PRODS,...adminProds].forEach(p=>{if(stockMap[p.id]!==undefined)p.stock=stockMap[p.id];});
+      localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+      const prodPage=document.getElementById('page-products');
+      if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
+    }
+  }catch(e){}
 },10000);
 
 // ESC close modals
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();document.getElementById('delSlideModal').classList.remove('show');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();}});
 </script>
 </body>
 </html>

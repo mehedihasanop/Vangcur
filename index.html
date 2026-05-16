@@ -935,14 +935,14 @@ body.dark .prod-badge{opacity:.88}
 <!-- CAT BAR (hidden — kept for JS filtering logic) -->
 <div class="cat-bar" style="display:none">
   <div class="cat-inner">
-    <button class="cat-pill active" onclick="filterCat('all',this,event)" ontouchend="filterCat('all',this,event)">সকল পণ্য</button>
-    <button class="cat-pill" onclick="filterCat('rgb',this,event)" ontouchend="filterCat('rgb',this,event)">RGB Lights</button>
-    <button class="cat-pill" onclick="filterCat('smartwatch',this,event)" ontouchend="filterCat('smartwatch',this,event)">Smartwatches</button>
-    <button class="cat-pill" onclick="filterCat('powerbank',this,event)" ontouchend="filterCat('powerbank',this,event)">Power Bank</button>
-    <button class="cat-pill" onclick="filterCat('tws',this,event)" ontouchend="filterCat('tws',this,event)">TWS</button>
-    <button class="cat-pill" onclick="filterCat('headphone',this,event)" ontouchend="filterCat('headphone',this,event)">BT Headphones</button>
-    <button class="cat-pill" onclick="filterCat('lamp',this,event)" ontouchend="filterCat('lamp',this,event)">Acrylic Lamp</button>
-    <button class="cat-pill" onclick="filterCat('fan',this,event)" ontouchend="filterCat('fan',this,event)">Rechargeable Fan</button>
+    <button class="cat-pill active" data-cat="all" onclick="filterCat('all',this,event)" ontouchend="filterCat('all',this,event)">সকল পণ্য</button>
+    <button class="cat-pill" data-cat="rgb" onclick="filterCat('rgb',this,event)" ontouchend="filterCat('rgb',this,event)">RGB Lights</button>
+    <button class="cat-pill" data-cat="smartwatch" onclick="filterCat('smartwatch',this,event)" ontouchend="filterCat('smartwatch',this,event)">Smartwatches</button>
+    <button class="cat-pill" data-cat="powerbank" onclick="filterCat('powerbank',this,event)" ontouchend="filterCat('powerbank',this,event)">Power Bank</button>
+    <button class="cat-pill" data-cat="tws" onclick="filterCat('tws',this,event)" ontouchend="filterCat('tws',this,event)">TWS</button>
+    <button class="cat-pill" data-cat="headphone" onclick="filterCat('headphone',this,event)" ontouchend="filterCat('headphone',this,event)">BT Headphones</button>
+    <button class="cat-pill" data-cat="lamp" onclick="filterCat('lamp',this,event)" ontouchend="filterCat('lamp',this,event)">Acrylic Lamp</button>
+    <button class="cat-pill" data-cat="fan" onclick="filterCat('fan',this,event)" ontouchend="filterCat('fan',this,event)">Rechargeable Fan</button>
   </div>
 </div>
 
@@ -1631,7 +1631,7 @@ const PRODS=[
     tags:'হেডফোন headphone overear over-ear anc নয়েজ noise cancel cancelling ব্লুটুথ bluetooth ওয়্যারলেস wireless মিউজিক music গান হাইব্রিড hybrid foldable ভাঁজযোগ্য'},
   {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:790,old:1100,specs:{ডিজাইন:'Heart Shape',আলো:'RGB 16 Colors',নিয়ন্ত্রণ:'Touch + Remote',পাওয়ার:'USB',সাইজ:'15cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:30,desc:'হার্ট শেপের রোমান্টিক অ্যাক্রিলিক ল্যাম্প। উপহার হিসেবে আদর্শ।',
     tags:'ল্যাম্প lamp আলো light led এলইডি হার্ট heart ভালোবাসা love রোমান্টিক romantic উপহার gift acrylic অ্যাক্রিলিক ডেকোর decor রুম room nightlight নাইটলাইট'},
-  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।',
+  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:0,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।',
     tags:'ফ্যান fan টেবিল table রিচার্জেবল rechargeable চার্জযোগ্য লোডশেডিং loadshedding বিদ্যুৎ বায়ু বাতাস পোর্টেবল portable tablefan rechargablefan'}
 ];
 
@@ -1680,6 +1680,7 @@ let cart=JSON.parse(localStorage.getItem('vc_cart')||'[]');
 let currentUser=JSON.parse(localStorage.getItem('vc_user')||'null');
 let curProd=null, curQty=1, curImgIdx=0;
 let selectedShip='', orderItems=[], pendingOrdId=null;
+let activeCat='all'; // Global category tracker
 
 // Fallback array — add image URLs here if not using admin panel
 const HERO_IMAGES=[];
@@ -2089,9 +2090,10 @@ document.addEventListener('DOMContentLoaded',async ()=>{
 
   loadStock();
   applyAdminSettings(); // ✅ Supabase fetch এর পরে call হচ্ছে এখন
-  // ১. localStorage থেকে custom products যোগ করো (instant)
+  // ১. localStorage থেকে custom products যোগ করো (instant) — শুধু non-default IDs
+  const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
   const customLocal=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
-  customLocal.forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
+  customLocal.filter(p => !defaultIds.has(p.id)).forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
   applyProdOrder(); // ✅ Apply drag & drop order from admin
   DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
   renderProds(PRODS);
@@ -2103,9 +2105,31 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     if(sbProds&&sbProds.length){
       let changed=false;
       sbProds.forEach(p=>{
-        // ✅ Supabase stores desc as desc_text, map it back
-        if(p.desc_text && !p.desc) p.desc = p.desc_text;
-        if(!PRODS.find(x=>x.id===p.id)){PRODS.push(p);changed=true;}
+        // ✅ FIX: Supabase field mapping — সব field সঠিকভাবে map করো
+        const mapped = {
+          id: p.id,
+          cat: p.cat || 'rgb',
+          name: p.name || '',
+          price: p.price || 0,
+          old: p.old || p.price || 0,
+          stock: p.stock !== undefined ? p.stock : 20,
+          badge: p.badge || '',
+          warranty: p.warranty || '৭ দিন',
+          rating: p.rating || 4.5,
+          imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
+          specs: p.specs || {},
+          desc: p.desc_text || p.desc || '',
+          longDesc: p.long_desc || p.desc_text || p.desc || '',
+          features: Array.isArray(p.features) ? p.features : [],
+          faqs: Array.isArray(p.faqs) ? p.faqs : [],
+          closing: p.closing || '',
+        };
+        if(!PRODS.find(x=>x.id===mapped.id)){PRODS.push(mapped);changed=true;}
+        else {
+          // ✅ FIX: existing product update করো
+          const idx = PRODS.findIndex(x=>x.id===mapped.id);
+          if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};changed=true;}
+        }
       });
       if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
     }
@@ -2160,8 +2184,21 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       })
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.new&&!PRODS.find(x=>x.id===payload.new.id)){
-          if(payload.new.desc_text && !payload.new.desc) payload.new.desc = payload.new.desc_text;
-          PRODS.push(payload.new);
+          const p = payload.new;
+          const mapped = {
+            id:p.id, cat:p.cat||'rgb', name:p.name||'',
+            price:p.price||0, old:p.old||p.price||0,
+            stock:p.stock!==undefined?p.stock:20, badge:p.badge||'',
+            warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
+            imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
+            specs:p.specs||{},
+            desc:p.desc_text||p.desc||'',
+            longDesc:p.long_desc||p.desc_text||p.desc||'',
+            features:Array.isArray(p.features)?p.features:[],
+            faqs:Array.isArray(p.faqs)?p.faqs:[],
+            closing:p.closing||'',
+          };
+          PRODS.push(mapped);
           updateCatPillCounts();
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
           renderProds(cur);
@@ -2169,10 +2206,23 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       })
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.new&&payload.new.id){
-          if(payload.new.desc_text && !payload.new.desc) payload.new.desc = payload.new.desc_text;
-          const idx=PRODS.findIndex(x=>x.id===payload.new.id);
-          if(idx>-1){PRODS[idx]=payload.new;}
-          else{PRODS.push(payload.new);}
+          const p = payload.new;
+          const mapped = {
+            id:p.id, cat:p.cat||'rgb', name:p.name||'',
+            price:p.price||0, old:p.old||p.price||0,
+            stock:p.stock!==undefined?p.stock:20, badge:p.badge||'',
+            warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
+            imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
+            specs:p.specs||{},
+            desc:p.desc_text||p.desc||'',
+            longDesc:p.long_desc||p.desc_text||p.desc||'',
+            features:Array.isArray(p.features)?p.features:[],
+            faqs:Array.isArray(p.faqs)?p.faqs:[],
+            closing:p.closing||'',
+          };
+          const idx=PRODS.findIndex(x=>x.id===mapped.id);
+          if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};}
+          else{PRODS.push(mapped);}
           updateCatPillCounts();
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
           renderProds(cur);
@@ -2472,7 +2522,7 @@ function renderProds(list){
     </div>
     <div class="prod-info">
       <div class="prod-name" onclick="openPP(${p.id})">${escHtml(p.name)}</div>
-      <div class="prod-spec">${Object.entries(p.specs).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
+      <div class="prod-spec">${Object.entries(p.specs||{}).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
       <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
         <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
         <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${Math.floor((p.id*37+p.stock*13)%80+20)})</span>
@@ -2489,12 +2539,21 @@ function renderProds(list){
 let _filterCatLock=false;
 // ✅ Category bar re-render (vc_categories Supabase থেকে পরিবর্তন হলে)
 function updateCatPillCounts(){
-  const catLabels={all:'সকল পণ্য',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
+  const catLabels={all:'সকল পণ্য',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
+  // Custom categories থেকে label নাও
+  const savedCats=JSON.parse(localStorage.getItem('vc_categories')||'null')||[];
+  savedCats.forEach(c=>{if(c.id&&c.name)catLabels[c.id]=c.name;});
+
   document.querySelectorAll('.cat-pill').forEach(b=>{
-    const fn=b.getAttribute('onclick')||'';
-    const m=fn.match(/'([^']+)'/);
-    if(!m)return;
-    const cat=m[1];
+    // data-cat attribute থেকে নাও (onclick parse এর চেয়ে reliable)
+    let cat=b.dataset.cat;
+    if(!cat){
+      // fallback: onclick string parse
+      const fn=b.getAttribute('onclick')||'';
+      const m=fn.match(/'([^']+)'/);
+      if(!m)return;
+      cat=m[1];
+    }
     const cnt=cat==='all'?PRODS.length:PRODS.filter(p=>p.cat===cat).length;
     const label=catLabels[cat]||cat;
     b.textContent=label+' ('+cnt+')';
@@ -2502,18 +2561,10 @@ function updateCatPillCounts(){
 }
 
 function renderCatBar(){
-  // Custom categories যদি থাকে apply করো
   const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
   if(!saved||!saved.length)return;
-  // cat-bar এর pills update করো label অনুযায়ী
-  const pills=document.querySelectorAll('.cat-pill');
-  pills.forEach(pill=>{
-    const fn=pill.getAttribute('onclick')||'';
-    const m=fn.match(/'([^']+)'/);if(!m)return;
-    const cat=m[1];if(cat==='all')return;
-    const match=saved.find(c=>c.key===cat||c.slug===cat);
-    if(match){const txt=pill.textContent.replace(/\s*\(\d+\)\s*$/,'');pill.textContent=match.name||(txt);}
-  });
+  // loadCustomCategories দিয়ে পুরো rebuild করো — এটাই সঠিক পথ
+  loadCustomCategories();
   updateCatPillCounts();
 }
 
@@ -2523,21 +2574,25 @@ function filterCat(cat,btn,evt){
   if(evt&&evt.type==='touchend'){_filterCatLock=true;setTimeout(()=>{_filterCatLock=false;},400);}
   activeCat=cat;
   document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
-  if(btn){btn.classList.add('active');}
-  else{
-    // Sync the pill bar to match category
+  if(btn){
+    btn.classList.add('active');
+  } else {
+    // data-cat attribute দিয়ে sync করো
     document.querySelectorAll('.cat-pill').forEach(b=>{
-      if(b.onclick){const fn=b.getAttribute('onclick')||'';if(fn.includes("'"+cat+"'")||fn.includes('"'+cat+'"'))b.classList.add('active');}
+      if(b.dataset.cat===cat) b.classList.add('active');
     });
   }
   const titles={all:'সকল',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
+  // Custom categories থেকেও title নাও
+  const savedCats=JSON.parse(localStorage.getItem('vc_categories')||'null')||[];
+  savedCats.forEach(c=>{if(c.id&&c.name)titles[c.id]=c.name;});
+
   const list=cat==='all'?PRODS:PRODS.filter(p=>p.cat===cat);
   document.getElementById('secTitle').innerHTML=`${titles[cat]||'প্রোডাক্ট'} <span>সমূহ</span>`;
-  // Update count to show filtered count, not total
   const countEl=document.getElementById('prodCount');
   if(countEl){
     if(cat==='all') countEl.textContent=PRODS.length+'টি প্রোডাক্ট';
-    else countEl.textContent=list.length+'টি প্রোডাক্ট ('+((titles[cat]||cat))+')';
+    else countEl.textContent=list.length+'টি প্রোডাক্ট ('+(titles[cat]||cat)+')';
   }
   renderProds(list);
   document.getElementById('prodSec').scrollIntoView({behavior:'smooth',block:'start'});
@@ -3053,8 +3108,16 @@ function quickOrder(id){
   if(cart.length>0){
     // কার্টে আইটেম আছে — মিনি কার্ট modal দেখাও + নতুন প্রোডাক্ট যোগ করো
     const ex=cart.find(x=>x.id===id);
-    if(!ex) cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty:1,cat:p.cat});
-    else ex.qty+=1;
+    if(!ex){
+      p.stock=Math.max(0,p.stock-1);
+      saveStock();
+      cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty:1,cat:p.cat});
+    } else {
+      if(p.stock<=0){showToast('স্টক শেষ!');return;}
+      p.stock=Math.max(0,p.stock-1);
+      saveStock();
+      ex.qty+=1;
+    }
     localStorage.setItem('vc_cart',JSON.stringify(cart));
     updateCartUI();
     showQuickOrderModal();
@@ -3187,18 +3250,23 @@ function showFloatCart(){
 }
 function addToCart(id,qty){
   const p=PRODS.find(x=>x.id===id);if(!p)return;
+  // স্টক চেক — পর্যাপ্ত স্টক নেই?
+  const currentCartQty=cart.find(x=>x.id===id)?.qty||0;
+  const availableStock=p.stock-currentCartQty;
+  if(availableStock<=0){showToast('❌ স্টক শেষ!');return;}
+  const addQty=Math.min(qty,availableStock);
+  // ✅ Add to Cart ক্লিকের সাথেই stock কমানো (race condition ঠেকাতে)
+  p.stock=Math.max(0,p.stock-addQty);
+  saveStock(); // Supabase + localStorage এ realtime sync
   const ex=cart.find(x=>x.id===id);
-  if(ex)ex.qty+=qty; else cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty,cat:p.cat});
+  if(ex)ex.qty+=addQty; else cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty:addQty,cat:p.cat});
   localStorage.setItem('vc_cart',JSON.stringify(cart));
   updateCartUI();showToast('✅ কার্টে যোগ হয়েছে');
   showFloatCart();
-  // Real-time stock check — if this product's stock would run out, update card
+  // স্টক শূন্য হলে UI আপডেট করো
   if(p.stock<=0){
-    // Re-render to reflect sold-out immediately
-    const activeFilter=document.querySelector('.cat-pill.active');
-    const activeCat=activeFilter?.dataset?.cat||'all';
-    const list=activeCat==='all'?PRODS:PRODS.filter(x=>x.cat===activeCat);
-    renderProds(list);
+    const cur=activeCat==='all'?PRODS:PRODS.filter(x=>x.cat===activeCat);
+    renderProds(cur);
   }
 }
 function updateCartUI(){
@@ -3812,12 +3880,23 @@ document.addEventListener('visibilitychange',()=>{
       const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
       if(sbProds&&sbProds.length){
         let changed=false;
-        sbProds.forEach(p=>{
-          if(p.desc_text && !p.desc) p.desc = p.desc_text;
+        sbProds.forEach(raw=>{
+          const p = {
+            id:raw.id, cat:raw.cat||'rgb', name:raw.name||'',
+            price:raw.price||0, old:raw.old||raw.price||0,
+            stock:raw.stock!==undefined?raw.stock:20, badge:raw.badge||'',
+            warranty:raw.warranty||'৭ দিন', rating:raw.rating||4.5,
+            imgs:Array.isArray(raw.imgs)?raw.imgs:(raw.imgs?[raw.imgs]:['📦']),
+            specs:raw.specs||{},
+            desc:raw.desc_text||raw.desc||'',
+            longDesc:raw.long_desc||raw.desc_text||raw.desc||'',
+            features:Array.isArray(raw.features)?raw.features:[],
+            faqs:Array.isArray(raw.faqs)?raw.faqs:[],
+            closing:raw.closing||'',
+          };
           const idx=PRODS.findIndex(x=>x.id===p.id);
           if(idx>-1){
-            // Update existing product data
-            if(JSON.stringify(PRODS[idx])!==JSON.stringify(p)){PRODS[idx]=p;changed=true;}
+            if(JSON.stringify(PRODS[idx])!==JSON.stringify(p)){PRODS[idx]={...PRODS[idx],...p};changed=true;}
           } else {
             PRODS.push(p);changed=true;
           }
@@ -3833,6 +3912,17 @@ document.addEventListener('visibilitychange',()=>{
 window.addEventListener('pagehide',()=>{
   if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
   if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+  // কার্টে থাকা পণ্যের stock ফেরত দাও — পেজ বন্ধ হলে cart এর stock ফ্রি হয়
+  if(cart&&cart.length){
+    cart.forEach(item=>{
+      const p=PRODS.find(x=>x.id===item.id);
+      if(p)p.stock=Math.min((p.stock||0)+item.qty,9999);
+    });
+    const stockMap={};PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
+    localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+    cart=[];
+    localStorage.setItem('vc_cart',JSON.stringify(cart));
+  }
 });
 function exitWaitAndBrowse(){
   // Close overlay but keep polling in background
@@ -4522,14 +4612,18 @@ function updateCatCarousel(){
   }
   const prev=document.getElementById('catPrevBtn');
   const next=document.getElementById('catNextBtn');
-  if(prev)prev.style.opacity=catPage<=0?'0.3':'1';
-  if(next)next.style.opacity=catPage>=maxPage?'0.3':'1';
+  if(prev)prev.style.opacity='1';
+  if(next)next.style.opacity='1';
 }
 function catCarouselSlide(dir,btn){
   const items=getCatItems();
   const total=items.length;
+  if(total===0)return;
   const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
-  catPage=Math.max(0,Math.min(catPage+dir,maxPage));
+  catPage=catPage+dir;
+  // ইনফিনিটি লুপ — শেষ হলে শুরু থেকে, শুরুর আগে গেলে শেষ থেকে
+  if(catPage>maxPage)catPage=0;
+  if(catPage<0)catPage=maxPage;
   updateCatCarousel();
   // Click feedback: color ০.৫ সেকেন্ড পরে reset হবে
   if(btn){
@@ -4558,35 +4652,53 @@ document.addEventListener('DOMContentLoaded',function(){
 // Rebuild carousel when categories are loaded from admin
 function loadCustomCategories(){
   const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
-  if(!saved||!saved.length)return;
-  const grid=document.getElementById('catCardsGrid');
   const catBar=document.querySelector('.cat-inner');
-  if(!grid)return;
-  // Clear existing cards and rebuild
-  grid.innerHTML='';
-  const allCard=document.createElement('div');
-  allCard.className='cat-card';
-  allCard.innerHTML='<div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div>';
-  allCard.onclick=()=>filterCat('all',null);
-  grid.appendChild(allCard);
-  saved.forEach(cat=>{
-    // Add to grid
-    const card=document.createElement('div');
-    card.className='cat-card';
-    card.innerHTML=`<div class="cat-card-icon">${escHtml(cat.icon||'📦')}</div><div class="cat-card-name">${escHtml(cat.name)}</div>`;
-    card.onclick=()=>filterCat(cat.id,null);
-    grid.appendChild(card);
-    // Add to cat-bar if not exists
-    if(catBar&&!catBar.querySelector(`[data-cat="${cat.id}"]`)){
+  const grid=document.getElementById('catCardsGrid');
+
+  // DEFAULT categories (যদি vc_categories না থাকে)
+  const defaultCats=[
+    {id:'all', name:'সকল পণ্য', icon:'🛍️'},
+    {id:'rgb', name:'RGB Lights', icon:'💡'},
+    {id:'smartwatch', name:'Smartwatches', icon:'⌚'},
+    {id:'powerbank', name:'Power Bank', icon:'🔋'},
+    {id:'tws', name:'TWS Earbuds', icon:'🎧'},
+    {id:'headphone', name:'BT Headphones', icon:'🎵'},
+    {id:'lamp', name:'Acrylic Lamp', icon:'🪔'},
+    {id:'fan', name:'Rechargeable Fan', icon:'💨'},
+  ];
+
+  // যে list ব্যবহার করা হবে
+  const cats = (saved && saved.length) ? saved : defaultCats;
+
+  // ── Cat Bar (pill strip) rebuild ──
+  if(catBar){
+    catBar.innerHTML='';
+    cats.forEach((cat,i)=>{
       const pill=document.createElement('button');
-      pill.className='cat-pill';
+      pill.className='cat-pill'+(cat.id==='all'?' active':'');
       pill.dataset.cat=cat.id;
       pill.textContent=cat.name;
-      pill.onclick=()=>filterCat(cat.id,pill);
+      // onclick function — event parameter সহ
+      pill.addEventListener('click', function(e){ filterCat(cat.id, pill, e); });
       catBar.appendChild(pill);
-    }
-  });
+    });
+  }
+
+  // ── Cat Cards Grid rebuild ──
+  if(grid){
+    grid.innerHTML='';
+    cats.forEach(cat=>{
+      // 'all' আলাদাভাবে যোগ হয়
+      const card=document.createElement('div');
+      card.className='cat-card';
+      card.innerHTML=`<div class="cat-card-icon">${escHtml(cat.icon||'📦')}</div><div class="cat-card-name">${escHtml(cat.name)}</div>`;
+      card.onclick=()=>filterCat(cat.id,null);
+      grid.appendChild(card);
+    });
+  }
+
   updateCatCarousel();
+  updateCatPillCounts();
 }
 </script>
 
