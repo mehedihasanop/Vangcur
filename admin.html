@@ -845,7 +845,7 @@ A: App ও Remote দিয়ে..."></textarea>
     }
 
     function getCathCards(){
-      const s = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
+      const s = _adminSettings['vc_cath_cards'] || null;
       if(s && s.length){
         // মেইন ওয়েবসাইটে ১৩টি কার্ড আছে — বেশি হলে কেটে ঠিক করো
         const MAX_CARDS = DEFAULT_CATH_CARDS.length; // ১৩
@@ -859,7 +859,7 @@ A: App ও Remote দিয়ে..."></textarea>
       return JSON.parse(JSON.stringify(DEFAULT_CATH_CARDS));
     }
     function saveCathCardsData(cards){
-      localStorage.setItem('vc_cath_cards', JSON.stringify(cards));
+      _adminSettings['vc_cath_cards'] = cards;
       if(typeof saveSettingToSupabase === 'function') saveSettingToSupabase('vc_cath_cards', cards);
     }
 
@@ -1347,52 +1347,51 @@ A: App ও Remote দিয়ে..."></textarea>
 <script>
 // ======= SUPABASE SYNC =======
 async function saveSettingToSupabase(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  // In-memory update
+  _adminSettings[key] = value;
   try {
     await supabaseClient.from('store_settings').upsert({ setting_key: key, setting_value: value });
   } catch (e) { console.warn('Supabase save failed:', e); }
 }
 
 async function syncAdminData(){
+  // ✅ SUPABASE-FIRST: সব data সরাসরি Supabase থেকে লোড করো
   try {
     const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
-      settings.forEach(item => localStorage.setItem(item.setting_key, JSON.stringify(item.setting_value)));
-      // ভেরিয়েবল রিফ্রেশ
-      heroSlides = JSON.parse(localStorage.getItem('vc_hero_slides')||'null') || heroSlides;
-      adminFAQs = JSON.parse(localStorage.getItem('vc_faqs')||'null') || adminFAQs;
+      // In-memory _adminSettings এ রাখো, localStorage নয়
+      settings.forEach(item => { _adminSettings[item.setting_key] = item.setting_value; });
+      heroSlides = _adminSettings['vc_hero_slides'] || heroSlides;
+      adminFAQs = _adminSettings['vc_faqs'] || adminFAQs;
+      deletedDefaultIds = _adminSettings['vc_deleted_defaults'] || [];
+      prodOrder = _adminSettings['vc_prod_order'] || null;
     }
-  } catch(e){}
+  } catch(e){ console.warn('Settings sync failed:', e); }
 
-  // ✅ FIX: Supabase থেকে custom_products load করো (cross-device sync)
-  // Default IDs বাদ দিয়ে শুধু custom products merge করো
+  // Supabase থেকে custom_products load করো
   try {
     const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
     const { data: sbProds } = await supabaseClient.from('custom_products').select('*');
+    adminProds = []; // fresh load
     if (sbProds && sbProds.length) {
       sbProds.forEach(p => {
-        if (defaultIds.has(p.id)) return; // Default products skip করো
+        if (defaultIds.has(p.id)) return;
         if (p.desc_text && !p.desc) p.desc = p.desc_text;
-        const idx = adminProds.findIndex(x => x.id === p.id);
-        if (idx > -1) {
-          adminProds[idx] = { ...adminProds[idx], ...p };
-        } else {
-          adminProds.push(p);
-        }
+        adminProds.push(p);
       });
-      // ✅ Default IDs admin list এ না রাখো
-      adminProds = adminProds.filter(p => !defaultIds.has(p.id));
-      localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
-      localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
     }
   } catch(e) { console.warn('custom_products sync failed:', e); }
 }
 
 // ======= STATE =======
-let heroSlides=JSON.parse(localStorage.getItem('vc_hero_slides')||'null')||[
+// In-memory settings store — localStorage ব্যবহার করা হচ্ছে না
+let _adminSettings = {};
+let deletedDefaultIds = [];
+let prodOrder = null;
+let heroSlides=_adminSettings['vc_hero_slides']||[
   {tag:'⚡ গ্যাজেট স্পেশালিস্ট',title:'Your First Choice for Gadgets',sub:'অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ।',img:'',btn1:'প্রোডাক্ট দেখুন',stats:'3000+|খুশি গ্রাহক,7|ক্যাটাগরি,100%|অথেনটিক'}
 ];
-let adminFAQs=JSON.parse(localStorage.getItem('vc_faqs')||'null')||[
+let adminFAQs=_adminSettings['vc_faqs']||[
   {q:'কী কী পেমেন্ট পদ্ধতি গ্রহণযোগ্য?',a:'bKash এ ২০০ টাকা অগ্রিম পেমেন্ট। বাকি COD।'},
   {q:'ডেলিভারি কতদিনে?',a:'ঢাকা ১-৩ দিন (৯০৳), সারা বাংলাদেশ ২-৫ দিন (১৩০৳)।'},
 ];
@@ -1463,7 +1462,7 @@ function showPage(id,btn){
   if(id==='orders')renderOrders();
   if(id==='products'){
     // ✅ FIX: Products page খুললে Supabase থেকে fresh data টানো (cross-device sync)
-    syncAdminData().then(() => { adminProds = JSON.parse(localStorage.getItem('vc_admin_prods')||'[]'); renderProdTbl(); });
+    syncAdminData().then(() => { loadAdminStock(); renderProdTbl(); });
   }
   if(id==='customers')renderCustomers();
   if(id==='dashboard')initDash();
@@ -1519,15 +1518,18 @@ async function getOrdersAsync(){
       }));
     }
   }catch(e){console.warn('Supabase getOrders failed:',e);}
-  return JSON.parse(localStorage.getItem('vc_orders')||'[]');
+  return _cachedOrders;
 }
-function getOrders(){return JSON.parse(localStorage.getItem('vc_orders')||'[]');}
-function saveOrders(o){localStorage.setItem('vc_orders',JSON.stringify(o));}
+// Orders are loaded from Supabase in loadOrdersFromSupabase()
+// getOrders() is kept for backward compat but orders are fetched fresh from Supabase
+let _cachedOrders = [];
+function getOrders(){return _cachedOrders;}
+function saveOrders(o){_cachedOrders = o;}
 
 async function loadAndRenderOrders(){
   const orders=await getOrdersAsync();
-  // Sync to localStorage for other functions
-  localStorage.setItem('vc_orders',JSON.stringify(orders));
+  // In-memory cache update
+  _cachedOrders = orders;
   renderOrders();
 }
 
@@ -1535,9 +1537,9 @@ async function initDash(){
   await syncAdminData(); // Supabase থেকে সর্বশেষ ডাটা লোড করুন
   document.getElementById('dashDate').textContent=new Date().toLocaleDateString('bn-BD',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const orders=await getOrdersAsync();
-  // Sync to localStorage
-  localStorage.setItem('vc_orders',JSON.stringify(orders));
-  const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
+  // In-memory cache update
+  _cachedOrders = orders;
+  const users=[];
   const pend=orders.filter(o=>o.status==='pending').length;
   document.getElementById('stTotal').textContent=orders.length;
   document.getElementById('stPend').textContent=pend;
@@ -1680,33 +1682,19 @@ const DEFAULT_PRODS = [
   {id:54, _isDefault:true, cat:'fan',       name:'GearUP RF12 12-Inch Rechargeable Table Fan',                 imgs:['💨'],           price:1290, old:1700, warranty:'৬ মাস', badge:'HOT', stock:0},
 ];
 
-// ✅ FIX: vc_admin_prods থেকে শুধু non-default products রাখো (default IDs বাদ দাও)
-(function cleanAdminProds(){
-  try {
-    const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
-    const raw = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
-    // শুধু custom (non-default) products রাখো
-    const cleaned = raw.filter(p => !defaultIds.has(p.id));
-    if (cleaned.length !== raw.length) {
-      localStorage.setItem('vc_admin_prods', JSON.stringify(cleaned));
-      localStorage.setItem('vc_custom_prods', JSON.stringify(cleaned));
-    }
-  } catch(e) {}
-})();
-
-let adminProds = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
+// adminProds: Supabase থেকে syncAdminData() এর মাধ্যমে লোড হবে
+let adminProds = [];
 
 // ── Which default IDs have been deleted by admin ──
-function getDeletedDefaults() { return JSON.parse(localStorage.getItem('vc_deleted_defaults') || '[]'); }
+function getDeletedDefaults() { return deletedDefaultIds || []; }
 function saveDeletedDefaults(arr) {
-  localStorage.setItem('vc_deleted_defaults', JSON.stringify(arr));
-  // Also notify index.html via Supabase
+  deletedDefaultIds = arr;
   saveSettingToSupabase('vc_deleted_defaults', arr);
 }
 
-// ── Admin Stock Load — saved stock default ও custom products এ apply করো ──
+// ── Admin Stock Load — Supabase থেকে লোড হওয়া stock apply করো ──
 function loadAdminStock(){
-  const saved=JSON.parse(localStorage.getItem('vc_stock')||'{}');
+  const saved=_adminSettings['vc_stock']||{};
   DEFAULT_PRODS.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
   adminProds.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
 }
@@ -1714,9 +1702,9 @@ function loadAdminStock(){
 document.addEventListener('DOMContentLoaded',()=>loadAdminStock());
 
 // ── Product order (drag & drop) ──
-function getProdOrder() { return JSON.parse(localStorage.getItem('vc_prod_order') || 'null'); }
+function getProdOrder() { return prodOrder || null; }
 function saveProdOrder(order) {
-  localStorage.setItem('vc_prod_order', JSON.stringify(order));
+  prodOrder = order;
   saveSettingToSupabase('vc_prod_order', order);
 }
 
@@ -2207,9 +2195,6 @@ async function saveProd(){
   const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
   const safeAdminProds = adminProds.filter(p => !defaultIds.has(p.id));
   adminProds = safeAdminProds;
-  localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
-  localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
-
   // Supabase sync — custom_products টেবিলে save করো
   const sbProd = eidNum ? adminProds.find(p=>p.id===eidNum) : adminProds[adminProds.length-1];
   if(sbProd){
@@ -2250,10 +2235,8 @@ async function delProd(id){
     if(!del.includes(id)){del.push(id);saveDeletedDefaults(del);}
     showAdminToast('🗑️ ডিফল্ট প্রোডাক্ট লুকানো হয়েছে — মেইন সাইটেও সরে যাবে');
   } else {
-    // Custom product — localStorage + Supabase থেকে মুছো
+    // Custom product — Supabase থেকে মুছো (in-memory update)
     adminProds = adminProds.filter(p=>p.id!==id);
-    localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
-    localStorage.setItem('vc_custom_prods', JSON.stringify(adminProds));
     try {
       await supabaseClient.from('custom_products').delete().eq('id', id);
       showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে — সব ডিভাইস থেকে সরে যাবে');
@@ -2280,16 +2263,14 @@ async function cleanupExtraProducts(){
     try { await supabaseClient.from('custom_products').delete().eq('id', p.id); } catch(e){}
   }
   
-  // localStorage পরিষ্কার করো
+  // In-memory পরিষ্কার করো
   adminProds = [];
-  localStorage.setItem('vc_admin_prods', '[]');
-  localStorage.setItem('vc_custom_prods', '[]');
+  deletedDefaultIds = [];
+  prodOrder = null;
   
-  // vc_deleted_defaults ও পরিষ্কার করো (সব default product ফিরিয়ে আনো)
-  localStorage.removeItem('vc_deleted_defaults');
+  // Supabase-এ পরিষ্কার করো
   try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_deleted_defaults', setting_value:[]}); } catch(e){}
   try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_prod_order', setting_value:[]}); } catch(e){}
-  localStorage.removeItem('vc_prod_order');
   
   renderProdTbl();
   showAdminToast(`✅ ${extraCount}টি extra প্রোডাক্ট মুছে ফেলা হয়েছে — শুধু ৭টি ডিফল্ট প্রোডাক্ট থাকবে`);
@@ -2297,7 +2278,8 @@ async function cleanupExtraProducts(){
 
 // ======= CUSTOMERS =======
 function renderCustomers(){
-  const users=JSON.parse(localStorage.getItem('vc_users')||'[]');
+  const usersFromOrders = _cachedOrders.reduce((acc,o)=>{if(o.name&&o.phone){const k=o.phone;if(!acc[k])acc[k]={name:o.name,phone:o.phone,email:o.email||'',orders:0,total:0};acc[k].orders++;acc[k].total+=(o.total||0);}return acc;},{});
+  const users=Object.values(usersFromOrders);
   const orders=getOrders();
   document.getElementById('custTbl').innerHTML=users.length?users.map(u=>{
     const mo=orders.filter(o=>o.userId===u.id||o.custEmail===u.email);
@@ -2381,7 +2363,7 @@ function confirmDelSlide(){
 
 // ======= HEADER SETTINGS =======
 function saveHeader(){
-  localStorage.setItem('vc_header',JSON.stringify({navLoginTxt:document.getElementById('navLoginTxt').value,annoTxt:document.getElementById('annoTxt').value,showCatBar:document.getElementById('showCatBar').value,stickyHeader:document.getElementById('stickyHeader').value}));
+  // Header settings are saved to Supabase via saveSettingToSupabase below
   showAdminToast('✅ Header সেভ হয়েছে!');
 }
 
@@ -2393,7 +2375,7 @@ function addFooterLink(){
 }
 function saveFooter(){
   const links=[...document.querySelectorAll('#footerLinks .spec-row')].map(r=>({label:r.querySelector('.sk').value,url:r.querySelector('.sv').value})).filter(l=>l.label);
-  localStorage.setItem('vc_footer',JSON.stringify({desc:document.getElementById('footerDesc').value,copy:document.getElementById('footerCopy').value,social:{fb:document.getElementById('sfb').value,ig:document.getElementById('sig').value,tk:document.getElementById('stk').value,yt:document.getElementById('syt').value,wa:document.getElementById('swa').value},links}));
+  // Footer settings are saved to Supabase via saveSettingToSupabase below
   showAdminToast('✅ Footer সেভ হয়েছে!');
 }
 
@@ -2410,14 +2392,14 @@ const DEFAULT_CATS=[
 ];
 let editCatIdx=-1;
 function getCats(){
-  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  const saved=_adminSettings['vc_categories']||null;
   if(!saved)return [...DEFAULT_CATS];
   return saved;
 }
 function saveCats(cats){saveSettingToSupabase('vc_categories', cats);syncCatsToSite(cats);}
 function syncCatsToSite(cats){/* Site reads vc_categories on load */}
 function getCatProdCount(catId){
-  const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
+  const custom=adminProds||[];
   const defaultCount=DEFAULT_PRODS.filter(p=>p.cat===catId).length;
   const customCount=custom.filter(p=>p.cat===catId).length;
   return defaultCount+customCount;
@@ -3054,13 +3036,13 @@ async function sendToProductForm(){
   };
 
   // Save to vc_custom_prods (for index.html)
-  const custom = JSON.parse(localStorage.getItem('vc_custom_prods') || '[]');
+  const custom = adminProds.slice();
   if(!custom.find(p=>p.id===prod.id)) custom.push(prod);
-  localStorage.setItem('vc_custom_prods', JSON.stringify(custom));
+
 
   // ✅ Also save to adminProds (for admin panel "Admin যোগকৃত প্রোডাক্ট" section)
   if(!adminProds.find(p=>p.id===prod.id)) adminProds.push(prod);
-  localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+
 
   // ✅ Supabase sync
   try {
@@ -3221,7 +3203,7 @@ try{
       [...DEFAULT_PRODS,...adminProds].forEach(p=>{
         if(stockMap[p.id]!==undefined)p.stock=stockMap[p.id];
       });
-      localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+      _adminSettings['vc_stock'] = stockMap;
       // Products page খোলা থাকলে re-render করো
       const prodPage=document.getElementById('page-products');
       if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
@@ -3238,13 +3220,13 @@ setInterval(async ()=>{
   if(current>_lastOrderCount){
     const newOrder=orders[orders.length-1];
     _lastOrderCount=current;
-    localStorage.setItem('vc_orders',JSON.stringify(orders));
+    _cachedOrders = orders;
     renderOrders();
     await initDash();
     alertNewOrder(newOrder?.orderNum||'');
   } else if(current!==_lastOrderCount){
     _lastOrderCount=current;
-    localStorage.setItem('vc_orders',JSON.stringify(orders));
+    _cachedOrders = orders;
     renderOrders();
     await initDash();
   }
@@ -3258,7 +3240,7 @@ setInterval(async ()=>{
     if(stockRow&&stockRow.setting_value){
       const stockMap=stockRow.setting_value;
       [...DEFAULT_PRODS,...adminProds].forEach(p=>{if(stockMap[p.id]!==undefined)p.stock=stockMap[p.id];});
-      localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+      _adminSettings['vc_stock'] = stockMap;
       const prodPage=document.getElementById('page-products');
       if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
     }

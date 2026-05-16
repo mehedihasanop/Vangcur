@@ -1635,21 +1635,21 @@ const PRODS=[
     tags:'ফ্যান fan টেবিল table রিচার্জেবল rechargeable চার্জযোগ্য লোডশেডিং loadshedding বিদ্যুৎ বায়ু বাতাস পোর্টেবল portable tablefan rechargablefan'}
 ];
 
-// ✅ Apply deleted defaults (admin deleted default products)
-(function applyDeletedDefaults(){
+// ✅ Apply deleted defaults — Supabase থেকে আসা data দিয়ে কাজ করে (localStorage নয়)
+function applyDeletedDefaults(deletedArr){
   try{
-    const deleted=JSON.parse(localStorage.getItem('vc_deleted_defaults')||'[]');
+    const deleted=deletedArr||[];
     deleted.forEach(id=>{
       const idx=PRODS.findIndex(p=>p.id===id);
       if(idx>-1)PRODS.splice(idx,1);
     });
   }catch(e){}
-})();
+}
 
-// ✅ Apply product order (drag & drop from admin)
-function applyProdOrder(){
+// ✅ Apply product order — Supabase থেকে আসা data দিয়ে কাজ করে (localStorage নয়)
+function applyProdOrder(orderArr){
   try{
-    const order=JSON.parse(localStorage.getItem('vc_prod_order')||'null');
+    const order=orderArr||null;
     if(!order||!order.length)return;
     const orderMap={};
     order.forEach((id,i)=>{orderMap[id]=i;});
@@ -1664,14 +1664,15 @@ function applyProdOrder(){
 const DISTRICTS=['ঢাকা','চট্টগ্রাম','রাজশাহী','খুলনা','বরিশাল','সিলেট','রংপুর','ময়মনসিংহ','কুমিল্লা','ফেনী','নোয়াখালী','লক্ষ্মীপুর','চাঁদপুর','ব্রাহ্মণবাড়িয়া','কিশোরগঞ্জ','নরসিংদী','নারায়ণগঞ্জ','মুন্সীগঞ্জ','মানিকগঞ্জ','গাজীপুর','টাঙ্গাইল','ফরিদপুর','মাদারীপুর','শরীয়তপুর','রাজবাড়ী','গোপালগঞ্জ','বগুড়া','নওগাঁ','নাটোর','পাবনা','সিরাজগঞ্জ','জয়পুরহাট','চাঁপাইনবাবগঞ্জ','যশোর','সাতক্ষীরা','মেহেরপুর','নড়াইল','চুয়াডাঙ্গা','কুষ্টিয়া','মাগুরা','ঝিনাইদহ','বাগেরহাট','পিরোজপুর','ঝালকাঠি','পটুয়াখালী','বরগুনা','ভোলা','সুনামগঞ্জ','হবিগঞ্জ','মৌলভীবাজার','নেত্রকোনা','জামালপুর','শেরপুর','গাইবান্ধা','নীলফামারী','লালমনিরহাট','কুড়িগ্রাম','ঠাকুরগাঁও','পঞ্চগড়','দিনাজপুর','কক্সবাজার','বান্দরবান','রাঙ্গামাটি','খাগড়াছড়ি'];
 
 // STATE
-// S-5: Load persisted stock from localStorage
-function loadStock(){
-  const saved=JSON.parse(localStorage.getItem('vc_stock')||'{}');
-  PRODS.forEach(p=>{if(saved[p.id]!==undefined)p.stock=saved[p.id];});
+// S-5: Load stock from in-memory stockData (loaded from Supabase), not localStorage
+let _stockData = {};
+function loadStock(stockMap){
+  if(stockMap) _stockData = stockMap;
+  PRODS.forEach(p=>{if(_stockData[p.id]!==undefined)p.stock=_stockData[p.id];});
 }
 async function saveStock(){
   const map={};PRODS.forEach(p=>{map[p.id]=p.stock;});
-  localStorage.setItem('vc_stock',JSON.stringify(map));
+  _stockData = map;
   try {
     await supabaseClient.from('store_settings').upsert({ setting_key: 'vc_stock', setting_value: map });
   } catch (e) {}
@@ -1686,9 +1687,11 @@ let activeCat='all'; // Global category tracker
 const HERO_IMAGES=[];
 
 // APPLY SETTINGS FROM ADMIN (logo, contact, faqs, footer)
+// _settings: Supabase থেকে লোড হওয়া settings object
+let _settings = {};
 function applyAdminSettings(){
   // Logo
-  const logo=JSON.parse(localStorage.getItem('vc_logo')||'null');
+  const logo=_settings['vc_logo']||null;
   if(logo){
     const lm=document.querySelector('.logo-mark');const ls=document.querySelector('.logo-sub');
     if(lm&&logo.main)lm.textContent=logo.main;
@@ -1698,10 +1701,10 @@ function applyAdminSettings(){
     if(logo.favicon){const fi=document.querySelector("link[rel='icon']")||document.createElement('link');fi.rel='icon';fi.href=logo.favicon;document.head.appendChild(fi);}
   }
   // Brand/title
-  const brand=JSON.parse(localStorage.getItem('vc_brand')||'null');
+  const brand=_settings['vc_brand']||null;
   if(brand&&brand.title)document.title=brand.title;
   // Contact settings (WhatsApp number etc.)
-  const contact=JSON.parse(localStorage.getItem('vc_contact')||'null');
+  const contact=_settings['vc_contact']||null;
   if(contact){
     // Update WhatsApp links
     if(contact.wa){
@@ -1714,7 +1717,7 @@ function applyAdminSettings(){
   FAQS.length=0;
   DEFAULT_FAQS.forEach(f=>FAQS.push(f));
   try{
-    const rawFaqs=localStorage.getItem('vc_faqs');
+    const rawFaqs=_settings['vc_faqs']?JSON.stringify(_settings['vc_faqs']):null;
     if(rawFaqs){
       const savedFAQs=JSON.parse(rawFaqs);
       if(Array.isArray(savedFAQs) && savedFAQs.length>0 && savedFAQs[0].q && savedFAQs[0].a){
@@ -2072,40 +2075,35 @@ function resetHeroAuto(){}
 
 // INIT
 document.addEventListener('DOMContentLoaded',async ()=>{
-  // ✅ Fix: Supabase থেকে আগে সব settings আনো, তারপর apply করো
+  // ✅ SUPABASE-FIRST: সব settings ও products সরাসরি Supabase থেকে লোড করো
+  // localStorage ব্যবহার করা হচ্ছে না — সব ডিভাইসে একই data দেখাবে
+
+  // Step 1: Supabase থেকে সব settings এক সাথে আনো
   try {
     const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
       settings.forEach(item => {
         const val = item.setting_value;
-        // vc_faqs empty array হলে localStorage এ save করো না — default দেখাবে
-        if(item.setting_key === 'vc_faqs' && Array.isArray(val) && val.length === 0){
-          localStorage.removeItem('vc_faqs');
-          return;
-        }
-        localStorage.setItem(item.setting_key, JSON.stringify(val));
+        _settings[item.setting_key] = val;
       });
     }
-  } catch (e) { console.warn('Supabase settings load failed, using localStorage cache', e); }
+  } catch (e) { console.warn('Supabase settings load failed:', e); }
 
-  loadStock();
-  applyAdminSettings(); // ✅ Supabase fetch এর পরে call হচ্ছে এখন
-  // ১. localStorage থেকে custom products যোগ করো (instant) — শুধু non-default IDs
+  // Step 2: stock apply করো (Supabase data থেকে)
+  loadStock(_settings['vc_stock'] || {});
+
+  // Step 3: deleted defaults apply করো
+  applyDeletedDefaults(_settings['vc_deleted_defaults'] || []);
+
+  // Step 4: Admin settings apply করো (logo, brand, contact, FAQs)
+  applyAdminSettings();
+
+  // Step 5: Supabase থেকে custom products আনো (সরাসরি — no localStorage)
   const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
-  const customLocal=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
-  customLocal.filter(p => !defaultIds.has(p.id)).forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
-  applyProdOrder(); // ✅ Apply drag & drop order from admin
-  DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
-  renderProds(PRODS);
-  updateCatPillCounts();
-  renderFAQ();
-  // ২. Background এ Supabase থেকে নতুন products আনো
-  (async()=>{try{
+  try{
     const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
     if(sbProds&&sbProds.length){
-      let changed=false;
       sbProds.forEach(p=>{
-        // ✅ FIX: Supabase field mapping — সব field সঠিকভাবে map করো
         const mapped = {
           id: p.id,
           cat: p.cat || 'rgb',
@@ -2124,16 +2122,22 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           faqs: Array.isArray(p.faqs) ? p.faqs : [],
           closing: p.closing || '',
         };
-        if(!PRODS.find(x=>x.id===mapped.id)){PRODS.push(mapped);changed=true;}
+        if(!PRODS.find(x=>x.id===mapped.id)){PRODS.push(mapped);}
         else {
-          // ✅ FIX: existing product update করো
           const idx = PRODS.findIndex(x=>x.id===mapped.id);
-          if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};changed=true;}
+          if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};}
         }
       });
-      if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
     }
-  }catch(e){}})();
+  }catch(e){console.warn('custom_products load failed:',e);}
+
+  // Step 6: Product order apply করো (Supabase থেকে)
+  applyProdOrder(_settings['vc_prod_order'] || null);
+
+  DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
+  renderProds(PRODS);
+  updateCatPillCounts();
+  renderFAQ();
 
   // ✅ Fix #15: Login থাকলে Supabase থেকে wishlist load করো
   if(currentUser){
@@ -2148,16 +2152,18 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         if(!payload.new||!payload.new.setting_key)return;
         const key=payload.new.setting_key;
         const val=payload.new.setting_value;
-        // localStorage sync
-        localStorage.setItem(key, JSON.stringify(val));
+        // In-memory settings update (no localStorage)
+        _settings[key] = val;
         // ✅ যেকোনো settings change হলে live apply
         if(key==='vc_stock'){
           PRODS.forEach(p=>{if(val[p.id]!==undefined)p.stock=val[p.id];});
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
           renderProds(cur);
         } else if(key==='vc_hero_slides'){
+          heroSlides = val;
           initCathSlider(); // hero slide বদলালে তাৎক্ষণিক update
         } else if(key==='vc_logo'||key==='vc_brand'||key==='vc_contact'){
+          _settings[key] = val;
           applyAdminSettings();
         } else if(key==='vc_faqs'){
           // FAQ আলাদাভাবে handle করো
@@ -2166,6 +2172,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           }
           if(document.getElementById('faqGrid'))renderFAQ();
         } else if(key==='vc_categories'){
+          _settings['vc_categories'] = val;
           renderCatBar(); // category bar re-render
         } else if(key==='vc_shipping'){
           // shipping cost cache clear — পরের order এ নতুন দাম দেখাবে
@@ -2541,7 +2548,7 @@ let _filterCatLock=false;
 function updateCatPillCounts(){
   const catLabels={all:'সকল পণ্য',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
   // Custom categories থেকে label নাও
-  const savedCats=JSON.parse(localStorage.getItem('vc_categories')||'null')||[];
+  const savedCats=_settings['vc_categories']||[];
   savedCats.forEach(c=>{if(c.id&&c.name)catLabels[c.id]=c.name;});
 
   document.querySelectorAll('.cat-pill').forEach(b=>{
@@ -2561,7 +2568,7 @@ function updateCatPillCounts(){
 }
 
 function renderCatBar(){
-  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  const saved=_settings['vc_categories']||null;
   if(!saved||!saved.length)return;
   // loadCustomCategories দিয়ে পুরো rebuild করো — এটাই সঠিক পথ
   loadCustomCategories();
@@ -2584,7 +2591,7 @@ function filterCat(cat,btn,evt){
   }
   const titles={all:'সকল',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
   // Custom categories থেকেও title নাও
-  const savedCats=JSON.parse(localStorage.getItem('vc_categories')||'null')||[];
+  const savedCats=_settings['vc_categories']||[];
   savedCats.forEach(c=>{if(c.id&&c.name)titles[c.id]=c.name;});
 
   const list=cat==='all'?PRODS:PRODS.filter(p=>p.cat===cat);
@@ -3257,7 +3264,7 @@ function addToCart(id,qty){
   const addQty=Math.min(qty,availableStock);
   // ✅ Add to Cart ক্লিকের সাথেই stock কমানো (race condition ঠেকাতে)
   p.stock=Math.max(0,p.stock-addQty);
-  saveStock(); // Supabase + localStorage এ realtime sync
+  saveStock(); // Supabase এ realtime sync
   const ex=cart.find(x=>x.id===id);
   if(ex)ex.qty+=addQty; else cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty:addQty,cat:p.cat});
   localStorage.setItem('vc_cart',JSON.stringify(cart));
@@ -3433,7 +3440,7 @@ function goS3(){
   // If l4 is provided, it must be exactly 4 digits
   if(l4&&l4.length!==4){showFerr('eL4',true);return;}
   showFerr('eTxn',false);showFerr('eL4',false);
-  const shipCfg=JSON.parse(localStorage.getItem('vc_shipping')||'{"dhaka":90,"out":130,"bd":130}');
+  const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
   const tot=sub+sc;
@@ -3468,7 +3475,7 @@ async function confirmOrder(){
   const ts=Date.now().toString(36).toUpperCase();
   const rnd=Math.floor(Math.random()*9000+1000);
   const num='#VC-'+ts+'-'+rnd;
-  const shipCfg=JSON.parse(localStorage.getItem('vc_shipping')||'{"dhaka":90,"out":130,"bd":130}');
+  const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   // S-5+S-6: Verify prices from PRODS (authoritative), ignore any tampered cart prices
   const verifiedItems=orderItems.map(i=>{
@@ -3919,7 +3926,7 @@ window.addEventListener('pagehide',()=>{
       if(p)p.stock=Math.min((p.stock||0)+item.qty,9999);
     });
     const stockMap={};PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
-    localStorage.setItem('vc_stock',JSON.stringify(stockMap));
+    _stockData = stockMap;
     cart=[];
     localStorage.setItem('vc_cart',JSON.stringify(cart));
   }
@@ -4513,10 +4520,10 @@ function renderRelated(prod){
 
 // HERO CATH-CARD DATA LOADER — Admin থেকে customize করা ডেটা লোড করে
 function loadCathCardData(){
-  const saved = JSON.parse(localStorage.getItem('vc_cath_cards') || 'null');
+  const saved = _settings['vc_cath_cards'] || null;
 
-  // ✅ Fix: localStorage-এ কম কার্ড থাকলেও সব HTML কার্ড দেখানো হবে
-  // HTML-এ ১৩টি কার্ড আছে — localStorage-এ যতটা থাকুক, বাকিগুলো নিজেই দেখাবে
+  // ✅ Fix: Supabase-এ কম কার্ড থাকলেও সব HTML কার্ড দেখানো হবে
+  // HTML-এ ১৩টি কার্ড আছে — Supabase-এ যতটা থাকুক, বাকিগুলো নিজেই দেখাবে
   const track = document.getElementById('cathDuoTrack');
   if(!track) return;
 
@@ -4651,7 +4658,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 // Rebuild carousel when categories are loaded from admin
 function loadCustomCategories(){
-  const saved=JSON.parse(localStorage.getItem('vc_categories')||'null');
+  const saved=_settings['vc_categories']||null;
   const catBar=document.querySelector('.cat-inner');
   const grid=document.getElementById('catCardsGrid');
 
