@@ -1674,8 +1674,15 @@ async function saveStock(){
   const map={};PRODS.forEach(p=>{map[p.id]=p.stock;});
   _stockData = map;
   try {
+    // vc_stock এ সব product এর stock save করো
     await supabaseClient.from('store_settings').upsert({ setting_key: 'vc_stock', setting_value: map });
-  } catch (e) {}
+    // Custom products এর stock তাদের নিজস্ব টেবিলেও update করো
+    const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
+    const customUpdates = PRODS.filter(p => !defaultIds.has(p.id));
+    for(const p of customUpdates){
+      await supabaseClient.from('custom_products').update({stock: p.stock}).eq('id', p.id);
+    }
+  } catch (e) { console.warn('saveStock error:', e); }
 }
 let cart=JSON.parse(localStorage.getItem('vc_cart')||'[]');
 let currentUser=JSON.parse(localStorage.getItem('vc_user')||'null');

@@ -2135,6 +2135,17 @@ function addSpecRow(k='',v=''){
   document.getElementById('specEd').appendChild(d);
 }
 
+// ✅ সব product এর stock একসাথে Supabase vc_stock এ save করে
+async function syncStockToSupabase(){
+  try{
+    const stockMap={};
+    DEFAULT_PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
+    adminProds.forEach(p=>{stockMap[p.id]=p.stock;});
+    _adminSettings['vc_stock']=stockMap;
+    await supabaseClient.from('store_settings').upsert({setting_key:'vc_stock',setting_value:stockMap});
+  }catch(e){console.warn('Stock sync failed:',e);}
+}
+
 async function saveProd(){
   const name=document.getElementById('pName').value.trim();
   const price=parseInt(document.getElementById('pPrice').value);
@@ -2214,8 +2225,10 @@ async function saveProd(){
       }]).select().single();
       if(error)throw error;
       savedProd = data;
-      adminProds.push(savedProd);
+      adminProds.push(savedProd); // আগে push করো, তারপর stock sync
     }
+    // ✅ vc_stock আপডেট করো — নতুন product এর stock সহ Supabase এ save হবে
+    await syncStockToSupabase();
     showAdminToast('✅ প্রোডাক্ট সেভ হয়েছে — সব ডিভাইসে দেখা যাবে');
   }catch(e){
     console.error('Supabase product save failed:',e);
@@ -3046,6 +3059,7 @@ async function sendToProductForm(){
     // adminProds এ সঠিক id সহ যোগ করো
     adminProds = adminProds.filter(p=>p.id!==prod.id); // temp entry সরাও
     adminProds.push(savedProd);
+    await syncStockToSupabase(); // stock Supabase এ sync করো
     showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
   } catch(e){
     console.error('Supabase AI product save failed:', e);
