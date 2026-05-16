@@ -900,7 +900,7 @@ body.dark .prod-badge{opacity:.88}
     </a>
     <div class="nav-search">
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" id="desktopSearchInput" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'desktop')" onkeydown="handleSearchKey(event)" autocomplete="off">
+      <input type="search" id="desktopSearchInput" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'desktop')" onkeydown="handleSearchKey(event)" autocomplete="off" name="product-search" readonly onfocus="this.removeAttribute('readonly')" onblur="this.setAttribute('readonly','')" style="cursor:text">
       <div class="search-dropdown" id="desktopSearchDropdown"></div>
     </div>
     <div class="nav-actions">
@@ -927,7 +927,7 @@ body.dark .prod-badge{opacity:.88}
 <div class="mobile-search-bar" id="mobileSearchBar">
   <div class="mobile-search-wrap">
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="text" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'mobile')" onkeydown="handleSearchKey(event)" id="mobileSearchInput" autocomplete="off">
+    <input type="search" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'mobile')" onkeydown="handleSearchKey(event)" id="mobileSearchInput" autocomplete="off" name="mobile-product-search">
     <div class="search-dropdown" id="mobileSearchDropdown"></div>
   </div>
 </div>
@@ -1635,6 +1635,32 @@ const PRODS=[
     tags:'ফ্যান fan টেবিল table রিচার্জেবল rechargeable চার্জযোগ্য লোডশেডিং loadshedding বিদ্যুৎ বায়ু বাতাস পোর্টেবল portable tablefan rechargablefan'}
 ];
 
+// ✅ Apply deleted defaults (admin deleted default products)
+(function applyDeletedDefaults(){
+  try{
+    const deleted=JSON.parse(localStorage.getItem('vc_deleted_defaults')||'[]');
+    deleted.forEach(id=>{
+      const idx=PRODS.findIndex(p=>p.id===id);
+      if(idx>-1)PRODS.splice(idx,1);
+    });
+  }catch(e){}
+})();
+
+// ✅ Apply product order (drag & drop from admin)
+function applyProdOrder(){
+  try{
+    const order=JSON.parse(localStorage.getItem('vc_prod_order')||'null');
+    if(!order||!order.length)return;
+    const orderMap={};
+    order.forEach((id,i)=>{orderMap[id]=i;});
+    PRODS.sort((a,b)=>{
+      const ia=orderMap[a.id]!==undefined?orderMap[a.id]:99999;
+      const ib=orderMap[b.id]!==undefined?orderMap[b.id]:99999;
+      return ia-ib;
+    });
+  }catch(e){}
+}
+
 const DISTRICTS=['ঢাকা','চট্টগ্রাম','রাজশাহী','খুলনা','বরিশাল','সিলেট','রংপুর','ময়মনসিংহ','কুমিল্লা','ফেনী','নোয়াখালী','লক্ষ্মীপুর','চাঁদপুর','ব্রাহ্মণবাড়িয়া','কিশোরগঞ্জ','নরসিংদী','নারায়ণগঞ্জ','মুন্সীগঞ্জ','মানিকগঞ্জ','গাজীপুর','টাঙ্গাইল','ফরিদপুর','মাদারীপুর','শরীয়তপুর','রাজবাড়ী','গোপালগঞ্জ','বগুড়া','নওগাঁ','নাটোর','পাবনা','সিরাজগঞ্জ','জয়পুরহাট','চাঁপাইনবাবগঞ্জ','যশোর','সাতক্ষীরা','মেহেরপুর','নড়াইল','চুয়াডাঙ্গা','কুষ্টিয়া','মাগুরা','ঝিনাইদহ','বাগেরহাট','পিরোজপুর','ঝালকাঠি','পটুয়াখালী','বরগুনা','ভোলা','সুনামগঞ্জ','হবিগঞ্জ','মৌলভীবাজার','নেত্রকোনা','জামালপুর','শেরপুর','গাইবান্ধা','নীলফামারী','লালমনিরহাট','কুড়িগ্রাম','ঠাকুরগাঁও','পঞ্চগড়','দিনাজপুর','কক্সবাজার','বান্দরবান','রাঙ্গামাটি','খাগড়াছড়ি'];
 
 // STATE
@@ -2066,6 +2092,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // ১. localStorage থেকে custom products যোগ করো (instant)
   const customLocal=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
   customLocal.forEach(p=>{if(!PRODS.find(x=>x.id===p.id))PRODS.push(p);});
+  applyProdOrder(); // ✅ Apply drag & drop order from admin
   DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
   renderProds(PRODS);
   updateCatPillCounts();
@@ -2118,11 +2145,34 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           renderCatBar(); // category bar re-render
         } else if(key==='vc_shipping'){
           // shipping cost cache clear — পরের order এ নতুন দাম দেখাবে
+        } else if(key==='vc_deleted_defaults'){
+          // Admin deleted a default product — remove from PRODS
+          if(Array.isArray(val)){val.forEach(id=>{const idx=PRODS.findIndex(p=>p.id===id);if(idx>-1)PRODS.splice(idx,1);});}
+          applyProdOrder();
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          renderProds(cur);
+        } else if(key==='vc_prod_order'){
+          // Admin reordered products
+          applyProdOrder();
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          renderProds(cur);
         }
       })
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.new&&!PRODS.find(x=>x.id===payload.new.id)){
+          if(payload.new.desc_text && !payload.new.desc) payload.new.desc = payload.new.desc_text;
           PRODS.push(payload.new);
+          updateCatPillCounts();
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          renderProds(cur);
+        }
+      })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'custom_products'},async(payload)=>{
+        if(payload.new&&payload.new.id){
+          if(payload.new.desc_text && !payload.new.desc) payload.new.desc = payload.new.desc_text;
+          const idx=PRODS.findIndex(x=>x.id===payload.new.id);
+          if(idx>-1){PRODS[idx]=payload.new;}
+          else{PRODS.push(payload.new);}
           updateCatPillCounts();
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
           renderProds(cur);
@@ -3755,8 +3805,29 @@ document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){
     if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
     if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
-  } else if(document.visibilityState==='visible'&&pendingOrdId&&!_pollInterval){
-    startPolling();
+  } else if(document.visibilityState==='visible'){
+    // ✅ Fix: মোবাইলে page visible হলে Supabase থেকে নতুন products টানো
+    // এটা দরকার কারণ মোবাইলে localStorage admin-এর সাথে share হয় না
+    (async()=>{try{
+      const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
+      if(sbProds&&sbProds.length){
+        let changed=false;
+        sbProds.forEach(p=>{
+          if(p.desc_text && !p.desc) p.desc = p.desc_text;
+          const idx=PRODS.findIndex(x=>x.id===p.id);
+          if(idx>-1){
+            // Update existing product data
+            if(JSON.stringify(PRODS[idx])!==JSON.stringify(p)){PRODS[idx]=p;changed=true;}
+          } else {
+            PRODS.push(p);changed=true;
+          }
+        });
+        if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+      }
+    }catch(e){}})();
+    if(pendingOrdId&&!_pollInterval){
+      startPolling();
+    }
   }
 });
 window.addEventListener('pagehide',()=>{
@@ -4469,6 +4540,15 @@ function catCarouselSlide(dir,btn){
 }
 // Init carousel on load
 document.addEventListener('DOMContentLoaded',function(){
+  // ✅ Fix: Autofill clear — page load হলেই search input খালি করো
+  // Browser (Chrome/Edge) login autofill search field এ ঢুকিয়ে দেয়, এটা বন্ধ করা হচ্ছে
+  setTimeout(function(){
+    const dsi = document.getElementById('desktopSearchInput');
+    const msi = document.getElementById('mobileSearchInput');
+    if(dsi && dsi.value) { dsi.value = ''; }
+    if(msi && msi.value) { msi.value = ''; }
+  }, 100);
+
   updateCatCarousel();
   // Load custom categories from admin
   loadCustomCategories();

@@ -493,13 +493,7 @@ A: App ও Remote দিয়ে..."></textarea>
             <div class="fg"><label>প্রোডাক্টের নাম</label><input class="finp" id="r_name" placeholder="Auto-filled..."></div>
             <div class="fg"><label>ক্যাটাগরি</label>
               <select class="finp" id="r_cat">
-                <option value="rgb">RGB Lights</option>
-                <option value="smartwatch">Smartwatches</option>
-                <option value="powerbank">Power Bank</option>
-                <option value="tws">TWS</option>
-                <option value="headphone">BT Headphones</option>
-                <option value="lamp">Acrylic Lamp</option>
-                <option value="fan">Rechargeable Fan</option>
+                <!-- dynamic — getCats() থেকে পপুলেট হয় -->
               </select>
             </div>
           </div>
@@ -563,62 +557,26 @@ A: App ও Remote দিয়ে..."></textarea>
   <!-- ===== PRODUCTS ===== -->
   <div class="page" id="page-products">
     <div class="page-head">
-      <div><div class="page-title">প্রোডাক্ট ম্যানেজমেন্ট</div><div class="page-sub">প্রোডাক্ট যোগ, এডিট ও মুছুন</div></div>
+      <div><div class="page-title">প্রোডাক্ট ম্যানেজমেন্ট</div><div class="page-sub">প্রোডাক্ট যোগ, এডিট, মুছুন ও সাজান</div></div>
       <button class="btn btn-dark" onclick="openAddProd()">+ প্রোডাক্ট যোগ করুন</button>
     </div>
-
-    <!-- Admin-added products -->
     <div class="card">
-      <div class="card-head"><span class="card-title">🆕 Admin যোগকৃত প্রোডাক্ট</span><span class="card-sub" id="adminProdCount"></span></div>
-      <div class="search-bar">
+      <div class="search-bar" style="margin-bottom:10px">
         <input class="s-inp" placeholder="প্রোডাক্টের নাম..." id="pQ" oninput="renderProdTbl()">
-        <select class="s-sel" id="pCatF" onchange="renderProdTbl()">
-          <option value="all">সব ক্যাটাগরি</option>
-          <option value="rgb">RGB Lights</option>
-          <option value="smartwatch">Smartwatches</option>
-          <option value="powerbank">Power Bank</option>
-          <option value="tws">TWS</option>
-          <option value="headphone">BT Headphones</option>
-          <option value="lamp">Acrylic Lamp</option>
-          <option value="fan">Rechargeable Fan</option>
-        </select>
+        <select class="s-sel" id="pCatF" onchange="renderProdTbl()"><option value="all">সব ক্যাটাগরি</option></select>
         <button class="btn btn-outline btn-sm" onclick="document.getElementById('pQ').value='';document.getElementById('pCatF').value='all';renderProdTbl()">✕ Clear</button>
       </div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>ছবি</th><th>নাম</th><th>ক্যাট</th><th>মূল্য</th><th>স্টক</th><th>রেটিং</th><th>ওয়ারেন্টি</th><th>অ্যাকশন</th></tr></thead>
-        <tbody id="pTbl"></tbody>
-      </table></div>
-    </div>
-
-    <!-- Website default products (hardcoded in index.html) -->
-    <div class="card" style="margin-top:16px">
-      <div class="card-head">
-        <div>
-          <span class="card-title">🌐 Website Default প্রোডাক্ট</span>
-          <div class="card-sub" style="margin-top:2px">index.html এ hardcode করা প্রোডাক্টগুলো — এগুলো সবসময় ওয়েবসাইটে দেখায়</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select class="s-sel" id="defaultCatF" onchange="renderDefaultProdTbl()" style="font-size:12px">
-            <option value="all">সব ক্যাটাগরি</option>
-            <option value="rgb">RGB Lights</option>
-            <option value="smartwatch">Smartwatches</option>
-            <option value="powerbank">Power Bank</option>
-            <option value="tws">TWS</option>
-            <option value="headphone">BT Headphones</option>
-            <option value="lamp">Acrylic Lamp</option>
-            <option value="fan">Rechargeable Fan</option>
-          </select>
-          <input class="s-inp" placeholder="নাম খুঁজুন..." id="defaultProdQ" oninput="renderDefaultProdTbl()" style="max-width:180px">
-        </div>
+      <div id="catCountBadges" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:11.5px;color:var(--gray)">≡ ধরে টেনে যেকোনো প্রোডাক্ট সাজান — ওয়েবসাইটে সাথে সাথে দেখাবে</span>
+        <span id="allProdCount" style="font-size:12px;font-weight:700;color:var(--blue);background:#EFF6FF;padding:3px 10px;border-radius:20px"></span>
       </div>
-      <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#1E40AF;line-height:1.65">
-        💡 এই প্রোডাক্টগুলো সরাসরি index.html ফাইলে আছে। এডিট করতে index.html এর PRODS array পরিবর্তন করতে হবে অথবা AI Parser দিয়ে নতুন প্রোডাক্ট যোগ করুন।
+      <div class="tbl-wrap">
+        <table id="allProdTable">
+          <thead><tr><th style="width:32px"></th><th>ছবি</th><th>নাম</th><th>ক্যাট</th><th>মূল্য</th><th>স্টক</th><th>ওয়ারেন্টি</th><th>অ্যাকশন</th></tr></thead>
+          <tbody id="pTbl"></tbody>
+        </table>
       </div>
-      <div id="defaultProdStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"></div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>ছবি</th><th>নাম</th><th>ক্যাট</th><th>মূল্য</th><th>স্টক</th><th>রেটিং</th><th>ওয়ারেন্টি</th><th>Details</th></tr></thead>
-        <tbody id="defaultPTbl"></tbody>
-      </table></div>
     </div>
   </div>
 
@@ -1419,10 +1377,7 @@ A: App ও Remote দিয়ে..."></textarea>
           <div class="fg"><label>প্রোডাক্টের নাম *</label><input class="finp" id="pName" placeholder="সম্পূর্ণ নাম লিখুন"></div>
           <div class="fg"><label>ক্যাটাগরি *</label>
             <select class="finp" id="pCat">
-              <option value="rgb">RGB Lights</option><option value="smartwatch">Smartwatches</option>
-              <option value="powerbank">Power Bank</option><option value="tws">TWS</option>
-              <option value="headphone">BT Headphones</option><option value="lamp">Acrylic Lamp</option>
-              <option value="fan">Rechargeable Fan</option>
+              <!-- dynamic — getCats() থেকে পপুলেট হয় -->
             </select>
           </div>
         </div>
@@ -1520,6 +1475,26 @@ async function syncAdminData(){
       adminFAQs = JSON.parse(localStorage.getItem('vc_faqs')||'null') || adminFAQs;
     }
   } catch(e){}
+
+  // ✅ FIX: Supabase থেকে custom_products load করো (cross-device sync)
+  // Desktop এ mobile এর add করা product দেখানোর জন্য এটা জরুরি
+  try {
+    const { data: sbProds } = await supabaseClient.from('custom_products').select('*');
+    if (sbProds && sbProds.length) {
+      // Supabase থেকে আসা product গুলো adminProds এ merge করো
+      sbProds.forEach(p => {
+        if (p.desc_text && !p.desc) p.desc = p.desc_text;
+        const idx = adminProds.findIndex(x => x.id === p.id);
+        if (idx > -1) {
+          adminProds[idx] = { ...adminProds[idx], ...p };
+        } else {
+          adminProds.push(p);
+        }
+      });
+      // localStorage আপডেট করো
+      localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+    }
+  } catch(e) { console.warn('custom_products sync failed:', e); }
 }
 
 // ======= STATE =======
@@ -1595,7 +1570,10 @@ function showPage(id,btn){
   document.getElementById('page-'+id)?.classList.add('active');
   if(btn)btn.classList.add('active');
   if(id==='orders')renderOrders();
-  if(id==='products'){renderProdTbl();renderDefaultProdTbl();}
+  if(id==='products'){
+    // ✅ FIX: Products page খুললে Supabase থেকে fresh data টানো (cross-device sync)
+    syncAdminData().then(() => { adminProds = JSON.parse(localStorage.getItem('vc_admin_prods')||'[]'); renderProdTbl(); });
+  }
   if(id==='customers')renderCustomers();
   if(id==='dashboard')initDash();
   if(id==='design-hero')renderHeroSlides();
@@ -1611,13 +1589,26 @@ function showPage(id,btn){
 
 // ✅ AI Planner category dropdown dynamic populate
 function populateAIParserCatDropdown(){
-  const sel = document.getElementById('r_cat');
+  populateCatDropdown('r_cat');
+}
+
+// ── Shared helper: যেকোনো select[id] কে getCats() দিয়ে populate করে ──
+function populateCatDropdown(selectId, selectedVal){
+  const sel = document.getElementById(selectId);
   if(!sel) return;
-  const cats = getCats();
-  const currentVal = sel.value;
+  const cats = getCats ? getCats() : [];
+  const curVal = selectedVal !== undefined ? selectedVal : sel.value;
   sel.innerHTML = '';
-  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
-  if(currentVal && sel.querySelector(`option[value="${currentVal}"]`)) sel.value = currentVal;
+  cats.filter(c => c.id !== 'all').forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+    sel.appendChild(o);
+  });
+  // পুরানো/নির্দিষ্ট value ফিরিয়ে দাও
+  if(curVal && sel.querySelector(`option[value="${curVal}"]`)){
+    sel.value = curVal;
+  }
 }
 
 // ======= DASHBOARD =======
@@ -1787,89 +1778,276 @@ function exportCSV(){
 }
 
 // ======= PRODUCTS =======
-let adminProds=JSON.parse(localStorage.getItem('vc_admin_prods')||'[]');
-const catNames={rgb:'RGB',smartwatch:'Watch',powerbank:'PwrBank',tws:'TWS',headphone:'Headphone',lamp:'Lamp',fan:'Fan'};
+let adminProds = JSON.parse(localStorage.getItem('vc_admin_prods') || '[]');
 
-function renderProdTbl(scrollToLast=false){
-  const q=(document.getElementById('pQ')?.value||'').toLowerCase();
-  const cat=document.getElementById('pCatF')?.value||'all';
-  const list=adminProds.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(cat==='all'||p.cat===cat));
-  const countEl=document.getElementById('adminProdCount');
-  if(countEl)countEl.textContent=`${adminProds.length}টি প্রোডাক্ট`;
-  document.getElementById('pTbl').innerHTML=list.length?list.map(p=>{
-    const stock=p.stock||0;
-    const stockPill=stock===0?`<span class="pill p-cancelled">Sold Out</span>`:
-      stock<=5?`<span class="pill" style="background:#FEF3C7;color:#92400E">${stock} পিস ⚠️</span>`:
-      `<span class="pill p-delivered">${stock} পিস</span>`;
-    return`<tr ${stock===0?'style="opacity:.65"':''}>
-      <td style="font-size:22px">${(p.imgs||['📦'])[0]}</td>
-      <td style="max-width:200px"><div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}</div>${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>`:''}</td>
-      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat]||p.cat)}</span></td>
-      <td>৳${p.price?.toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${p.old?.toLocaleString()}</span></td>
-      <td>${stockPill}</td>
-      <td>${p.rating||4.5}⭐</td>
-      <td style="font-size:11px;max-width:120px">${p.warranty||'-'}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-outline btn-xs" onclick="editProd(${p.id})" style="margin-right:4px">✏️</button>
-        <button class="btn btn-red btn-xs" onclick="delProd(${p.id})">🗑️</button>
-      </td>
-    </tr>`;
-  }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো Admin প্রোডাক্ট নেই — নিচে "Website Default" প্রোডাক্টগুলো দেখুন বা নতুন যোগ করুন</td></tr>';
-  if(scrollToLast){
-    const rows=document.querySelectorAll('#pTbl tr');
-    if(rows.length)rows[rows.length-1].scrollIntoView({behavior:'smooth',block:'nearest'});
+// ── Default products (hardcoded in index.html PRODS array) ──
+const DEFAULT_PRODS = [
+  {id:1,  _isDefault:true, cat:'rgb',       name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control', imgs:['💡','🌟','✨'], price:1490, old:1800, warranty:'৬ মাস', badge:'HOT', stock:20},
+  {id:4,  _isDefault:true, cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',                   imgs:['⌚','📱'],      price:2490, old:3200, warranty:'৬ মাস', badge:'HOT', stock:18},
+  {id:14, _isDefault:true, cat:'powerbank', name:'GearUP PB20K 20000mAh Fast Charge Power Bank',               imgs:['🔋'],           price:1690, old:2200, warranty:'৬ মাস', badge:'HOT', stock:20},
+  {id:24, _isDefault:true, cat:'tws',       name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',                imgs:['🎧'],           price:1890, old:2500, warranty:'৬ মাস', badge:'HOT', stock:15},
+  {id:34, _isDefault:true, cat:'headphone', name:'GearUP HP80 Over-Ear ANC Headphone',                         imgs:['🎵'],           price:2990, old:3800, warranty:'৬ মাস', badge:'HOT', stock:12},
+  {id:44, _isDefault:true, cat:'lamp',      name:'GearUP AL-Love Heart Acrylic LED Lamp',                      imgs:['🪔','❤️'],      price:890,  old:1200, warranty:'৩ মাস', badge:'NEW', stock:25},
+  {id:54, _isDefault:true, cat:'fan',       name:'GearUP RF12 12-Inch Rechargeable Table Fan',                 imgs:['💨'],           price:1290, old:1700, warranty:'৬ মাস', badge:'HOT', stock:18},
+];
+
+// ── Which default IDs have been deleted by admin ──
+function getDeletedDefaults() { return JSON.parse(localStorage.getItem('vc_deleted_defaults') || '[]'); }
+function saveDeletedDefaults(arr) {
+  localStorage.setItem('vc_deleted_defaults', JSON.stringify(arr));
+  // Also notify index.html via Supabase
+  saveSettingToSupabase('vc_deleted_defaults', arr);
+}
+
+// ── Product order (drag & drop) ──
+function getProdOrder() { return JSON.parse(localStorage.getItem('vc_prod_order') || 'null'); }
+function saveProdOrder(order) {
+  localStorage.setItem('vc_prod_order', JSON.stringify(order));
+  saveSettingToSupabase('vc_prod_order', order);
+}
+
+// ── Build the full unified product list (default + admin) in saved order ──
+function getAllProds() {
+  const deleted = getDeletedDefaults();
+  const visibleDefaults = DEFAULT_PRODS.filter(p => !deleted.includes(p.id));
+  const allCustom = adminProds;
+  // Merge: avoid duplicates (custom overrides default if same id)
+  const merged = [...visibleDefaults];
+  allCustom.forEach(p => { if (!merged.find(x => x.id === p.id)) merged.push(p); });
+  // Apply saved order
+  const order = getProdOrder();
+  if (order && order.length) {
+    const orderMap = {};
+    order.forEach((id, i) => { orderMap[id] = i; });
+    merged.sort((a, b) => {
+      const ia = orderMap[a.id] !== undefined ? orderMap[a.id] : 99999;
+      const ib = orderMap[b.id] !== undefined ? orderMap[b.id] : 99999;
+      return ia - ib;
+    });
+  }
+  return merged;
+}
+
+// ── Legacy catNames ──
+const catNames = {rgb:'RGB', smartwatch:'Watch', powerbank:'PwrBank', tws:'TWS', headphone:'Headphone', lamp:'Lamp', fan:'Fan'};
+
+// ── Populate category filter dropdown from real categories ──
+function populateCatFilter() {
+  const sel = document.getElementById('pCatF');
+  if (!sel) return;
+  const savedVal = sel.value; // ✅ FIX: selected value সংরক্ষণ করো
+  const cats = getCats ? getCats() : [];
+  sel.innerHTML = '<option value="all">সব ক্যাটাগরি</option>';
+  cats.filter(c => c.id !== 'all').forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+    sel.appendChild(o);
+  });
+  // ✅ FIX: পুরানো selected value ফিরিয়ে দাও
+  if (savedVal && sel.querySelector(`option[value="${savedVal}"]`)) {
+    sel.value = savedVal;
   }
 }
 
-// Default website products (hardcoded in index.html PRODS array)
-const DEFAULT_PRODS=[
-  {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex'},warranty:'৬ মাস',badge:'HOT',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:4,cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',imgs:['⌚','📱'],price:2490,old:3200,specs:{ডিসপ্লে:'1.96" AMOLED'},warranty:'৬ মাস',badge:'HOT',stock:18,rating:4.5,features:0,faqs:0,desc:false},
-  {id:14,cat:'powerbank',name:'GearUP PB20K 20000mAh Fast Charge Power Bank',imgs:['🔋'],price:1690,old:2200,specs:{},warranty:'৬ মাস',badge:'HOT',stock:20,rating:4.5,features:0,faqs:0,desc:false},
-  {id:24,cat:'tws',name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',imgs:['🎧','✨'],price:1890,old:2500,specs:{},warranty:'৬ মাস',badge:'HOT',stock:15,rating:4.5,features:0,faqs:0,desc:false},
-  {id:34,cat:'headphone',name:'GearUP HP80 Over-Ear ANC Headphone',imgs:['🎧'],price:2990,old:3800,specs:{},warranty:'৬ মাস',badge:'HOT',stock:12,rating:4.5,features:0,faqs:0,desc:false},
-  {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:890,old:1200,specs:{},warranty:'৩ মাস',badge:'NEW',stock:25,rating:4.5,features:0,faqs:0,desc:false},
-  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1290,old:1700,specs:{},warranty:'৬ মাস',badge:'HOT',stock:18,rating:4.5,features:0,faqs:0,desc:false},
-];
+// ── Render category count badges ──
+function renderCatCountBadges() {
+  const el = document.getElementById('catCountBadges');
+  if (!el) return;
+  const all = getAllProds();
+  const cats = getCats ? getCats().filter(c => c.id !== 'all') : [];
+  const catList = cats.length ? cats : Object.entries(catNames).map(([id, name]) => ({id, name, icon: ''}));
+  const counts = {};
+  all.forEach(p => { counts[p.cat] = (counts[p.cat] || 0) + 1; });
+  // ✅ FIX: currently active cat highlight + correct filter on click
+  const activeCat = document.getElementById('pCatF')?.value || 'all';
+  el.innerHTML = catList.map(c => {
+    const n = counts[c.id] || 0;
+    // ✅ FIX: সব category দেখাও — product না থাকলেও (0টি দেখাবে)
+    const isActive = activeCat === c.id;
+    const style = isActive
+      ? 'background:#1E40AF;color:#fff;border:1.5px solid #1E40AF;'
+      : n === 0
+        ? 'background:#F9FAFB;color:#9CA3AF;border:1.5px solid #E5E7EB;'
+        : 'background:#EFF6FF;color:#1E40AF;border:1.5px solid #BFDBFE;';
+    return `<button onclick="filterByCatBadge('${c.id}')" style="${style}border-radius:20px;padding:3px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">${c.icon ? c.icon+' ' : ''}${c.name}: ${n}টি</button>`;
+  }).join('');
+}
 
-function renderDefaultProdTbl(){
-  const q=(document.getElementById('defaultProdQ')?.value||'').toLowerCase();
-  const cat=document.getElementById('defaultCatF')?.value||'all';
-  const list=DEFAULT_PRODS.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(cat==='all'||p.cat===cat));
+// ── Badge click: set dropdown value then re-render ──
+function filterByCatBadge(catId) {
+  const sel = document.getElementById('pCatF');
+  if (sel) sel.value = catId;
+  renderProdTbl();
+}
 
-  // Stats by category
-  const statsEl=document.getElementById('defaultProdStats');
-  if(statsEl){
-    const catCounts={};
-    DEFAULT_PRODS.forEach(p=>{catCounts[p.cat]=(catCounts[p.cat]||0)+1;});
-    statsEl.innerHTML=Object.entries(catCounts).map(([c,n])=>`<span class="pill" style="background:#E0E7FF;color:#3730A3;padding:4px 10px">${escHtml(catNames[c]||c)}: ${n}টি</span>`).join('');
-  }
+// ── Main unified render ──
+function renderProdTbl(scrollToLast = false) {
+  populateCatFilter();
+  renderCatCountBadges();
 
-  document.getElementById('defaultPTbl').innerHTML=list.length?list.map(p=>{
-    const stock=p.stock||0;
-    const stockPill=stock===0?`<span class="pill p-cancelled">Sold Out</span>`:
-      stock<=5?`<span class="pill" style="background:#FEF3C7;color:#92400E">${stock} পিস ⚠️</span>`:
-      `<span class="pill p-delivered">${stock} পিস</span>`;
-    const hasDetails=p.desc||p.features>0||p.faqs>0;
-    return`<tr>
-      <td style="font-size:22px">${(p.imgs||['📦'])[0]}</td>
-      <td style="max-width:220px">
-        <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}</div>
-        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">
-          ${p.badge?`<span class="pill" style="background:#FEF3C7;color:#92400E">${escHtml(p.badge)}</span>`:''}
-          ${p.desc?'<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">📝 Desc</span>':'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No Desc</span>'}
-          ${p.features>0?`<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">⭐ ${p.features} Features</span>`:'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No Features</span>'}
-          ${p.faqs>0?`<span class="pill" style="background:#D1FAE5;color:#065F46;font-size:9.5px">❓ ${p.faqs} FAQs</span>`:'<span class="pill" style="background:#FEE2E2;color:#991B1B;font-size:9.5px">No FAQs</span>'}
-        </div>
+  const q = (document.getElementById('pQ')?.value || '').toLowerCase();
+  const cat = document.getElementById('pCatF')?.value || 'all';
+  const all = getAllProds();
+  const list = all.filter(p => (!q || p.name.toLowerCase().includes(q)) && (cat === 'all' || p.cat === cat));
+
+  const countEl = document.getElementById('allProdCount');
+  if (countEl) countEl.textContent = `মোট ${all.length}টি প্রোডাক্ট`;
+
+  const tbody = document.getElementById('pTbl');
+  if (!tbody) return;
+
+  tbody.innerHTML = list.length ? list.map((p, idx) => {
+    const stock = p.stock || 0;
+    const stockPill = stock === 0
+      ? `<span class="pill p-cancelled">Sold Out</span>`
+      : stock <= 5
+        ? `<span class="pill" style="background:#FEF3C7;color:#92400E">${stock} পিস ⚠️</span>`
+        : `<span class="pill p-delivered">${stock} পিস</span>`;
+
+    const isDefault = !!p._isDefault;
+    const rowStyle = isDefault ? 'background:#FFFBEB;' : '';
+    const defaultTag = isDefault ? `<span class="pill" style="background:#FEF3C7;color:#92400E;font-size:9px;margin-left:4px">Default</span>` : '';
+
+    const actionBtns = isDefault
+      ? `<button class="btn btn-red btn-xs" onclick="delDefaultProd(${p.id})" title="ডিলিট করুন">🗑️</button>`
+      : `<button class="btn btn-outline btn-xs" onclick="editProd(${p.id})" style="margin-right:4px">✏️</button>
+         <button class="btn btn-red btn-xs" onclick="delProd(${p.id})">🗑️</button>`;
+
+    return `<tr data-prod-id="${p.id}" style="${rowStyle}cursor:default">
+      <td style="cursor:grab;color:#9CA3AF;font-size:18px;text-align:center;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
+      <td style="font-size:22px">${(p.imgs || ['📦'])[0]}</td>
+      <td style="max-width:200px">
+        <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}${defaultTag}</div>
+        ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>` : ''}
       </td>
-      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat]||p.cat)}</span></td>
-      <td>৳${p.price?.toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${p.old?.toLocaleString()}</span></td>
+      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat] || p.cat)}</span></td>
+      <td>৳${(p.price || 0).toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${(p.old || 0).toLocaleString()}</span></td>
       <td>${stockPill}</td>
-      <td>${p.rating||4.5}⭐</td>
-      <td style="font-size:11px">${p.warranty||'-'}</td>
-      <td><span style="font-size:11px;color:var(--gray)">index.html</span></td>
+      <td style="font-size:11px;max-width:110px">${p.warranty || '-'}</td>
+      <td style="white-space:nowrap">${actionBtns}</td>
     </tr>`;
-  }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+  }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>`;
+
+  initDragSort();
+
+  if (scrollToLast) {
+    const rows = tbody.querySelectorAll('tr');
+    if (rows.length) rows[rows.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ── Delete a default product ──
+function delDefaultProd(id) {
+  if (!confirm('এই ডিফল্ট প্রোডাক্টটি ওয়েবসাইট থেকে মুছে ফেলা হবে। নিশ্চিত?')) return;
+  const deleted = getDeletedDefaults();
+  if (!deleted.includes(id)) deleted.push(id);
+  saveDeletedDefaults(deleted);
+  // Also remove from prod order
+  const order = getProdOrder();
+  if (order) saveProdOrder(order.filter(x => x !== id));
+  renderProdTbl();
+  showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে');
+}
+
+// ── Legacy: renderDefaultProdTbl (no-op now) ──
+function renderDefaultProdTbl() { renderProdTbl(); }
+
+// ══════════════════════════════════════
+//  DRAG & DROP PRODUCT REORDERING
+// ══════════════════════════════════════
+let _dragSrc = null;
+
+function initDragSort() {
+  const tbody = document.getElementById('pTbl');
+  if (!tbody) return;
+
+  tbody.querySelectorAll('tr[data-prod-id]').forEach(row => {
+    const handle = row.querySelector('.drag-handle');
+    if (!handle) return;
+
+    // ── Mouse (desktop) ──
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      _dragSrc = row;
+      row.style.opacity = '0.5';
+      row.style.background = '#EFF6FF';
+
+      function onMove(ev) {
+        const target = getRowFromPoint(ev.clientX, ev.clientY, tbody);
+        if (target && target !== _dragSrc) {
+          const rect = target.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          if (ev.clientY < mid) {
+            tbody.insertBefore(_dragSrc, target);
+          } else {
+            tbody.insertBefore(_dragSrc, target.nextSibling);
+          }
+        }
+      }
+
+      function onUp() {
+        if (_dragSrc) {
+          _dragSrc.style.opacity = '';
+          _dragSrc.style.background = _dragSrc.dataset.prodId && DEFAULT_PRODS.find(p => p.id == _dragSrc.dataset.prodId) ? '#FFFBEB' : '';
+          _dragSrc = null;
+          saveCurrentOrder();
+        }
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    // ── Touch (mobile) ──
+    handle.addEventListener('touchstart', function (e) {
+      _dragSrc = row;
+      row.style.opacity = '0.5';
+    }, { passive: true });
+
+    handle.addEventListener('touchmove', function (e) {
+      if (!_dragSrc) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const target = getRowFromPoint(touch.clientX, touch.clientY, tbody);
+      if (target && target !== _dragSrc) {
+        const rect = target.getBoundingClientRect();
+        if (touch.clientY < rect.top + rect.height / 2) {
+          tbody.insertBefore(_dragSrc, target);
+        } else {
+          tbody.insertBefore(_dragSrc, target.nextSibling);
+        }
+      }
+    }, { passive: false });
+
+    handle.addEventListener('touchend', function () {
+      if (_dragSrc) {
+        _dragSrc.style.opacity = '';
+        _dragSrc = null;
+        saveCurrentOrder();
+      }
+    });
+  });
+}
+
+function getRowFromPoint(x, y, tbody) {
+  const rows = Array.from(tbody.querySelectorAll('tr[data-prod-id]'));
+  return rows.find(r => {
+    const rect = r.getBoundingClientRect();
+    return y >= rect.top && y <= rect.bottom;
+  }) || null;
+}
+
+function saveCurrentOrder() {
+  const rows = document.querySelectorAll('#pTbl tr[data-prod-id]');
+  const order = Array.from(rows).map(r => {
+    const id = r.dataset.prodId;
+    return isNaN(id) ? id : Number(id);
+  });
+  saveProdOrder(order);
+  showAdminToast('✅ অর্ডার সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
 }
 
 function openAddProd(){
@@ -1881,6 +2059,7 @@ function openAddProd(){
   document.getElementById('pWarranty').value='৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি';
   document.getElementById('imgMgr').innerHTML='';addImgRow('💡');addImgRow('');
   document.getElementById('specEd').innerHTML='';addSpecRow('','');addSpecRow('','');addSpecRow('','');
+  populateCatDropdown('pCat'); // ✅ Dynamic categories
   document.getElementById('prodModal').classList.add('show');
 }
 
@@ -1889,7 +2068,7 @@ function editProd(id){
   document.getElementById('prodModalTitle').textContent='প্রোডাক্ট এডিট করুন';
   document.getElementById('editId').value=id;
   document.getElementById('pName').value=p.name||'';
-  document.getElementById('pCat').value=p.cat||'rgb';
+  populateCatDropdown('pCat', p.cat||'rgb'); // ✅ Dynamic + সঠিক category select
   document.getElementById('pPrice').value=p.price||'';
   document.getElementById('pOld').value=p.old||'';
   document.getElementById('pStock').value=p.stock||20;
