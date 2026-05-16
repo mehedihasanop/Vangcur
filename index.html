@@ -767,7 +767,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 /* DISCOUNT BADGE (U-2) */
 .discount-badge{position:absolute;top:10px;left:10px;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700;z-index:2;background:#FF6B00;color:#fff}
 /* STICKY ORDER BTN (F-7) */
-.pp-sticky-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:10px 20px;z-index:1800;box-shadow:0 -4px 18px rgba(0,0,0,.1);justify-content:center;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;}
+.pp-sticky-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:10px 20px;z-index:1900;box-shadow:0 -4px 18px rgba(0,0,0,.1);justify-content:center;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;}
 .pp-sticky-bar.show{transform:translateY(0);gap:10px;justify-content:center}
 .pp-sticky-inner{max-width:1100px;margin:0 auto;display:flex;gap:10px;width:100%;align-items:center}
 .pp-sticky-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1619,13 +1619,20 @@ body.dark .prod-badge{opacity:.88}
 <script>
 // ============ PRODUCTS DATA ============
 const PRODS=[
-  {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex',নিয়ন্ত্রণ:'App + Remote',ভোল্টেজ:'DC 12V / 220V',রং:'16 Million Color'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'GearUP NRGB50 প্রিমিয়াম মানের ৫ মিটার RGB নিয়ন লাইট। অ্যাপ ও রিমোট উভয়ে নিয়ন্ত্রণযোগ্য। ঘরের সাজসজ্জায় অসাধারণ আলোর পরিবেশ তৈরি করে।'},
-  {id:4,cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',imgs:['⌚','📱'],price:2490,old:3200,specs:{ডিসপ্লে:'1.96" AMOLED',ব্যাটারি:'300mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2 + BP',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:18,desc:'প্রিমিয়াম AMOLED ডিসপ্লে সহ স্মার্টওয়াচ। হার্ট রেট, অক্সিজেন, ব্লাড প্রেশার মনিটরিং।'},
-  {id:14,cat:'powerbank',name:'GearUP PB20K 20000mAh Fast Charge Power Bank',imgs:['🔋'],price:1690,old:2200,specs:{ক্যাপাসিটি:'20000mAh',আউটপুট:'22.5W PD',পোর্ট:'USB-A + USB-C',ডিসপ্লে:'LED Indicator',ওজন:'450g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'বড় ক্যাপাসিটির ফাস্ট চার্জ পাওয়ার ব্যাংক। স্মার্টফোন ৪-৫ বার চার্জ।'},
-  {id:24,cat:'tws',name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',imgs:['🎧'],price:1890,old:2500,specs:{ড্রাইভার:'13mm Dynamic',ANC:'Active Noise Cancelling',ব্যাটারি:'6+30h',সংযোগ:'Bluetooth 5.3',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'ANC ফিচার সহ প্রিমিয়াম TWS ইয়ারবাড। বাইরের শব্দ বন্ধ করে মিউজিক উপভোগ।'},
-  {id:34,cat:'headphone',name:'GearUP HP80 Over-Ear ANC Headphone',imgs:['🎵'],price:2990,old:3800,specs:{ড্রাইভার:'40mm',ANC:'Hybrid ANC',ব্যাটারি:'30h',সংযোগ:'BT5.3 + 3.5mm',ভাঁজ:'Foldable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:15,desc:'Hybrid ANC হেডফোন। ৩০ ঘণ্টার ব্যাটারি ব্যাকআপ।'},
-  {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:790,old:1100,specs:{ডিজাইন:'Heart Shape',আলো:'RGB 16 Colors',নিয়ন্ত্রণ:'Touch + Remote',পাওয়ার:'USB',সাইজ:'15cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:30,desc:'হার্ট শেপের রোমান্টিক অ্যাক্রিলিক ল্যাম্প। উপহার হিসেবে আদর্শ।'},
-  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।'}
+  {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex',নিয়ন্ত্রণ:'App + Remote',ভোল্টেজ:'DC 12V / 220V',রং:'16 Million Color'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'GearUP NRGB50 প্রিমিয়াম মানের ৫ মিটার RGB নিয়ন লাইট। অ্যাপ ও রিমোট উভয়ে নিয়ন্ত্রণযোগ্য। ঘরের সাজসজ্জায় অসাধারণ আলোর পরিবেশ তৈরি করে।',
+    tags:'নিয়ন লাইট নিয়নলাইট আলো rgb আরজিবি রুম ডেকোর ঘর সাজানো neonlight rgblight ledstrip এলইডি led strip রিমোট app কন্ট্রোল নিয়ন্ত্রণ আলোক সজ্জা রংিন রঙ্গিন'},
+  {id:4,cat:'smartwatch',name:'GearUP GT4 Pro Smartwatch AMOLED Display',imgs:['⌚','📱'],price:2490,old:3200,specs:{ডিসপ্লে:'1.96" AMOLED',ব্যাটারি:'300mAh',কল:'হ্যাঁ',স্বাস্থ্য:'HR + SpO2 + BP',ওয়াটার:'IP68'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:18,desc:'প্রিমিয়াম AMOLED ডিসপ্লে সহ স্মার্টওয়াচ। হার্ট রেট, অক্সিজেন, ব্লাড প্রেশার মনিটরিং।',
+    tags:'স্মার্টওয়াচ ঘড়ি smartwatch ঘড়ি watch ওয়াচ amoled আমোলেড হার্টরেট heartrate স্বাস্থ্য health ব্লাড blood pressure bp স্পো2 spo2 অক্সিজেন oxygen কল call ip68 ওয়াটারপ্রুফ waterproof'},
+  {id:14,cat:'powerbank',name:'GearUP PB20K 20000mAh Fast Charge Power Bank',imgs:['🔋'],price:1690,old:2200,specs:{ক্যাপাসিটি:'20000mAh',আউটপুট:'22.5W PD',পোর্ট:'USB-A + USB-C',ডিসপ্লে:'LED Indicator',ওজন:'450g'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'বড় ক্যাপাসিটির ফাস্ট চার্জ পাওয়ার ব্যাংক। স্মার্টফোন ৪-৫ বার চার্জ।',
+    tags:'পাওয়ার ব্যাংক পাওয়ারব্যাংক powerbank চার্জার charger ব্যাটারি battery ব্যাকআপ backup fastcharge ফাস্টচার্জ চার্জ 20000 mah পোর্টেবল portable usb পিডি pd'},
+  {id:24,cat:'tws',name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',imgs:['🎧'],price:1890,old:2500,specs:{ড্রাইভার:'13mm Dynamic',ANC:'Active Noise Cancelling',ব্যাটারি:'6+30h',সংযোগ:'Bluetooth 5.3',পানি:'IPX5'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'ANC ফিচার সহ প্রিমিয়াম TWS ইয়ারবাড। বাইরের শব্দ বন্ধ করে মিউজিক উপভোগ।',
+    tags:'ইয়ারবাড earbuds tws ইয়ারফোন earphone হেডফোন headphone ব্লুটুথ bluetooth anc নয়েজ noise cancel cancelling ওয়্যারলেস wireless মিউজিক music গান শোনা'},
+  {id:34,cat:'headphone',name:'GearUP HP80 Over-Ear ANC Headphone',imgs:['🎵'],price:2990,old:3800,specs:{ড্রাইভার:'40mm',ANC:'Hybrid ANC',ব্যাটারি:'30h',সংযোগ:'BT5.3 + 3.5mm',ভাঁজ:'Foldable'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:15,desc:'Hybrid ANC হেডফোন। ৩০ ঘণ্টার ব্যাটারি ব্যাকআপ।',
+    tags:'হেডফোন headphone overear over-ear anc নয়েজ noise cancel cancelling ব্লুটুথ bluetooth ওয়্যারলেস wireless মিউজিক music গান হাইব্রিড hybrid foldable ভাঁজযোগ্য'},
+  {id:44,cat:'lamp',name:'GearUP AL-Love Heart Acrylic LED Lamp',imgs:['🪔','❤️'],price:790,old:1100,specs:{ডিজাইন:'Heart Shape',আলো:'RGB 16 Colors',নিয়ন্ত্রণ:'Touch + Remote',পাওয়ার:'USB',সাইজ:'15cm'},warranty:'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:30,desc:'হার্ট শেপের রোমান্টিক অ্যাক্রিলিক ল্যাম্প। উপহার হিসেবে আদর্শ।',
+    tags:'ল্যাম্প lamp আলো light led এলইডি হার্ট heart ভালোবাসা love রোমান্টিক romantic উপহার gift acrylic অ্যাক্রিলিক ডেকোর decor রুম room nightlight নাইটলাইট'},
+  {id:54,cat:'fan',name:'GearUP RF12 12-Inch Rechargeable Table Fan',imgs:['💨'],price:1990,old:2600,specs:{সাইজ:'12 Inch',ব্যাটারি:'8000mAh',রানটাইম:'8–12 ঘণ্টা',স্পিড:'৩ স্তর',চার্জ:'USB-C'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'লোডশেডিংয়ে আদর্শ রিচার্জেবল টেবিল ফ্যান।',
+    tags:'ফ্যান fan টেবিল table রিচার্জেবল rechargeable চার্জযোগ্য লোডশেডিং loadshedding বিদ্যুৎ বায়ু বাতাস পোর্টেবল portable tablefan rechargablefan'}
 ];
 
 const DISTRICTS=['ঢাকা','চট্টগ্রাম','রাজশাহী','খুলনা','বরিশাল','সিলেট','রংপুর','ময়মনসিংহ','কুমিল্লা','ফেনী','নোয়াখালী','লক্ষ্মীপুর','চাঁদপুর','ব্রাহ্মণবাড়িয়া','কিশোরগঞ্জ','নরসিংদী','নারায়ণগঞ্জ','মুন্সীগঞ্জ','মানিকগঞ্জ','গাজীপুর','টাঙ্গাইল','ফরিদপুর','মাদারীপুর','শরীয়তপুর','রাজবাড়ী','গোপালগঞ্জ','বগুড়া','নওগাঁ','নাটোর','পাবনা','সিরাজগঞ্জ','জয়পুরহাট','চাঁপাইনবাবগঞ্জ','যশোর','সাতক্ষীরা','মেহেরপুর','নড়াইল','চুয়াডাঙ্গা','কুষ্টিয়া','মাগুরা','ঝিনাইদহ','বাগেরহাট','পিরোজপুর','ঝালকাঠি','পটুয়াখালী','বরগুনা','ভোলা','সুনামগঞ্জ','হবিগঞ্জ','মৌলভীবাজার','নেত্রকোনা','জামালপুর','শেরপুর','গাইবান্ধা','নীলফামারী','লালমনিরহাট','কুড়িগ্রাম','ঠাকুরগাঁও','পঞ্চগড়','দিনাজপুর','কক্সবাজার','বান্দরবান','রাঙ্গামাটি','খাগড়াছড়ি'];
@@ -2068,7 +2075,11 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
     if(sbProds&&sbProds.length){
       let changed=false;
-      sbProds.forEach(p=>{if(!PRODS.find(x=>x.id===p.id)){PRODS.push(p);changed=true;}});
+      sbProds.forEach(p=>{
+        // ✅ Supabase stores desc as desc_text, map it back
+        if(p.desc_text && !p.desc) p.desc = p.desc_text;
+        if(!PRODS.find(x=>x.id===p.id)){PRODS.push(p);changed=true;}
+      });
       if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
     }
   }catch(e){}})();
@@ -2186,8 +2197,8 @@ function togglePassVis(inputId, btnId){
   }
 }
 
-function openLogin(){document.getElementById('loginModal').classList.add('show');document.body.style.overflow='hidden';}
-function closeLogin(){document.getElementById('loginModal').classList.remove('show');document.body.style.overflow='';}
+function openLogin(){document.getElementById('loginModal').classList.add('show');document.body.style.overflow='hidden';_pushPanel('login');}
+function closeLogin(){_closePanel('loginModal','show');}
 function switchToRegister(){
   document.getElementById('loginForm').style.display='none';
   document.getElementById('regForm').style.display='block';
@@ -2360,13 +2371,14 @@ async function loginWithGoogle(){
 function openAcc(){
   if(!currentUser){openLogin();return;}
   document.getElementById('accPage').classList.add('show');document.body.style.overflow='hidden';
+  _pushPanel('acc');
   const ini=(currentUser.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('accAv').textContent=ini;
   document.getElementById('accNameTxt').textContent=currentUser.name||'-';
   document.getElementById('accEmailTxt').textContent=currentUser.email||'-';
   renderMyOrders();
 }
-function closeAcc(){document.getElementById('accPage').classList.remove('show');document.body.style.overflow='';}
+function closeAcc(){_closePanel('accPage','show');}
 function renderMyOrders(){
   const all=JSON.parse(localStorage.getItem('vc_orders')||'[]');
   const mine=all.filter(o=>o.userId===currentUser?.id||o.custEmail===currentUser?.email);
@@ -2519,13 +2531,22 @@ function showSearchDropdown(q, source) {
 
   const lower = q.toLowerCase().trim();
   const words = lower.split(/\s+/).filter(Boolean);
+  const compactQuery = lower.replace(/\s+/g,'');
   const allProds = typeof PRODS !== 'undefined' ? PRODS : [];
-  const matches = allProds
-    .filter(p => {
-      const hay = (p.name + ' ' + (p.desc||'') + ' ' + (p.cat||'')).toLowerCase();
-      return words.every(w => hay.includes(w));
-    })
-    .slice(0, 6);
+
+  function getHay(p){
+    return [p.name||'',p.nameBn||'',p.desc||'',p.cat||'',p.tags||'',
+            Object.values(p.specs||{}).join(' ')].join(' ').toLowerCase();
+  }
+
+  const matches = allProds.filter(p => {
+    const hay = getHay(p);
+    const compactHay = hay.replace(/\s+/g,'');
+    if(words.every(w => hay.includes(w))) return true;
+    if(compactHay.includes(compactQuery)) return true;
+    if(words.some(w => w.length >= 3 && hay.includes(w))) return true;
+    return false;
+  }).slice(0, 6);
 
   if(!matches.length) {
     dd.innerHTML = `<div class="sd-empty">🔍 "<strong>${q}</strong>" এর জন্য কোনো পণ্য পাওয়া যায়নি</div>`;
@@ -2604,24 +2625,65 @@ document.addEventListener('click', (e) => {
 
 async function filterProducts(q){
   const l=q.toLowerCase().trim();
-  if(!l){renderProds(PRODS);return;}
+  if(!l){
+    // Search clear হলে search history entry সরাও
+    if(_panelStack[_panelStack.length-1]==='search'){
+      _panelStack=_panelStack.filter(p=>p!=='search');
+    }
+    renderProds(PRODS);return;
+  }
+  // Search active হলে history তে push করো (একবারই)
+  if(_panelStack[_panelStack.length-1]!=='search'){
+    _pushPanel('search');
+  }
+
+  // ====== SMART SEARCH LOGIC ======
+  // প্রতিটি product এর সম্পূর্ণ searchable text তৈরি করো
+  function getHaystack(p){
+    const parts=[
+      p.name||'',
+      p.nameBn||'',
+      p.desc||'',
+      p.cat||'',
+      p.tags||'',
+      Object.values(p.specs||{}).join(' ')
+    ];
+    return parts.join(' ').toLowerCase();
+  }
+
+  // Space সরিয়ে compound word তৈরি (neonlight → neon light match)
+  function compactText(t){ return t.replace(/\s+/g,''); }
+
   const words=l.split(/\s+/).filter(Boolean);
-  // Search in-memory PRODS first (instant)
-  const localResults=PRODS.filter(p=>{
-    const hay=(p.name+' '+(p.nameBn||'')+' '+(p.desc||'')+' '+(p.cat||'')).toLowerCase();
-    return words.every(w=>hay.includes(w));
-  });
+  const compactQuery=compactText(l); // neonlight
+
+  function matchProduct(p){
+    const hay=getHaystack(p);
+    const compactHay=compactText(hay);
+
+    // ১. সব word আলাদাভাবে match করে কিনা (normal search)
+    if(words.every(w=>hay.includes(w))) return true;
+
+    // ২. Space ছাড়া লেখা match (neonlight → "neon light")
+    if(compactHay.includes(compactQuery)) return true;
+
+    // ৩. যেকোনো একটা word match করলেও দেখাও (partial/fuzzy)
+    if(words.some(w=>w.length>=3 && hay.includes(w))) return true;
+
+    return false;
+  }
+
+  const localResults=PRODS.filter(matchProduct);
   renderProds(localResults);
-  // Also search Supabase custom_products (async)
+
+  // Supabase search (async)
   try{
-    const searchTerm=words.join(' & ');
     const{data,error}=await supabaseClient
       .from('custom_products')
       .select('*')
       .or(words.map(w=>`name.ilike.%${w}%`).join(','))
       .limit(20);
     if(!error&&data&&data.length){
-      // Convert Supabase rows to PRODS format
       const sbProds=data.map(row=>({
         id:'sb_'+row.id,cat:row.category||row.cat||'all',
         name:row.name||'',nameBn:row.name_bn||row.name||'',
@@ -2631,14 +2693,13 @@ async function filterProducts(q){
         warranty:row.warranty||'৭ দিন',badge:row.badge||'',
         desc:row.description||row.desc||''
       }));
-      // Merge — avoid duplicates already in PRODS
       const existingIds=new Set(PRODS.map(p=>p.id));
       const newSbProds=sbProds.filter(p=>!existingIds.has(p.id));
       if(newSbProds.length){
         renderProds([...localResults,...newSbProds]);
       }
     }
-  }catch(e){/* Supabase unavailable — local results shown */}
+  }catch(e){/* Supabase unavailable */}
 }
 
 // PRODUCT FULL PAGE
@@ -2772,6 +2833,7 @@ function openPP(id){
   renderRelated(curProd);
   document.getElementById('ppOverlay').classList.add('show');
   document.body.style.overflow='hidden';
+  _pushPanel('pp');
   // U-10: hide floating WA button
   const fb=document.querySelector('.float-btns');if(fb)fb.style.display='none';
   // B-4: save scroll pos
@@ -2793,12 +2855,15 @@ function openPP(id){
     document.getElementById('ppStickyCartBtn').disabled=curProd.stock<=0;
     const ppInner=document.getElementById('ppOverlay');
     ppInner._stickyHandler=()=>{
-      const descSec=document.getElementById('ppSecDesc');
-      if(descSec){
-        const descBottom=descSec.offsetTop+descSec.offsetHeight;
-        stickyBar.classList.toggle('show',ppInner.scrollTop>descBottom);
+      const tabsWrap=document.getElementById('ppTabsWrap');
+      if(tabsWrap){
+        // ppOverlay এর top থেকে tabsWrap কতটা নিচে আছে সেটা measure করো
+        const overlayRect=ppInner.getBoundingClientRect();
+        const tabsRect=tabsWrap.getBoundingClientRect();
+        // tabsWrap যখন ppOverlay এর top এ বা উপরে চলে আসে তখন show করো
+        stickyBar.classList.toggle('show', tabsRect.top <= overlayRect.top + 70);
       } else {
-        stickyBar.classList.toggle('show',ppInner.scrollTop>320);
+        stickyBar.classList.toggle('show',ppInner.scrollTop>200);
       }
     };
     ppInner.addEventListener('scroll',ppInner._stickyHandler);
@@ -2827,8 +2892,9 @@ function ppScrollTo(sectionId,tabBtn){
 }
 function closePP(){
   const overlay=document.getElementById('ppOverlay');
+  if(!overlay.classList.contains('show'))return;
   overlay.classList.remove('show');document.body.style.overflow='';
-  // B-4: restore scroll position — direct call (no requestAnimationFrame for old Android)
+  // B-4: restore scroll position
   const pos=overlay._scrollPos||0;
   window.scrollTo(0,pos);
   // F-7: cleanup sticky bar
@@ -2837,6 +2903,7 @@ function closePP(){
   if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
   // U-10: show float btns again
   const fb=document.querySelector('.float-btns');if(fb)fb.style.display='flex';
+  _popPanel();
 }
 function galleryArrow(dir){
   if(!curProd||!curProd.imgs||curProd.imgs.length<=1)return;
@@ -2898,18 +2965,25 @@ function addCartFromPP(){if(!curProd||curProd.stock<=0)return;addToCart(curProd.
 function orderNow(){
   if(!curProd||curProd.stock<=0)return;
   if(cart.length>0){
-    // কার্টে আইটেম আছে — শপিং কার্ট দেখাও, বর্তমান প্রোডাক্ট যোগ করো
+    // কার্টে আইটেম আছে — PP বন্ধ না করে ppOverlay এর উপরে cart modal দেখাও
     const ex=cart.find(x=>x.id===curProd.id);
     if(!ex) cart.push({id:curProd.id,name:curProd.name,emoji:curProd.imgs[0],price:curProd.price,qty:curQty,cat:curProd.cat});
     else ex.qty+=curQty;
     localStorage.setItem('vc_cart',JSON.stringify(cart));
     updateCartUI();
-    closePP();
     showQuickOrderModal();
   } else {
     // কার্ট খালি — সরাসরি অর্ডার পেজে যাও
+    // closePP() ব্যবহার না করে directly বন্ধ করো (history.go(-1) avoid করতে)
     orderItems=[{...curProd,qty:curQty}];
-    closePP();
+    const overlay=document.getElementById('ppOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow='';
+    const stickyBar=document.getElementById('ppStickyBar');
+    if(stickyBar)stickyBar.classList.remove('show');
+    if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
+    const fb=document.querySelector('.float-btns');if(fb)fb.style.display='flex';
+    _panelStack=_panelStack.filter(p=>p!=='pp');
     openOrder(false);
   }
 }
@@ -2974,17 +3048,25 @@ function showQuickOrderModal(){
         <div style="font-size:16px;font-weight:700">🛒 শপিং কার্ট</div>
         <div id="qoCount" style="font-size:12px;color:var(--gray);margin-top:2px">${cart.length}টি প্রোডাক্ট নির্বাচিত</div>
       </div>
-      <button onclick="document.getElementById('quickOrderModal').remove()" style="background:var(--light);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <button onclick="closeQuickOrderModal()" style="background:var(--light);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div id="qoList" style="overflow-y:auto;flex:1;padding:0 18px">${itemsHTML}</div>
     <div style="padding:14px 18px 20px;border-top:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px"><span class=\"bn\">মোট:</span><span id="qoTotal" style="color:var(--dark)">৳${tot.toLocaleString()}</span></div>
       <button onclick="qoCheckout()" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr)" onmouseover="this.style.background='#E63946'" onmouseout="this.style.background='var(--dark)'">⚡ অর্ডার নিশ্চিত করুন</button>
-      <button onclick="document.getElementById('quickOrderModal').remove()" style="width:100%;background:none;border:1.5px solid var(--border);border-radius:12px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">কেনাকাটা চালিয়ে যান</button>
+      <button onclick="closeQuickOrderModal()" style="width:100%;background:none;border:1.5px solid var(--border);border-radius:12px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">কেনাকাটা চালিয়ে যান</button>
     </div>
   </div>`;
-  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  modal.addEventListener('click',function(e){if(e.target===modal)closeQuickOrderModal();});
   document.body.appendChild(modal);
+  // History stack এ push করো যাতে back button দিয়ে বন্ধ হয়
+  _pushPanel('quickOrder');
+}
+function closeQuickOrderModal(){
+  const m=document.getElementById('quickOrderModal');
+  if(m){m.remove();}
+  _panelStack=_panelStack.filter(p=>p!=='quickOrder');
+  if(!_backButtonTriggered) history.go(-1);
 }
 function qoUpdateTotals(){
   // Stable update — only change numbers, no full re-render
@@ -3010,7 +3092,7 @@ function qoQty(id,d){
     localStorage.setItem('vc_cart',JSON.stringify(cart));
     updateCartUI();
     const row=document.getElementById('qoi-'+id);if(row)row.remove();
-    if(!cart.length){const m=document.getElementById('quickOrderModal');if(m)m.remove();}
+    if(!cart.length){const m=document.getElementById('quickOrderModal');if(m){m.remove();_panelStack=_panelStack.filter(p=>p!=='quickOrder');if(!_backButtonTriggered)history.go(-1);}}
     else qoUpdateTotals();
     return;
   }
@@ -3023,7 +3105,7 @@ function qoRemove(id){
   cart=cart.filter(x=>x.id!==id);
   localStorage.setItem('vc_cart',JSON.stringify(cart));
   updateCartUI();
-  if(!cart.length){const m=document.getElementById('quickOrderModal');if(m)m.remove();}
+  if(!cart.length){const m=document.getElementById('quickOrderModal');if(m){m.remove();_panelStack=_panelStack.filter(p=>p!=='quickOrder');if(!_backButtonTriggered)history.go(-1);}}
   else{
     const row=document.getElementById('qoi-'+id);
     if(row)row.remove();
@@ -3034,6 +3116,7 @@ function qoCheckout(){
   if(!cart.length){showToast('কার্ট খালি!');return;}
   orderItems=cart.map(i=>({...i}));
   const m=document.getElementById('quickOrderModal');if(m)m.remove();
+  _panelStack=_panelStack.filter(p=>p!=='quickOrder');
   openOrder(false);
 }
 function quickCart(id){
@@ -3098,13 +3181,17 @@ function renderCartItems(){
 }
 function updQty(id,d){const i=cart.find(x=>x.id===id);if(i){i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);}localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();}
 function remItem(id){cart=cart.filter(x=>x.id!==id);localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();}
-function openCart(){document.getElementById('cartSide').classList.add('open');document.getElementById('cartBack').classList.add('on');document.body.style.overflow='hidden';}
-function closeCart(){document.getElementById('cartSide').classList.remove('open');document.getElementById('cartBack').classList.remove('on');document.body.style.overflow='';}
+function openCart(){document.getElementById('cartSide').classList.add('open');document.getElementById('cartBack').classList.add('on');document.body.style.overflow='hidden';_pushPanel('cart');}
+function closeCart(){if(document.getElementById('cartSide').classList.contains('open')){document.getElementById('cartSide').classList.remove('open');document.getElementById('cartBack').classList.remove('on');document.body.style.overflow='';_popPanel();}}
 function checkout(){
   if(!cart.length){showToast('কার্ট খালি!');return;}
-  // Deep clone cart items into orderItems
   orderItems=cart.map(i=>({...i}));
-  closeCart();
+  // Close cart visually but keep cart in _panelStack
+  document.getElementById('cartSide').classList.remove('open');
+  document.getElementById('cartBack').classList.remove('on');
+  document.body.style.overflow='';
+  // Push order on top of cart in stack
+  _pushPanel('order');
   openOrder(false);
 }
 
@@ -3142,12 +3229,14 @@ function openOrder(warn){
   document.getElementById('orderOverlay').classList.add('show');
   document.getElementById('orderOverlay').scrollTop=0;
   document.body.style.overflow='hidden';
+  // History managed by caller (_pushPanel already called)
+  if(_panelStack[_panelStack.length-1]!=='order') _pushPanel('order');
   // Hide summary if multi-product (came from cart)
   const summaryEl2=document.getElementById('orderItemsSummary');
   if(summaryEl2&&orderItems.length>1){summaryEl2.style.display='none';summaryEl2.dataset.hasItems='0';}
   goS(1);
 }
-function closeOrder(){document.getElementById('orderOverlay').classList.remove('show');document.body.style.overflow='';}
+function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');document.body.style.overflow='';_popPanel();}}
 function buildShipOpts(dist){
   const isDhaka=dist==='ঢাকা';
   const c=document.getElementById('shipOpts');
@@ -3414,12 +3503,254 @@ function startPolling(){
   },5000);
 }
 // S-11: Intercept browser back button when wait overlay is open
-window.addEventListener('popstate',function(e){
-  if(document.getElementById('waitOverlay').classList.contains('show')){
-    history.pushState({waitOverlay:true},'','');// re-push to keep on same page
-    // Do nothing — keep overlay open
+// ======= NAVIGATION STACK SYSTEM =======
+// সমস্ত panel/modal এর history একটি stack দিয়ে manage করা হচ্ছে।
+// প্রতিটি panel খোলার সময় _pushPanel() এবং বন্ধের সময় _popPanel() call হয়।
+// Android back button → popstate → _handleBack() → সঠিক panel বন্ধ হয়।
+
+let _panelStack = [];          // e.g. ['cart', 'order', 'order-step-2']
+let _homeBackCount = 0;
+let _homeBackTimer = null;
+let _exitDialogOpen = false;
+
+// Homepage back guard:
+// entry[0] = {vcStack:[], homeBase:true}  ← browser এর আগের page থেকে আসা রোধ করে
+// entry[1] = {vcStack:[], homeCurrent:true} ← আমরা এখানে আছি
+// প্রথম back চাপলে entry[1] → entry[0] তে যায়, popstate fires, আমরা ধরি
+// দ্বিতীয় back চাপলে exit dialog দেখাই
+history.replaceState({vcStack:[], homeBase:true}, '', '');
+history.pushState({vcStack:[], homeCurrent:true}, '', '');
+
+function _pushPanel(name) {
+  _panelStack.push(name);
+  history.pushState({vcStack: [..._panelStack]}, '', '');
+}
+
+let _backButtonTriggered = false; // popstate handler sets this true
+
+function _popPanel() {
+  // Called from close buttons — need to go back in browser history
+  if(!_backButtonTriggered){
+    _panelStack.pop();
+    history.go(-1);
   }
+  // If called from popstate, _handleBack already manages _panelStack
+}
+
+function _closePanel(elId, cls) {
+  const el = document.getElementById(elId);
+  if(el && el.classList.contains(cls)) {
+    el.classList.remove(cls);
+    document.body.style.overflow = '';
+    _panelStack.pop();
+    history.go(-1);
+  }
+}
+
+function _handleBack(state) {
+  _backButtonTriggered = true;
+  setTimeout(()=>{ _backButtonTriggered = false; }, 100);
+  const stack = (state && state.vcStack) ? state.vcStack : [];
+  const topPanel = stack.length > 0 ? stack[stack.length - 1] : null;
+
+  // waitOverlay — block back
+  if(document.getElementById('waitOverlay').classList.contains('show')){
+    history.pushState({vcStack: [..._panelStack]}, '', '');
+    return true;
+  }
+
+  // Order step navigation
+  if(document.getElementById('orderOverlay').classList.contains('show')){
+    // Find current step
+    const s3 = document.getElementById('oS3');
+    const s2 = document.getElementById('oS2');
+    const isS3 = s3 && s3.style.display === 'block';
+    const isS2 = s2 && s2.style.display === 'block';
+    if(isS3){ goS(2); history.pushState({vcStack:[..._panelStack], orderStep:2},'',''); return true; }
+    if(isS2){ goS(1); history.pushState({vcStack:[..._panelStack], orderStep:1},'',''); return true; }
+    // Step 1 — close order
+    document.getElementById('orderOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    _panelStack = _panelStack.filter(p => p !== 'order');
+    // If cart was open before, re-open it
+    if(_panelStack.length > 0 && _panelStack[_panelStack.length-1] === 'cart'){
+      document.getElementById('cartSide').classList.add('open');
+      document.getElementById('cartBack').classList.add('on');
+      document.body.style.overflow = 'hidden';
+    }
+    return true;
+  }
+
+  // Search active — clear search and show all products
+  if(_panelStack[_panelStack.length-1]==='search' || 
+     (_panelStack.includes('search') && !document.getElementById('ppOverlay').classList.contains('show'))){
+    _panelStack=_panelStack.filter(p=>p!=='search');
+    // Search input clear করো
+    const di=document.getElementById('desktopSearchInput');
+    const mi=document.getElementById('mobileSearchInput');
+    if(di)di.value='';
+    if(mi)mi.value='';
+    // Dropdowns বন্ধ করো
+    closeSearchDropdowns();
+    // সব প্রোডাক্ট দেখাও
+    renderProds(PRODS);
+    // উপরে scroll করো
+    window.scrollTo({top:0,behavior:'smooth'});
+    return true;
+  }
+
+  // QuickOrder modal (cart popup shown over product page)
+  const qoModal = document.getElementById('quickOrderModal');
+  if(qoModal && qoModal.style.display !== 'none'){
+    qoModal.remove();
+    _panelStack=_panelStack.filter(p=>p!=='quickOrder');
+    return true;
+  }
+
+  // Product page
+  if(document.getElementById('ppOverlay').classList.contains('show')){
+    const overlay = document.getElementById('ppOverlay');
+    overlay.classList.remove('show'); document.body.style.overflow = '';
+    const pos = overlay._scrollPos || 0; window.scrollTo(0, pos);
+    const stickyBar = document.getElementById('ppStickyBar');
+    if(stickyBar) stickyBar.classList.remove('show');
+    if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
+    const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
+    _panelStack = _panelStack.filter(p => p !== 'pp');
+    return true;
+  }
+
+  // Cart
+  if(document.getElementById('cartSide').classList.contains('open')){
+    document.getElementById('cartSide').classList.remove('open');
+    document.getElementById('cartBack').classList.remove('on');
+    document.body.style.overflow = '';
+    _panelStack = _panelStack.filter(p => p !== 'cart');
+    return true;
+  }
+
+  // Login
+  if(document.getElementById('loginModal').classList.contains('show')){
+    document.getElementById('loginModal').classList.remove('show');
+    document.body.style.overflow = '';
+    _panelStack = _panelStack.filter(p => p !== 'login');
+    return true;
+  }
+
+  // Account
+  if(document.getElementById('accPage').classList.contains('show')){
+    document.getElementById('accPage').classList.remove('show');
+    document.body.style.overflow = '';
+    _panelStack = _panelStack.filter(p => p !== 'acc');
+    return true;
+  }
+
+  // Wishlist
+  const wlEl = document.getElementById('wishlistOverlay');
+  if(wlEl && wlEl.classList.contains('show')){
+    wlEl.classList.remove('show'); document.body.style.overflow = '';
+    _panelStack = _panelStack.filter(p => p !== 'wishlist');
+    return true;
+  }
+
+  // Track Order
+  const trEl = document.getElementById('trackOrderModal');
+  if(trEl && trEl.classList.contains('show')){
+    trEl.classList.remove('show'); document.body.style.overflow = '';
+    const ri = document.getElementById('trackResult'); if(ri) ri.innerHTML = '';
+    const ti = document.getElementById('trackInput'); if(ti) ti.value = '';
+    _panelStack = _panelStack.filter(p => p !== 'track');
+    return true;
+  }
+
+  return false; // কোনো panel খোলা নেই
+}
+
+window.addEventListener('popstate', function(e){
+  const handled = _handleBack(e.state);
+  if(handled){
+    if(_panelStack.length === 0){
+      _homeBackCount = 0;
+      clearTimeout(_homeBackTimer);
+      history.replaceState({vcStack:[], homeBase:true}, '', '');
+      history.pushState({vcStack:[], homeCurrent:true}, '', '');
+    }
+    return;
+  }
+
+  // ====== HOMEPAGE EXIT GUARD ======
+  if(_exitDialogOpen) return;
+
+  // কোনো panel নেই — homepage এ আছি
+  // সবার আগে count check করি
+  if(_homeBackCount >= 1){
+    // দ্বিতীয় back → exit dialog দেখাও
+    _homeBackCount = 0;
+    clearTimeout(_homeBackTimer);
+    // homepage এ ধরে রাখো
+    history.replaceState({vcStack:[], homeBase:true}, '', '');
+    history.pushState({vcStack:[], homeCurrent:true}, '', '');
+    showExitDialog();
+    return;
+  }
+
+  // প্রথম back → scroll to top, re-push, count বাড়াও
+  _homeBackCount = 1;
+  clearTimeout(_homeBackTimer);
+  _homeBackTimer = setTimeout(()=>{ _homeBackCount = 0; }, 3000);
+  history.replaceState({vcStack:[], homeBase:true}, '', '');
+  history.pushState({vcStack:[], homeCurrent:true}, '', '');
+  window.scrollTo({top:0, behavior:'smooth'});
 });
+
+function showExitDialog(){
+  _exitDialogOpen = true;
+  const old = document.getElementById('exitDialog');
+  if(old) old.remove();
+  const dlg = document.createElement('div');
+  dlg.id = 'exitDialog';
+  dlg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;animation:fadeInBg .2s ease;padding:20px';
+  dlg.innerHTML = `
+    <style>
+      @keyframes scaleDlg{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+      @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
+      #exitBox{background:#fff;border-radius:20px;padding:32px 24px 28px;width:100%;max-width:340px;text-align:center;animation:scaleDlg .25s cubic-bezier(.4,0,.2,1);box-shadow:0 20px 60px rgba(0,0,0,.18)}
+      #exitBox .ex-icon{font-size:44px;margin-bottom:12px}
+      #exitBox h3{font-size:19px;font-weight:700;color:#1A1A1A;margin:0 0 8px;font-family:'DM Sans',sans-serif}
+      #exitBox p{font-size:14px;color:#6B7280;margin:0 0 24px;font-family:'DM Sans',sans-serif;line-height:1.6}
+      #exitBox .ex-btns{display:flex;gap:10px}
+      #exitBox .btn-stay{flex:1;padding:14px;border-radius:12px;border:1.5px solid #E5E7EB;background:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:#1A1A1A}
+      #exitBox .btn-leave{flex:1;padding:14px;border-radius:12px;border:none;background:#1A1A1A;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+    </style>
+    <div id="exitBox">
+      <div class="ex-icon">🛍️</div>
+      <h3>চলে যাচ্ছেন?</h3>
+      <p>আপনি কি ওয়েবসাইট থেকে বের হয়ে যেতে চাচ্ছেন?</p>
+      <div class="ex-btns">
+        <button class="btn-stay" onclick="closeExitDialog()">না, থাকব</button>
+        <button class="btn-leave" onclick="confirmExit()">হ্যাঁ, বের হব</button>
+      </div>
+    </div>`;
+  document.body.appendChild(dlg);
+  dlg.addEventListener('click', e=>{ if(e.target===dlg) closeExitDialog(); });
+}
+
+function closeExitDialog(){
+  _exitDialogOpen = false;
+  _homeBackCount = 0;
+  const dlg = document.getElementById('exitDialog');
+  if(dlg) dlg.remove();
+  history.replaceState({vcStack:[], homeBase:true}, '', '');
+  history.pushState({vcStack:[], homeCurrent:true}, '', '');
+}
+
+function confirmExit(){
+  _exitDialogOpen = false;
+  const dlg = document.getElementById('exitDialog');
+  if(dlg) dlg.remove();
+  history.go(-1);
+}
+
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){
     if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
@@ -3588,13 +3919,17 @@ function openTrackOrder(){
   document.body.style.overflow='hidden';
   document.getElementById('trackResult').innerHTML='';
   document.getElementById('trackInput').value='';
+  _pushPanel('track');
   setTimeout(()=>document.getElementById('trackInput').focus(),100);
 }
 function closeTrackOrder(){
-  document.getElementById('trackOrderModal').classList.remove('show');
-  document.body.style.overflow='';
-  document.getElementById('trackResult').innerHTML='';
-  document.getElementById('trackInput').value='';
+  if(document.getElementById('trackOrderModal').classList.contains('show')){
+    document.getElementById('trackOrderModal').classList.remove('show');
+    document.body.style.overflow='';
+    document.getElementById('trackResult').innerHTML='';
+    document.getElementById('trackInput').value='';
+    _popPanel();
+  }
 }
 
 async function doTrackOrder(){
@@ -3828,6 +4163,11 @@ function goS(n){
   if(miniSum)miniSum.style.display=(n===1&&miniSum.dataset.hasItems==='1')?'block':'none';
   const closeBtn=document.getElementById('orderCloseBtn');
   if(closeBtn)closeBtn.style.display=(n===1)?'block':'none';
+  // Push a new history entry for each forward step (back button can reverse)
+  // Don't push when _handleBack calls goS (backButtonTriggered is true)
+  if(n>1 && !_backButtonTriggered){
+    history.pushState({vcStack:[..._panelStack], orderStep:n},'','');
+  }
 }
 
 // COPY BKASH NUMBER
@@ -3933,8 +4273,9 @@ function openWishlist(){
   renderWishlist();
   document.getElementById('wishlistOverlay').classList.add('show');
   document.body.style.overflow='hidden';
+  _pushPanel('wishlist');
 }
-function closeWishlist(){document.getElementById('wishlistOverlay').classList.remove('show');document.body.style.overflow='';}
+function closeWishlist(){if(document.getElementById('wishlistOverlay').classList.contains('show')){document.getElementById('wishlistOverlay').classList.remove('show');document.body.style.overflow='';_popPanel();}}
 function renderWishlist(){
   const w=getWishlist();
   const body=document.getElementById('wishlistBody');

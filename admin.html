@@ -291,7 +291,7 @@ tr:hover td{background:#FAFAFA}
   <button class="nav-item active" onclick="showPage('dashboard',this)">📊 ড্যাশবোর্ড</button>
   <button class="nav-item" onclick="showPage('orders',this)">📦 অর্ডার <span class="nav-badge" id="pendBadge" style="display:none">0</span></button>
   <button class="nav-item" onclick="showPage('products',this)">🛍️ প্রোডাক্ট</button>
-  <button class="nav-item" onclick="showPage('ai-parser',this)">🤖 AI Parser <span class="nav-badge" style="background:#8B5CF6">NEW</span></button>
+  <button class="nav-item" onclick="showPage('ai-parser',this)">🤖 AI Planner <span class="nav-badge" style="background:#4CAF50">AUTO</span></button>
   <button class="nav-item" onclick="showPage('customers',this)">👥 কাস্টমার</button>
 
   <div class="sb-section">ডিজাইন</div>
@@ -386,111 +386,119 @@ tr:hover td{background:#FAFAFA}
     </div>
   </div>
 
-  <!-- ===== AI PARSER ===== -->
+  <!-- ===== AI PARSER (Gemini) ===== -->
   <div class="page" id="page-ai-parser">
     <div class="page-head">
-      <div><div class="page-title">🤖 AI Product Parser</div><div class="page-sub">Raw টেক্সট পেস্ট করুন — AI স্বয়ংক্রিয়ভাবে সব ফিল্ড পূরণ করে দেবে</div></div>
+      <div>
+        <div class="page-title">🤖 AI Product Planner</div>
+        <div class="page-sub">প্রোডাক্টের তথ্য পেস্ট করুন — Gemini AI স্বয়ংক্রিয়ভাবে সব ফিল্ড পূরণ করে দেবে এবং সরাসরি ওয়েবসাইটে দেখাবে</div>
+      </div>
     </div>
 
-    <!-- API KEY SETUP -->
-    <div class="card" id="apiKeyCard">
-      <div class="card-head">
-        <span class="card-title">⚙️ Claude API Key সেটআপ</span>
-        <span id="apiKeyStatus" style="font-size:12px;color:var(--gray)">সেট করা নেই</span>
+    <!-- STATUS BAR -->
+    <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:1.5px solid #4CAF50;border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">⚡</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1b5e20">Smart Parser — কোনো API লাগবে না, সম্পূর্ণ বিনামূল্যে</div>
+        <div style="font-size:12px;color:#2e7d32;margin-top:2px">আপনার দেওয়া তথ্য থেকে স্বয়ংক্রিয়ভাবে সব ফিল্ড পূরণ করে। ইন্টারনেট ছাড়াও কাজ করে।</div>
       </div>
-      <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px;font-size:12.5px;color:#1E40AF;margin-bottom:14px;line-height:1.7">
-        💡 <strong>Claude API Key পেতে:</strong> console.anthropic.com → API Keys → Create Key<br>
-        Key টি শুধু এই browser এ locally সংরক্ষিত থাকবে। কোনো server এ যাবে না।
-      </div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <input class="finp" type="password" id="claudeApiKey" placeholder="sk-ant-api03-..." style="flex:1">
-        <button class="btn btn-dark" onclick="saveApiKey()">💾 সেভ করুন</button>
-        <button class="btn btn-outline" onclick="testApiKey()">🔗 Test</button>
-      </div>
-      <div id="apiTestResult" style="font-size:12px;margin-top:8px"></div>
     </div>
 
-    <!-- MASTER TEXT AREA -->
+    <!-- STEP 1: PRODUCT INFO INPUT -->
     <div class="card">
       <div class="card-head">
-        <span class="card-title">📋 Master Input Box</span>
-        <span style="font-size:12px;color:var(--gray)">যেকোনো ভাষায় (বাংলা, English, Banglish) লিখতে পারেন</span>
+        <span class="card-title">📋 ধাপ ১ — প্রোডাক্টের তথ্য লিখুন</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="loadExample()">📝 উদাহরণ</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('masterInput').value=''">🗑️ মুছুন</button>
+        </div>
       </div>
-      <div style="background:#F9F7FF;border:1px dashed #C4B5FD;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#7C3AED;line-height:1.8">
-        <strong>📌 যা লিখতে পারেন:</strong> প্রোডাক্টের নাম, দাম, warranty, features, specs, FAQ — যেকোনো format এ লিখুন।<br>
-        <strong>উদাহরণ:</strong> "GearUP GT4 Pro Smartwatch, price 2490tk, old price 3200tk, 6 months warranty, 1.96 AMOLED display, IP68 waterproof, heart rate, SpO2 monitor, call feature, এটা একটা premium smartwatch..."
+      <div style="background:#F9F7FF;border:1px dashed #C4B5FD;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#7C3AED;line-height:1.9">
+        <strong>📌 নিচের যেকোনো ফরম্যাটে তথ্য দিন:</strong><br>
+        ✔ Product Name + Price + Old Price + Badge + Warranty + Rating<br>
+        ✔ Specifications (Brand, Model, Connectivity, Power, ইত্যাদি)<br>
+        ✔ বিস্তারিত বর্ণনা (বাংলা বা English যেকোনো ভাষায়)<br>
+        ✔ Features / FAQ যা আছে সব পেস্ট করুন — AI নিজেই বের করবে
       </div>
-      <textarea id="masterInput" style="width:100%;min-height:220px;padding:14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.75;transition:var(--tr)" placeholder="এখানে প্রোডাক্টের সমস্ত তথ্য পেস্ট করুন...
+      <textarea id="masterInput" style="width:100%;min-height:280px;padding:14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.8;transition:var(--tr)" placeholder="এখানে প্রোডাক্টের সমস্ত তথ্য পেস্ট করুন...
 
 উদাহরণ:
-Product: GearUP GT4 Pro Smartwatch AMOLED
-Price: 2490 taka
-Old Price: 3200 taka  
-Warranty: 6 months replacement
-Category: smartwatch
+Product Name: GearUP NRGB50 5 Meter RGB Neon Light
+Price: 2200 TK
+পুরনো মূল্য: 2850
 Badge: HOT
-Stock: 20
+ওয়ারেন্টি: 6 Months Replacement Warranty
+রেটিং: 4.8
+
+Brand: GearUP, 5 Meter Length, App and Remote Control, Bluetooth, 24W...
+
+এটি একটি ৫ মিটার দীর্ঘ RGB Neon Light। ব্লুটুথ অ্যাপ ও রিমোট দিয়ে কন্ট্রোল করা যায়...
 
 Features:
-- 1.96 inch AMOLED display
-- IP68 waterproof
-- Heart rate, SpO2, Blood Pressure monitor
-- Call feature via Bluetooth
-- 300mAh battery
-
-Specs:
-Display: 1.96 AMOLED
-Battery: 300mAh
-Water resistance: IP68
-Health sensors: HR, SpO2, BP
-
-Description:
-এটি একটি premium smartwatch যা...
+- Vibrant RGB Colors
+- App & Remote Control
+- Multiple Lighting Modes
 
 FAQ:
-Q: এটা কি পানিতে ব্যবহার করা যাবে?
-A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
+Q: কীভাবে কন্ট্রোল করা যায়?
+A: App ও Remote দিয়ে..."></textarea>
 
-      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-        <button class="btn btn-dark" onclick="runAIParser()" id="parseBtn" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);flex:1;justify-content:center;padding:13px;font-size:14px">
-          🤖 AI দিয়ে Parse করুন
-        </button>
-        <button class="btn btn-outline" onclick="document.getElementById('masterInput').value=''" style="padding:13px">🗑️ মুছুন</button>
-        <button class="btn btn-outline" onclick="loadExample()" style="padding:13px">📝 উদাহরণ লোড করুন</button>
+      <button class="btn btn-dark" onclick="runAIParser()" id="parseBtn" style="background:linear-gradient(135deg,#4CAF50,#2E7D32);width:100%;justify-content:center;padding:14px;font-size:15px;margin-top:12px;border-radius:10px">
+        ⚡ Parse করুন — সাথে সাথে ফলাফল দেখুন
+      </button>
+    </div>
+
+    <!-- STEP 2: IMAGE MANAGER (always visible, filled before/after parse) -->
+    <div class="card" id="imgManagerCard">
+      <div class="card-head">
+        <span class="card-title">🖼️ ধাপ ২ — প্রোডাক্ট ছবি যোগ করুন</span>
+        <button class="btn btn-outline btn-sm" onclick="addRImgRow()">+ ছবি যোগ করুন</button>
       </div>
+      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#92400E;line-height:1.8">
+        💡 <strong>ছবির URL দিন</strong> — একাধিক ছবি দিতে পারবেন। নিচে ড্র্যাগ করে ছবির ক্রম বদলাতে পারবেন।<br>
+        <strong>টিপস:</strong> imgbb.com বা imgur.com এ ছবি আপলোড করে সেই URL দিন।
+      </div>
+      <!-- Image rows container -->
+      <div id="r_imgMgr" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+      <button type="button" onclick="addRImgRow()" class="btn btn-outline btn-sm">+ আরেকটি ছবি যোগ করুন</button>
+
+      <!-- Image preview strip -->
+      <div id="imgPreviewStrip" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"></div>
     </div>
 
     <!-- LOADING STATE -->
     <div id="parserLoading" style="display:none">
-      <div class="card" style="text-align:center;padding:40px">
-        <div style="width:60px;height:60px;border:4px solid var(--border);border-top-color:#8B5CF6;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">AI বিশ্লেষণ করছে...</div>
-        <div style="font-size:12.5px;color:var(--gray)" id="parseStatus">টেক্সট পড়ছে...</div>
+      <div class="card" style="text-align:center;padding:48px">
+        <div style="width:64px;height:64px;border:4px solid var(--border);border-top-color:#4CAF50;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 18px"></div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">তথ্য বিশ্লেষণ করছে...</div>
+        <div style="font-size:12.5px;color:var(--gray)" id="parseStatus">তথ্য পড়ছে...</div>
       </div>
     </div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
     <!-- PARSED RESULT PREVIEW -->
     <div id="parsedResult" style="display:none">
-      <div class="card" style="border:2px solid #8B5CF6">
+      <div class="card" style="border:2px solid #4CAF50">
         <div class="card-head">
-          <span class="card-title" style="color:#7C3AED">✅ Parse সম্পন্ন — প্রিভিউ ও এডিট করুন</span>
+          <span class="card-title" style="color:#2E7D32">✅ Parse সম্পন্ন — প্রিভিউ ও এডিট করুন</span>
           <div style="display:flex;gap:8px">
             <button class="btn btn-outline btn-sm" onclick="resetParser()">🔄 Reset</button>
-            <button class="btn btn-sm" style="background:#8B5CF6;color:#fff" onclick="sendToProductForm()">→ Product Form এ পাঠান</button>
           </div>
         </div>
 
-        <!-- TOP SECTION PREVIEW -->
-        <div style="background:#F9F7FF;border-radius:10px;padding:16px;margin-bottom:16px">
-          <div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🔝 TOP SECTION (Name → Price → Warranty → Specs → Buttons)</div>
+        <!-- TOP SECTION -->
+        <div style="background:#F9F7FF;border-radius:10px;padding:16px;margin-bottom:14px">
+          <div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🔝 মূল তথ্য (নাম → মূল্য → ওয়ারেন্টি → Quick Specs)</div>
           <div class="fg2c">
             <div class="fg"><label>প্রোডাক্টের নাম</label><input class="finp" id="r_name" placeholder="Auto-filled..."></div>
             <div class="fg"><label>ক্যাটাগরি</label>
               <select class="finp" id="r_cat">
-                <option value="rgb">RGB Lights</option><option value="smartwatch">Smartwatches</option>
-                <option value="powerbank">Power Bank</option><option value="tws">TWS</option>
-                <option value="headphone">BT Headphones</option><option value="lamp">Acrylic Lamp</option>
+                <option value="rgb">RGB Lights</option>
+                <option value="smartwatch">Smartwatches</option>
+                <option value="powerbank">Power Bank</option>
+                <option value="tws">TWS</option>
+                <option value="headphone">BT Headphones</option>
+                <option value="lamp">Acrylic Lamp</option>
                 <option value="fan">Rechargeable Fan</option>
               </select>
             </div>
@@ -499,35 +507,44 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
             <div class="fg"><label>মূল্য (৳)</label><input class="finp" id="r_price" type="number"></div>
             <div class="fg"><label>পুরনো মূল্য (৳)</label><input class="finp" id="r_old" type="number"></div>
             <div class="fg"><label>স্টক</label><input class="finp" id="r_stock" type="number" value="20"></div>
-            <div class="fg"><label>রেটিং</label><input class="finp" id="r_rating" type="number" step="0.1" min="1" max="5" value="4.5"></div>
+            <div class="fg"><label>রেটিং (১-৫)</label><input class="finp" id="r_rating" type="number" step="0.1" min="1" max="5" value="4.5"></div>
           </div>
           <div class="fg2c">
-            <div class="fg"><label>ওয়ারেন্টি</label><input class="finp" id="r_warranty"></div>
-            <div class="fg"><label>Badge</label><input class="finp" id="r_badge" placeholder="HOT / NEW / SALE"></div>
+            <div class="fg"><label>ওয়ারেন্টি</label><input class="finp" id="r_warranty" placeholder="6 Months Replacement Warranty"></div>
+            <div class="fg"><label>Badge</label>
+              <select class="finp" id="r_badge">
+                <option value="">— কোনো Badge নেই —</option>
+                <option value="HOT">🔥 HOT</option>
+                <option value="NEW">🆕 NEW</option>
+                <option value="SALE">💸 SALE</option>
+              </select>
+            </div>
           </div>
-          <div class="fg"><label>Quick Specs (কমা দিয়ে আলাদা, যেমন: Display: AMOLED, Battery: 300mAh)</label><textarea class="finp" id="r_quick_specs" rows="2"></textarea></div>
+          <div class="fg"><label>Quick Specs <span class="hint">(কমা দিয়ে আলাদা — ওয়েবসাইটে ছোট ট্যাগ হিসেবে দেখায়)</span></label>
+            <textarea class="finp" id="r_quick_specs" rows="2" placeholder="দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth, ওয়ারেন্টি 6 Months"></textarea>
+          </div>
         </div>
 
-        <!-- BOTTOM SECTION PREVIEW -->
-        <div style="background:#F0FDF4;border-radius:10px;padding:16px;margin-bottom:16px">
-          <div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⬇️ BOTTOM SECTION (Description → Features → Tech Specs → FAQs → Closing)</div>
-          <div class="fg"><label>Description</label><textarea class="finp" id="r_desc" rows="3"></textarea></div>
-          <div class="fg"><label>Features (প্রতিটি লাইনে একটি)</label><textarea class="finp" id="r_features" rows="4" placeholder="প্রতিটি feature আলাদা লাইনে লিখুন"></textarea></div>
-          <div class="fg"><label>Technical Specs (Key: Value, প্রতিটি লাইনে একটি)</label><textarea class="finp" id="r_tech_specs" rows="4" placeholder="Display: 1.96 AMOLED&#10;Battery: 300mAh&#10;Water: IP68"></textarea></div>
-          <div class="fg"><label>Product FAQs (Q: ... A: ... format)</label><textarea class="finp" id="r_faqs" rows="4" placeholder="Q: প্রশ্ন?&#10;A: উত্তর&#10;&#10;Q: আরেকটি প্রশ্ন?&#10;A: উত্তর"></textarea></div>
-          <div class="fg"><label>Closing Statement</label><input class="finp" id="r_closing" placeholder="একটি আকর্ষণীয় শেষ বাক্য..."></div>
+        <!-- BOTTOM SECTION -->
+        <div style="background:#F0FDF4;border-radius:10px;padding:16px;margin-bottom:14px">
+          <div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⬇️ বিস্তারিত (Description → Features → Technical Specs → FAQs)</div>
+          <div class="fg"><label>বর্ণনা (Description)</label><textarea class="finp" id="r_desc" rows="3"></textarea></div>
+          <div class="fg"><label>Features <span class="hint">(প্রতিটি লাইনে একটি)</span></label><textarea class="finp" id="r_features" rows="5" placeholder="প্রতিটি feature আলাদা লাইনে লিখুন"></textarea></div>
+          <div class="fg"><label>Technical Specs <span class="hint">(Key: Value, প্রতিটি লাইনে একটি)</span></label><textarea class="finp" id="r_tech_specs" rows="5" placeholder="Brand: GearUP&#10;Model: NRGB50&#10;Power: 24W&#10;Length: 5m"></textarea></div>
+          <div class="fg"><label>FAQ <span class="hint">(Q: প্রশ্ন? A: উত্তর — আলাদা লাইনে)</span></label><textarea class="finp" id="r_faqs" rows="5" placeholder="Q: প্রশ্ন?&#10;A: উত্তর&#10;&#10;Q: আরেকটি প্রশ্ন?&#10;A: উত্তর"></textarea></div>
+          <div class="fg"><label>Closing Statement <span class="hint">(শেষ আকর্ষণীয় বাক্য)</span></label><input class="finp" id="r_closing" placeholder="আজই অর্ডার করুন..."></div>
         </div>
 
-        <!-- IMAGE UPLOAD (manual) -->
-        <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:16px">
-          <div style="font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🖼️ IMAGE (ম্যানুয়ালি যোগ করুন)</div>
-          <div class="img-manager" id="r_imgMgr"></div>
-          <button type="button" onclick="addRImgRow()" class="btn btn-outline btn-sm" style="margin-top:8px">+ Emoji বা ছবির URL যোগ করুন</button>
-        </div>
-
-        <div style="margin-top:16px;display:flex;gap:10px">
-          <button class="btn btn-outline" onclick="resetParser()" style="flex:1;justify-content:center">বাতিল করুন</button>
-          <button class="btn btn-sm" style="background:#8B5CF6;color:#fff;flex:2;padding:12px;justify-content:center;font-size:14px" onclick="sendToProductForm()">✅ প্রোডাক্ট হিসেবে সেভ করুন</button>
+        <!-- FINAL SAVE -->
+        <div style="background:#1A1A1A;border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+          <div>
+            <div style="color:#fff;font-size:14px;font-weight:700">সব ঠিক আছে? প্রোডাক্ট পাবলিশ করুন!</div>
+            <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:2px">সেভ করলে সাথে সাথে ওয়েবসাইটে দেখাবে।</div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-outline" onclick="resetParser()" style="color:#fff;border-color:rgba(255,255,255,.3)">বাতিল</button>
+            <button class="btn btn-green" style="padding:12px 24px;font-size:14px" onclick="sendToProductForm()">✅ পাবলিশ করুন</button>
+          </div>
         </div>
       </div>
     </div>
@@ -535,7 +552,7 @@ A: হ্যাঁ, IP68 রেটিং আছে..."></textarea>
     <!-- ERROR STATE -->
     <div id="parserError" style="display:none">
       <div class="card" style="border:1.5px solid #FCA5A5;background:#FFF5F5;text-align:center;padding:28px">
-        <div style="font-size:32px;margin-bottom:10px">❌</div>
+        <div style="font-size:36px;margin-bottom:10px">❌</div>
         <div style="font-size:15px;font-weight:700;color:var(--red);margin-bottom:8px">Parse করতে সমস্যা হয়েছে</div>
         <div style="font-size:13px;color:var(--gray);margin-bottom:16px" id="parserErrorMsg"></div>
         <button class="btn btn-outline" onclick="resetParser()">আবার চেষ্টা করুন</button>
@@ -1582,10 +1599,22 @@ function showPage(id,btn){
   if(id==='design-cath-cards')renderCathCardList();
   if(id==='design-categories')renderCategoryList();
   if(id==='faq-settings')renderFAQSettings();
+  if(id==='ai-parser') populateAIParserCatDropdown();
   // Auto close sidebar on mobile after nav
   if(window.innerWidth<=768)closeMobSidebar();
   // Scroll to top
   window.scrollTo(0,0);
+}
+
+// ✅ AI Planner category dropdown dynamic populate
+function populateAIParserCatDropdown(){
+  const sel = document.getElementById('r_cat');
+  if(!sel) return;
+  const cats = getCats();
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+  if(currentVal && sel.querySelector(`option[value="${currentVal}"]`)) sel.value = currentVal;
 }
 
 // ======= DASHBOARD =======
@@ -2244,6 +2273,7 @@ function saveCategoryEdit(){
   saveCats(cats);
   document.getElementById('catEditor').style.display='none';
   renderCategoryList();
+  populateAIParserCatDropdown(); // ✅ AI Planner dropdown sync
 }
 function deleteCategory(i){
   if(!confirm('এই ক্যাটাগরি মুছে দিবেন?'))return;
@@ -2251,6 +2281,7 @@ function deleteCategory(i){
   cats.splice(i,1);
   saveCats(cats);
   renderCategoryList();
+  populateAIParserCatDropdown(); // ✅ AI Planner dropdown sync
   showAdminToast('🗑️ ক্যাটাগরি মুছে গেছে');
 }
 
@@ -2315,265 +2346,466 @@ function showAdminToast(m){
   t.textContent=m;t.style.opacity='1';clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',2400);
 }
 
-// ======= AI PARSER (Anthropic Claude API) =======
-function saveApiKey(){
-  const key=document.getElementById('claudeApiKey').value.trim();
-  if(!key){showAdminToast('API Key দিন');return;}
-  localStorage.setItem('vc_claude_key',key);
-  document.getElementById('apiKeyStatus').textContent='✅ সেট করা আছে';
-  document.getElementById('apiKeyStatus').style.color='#10B981';
-  showAdminToast('✅ API Key সেভ হয়েছে!');
-}
+// ======= SMART PARSER (No API — Rule-Based, Works Offline) =======
 
-async function testApiKey(){
-  const key=localStorage.getItem('vc_claude_key');
-  if(!key){showAdminToast('আগে API Key সেভ করুন');return;}
-  const res=document.getElementById('apiTestResult');
-  res.textContent='⏳ Test করছি...';res.style.color='var(--gray)';
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'hi'}]})
-    });
-    if(r.ok){res.textContent='✅ API Key সঠিক — সংযোগ সফল!';res.style.color='#10B981';}
-    else{const e=await r.json();res.textContent='❌ Error: '+(e.error?.message||r.status);res.style.color='#E63946';}
-  }catch(e){res.textContent='❌ Network error: '+e.message;res.style.color='#E63946';}
-}
-
-// Load API key status on page init
-(function(){
-  const k=localStorage.getItem('vc_claude_key');
-  if(k){
-    document.getElementById('apiKeyStatus').textContent='✅ সেট করা আছে';
-    document.getElementById('apiKeyStatus').style.color='#10B981';
-    document.getElementById('claudeApiKey').placeholder='sk-ant-api... (সেট করা আছে)';
-  }
+// Init image manager on page load
+(function initImgManager(){
+  // Add one default empty row for images
+  setTimeout(()=>{
+    const mgr = document.getElementById('r_imgMgr');
+    if(mgr && mgr.children.length === 0) addRImgRow('');
+  }, 500);
 })();
 
 function loadExample(){
-  document.getElementById('masterInput').value=`পণ্যের নাম: GearUP GT4 Pro Smartwatch AMOLED 2025
-মূল্য: ২৪৯০ টাকা
-পুরনো মূল্য: ৩২০০ টাকা
-ক্যাটাগরি: smartwatch
-ওয়ারেন্টি: ৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি
-ব্যাজ: HOT
+  document.getElementById('masterInput').value = `Product Name: GearUP NRGB50 5 Meter RGB Neon Light with App & Remote Control
+Price: 2200 TK
+পুরনো মূল্য: 2850
+Badge: HOT
+ওয়ারেন্টি: 6 Months Replacement Warranty
+রেটিং (1-5): 4.8
+Quick Specs: দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth, ওয়ারেন্টি 6 Months
 
-বর্ণনা: GearUP GT4 Pro হলো একটি প্রিমিয়াম স্মার্টওয়াচ যা AMOLED ডিসপ্লে এবং সম্পূর্ণ হেলথ মনিটরিং সুবিধা দেয়। এটি IP68 ওয়াটারপ্রুফ এবং দীর্ঘস্থায়ী ব্যাটারি লাইফ সহ আসে।
+স্পেসিফিকেশন:
+Brand: GearUP
+5 Meter Length
+Vibrant RGB Colors
+App and Remote Control
+Multiple Lighting Modes
+Flexible Design
 
-ফিচার:
-- 1.96" AMOLED HD ডিসপ্লে
-- হার্ট রেট, SpO2, ব্লাড প্রেশার মনিটর
-- IP68 ওয়াটারপ্রুফ
-- ৩০০mAh ব্যাটারি — ৭ দিনের ব্যাকআপ
-- Bluetooth কলিং সাপোর্ট
-- ১০০+ স্পোর্টস মোড
+পণ্যটির বিস্তারিত বর্ণনা:
+আধুনিক ইন্টেরিয়র এবং লাইটিং সলিউশনে GearUP একটি পরিচিত নাম। GearUP NRGB50 5 Meter RGB Neon Light আপনার রুম বা গেমিং সেটআপকে সম্পূর্ণ বদলে দিতে পারে।
 
-টেকনিক্যাল স্পেক:
-Display: 1.96 inch AMOLED
-Battery: 300mAh
-Water Resistance: IP68
-Connectivity: Bluetooth 5.3
-Health: HR + SpO2 + BP + Sleep
-Call: Yes
+Product Features:
+- Vibrant RGB Colors
+- 5-Meter Length
+- App and Remote Control
+- Multiple Lighting Modes
+- DIY Flexibility
+- Energy Efficient
+- Safe and Durable
+- Easy Installation
+
+Technical Specs:
+Brand: GearUP
+Model: NRGB50
+LED Density: 96Led/per meter
+Connectivity: Bluetooth
+Power: 24W
+Voltage: 24V
+Length: 5m
+Useful Life: 50000 hours
 
 FAQ:
-Q: এই ঘড়িতে কি বাংলায় নোটিফিকেশন দেখা যায়?
-A: হ্যাঁ, বাংলা সহ সকল ভাষার নোটিফিকেশন দেখায়।
+Q: এই নিয়ন লাইটটি কীভাবে কন্ট্রোল করা যায়?
+A: স্মার্টফোনের অ্যাপ এবং রিমোট কন্ট্রোল দিয়ে কন্ট্রোল করা যায়।
 
-Q: চার্জ দিতে কতক্ষণ লাগে?
-A: সম্পূর্ণ চার্জ হতে প্রায় ১.৫-২ ঘণ্টা সময় লাগে।
-
-ক্লোজিং: আজই অর্ডার করুন এবং স্মার্ট লাইফস্টাইলের অভিজ্ঞতা নিন!`;
+Q: এই প্রোডাক্টটির সাথে কতদিনের ওয়ারেন্টি?
+A: ৬ মাসের রিপ্লেসমেন্ট ওয়ারেন্টি।`;
 }
 
 async function runAIParser(){
-  const key=localStorage.getItem('vc_claude_key');
-  if(!key){
-    showAdminToast('❌ আগে API Key সেট করুন');
-    document.getElementById('apiKeyCard').scrollIntoView({behavior:'smooth'});
-    return;
-  }
-  const raw=document.getElementById('masterInput').value.trim();
-  if(!raw){showAdminToast('Master Input Box এ টেক্সট দিন');return;}
+  const raw = document.getElementById('masterInput').value.trim();
+  if(!raw){ showAdminToast('Master Input Box এ তথ্য দিন'); return; }
 
-  // Show loading
-  document.getElementById('parserLoading').style.display='block';
-  document.getElementById('parsedResult').style.display='none';
-  document.getElementById('parserError').style.display='none';
-  document.getElementById('parseBtn').disabled=true;
+  document.getElementById('parserLoading').style.display = 'block';
+  document.getElementById('parsedResult').style.display = 'none';
+  document.getElementById('parserError').style.display = 'none';
+  document.getElementById('parseBtn').disabled = true;
 
-  const statusEl=document.getElementById('parseStatus');
-  const statuses=['টেক্সট পড়ছি...','তথ্য বিশ্লেষণ করছি...','ফিল্ড সাজাচ্ছি...','প্রায় শেষ...'];
-  let si=0;
-  const st=setInterval(()=>{if(si<statuses.length)statusEl.textContent=statuses[si++];},1500);
+  const statusEl = document.getElementById('parseStatus');
+  const statuses = ['তথ্য পড়ছি...', 'নাম ও দাম বের করছি...', 'Features ও Specs সাজাচ্ছি...', 'FAQ ও বর্ণনা গোছাচ্ছি...'];
+  let si = 0;
+  const st = setInterval(()=>{ if(si < statuses.length) statusEl.textContent = statuses[si++]; }, 600);
 
-  const systemPrompt=`You are a product data extractor for a Bangladeshi e-commerce store called Vangcur. Extract product information from the given text and return ONLY a valid JSON object with these exact keys:
-{
-  "name": "product name in English/Banglish",
-  "cat": "one of: rgb, smartwatch, powerbank, tws, headphone, lamp, fan",
-  "price": number,
-  "old": number (original/crossed-out price, if not given use price*1.3 rounded),
-  "stock": number (default 20 if not mentioned),
-  "rating": number between 4.0-5.0 (default 4.5 if not mentioned),
-  "warranty": "warranty text",
-  "badge": "HOT or NEW or SALE or empty string",
-  "quick_specs": "key: value pairs separated by comma, max 5",
-  "desc": "short description 1-2 sentences",
-  "features": ["feature 1", "feature 2", ...] (array, max 8),
-  "tech_specs": "Key: Value\\nKey: Value format",
-  "faqs": "Q: question?\\nA: answer\\n\\nQ: question?\\nA: answer",
-  "closing": "closing statement one sentence"
-}
-Return ONLY the JSON, no markdown, no explanation.`;
+  // Small delay to show loading UI
+  await new Promise(r => setTimeout(r, 2200));
+  clearInterval(st);
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        system:systemPrompt,
-        messages:[{role:'user',content:raw}]
-      })
-    });
-    clearInterval(st);
-    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error '+r.status);}
-    const data=await r.json();
-    const txt=data.content?.filter(c=>c.type==='text').map(c=>c.text).join('');
-    let parsed;
-    try{parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());}
-    catch(e){throw new Error('AI response JSON parse করা যায়নি। আবার চেষ্টা করুন।');}
+    const parsed = smartParse(raw);
     fillParsedForm(parsed);
-    document.getElementById('parserLoading').style.display='none';
-    document.getElementById('parsedResult').style.display='block';
-    document.getElementById('parsedResult').scrollIntoView({behavior:'smooth'});
+    document.getElementById('parserLoading').style.display = 'none';
+    document.getElementById('parsedResult').style.display = 'block';
+    document.getElementById('parsedResult').scrollIntoView({ behavior:'smooth' });
     showAdminToast('✅ Parse সম্পন্ন!');
   }catch(e){
-    clearInterval(st);
-    document.getElementById('parserLoading').style.display='none';
-    document.getElementById('parserError').style.display='block';
-    document.getElementById('parserErrorMsg').textContent=e.message;
-    showAdminToast('❌ Parse ব্যর্থ');
+    document.getElementById('parserLoading').style.display = 'none';
+    document.getElementById('parserError').style.display = 'block';
+    document.getElementById('parserErrorMsg').textContent = e.message;
+    showAdminToast('❌ Parse ব্যর্থ হয়েছে');
   }
-  document.getElementById('parseBtn').disabled=false;
+  document.getElementById('parseBtn').disabled = false;
+}
+
+// ── Smart Rule-Based Parser ──
+function smartParse(raw){
+  const lines = raw.split('\n');
+
+  // Helper: find value by multiple possible labels (case-insensitive, bangla+english)
+  function findVal(keys){
+    for(const line of lines){
+      const lower = line.toLowerCase();
+      for(const k of keys){
+        const kl = k.toLowerCase();
+        // pattern: "Key: value" or "Key — value" or "Key = value"
+        const m = line.match(new RegExp('^' + escRe(k) + '\\s*[:=—-]\\s*(.+)', 'i'));
+        if(m) return m[1].trim();
+        // Bengali colon
+        const mb = line.match(new RegExp('^' + escRe(k) + '\\s*[ঃ:]\\s*(.+)', 'i'));
+        if(mb) return mb[1].trim();
+      }
+    }
+    return '';
+  }
+
+  function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+  // ── Product Name ──
+  let name = findVal(['Product Name','পণ্যের নাম','পণ্যের নাম','প্রোডাক্টের নাম','Name','নাম','Product']);
+  if(!name){
+    // First non-empty line often has the name
+    for(const l of lines){ if(l.trim() && !l.includes(':') && l.length > 8){ name = l.trim(); break; } }
+  }
+
+  // ── Price ──
+  function parsePrice(s){
+    if(!s) return 0;
+    const m = s.match(/[\d,]+/);
+    return m ? parseInt(m[0].replace(/,/g,'')) : 0;
+  }
+  let priceRaw = findVal(['বর্তমান মূল্য','Price','মূল্য','দাম','Current Price','বর্তমান দাম']);
+  let price = parsePrice(priceRaw);
+  if(!price){
+    // fallback: search "2200 TK" or "২২০০" anywhere
+    const pm = raw.match(/(?:price|মূল্য|দাম)[^\d]*(\d[\d,]+)/i);
+    if(pm) price = parseInt(pm[1].replace(/,/g,''));
+  }
+
+  let oldRaw = findVal(['পুরনো মূল্য','Old Price','আগের মূল্য','পুরানো মূল্য','পুরনো দাম','Original Price']);
+  let old = parsePrice(oldRaw) || Math.round(price * 1.3);
+
+  // ── Rating ──
+  let ratingRaw = findVal(['রেটিং','Rating','রেটিং (1-5)','Rate']);
+  let rating = parseFloat(ratingRaw) || 4.5;
+  if(rating > 5) rating = 5;
+  if(rating < 1) rating = 4.5;
+
+  // ── Warranty ──
+  let warranty = findVal(['ওয়ারেন্টি','Warranty','গ্যারান্টি','Guarantee','ওয়ারেন্টি']);
+  if(!warranty){ const wm = raw.match(/(\d+\s*(?:months?|বছর|মাস)[^,\n]*warranty[^,\n]*)/i); if(wm) warranty = wm[1].trim(); }
+
+  // ── Badge ──
+  let badgeRaw = findVal(['Badge','ব্যাজ','Tag']);
+  let badge = '';
+  if(/hot/i.test(badgeRaw)) badge = 'HOT';
+  else if(/new/i.test(badgeRaw)) badge = 'NEW';
+  else if(/sale/i.test(badgeRaw)) badge = 'SALE';
+
+  // ── Quick Specs ──
+  let quickSpecs = findVal(['Quick Specs','Quick Spec','কুইক স্পেক','দ্রুত স্পেক']);
+
+  // ── Category detection ──
+  const text = raw.toLowerCase();
+  let cat = 'rgb';
+  if(/smartwatch|ঘড়ি|watch/i.test(raw)) cat = 'smartwatch';
+  else if(/power.?bank|পাওয়ার ব্যাংক/i.test(raw)) cat = 'powerbank';
+  else if(/tws|earbuds|earphone|ইয়ারবাড/i.test(raw)) cat = 'tws';
+  else if(/headphone|headset|হেডফোন/i.test(raw)) cat = 'headphone';
+  else if(/lamp|লাইট.*acrylic|acrylic/i.test(raw)) cat = 'lamp';
+  else if(/fan|ফ্যান/i.test(raw)) cat = 'fan';
+  else if(/rgb|neon|light|লাইট/i.test(raw)) cat = 'rgb';
+
+  // ── Description ──
+  // Find paragraph after keywords
+  let desc = '';
+  const descKeywords = ['পণ্যটির বিস্তারিত বর্ণনা','বিস্তারিত বর্ণনা','Description','বর্ণনা','পণ্যের বর্ণনা'];
+  for(const kw of descKeywords){
+    const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
+    if(idx >= 0){
+      // collect next non-empty lines until next section
+      const parts = [];
+      for(let i = idx+1; i < lines.length && parts.length < 4; i++){
+        const l = lines[i].trim();
+        if(!l) continue;
+        if(/^(Q:|A:|FAQ|ফিচার|Feature|Spec|Technical|Product F)/i.test(l)) break;
+        if(l.includes(':') && l.length < 40) break;
+        parts.push(l);
+      }
+      desc = parts.join(' ').trim();
+      if(desc) break;
+    }
+  }
+
+  // ── Features ──
+  let features = [];
+  const featKwds = ['Product Features','Features','ফিচার','সুবিধা','Product Feature','Feature'];
+  for(const kw of featKwds){
+    const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()) && !l.includes('Quick'));
+    if(idx >= 0){
+      for(let i = idx+1; i < lines.length; i++){
+        const l = lines[i].trim();
+        if(!l) continue;
+        if(/^(Q:|A:|FAQ|Spec|Technical|বর্ণনা|Description|কিছু কমন)/i.test(l)) break;
+        if(l.includes(':') && !l.startsWith('-') && l.length < 60 && !/^[-•*]/.test(l)) break;
+        const feat = l.replace(/^[-•*✔✓]\s*/,'').trim();
+        if(feat && feat.length > 3 && features.length < 10) features.push(feat);
+      }
+      if(features.length) break;
+    }
+  }
+
+  // ── Technical Specs ──
+  let techSpecLines = [];
+  const specKwds = ['Product Specifications','Technical Specs','Specifications','স্পেসিফিকেশন','কারিগরি তথ্য','Spec'];
+  for(const kw of specKwds){
+    const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
+    if(idx >= 0){
+      for(let i = idx+1; i < lines.length; i++){
+        const l = lines[i].trim();
+        if(!l) continue;
+        if(/^(Q:|FAQ|Feature|বর্ণনা|Description|কিছু কমন|ADMIN)/i.test(l)) break;
+        if(l.includes(':') && !l.startsWith('-')){
+          techSpecLines.push(l);
+        } else if(/^[-•*]/.test(l)){
+          // skip bullet items in spec section, they're often headers
+        }
+      }
+      if(techSpecLines.length) break;
+    }
+  }
+  const tech_specs = techSpecLines.join('\n');
+
+  // ── FAQs ──
+  let faqBlocks = [];
+  const faqIdx = lines.findIndex(l => /^FAQ|^কিছু কমন প্রশ্ন/i.test(l.trim()));
+  if(faqIdx >= 0){
+    let q = '', a = '';
+    for(let i = faqIdx+1; i < lines.length; i++){
+      const l = lines[i].trim();
+      if(!l) continue;
+      if(/^ADMIN/i.test(l)) break;
+      if(/^(?:প্রশ্ন|Q)[:\s]/.test(l)){ if(q && a) faqBlocks.push(`Q: ${q}\nA: ${a}`); q = l.replace(/^(?:প্রশ্ন|Q)[:\s]*/,'').trim(); a = ''; }
+      else if(/^(?:উত্তর|A)[:\s]/.test(l)){ a = l.replace(/^(?:উত্তর|A)[:\s]*/,'').trim(); }
+      else if(a){ a += ' ' + l; }
+    }
+    if(q && a) faqBlocks.push(`Q: ${q}\nA: ${a}`);
+  }
+  const faqs = faqBlocks.join('\n\n');
+
+  // ── Closing ──
+  let closing = '';
+  const lastFeat = features[features.length-1] || '';
+  // Look for a closing line near the end
+  for(let i = lines.length-1; i >= 0; i--){
+    const l = lines[i].trim();
+    if(l && !l.includes(':') && l.length > 15 && !/^(Q:|A:|FAQ|-|•|\*)/i.test(l) && !/^ADMIN/i.test(l)){
+      closing = l; break;
+    }
+  }
+
+  // ── Stock default ──
+  let stockRaw = findVal(['Stock','স্টক','Quantity']);
+  let stock = parseInt(stockRaw) || 20;
+
+  return { name, cat, price, old, stock, rating, warranty, badge, quick_specs: quickSpecs, desc, features, tech_specs, faqs, closing };
 }
 
 function fillParsedForm(p){
-  const safe=(v,fb)=>v!==undefined&&v!==null?v:fb;
-  document.getElementById('r_name').value=safe(p.name,'');
-  document.getElementById('r_price').value=safe(p.price,'');
-  document.getElementById('r_old').value=safe(p.old,'');
-  document.getElementById('r_stock').value=safe(p.stock,20);
-  document.getElementById('r_rating').value=safe(p.rating,4.5);
-  document.getElementById('r_warranty').value=safe(p.warranty,'');
-  document.getElementById('r_badge').value=safe(p.badge,'');
-  document.getElementById('r_quick_specs').value=safe(p.quick_specs,'');
-  document.getElementById('r_desc').value=safe(p.desc,'');
-  document.getElementById('r_features').value=Array.isArray(p.features)?p.features.join('\n'):safe(p.features,'');
-  document.getElementById('r_tech_specs').value=safe(p.tech_specs,'');
-  document.getElementById('r_faqs').value=safe(p.faqs,'');
-  document.getElementById('r_closing').value=safe(p.closing,'');
-  // Set category dropdown
-  const catSel=document.getElementById('r_cat');
-  if(catSel&&p.cat){
-    [...catSel.options].forEach(o=>{if(o.value===p.cat)o.selected=true;});
+  const safe = (v, fb) => (v !== undefined && v !== null) ? v : fb;
+  document.getElementById('r_name').value = safe(p.name, '');
+  document.getElementById('r_price').value = safe(p.price, '');
+  document.getElementById('r_old').value = safe(p.old, '');
+  document.getElementById('r_stock').value = safe(p.stock, 20);
+  document.getElementById('r_rating').value = safe(p.rating, 4.5);
+  document.getElementById('r_warranty').value = safe(p.warranty, '');
+  document.getElementById('r_quick_specs').value = safe(p.quick_specs, '');
+  document.getElementById('r_desc').value = safe(p.desc, '');
+  document.getElementById('r_features').value = Array.isArray(p.features) ? p.features.join('\n') : safe(p.features, '');
+  document.getElementById('r_tech_specs').value = safe(p.tech_specs, '');
+  document.getElementById('r_faqs').value = safe(p.faqs, '');
+  document.getElementById('r_closing').value = safe(p.closing, '');
+
+  // Set badge dropdown
+  const badgeSel = document.getElementById('r_badge');
+  if(badgeSel && p.badge){
+    [...badgeSel.options].forEach(o => { if(o.value === p.badge.toUpperCase()) o.selected = true; });
   }
-  // Init image manager
-  initRImgMgr();
+
+  // Set category dropdown
+  const catSel = document.getElementById('r_cat');
+  if(catSel && p.cat){
+    [...catSel.options].forEach(o => { if(o.value === p.cat) o.selected = true; });
+  }
 }
 
-function initRImgMgr(){
-  const mgr=document.getElementById('r_imgMgr');
-  if(!mgr)return;
-  mgr.innerHTML='';
-  addRImgRow('💡');
-}
-
+// ── Image Manager ──
 function addRImgRow(val){
-  const mgr=document.getElementById('r_imgMgr');
-  const row=document.createElement('div');
-  row.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px';
-  row.innerHTML=`<input class="finp" placeholder="Emoji বা https://img.url" value="${val||''}" style="flex:1">
-    <button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>`;
+  const mgr = document.getElementById('r_imgMgr');
+  if(!mgr) return;
+  const idx = mgr.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'img-row-item';
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;background:var(--light);padding:8px 10px;border-radius:8px';
+  row.draggable = true;
+  row.innerHTML = `
+    <span style="cursor:grab;color:var(--gray);font-size:16px;flex-shrink:0" title="ড্র্যাগ করে সাজান">⠿</span>
+    <span style="font-size:11px;font-weight:700;color:var(--gray);flex-shrink:0;min-width:20px">#${idx}</span>
+    <div id="imgThumb_${Date.now()}" style="width:40px;height:40px;background:#fff;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">🖼️</div>
+    <input class="finp img-url-input" placeholder="https://i.ibb.co/... বা অন্য image URL" value="${val||''}" style="flex:1" oninput="updateThumb(this)">
+    <button type="button" onclick="removeImgRow(this);updateImgPreviewStrip()" class="btn btn-red btn-xs" title="সরিয়ে দিন">✕</button>`;
+  // drag events
+  row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', ''); row.style.opacity='0.4'; window._dragRow = row; });
+  row.addEventListener('dragend', () => { row.style.opacity='1'; updateRowNumbers(); updateImgPreviewStrip(); });
+  row.addEventListener('dragover', e => { e.preventDefault(); });
+  row.addEventListener('drop', e => {
+    e.preventDefault();
+    const dragged = window._dragRow;
+    if(dragged && dragged !== row){ mgr.insertBefore(dragged, row); }
+    updateRowNumbers();
+    updateImgPreviewStrip();
+  });
   mgr.appendChild(row);
+  // auto-update thumb if value given
+  const inp = row.querySelector('.img-url-input');
+  if(inp && val) updateThumb(inp);
+  updateImgPreviewStrip();
+}
+
+function updateThumb(inp){
+  const row = inp.closest('.img-row-item');
+  if(!row) return;
+  const thumb = row.querySelector('[id^="imgThumb_"]');
+  const url = inp.value.trim();
+  if(!thumb) return;
+  if(url && url.startsWith('http')){
+    thumb.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='❌'">`;
+  } else {
+    thumb.innerHTML = url || '🖼️';
+  }
+  updateImgPreviewStrip();
+}
+
+function removeImgRow(btn){
+  btn.closest('.img-row-item').remove();
+  updateRowNumbers();
+}
+
+function updateRowNumbers(){
+  const rows = document.querySelectorAll('#r_imgMgr .img-row-item');
+  rows.forEach((row, i) => {
+    const numEl = row.querySelectorAll('span')[1];
+    if(numEl) numEl.textContent = '#' + (i+1);
+  });
+}
+
+function updateImgPreviewStrip(){
+  const strip = document.getElementById('imgPreviewStrip');
+  if(!strip) return;
+  const urls = [...document.querySelectorAll('#r_imgMgr .img-url-input')]
+    .map(i => i.value.trim()).filter(v => v);
+  if(!urls.length){ strip.innerHTML = '<span style="color:var(--gray);font-size:12px">ছবি যোগ করলে এখানে প্রিভিউ দেখাবে</span>'; return; }
+  strip.innerHTML = urls.map((url, i) => `
+    <div style="text-align:center">
+      <div style="width:64px;height:64px;background:#fff;border-radius:8px;border:2px solid ${i===0?'#4CAF50':'var(--border)'};overflow:hidden;display:flex;align-items:center;justify-content:center">
+        ${url.startsWith('http') ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='❌'">` : url}
+      </div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">${i===0?'প্রথম':'#'+(i+1)}</div>
+    </div>`).join('');
 }
 
 function sendToProductForm(){
-  // Build product object from parsed form
-  const name=document.getElementById('r_name').value.trim();
-  if(!name){showAdminToast('নাম দিন');return;}
-  
+  const name = document.getElementById('r_name').value.trim();
+  if(!name){ showAdminToast('প্রোডাক্টের নাম দিন'); return; }
+
   // Parse tech_specs into object
-  const techSpecsRaw=document.getElementById('r_tech_specs').value;
-  const specs={};
-  techSpecsRaw.split('\n').forEach(line=>{
-    const [k,...vs]=line.split(':');
-    if(k&&vs.length)specs[k.trim()]=vs.join(':').trim();
+  const techSpecsRaw = document.getElementById('r_tech_specs').value;
+  const specs = {};
+  techSpecsRaw.split('\n').forEach(line => {
+    const [k, ...vs] = line.split(':');
+    if(k && vs.length) specs[k.trim()] = vs.join(':').trim();
   });
-  
+
   // Parse features
-  const featuresRaw=document.getElementById('r_features').value;
-  const features=featuresRaw.split('\n').filter(l=>l.trim()).map(l=>l.replace(/^[-•*]\s*/,''));
-  
+  const featuresRaw = document.getElementById('r_features').value;
+  const features = featuresRaw.split('\n').filter(l => l.trim()).map(l => l.replace(/^[-•*]\s*/,''));
+
   // Parse FAQs
-  const faqsRaw=document.getElementById('r_faqs').value;
-  const faqs=[];
-  const faqBlocks=faqsRaw.split(/\n\n+/).filter(b=>b.trim());
-  faqBlocks.forEach(block=>{
-    const qm=block.match(/Q:\s*(.+)/);
-    const am=block.match(/A:\s*([\s\S]+)/);
-    if(qm&&am)faqs.push({q:qm[1].trim(),a:am[1].trim()});
+  const faqsRaw = document.getElementById('r_faqs').value;
+  const faqs = [];
+  faqsRaw.split(/\n\n+/).filter(b => b.trim()).forEach(block => {
+    const qm = block.match(/Q:\s*(.+)/);
+    const am = block.match(/A:\s*([\s\S]+)/);
+    if(qm && am) faqs.push({ q: qm[1].trim(), a: am[1].trim() });
   });
-  
-  // Get images from manager
-  const imgs=[...document.querySelectorAll('#r_imgMgr input')].map(i=>i.value.trim()).filter(v=>v);
-  
-  // Build product
-  const prod={
-    id:Date.now(),
-    cat:document.getElementById('r_cat').value,
+
+  // Get images in order from manager
+  const imgs = [...document.querySelectorAll('#r_imgMgr .img-url-input')]
+    .map(i => i.value.trim()).filter(v => v);
+
+  const badgeVal = document.getElementById('r_badge');
+  const prod = {
+    id: Date.now(),
+    cat: document.getElementById('r_cat').value,
     name,
-    imgs:imgs.length?imgs:['📦'],
-    price:parseFloat(document.getElementById('r_price').value)||0,
-    old:parseFloat(document.getElementById('r_old').value)||0,
-    stock:parseInt(document.getElementById('r_stock').value)||20,
-    rating:parseFloat(document.getElementById('r_rating').value)||4.5,
-    warranty:document.getElementById('r_warranty').value||'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',
-    badge:document.getElementById('r_badge').value.toUpperCase()||'',
+    imgs: imgs.length ? imgs : ['📦'],
+    price: parseFloat(document.getElementById('r_price').value) || 0,
+    old: parseFloat(document.getElementById('r_old').value) || 0,
+    stock: parseInt(document.getElementById('r_stock').value) || 20,
+    rating: parseFloat(document.getElementById('r_rating').value) || 4.5,
+    warranty: document.getElementById('r_warranty').value || '১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',
+    badge: badgeVal ? badgeVal.value.toUpperCase() : '',
     specs,
-    desc:document.getElementById('r_desc').value,
+    desc: document.getElementById('r_desc').value,
     features,
     faqs,
-    closing:document.getElementById('r_closing').value,
-    addedAt:new Date().toISOString(),
+    closing: document.getElementById('r_closing').value,
+    addedAt: new Date().toISOString(),
   };
-  
-  // Save to localStorage custom products
-  const custom=JSON.parse(localStorage.getItem('vc_custom_prods')||'[]');
-  custom.push(prod);
-  localStorage.setItem('vc_custom_prods',JSON.stringify(custom));
-  
-  showAdminToast('✅ প্রোডাক্ট সেভ হয়েছে! ওয়েবসাইটে দেখাবে।');
+
+  // Save to vc_custom_prods (for index.html)
+  const custom = JSON.parse(localStorage.getItem('vc_custom_prods') || '[]');
+  if(!custom.find(p=>p.id===prod.id)) custom.push(prod);
+  localStorage.setItem('vc_custom_prods', JSON.stringify(custom));
+
+  // ✅ Also save to adminProds (for admin panel "Admin যোগকৃত প্রোডাক্ট" section)
+  if(!adminProds.find(p=>p.id===prod.id)) adminProds.push(prod);
+  localStorage.setItem('vc_admin_prods', JSON.stringify(adminProds));
+
+  // ✅ Supabase sync
+  try {
+    await supabaseClient.from('custom_products').upsert([{
+      id: prod.id, name: prod.name, price: prod.price, old: prod.old,
+      cat: prod.cat, stock: prod.stock, warranty: prod.warranty,
+      imgs: prod.imgs, specs: prod.specs, desc_text: prod.desc||'',
+      features: prod.features||[], badge: prod.badge||'',
+      rating: prod.rating||4.5, faqs: prod.faqs||[], closing: prod.closing||''
+    }],{onConflict:'id'});
+  } catch(e){ console.warn('Supabase AI product save failed:', e); }
+
+  showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
   resetParser();
-  // Navigate to products page
-  setTimeout(()=>{showPage('products',null);renderProdTbl();},800);
+  setTimeout(() => { showPage('products', null); renderProdTbl(); }, 800);
 }
 
 function resetParser(){
-  document.getElementById('parsedResult').style.display='none';
-  document.getElementById('parserError').style.display='none';
-  document.getElementById('parserLoading').style.display='none';
-  document.getElementById('parseBtn').disabled=false;
+  document.getElementById('parsedResult').style.display = 'none';
+  document.getElementById('parserError').style.display = 'none';
+  document.getElementById('parserLoading').style.display = 'none';
+  document.getElementById('parseBtn').disabled = false;
+  // Reset image manager
+  const mgr = document.getElementById('r_imgMgr');
+  if(mgr){ mgr.innerHTML = ''; addRImgRow(''); }
+  updateImgPreviewStrip();
 }
 
-function switchProdTab(tab,btn){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  ['basic','layout','images'].forEach(t=>{
-    const el=document.getElementById('ptab-'+t);
-    if(el)el.style.display=t===tab?'block':'none';
+function switchProdTab(tab, btn){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  ['basic','layout','images'].forEach(t => {
+    const el = document.getElementById('ptab-'+t);
+    if(el) el.style.display = t === tab ? 'block' : 'none';
   });
 }
 
