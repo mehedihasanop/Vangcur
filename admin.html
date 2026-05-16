@@ -950,21 +950,24 @@ A: App ও Remote দিয়ে..."></textarea>
     </div><!-- end drawer -->
 
     <script>
+    // ======= UTILITY (সবার আগে define — escHtml ছাড়া renderCathCardGrid crash করে) =======
+    function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
     // ======= HERO CARD MANAGER (NEW) =======
     const DEFAULT_CATH_CARDS = [
-      {label:'Shop Now', img:'', emoji:'🛍️', catId:'all',      bg:'linear-gradient(155deg,#1a1a2e,#0f3460)'},
-      {label:'Explore',  img:'', emoji:'✨',  catId:'smartwatch',bg:'linear-gradient(155deg,#0d0520,#2a1060)'},
-      {label:'RGB Lights',img:'',emoji:'💡', catId:'rgb',       bg:'linear-gradient(155deg,#0d1b0d,#0d2d1a)'},
-      {label:'Power Bank',img:'',emoji:'🔋', catId:'powerbank', bg:'linear-gradient(155deg,#1a0a00,#5c2d00)'},
-      {label:'TWS Earbuds',img:'',emoji:'🎧',catId:'tws',       bg:'linear-gradient(155deg,#1a0020,#2d0070)'},
-      {label:'Headphones',img:'',emoji:'🎵', catId:'headphone', bg:'linear-gradient(155deg,#00101a,#003366)'},
-      {label:'Acrylic Lamp',img:'',emoji:'🪔',catId:'lamp',     bg:'linear-gradient(155deg,#1a0010,#1a0040)'},
-      {label:'Recharge. Fan',img:'',emoji:'💨',catId:'fan',     bg:'linear-gradient(155deg,#001a1a,#005252)'},
-      {label:'Unique Collection',img:'',emoji:'🌟',catId:'unique',   bg:'linear-gradient(155deg,#1a0a1a,#5c007a)'},
-      {label:'Mini Printer',img:'',emoji:'🖨️', catId:'miniprinter', bg:'linear-gradient(155deg,#0a1a0a,#0a2a0a)'},
-      {label:'Crystal Ball',img:'',emoji:'🔮',  catId:'crystalball', bg:'linear-gradient(155deg,#0a0a2a,#0a0a3d)'},
-      {label:'Moon Lamp',  img:'',emoji:'🌙',   catId:'moonlamp',    bg:'linear-gradient(155deg,#1a1a0a,#2a2a00)'},
-      {label:'Water Bottle',img:'',emoji:'🍶',  catId:'waterbottle', bg:'linear-gradient(155deg,#001a3d,#003d7a)'},
+      {label:'Unique Gadgets', img:'', emoji:'💎', catId:'unique',      bg:'linear-gradient(155deg,#1a0a1a,#3d0a3d,#5c145c)'},
+      {label:'RGB Neon Light',  img:'', emoji:'🌈', catId:'rgb',          bg:'linear-gradient(155deg,#0a1628,#0f2a5e,#1a3a8f)'},
+      {label:'Mini Printer',    img:'', emoji:'🖨️', catId:'miniprinter',  bg:'linear-gradient(155deg,#0d0520,#1a0a45,#2a1060)'},
+      {label:'Crystal Ball',    img:'', emoji:'🔮', catId:'crystalball',  bg:'linear-gradient(155deg,#0d1b0d,#1a3a1a,#0d2d1a)'},
+      {label:'Acrylic Lamp',    img:'', emoji:'🪔', catId:'acrylic',      bg:'linear-gradient(155deg,#1a0a00,#3d1f00,#5c2d00)'},
+      {label:'Water Bottle',    img:'', emoji:'🍶', catId:'waterbottle',  bg:'linear-gradient(155deg,#1a0020,#3d0050,#2d0070)'},
+      {label:'Moon Lamp',       img:'', emoji:'🌙', catId:'moonlamp',     bg:'linear-gradient(155deg,#00101a,#001f3d,#003366)'},
+      {label:'Headphone',       img:'', emoji:'🎧', catId:'headphone',    bg:'linear-gradient(155deg,#1a0010,#3d0030,#1a0040)'},
+      {label:'Fan',             img:'', emoji:'💨', catId:'fan',          bg:'linear-gradient(155deg,#001a1a,#003d3d,#005252)'},
+      {label:'TWS',             img:'', emoji:'🎵', catId:'tws',          bg:'linear-gradient(155deg,#1a1a00,#3d3d00,#525200)'},
+      {label:'G Lamp',          img:'', emoji:'💡', catId:'glamp',        bg:'linear-gradient(155deg,#00001a,#00003d,#000052)'},
+      {label:'Humidifier',      img:'', emoji:'💧', catId:'humidifier',   bg:'linear-gradient(155deg,#001a0d,#003d1a,#005227)'},
+      {label:'RC Plane',        img:'', emoji:'✈️', catId:'rcplane',      bg:'linear-gradient(155deg,#1a000d,#3d001a,#520027)'},
     ];
 
     let _cathCards = [];
@@ -1725,8 +1728,7 @@ function bulkChangeStatus(){
   document.getElementById('bulkStatus').value='';
 }
 
-// S-4: XSS protection — escape all user-supplied strings before innerHTML
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// S-4: XSS protection — escHtml defined at top of script for early availability
 
 function viewOrder(id){
   const o=getOrders().find(x=>x.id===id);if(!o)return;
@@ -2715,7 +2717,7 @@ function updateImgPreviewStrip(){
     </div>`).join('');
 }
 
-function sendToProductForm(){
+async function sendToProductForm(){
   const name = document.getElementById('r_name').value.trim();
   if(!name){ showAdminToast('প্রোডাক্টের নাম দিন'); return; }
 
