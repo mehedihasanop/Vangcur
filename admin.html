@@ -2156,7 +2156,7 @@ async function saveProd(){
   const eid=document.getElementById('editId').value;
   const eidNum=eid?parseInt(eid):null;
   // Build full product object
-  const data={
+  const data_obj={
     name,
     cat:document.getElementById('pCat').value,
     price,
@@ -2183,45 +2183,44 @@ async function saveProd(){
       });
       return faqs;
     })(),
-  };
-  if(eidNum){
-    const i=adminProds.findIndex(p=>p.id===eidNum);
-    if(i>-1)adminProds[i]={...adminProds[i],...data};
-  } else {
-    const newId=adminProds.length?Math.max(...adminProds.map(p=>p.id))+1:Date.now();
-    adminProds.push({id:newId,...data});
-  }
-  // ✅ FIX: Default IDs কখনো vc_admin_prods এ যাবে না
-  const defaultIds = new Set(DEFAULT_PRODS.map(p => p.id));
-  const safeAdminProds = adminProds.filter(p => !defaultIds.has(p.id));
-  adminProds = safeAdminProds;
-  // Supabase sync — custom_products টেবিলে save করো
-  const sbProd = eidNum ? adminProds.find(p=>p.id===eidNum) : adminProds[adminProds.length-1];
-  if(sbProd){
-    try{
-      await supabaseClient.from('custom_products').upsert([{
-        id:sbProd.id,
-        name:sbProd.name,
-        price:sbProd.price,
-        old:sbProd.old,
-        cat:sbProd.cat,
-        stock:sbProd.stock,
-        warranty:sbProd.warranty,
-        imgs:sbProd.imgs,
-        specs:sbProd.specs,
-        desc_text:sbProd.desc||sbProd.longDesc||'',
-        features:sbProd.features||[],
-        badge:sbProd.badge||'',
-        rating:sbProd.rating||4.5,
-        long_desc:sbProd.longDesc||sbProd.desc||'',
-        faqs:sbProd.faqs||[],
-        closing:sbProd.closing||''
-      }],{onConflict:'id'});
-      showAdminToast('✅ Supabase sync সম্পন্ন — সব ডিভাইসে দেখা যাবে');
-    }catch(e){
-      console.warn('Supabase product save failed:',e);
-      showAdminToast('⚠️ Supabase sync ব্যর্থ — শুধু এই ডিভাইসে সেভ হয়েছে');
+  }; // data_obj end
+  try{
+    let savedProd;
+    if(eidNum){
+      // Edit: existing product update
+      const {data,error} = await supabaseClient.from('custom_products').update({
+        name:data_obj.name, price:data_obj.price, old:data_obj.old,
+        cat:data_obj.cat, stock:data_obj.stock, warranty:data_obj.warranty,
+        imgs:data_obj.imgs, specs:data_obj.specs,
+        desc_text:data_obj.desc||data_obj.longDesc||'',
+        features:data_obj.features||[], badge:data_obj.badge||'',
+        rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
+        faqs:data_obj.faqs||[], closing:data_obj.closing||''
+      }).eq('id',eidNum).select().single();
+      if(error)throw error;
+      savedProd = data;
+      const i=adminProds.findIndex(p=>p.id===eidNum);
+      if(i>-1)adminProds[i]={...adminProds[i],...savedProd};
+    } else {
+      // New: Supabase auto-generate করবে id (serial/bigserial)
+      const {data,error} = await supabaseClient.from('custom_products').insert([{
+        name:data_obj.name, price:data_obj.price, old:data_obj.old,
+        cat:data_obj.cat, stock:data_obj.stock, warranty:data_obj.warranty,
+        imgs:data_obj.imgs, specs:data_obj.specs,
+        desc_text:data_obj.desc||data_obj.longDesc||'',
+        features:data_obj.features||[], badge:data_obj.badge||'',
+        rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
+        faqs:data_obj.faqs||[], closing:data_obj.closing||''
+      }]).select().single();
+      if(error)throw error;
+      savedProd = data;
+      adminProds.push(savedProd);
     }
+    showAdminToast('✅ প্রোডাক্ট সেভ হয়েছে — সব ডিভাইসে দেখা যাবে');
+  }catch(e){
+    console.error('Supabase product save failed:',e);
+    showAdminToast('⚠️ সেভ ব্যর্থ: '+( e.message||'Supabase error'));
+    return;
   }
   closeProdModal();renderProdTbl(!eidNum);if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
 }
@@ -3017,7 +3016,6 @@ async function sendToProductForm(){
 
   const badgeVal = document.getElementById('r_badge');
   const prod = {
-    id: Date.now(),
     cat: document.getElementById('r_cat').value,
     name,
     imgs: imgs.length ? imgs : ['📦'],
@@ -3035,27 +3033,25 @@ async function sendToProductForm(){
     addedAt: new Date().toISOString(),
   };
 
-  // Save to vc_custom_prods (for index.html)
-  const custom = adminProds.slice();
-  if(!custom.find(p=>p.id===prod.id)) custom.push(prod);
-
-
-  // ✅ Also save to adminProds (for admin panel "Admin যোগকৃত প্রোডাক্ট" section)
-  if(!adminProds.find(p=>p.id===prod.id)) adminProds.push(prod);
-
-
-  // ✅ Supabase sync
+  // ✅ Supabase insert (id auto-generate হবে)
   try {
-    await supabaseClient.from('custom_products').upsert([{
-      id: prod.id, name: prod.name, price: prod.price, old: prod.old,
+    const {data:savedProd, error} = await supabaseClient.from('custom_products').insert([{
+      name: prod.name, price: prod.price, old: prod.old,
       cat: prod.cat, stock: prod.stock, warranty: prod.warranty,
       imgs: prod.imgs, specs: prod.specs, desc_text: prod.desc||'',
       features: prod.features||[], badge: prod.badge||'',
       rating: prod.rating||4.5, faqs: prod.faqs||[], closing: prod.closing||''
-    }],{onConflict:'id'});
-  } catch(e){ console.warn('Supabase AI product save failed:', e); }
-
-  showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
+    }]).select().single();
+    if(error) throw error;
+    // adminProds এ সঠিক id সহ যোগ করো
+    adminProds = adminProds.filter(p=>p.id!==prod.id); // temp entry সরাও
+    adminProds.push(savedProd);
+    showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
+  } catch(e){
+    console.error('Supabase AI product save failed:', e);
+    showAdminToast('⚠️ সেভ ব্যর্থ: '+(e.message||'Supabase error'));
+    return;
+  }
   resetParser();
   setTimeout(() => { showPage('products', null); renderProdTbl(); }, 800);
 }
