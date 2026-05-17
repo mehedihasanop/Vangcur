@@ -515,8 +515,8 @@ A: App ও Remote দিয়ে..."></textarea>
     <div class="page-head"><div><div class="page-title">কাস্টমার তালিকা</div><div class="page-sub">নিবন্ধিত গ্রাহকদের তথ্য</div></div></div>
     <div class="card">
       <div class="tbl-wrap"><table>
-        <thead><tr><th>নাম</th><th>ইমেইল</th><th>নিবন্ধন</th><th>মোট অর্ডার</th><th>মোট খরচ</th></tr></thead>
-        <tbody id="custTbl"><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:24px">কোনো নিবন্ধিত গ্রাহক নেই</td></tr></tbody>
+        <thead><tr><th>নাম</th><th>ফোন</th><th>ইমেইল</th><th>শেষ অর্ডার</th><th>মোট অর্ডার</th><th>মোট খরচ</th></tr></thead>
+        <tbody id="custTbl"><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:24px">কোনো নিবন্ধিত গ্রাহক নেই</td></tr></tbody>
       </table></div>
     </div>
   </div>
@@ -634,24 +634,10 @@ A: App ও Remote দিয়ে..."></textarea>
         <div class="page-title">🖼️ হিরো সেকশন কার্ড</div>
         <div class="page-sub">হোমপেজের স্লাইডার কার্ডগুলো ম্যানেজ করুন</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-        <button class="btn btn-outline btn-sm" onclick="resetCathCardsToDefault()" title="মেইন ওয়েবসাইটের ১৩টি কার্ডে রিসেট করুন">🔄 ডিফল্ট ১৩ কার্ড রিসেট</button>
-        <button class="btn btn-dark" onclick="openCathCardDrawer(-1)">+ নতুন কার্ড যোগ করুন</button>
-      </div>
+
     </div>
 
-    <!-- Image size guide banner -->
-    <div style="background:linear-gradient(135deg,#e8f4fd,#d6ebf8);border:1.5px solid #a8d4f0;border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px">
-      <span style="font-size:24px;flex-shrink:0">📐</span>
-      <div>
-        <div style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:4px">ছবির সাইজ গাইড</div>
-        <div style="font-size:12px;color:#2a5a8c;line-height:1.7">
-          <b>প্রস্তাবিত সাইজ:</b> <code style="background:#fff;padding:2px 6px;border-radius:4px;font-size:11px">600 × 900 px</code> (Portrait/Vertical)<br>
-          <b>Aspect Ratio:</b> <code style="background:#fff;padding:2px 6px;border-radius:4px;font-size:11px">2:3</code> — কার্ড লম্বালম্বি হওয়ায় tall ছবি সবচেয়ে ভালো দেখায়<br>
-          <b>ফরম্যাট:</b> JPG বা WebP (ছোট ফাইল সাইজের জন্য) · সর্বোচ্চ 2MB
-        </div>
-      </div>
-    </div>
+
 
     <!-- Card Grid (existing cards) -->
     <div class="card">
@@ -694,43 +680,10 @@ A: App ও Remote দিয়ে..."></textarea>
 
       <div style="padding:0 20px 20px">
 
-        <!-- ── IMAGE SECTION ── -->
+        <!-- ── IMAGE URL ── -->
         <div style="margin-bottom:18px">
-          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <span style="background:#e8f4fd;color:#1a6fad;padding:2px 8px;border-radius:20px;font-size:11px">STEP 1</span>
-            কার্ডের ছবি বেছে নিন
-          </div>
-
-          <!-- Drop zone -->
-          <div id="cathDropZone" onclick="document.getElementById('cathFileIn').click()"
-            style="border:2.5px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--bg);transition:all .2s;position:relative;overflow:hidden">
-            <input type="file" id="cathFileIn" accept="image/*" style="display:none" onchange="handleCathFile(this)">
-
-            <!-- Preview (hidden by default) -->
-            <div id="cathImgPreviewWrap" style="display:none">
-              <div style="position:relative;display:inline-block">
-                <img id="cathImgPreview" style="max-height:160px;max-width:100%;border-radius:10px;object-fit:cover;display:block" src="" alt="">
-                <button onclick="event.stopPropagation();removeCathImg()" style="position:absolute;top:-8px;right:-8px;background:#e53e3e;color:#fff;border:none;width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2">×</button>
-              </div>
-              <div style="font-size:11px;color:var(--gray);margin-top:8px">ছবি পরিবর্তন করতে এখানে ক্লিক করুন</div>
-            </div>
-
-            <!-- Upload prompt -->
-            <div id="cathDropPrompt">
-              <div style="font-size:36px;margin-bottom:8px">📸</div>
-              <div style="font-size:13px;font-weight:700;color:var(--dark)">ছবি আপলোড করুন</div>
-              <div style="font-size:11px;color:var(--gray);margin-top:4px">JPG, PNG, WebP · সর্বোচ্চ 2MB</div>
-              <div style="margin-top:10px;display:inline-block;background:var(--dark);color:#fff;padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600">ফাইল বেছে নিন</div>
-            </div>
-          </div>
-
-          <!-- OR divider -->
-          <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
-            <div style="flex:1;height:1px;background:var(--border)"></div>
-            <span style="font-size:11px;color:var(--gray);font-weight:600">অথবা URL দিন</span>
-            <div style="flex:1;height:1px;background:var(--border)"></div>
-          </div>
-          <input class="finp" id="cathImgUrl" placeholder="https://example.com/image.jpg" oninput="onCathUrlInput(this.value)" style="margin-bottom:0">
+          <label style="font-size:12px;font-weight:700;color:var(--dark);display:block;margin-bottom:8px">📸 ছবির URL</label>
+          <input class="finp" id="cathImgUrl" placeholder="https://example.com/image.jpg" oninput="onCathUrlInput(this.value)">
         </div>
 
         <!-- ── BUTTON TEXT ── -->
@@ -744,68 +697,39 @@ A: App ও Remote দিয়ে..."></textarea>
           <div style="font-size:11px;color:var(--gray)">এই টেক্সটটা কার্ডের নিচে "→" সহ দেখাবে</div>
         </div>
 
-        <!-- ── CATEGORY LINK (optional) ── -->
-        <div style="margin-bottom:20px">
-          <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <span style="background:#fdf6ec;color:#b7791f;padding:2px 8px;border-radius:20px;font-size:11px">STEP 3</span>
-            ক্লিক করলে কোন ক্যাটাগরিতে যাবে? <span style="font-weight:400;color:var(--gray)">(optional)</span>
-          </div>
-          <input class="finp" id="cathCardCatId" placeholder="যেমন: rgb  বা  smartwatch  বা  all" style="margin-bottom:6px">
-          <div style="font-size:11px;color:var(--gray)">ক্যাটাগরি ID দিন — ফাঁকা রাখলে সব পণ্য দেখাবে</div>
+        <!-- ── CATEGORY LINK ── -->
+        <div style="margin-bottom:18px">
+          <label style="font-size:12px;font-weight:700;color:var(--dark);display:block;margin-bottom:8px">🗂️ ক্লিক করলে কোন ক্যাটাগরিতে যাবে?</label>
+          <select class="finp" id="cathCardCatId" style="margin-bottom:0">
+            <option value="">-- সব পণ্য দেখাবে (ফাঁকা) --</option>
+          </select>
         </div>
 
         <!-- ── LIVE PREVIEW ── -->
         <div style="margin-bottom:20px">
           <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:10px">লাইভ প্রিভিউ</div>
-          <div style="display:flex;gap:14px;align-items:flex-start">
-
-            <!-- Mobile card preview -->
-            <div style="flex-shrink:0">
+          <div style="display:flex;justify-content:center">
+            <div>
               <div style="font-size:10px;color:var(--gray);text-align:center;margin-bottom:5px">📱 Mobile</div>
-              <div id="cathPreviewCard" style="
-                width:130px;height:210px;border-radius:16px;overflow:hidden;
-                position:relative;background:#111;
-                box-shadow:0 6px 20px rgba(0,0,0,.25);flex-shrink:0">
-                <img id="cathPreviewBg" src="" alt=""
-                  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
+              <div id="cathPreviewCard" style="width:130px;height:210px;border-radius:16px;overflow:hidden;position:relative;background:#111;box-shadow:0 6px 20px rgba(0,0,0,.25)">
+                <img id="cathPreviewBg" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
                 <div id="cathPreviewEmoji" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px">🖼️</div>
                 <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(0,0,0,.65) 100%)"></div>
                 <div style="position:absolute;bottom:12px;left:10px;right:10px">
-                  <div id="cathPreviewLabel" style="
-                    display:inline-flex;align-items:center;gap:4px;
-                    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
-                    backdrop-filter:blur(6px);color:#fff;
-                    font-size:9px;font-weight:700;padding:4px 9px;border-radius:50px;
-                    letter-spacing:.3px;text-transform:uppercase">
-                    SHOP NOW →
-                  </div>
+                  <div id="cathPreviewLabel" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);color:#fff;font-size:9px;font-weight:700;padding:4px 9px;border-radius:50px;letter-spacing:.3px;text-transform:uppercase">SHOP NOW →</div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Info panel -->
-            <div style="flex:1;font-size:12px;color:var(--gray);line-height:1.9;padding-top:4px">
-              <div>✅ <b>ছবি</b> কার্ডের পুরোটা ভরবে</div>
-              <div>✅ নিচে <b>gradient overlay</b> থাকবে</div>
-              <div>✅ বাটন কার্ডের <b>একদম নিচে</b> থাকবে</div>
-              <div style="margin-top:10px;padding:8px 10px;background:#fff8e1;border-radius:8px;border-left:3px solid #f6c90e;color:#7a5800;font-size:11px;line-height:1.6">
-                💡 <b>সেরা ছবি:</b> প্রোডাক্টের tall portrait ছবি, সাদা বা dark background
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Action buttons -->
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-outline" onclick="closeCathDrawer()" style="flex:1">বাতিল</button>
-          <button class="btn btn-dark" onclick="saveCathCardNew()" style="flex:2">💾 কার্ড সেভ করুন</button>
-        </div>
-
-        <!-- Delete button (only when editing) -->
-        <div id="cathDeleteWrap" style="display:none;margin-top:10px">
-          <button onclick="deleteCathCardNew()" style="width:100%;padding:10px;background:none;border:1.5px solid #e53e3e;color:#e53e3e;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">
-            🗑️ এই কার্ড মুছে ফেলুন
-          </button>
+        <!-- Action buttons — stacked vertically -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-dark" onclick="saveCathCardNew()" style="width:100%;justify-content:center;padding:12px">💾 কার্ড সেভ করুন</button>
+          <button class="btn btn-outline" onclick="closeCathDrawer()" style="width:100%;justify-content:center;padding:12px">বাতিল</button>
+          <div id="cathDeleteWrap" style="display:none">
+            <button onclick="deleteCathCardNew()" style="width:100%;padding:12px;background:none;border:1.5px solid #e53e3e;color:#e53e3e;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">🗑️ এই কার্ড মুছে ফেলুন</button>
+          </div>
         </div>
 
       </div><!-- end drawer inner -->
@@ -912,6 +836,35 @@ A: App ও Remote দিয়ে..."></textarea>
     }
 
     // ── Open drawer ──
+    // ── Populate category dropdown for hero card editor ──
+    function populateCathCatDropdown(selectedVal) {
+      const sel = document.getElementById('cathCardCatId');
+      if (!sel) return;
+      // Get cats from admin _adminSettings or global getCats
+      let cats = [];
+      if (typeof getCats === 'function') {
+        cats = getCats().filter(c => c.id !== 'all');
+      } else if (window._adminSettings && window._adminSettings['vc_categories']) {
+        cats = window._adminSettings['vc_categories'].filter(c => c.id !== 'all');
+      }
+      sel.innerHTML = '<option value="">-- সব পণ্য দেখাবে --</option>';
+      cats.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id;
+        o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+        if (c.id === selectedVal) o.selected = true;
+        sel.appendChild(o);
+      });
+      // If selectedVal not in list, add it as custom
+      if (selectedVal && !cats.find(c => c.id === selectedVal)) {
+        const o = document.createElement('option');
+        o.value = selectedVal;
+        o.textContent = selectedVal;
+        o.selected = true;
+        sel.appendChild(o);
+      }
+    }
+
     function openCathCardDrawer(idx){
       _cathEditIdx = idx;
       _cathImgData = '';
@@ -925,15 +878,14 @@ A: App ও Remote দিয়ে..."></textarea>
       // Reset fields
       document.getElementById('cathImgUrl').value = '';
       document.getElementById('cathCardLabel').value = '';
-      document.getElementById('cathCardCatId').value = '';
-      resetCathDropzone();
+      populateCathCatDropdown(''); // ✅ Dynamic categories
 
       if(idx >= 0){
         const c = getCathCards()[idx];
         title.textContent = 'কার্ড এডিট করুন';
         sub.textContent   = '#' + (idx+1) + ' — পরিবর্তন করুন';
         document.getElementById('cathCardLabel').value = c.label || '';
-        document.getElementById('cathCardCatId').value = c.catId || '';
+        populateCathCatDropdown(c.catId || ''); // ✅ Dynamic categories
         delWrap.style.display = 'block';
         if(c.img){
           _cathImgData = c.img;
@@ -1038,7 +990,7 @@ A: App ও Remote দিয়ে..."></textarea>
     // ── Save card ──
     function saveCathCardNew(){
       const label = document.getElementById('cathCardLabel').value.trim();
-      const catId = document.getElementById('cathCardCatId').value.trim() || 'all';
+      const catId = document.getElementById('cathCardCatId').value || '';
       if(!label){ showAdminToast('⚠️ বাটন টেক্সট দিন'); return; }
 
       const cards = getCathCards();
@@ -1085,12 +1037,10 @@ A: App ও Remote দিয়ে..."></textarea>
       showAdminToast('🗑️ কার্ড মুছে ফেলা হয়েছে');
     }
 
-    // ── Drag-over highlight ──
+    // ── Drag-over highlight (cathDropZone removed) ──
     (function(){
       const dz = document.getElementById('cathDropZone');
-      if(!dz) return;
-      dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--dark)'; dz.style.background='#f0f4ff'; });
-      dz.addEventListener('dragleave', () => { dz.style.borderColor=''; dz.style.background=''; });
+      if(!dz) return; // safely skipped — drop zone removed
       dz.addEventListener('drop', e => {
         e.preventDefault(); dz.style.borderColor=''; dz.style.background='';
         const file = e.dataTransfer.files[0];
@@ -1279,10 +1229,11 @@ A: App ও Remote দিয়ে..."></textarea>
         <div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🔝 TOP SECTION — Name → Price → Warranty → Quick Specs → Buttons</div>
         <div class="fg2c">
           <div class="fg"><label>প্রোডাক্টের নাম *</label><input class="finp" id="pName" placeholder="সম্পূর্ণ নাম লিখুন"></div>
-          <div class="fg"><label>ক্যাটাগরি *</label>
-            <select class="finp" id="pCat">
-              <!-- dynamic — getCats() থেকে পপুলেট হয় -->
-            </select>
+          <div class="fg" id="catFieldGroup">
+            <label>ক্যাটাগরি * <button type="button" onclick="addCatRow()" style="margin-left:8px;background:#EFF6FF;color:#1D4ED8;border:1.5px solid #BFDBFE;border-radius:20px;padding:1px 10px;font-size:11px;font-weight:700;cursor:pointer">+ আরেকটি ক্যাটাগরি</button></label>
+            <div id="catRowsContainer" style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+              <!-- dynamic rows injected by addCatRow() / populateCatDropdowns() -->
+            </div>
           </div>
         </div>
         <div class="fg3c">
@@ -1498,6 +1449,53 @@ function populateCatDropdown(selectId, selectedVal){
   if(curVal && sel.querySelector(`option[value="${curVal}"]`)){
     sel.value = curVal;
   }
+}
+
+// ──────────────────────────────────────────────
+//  MULTI-CATEGORY SYSTEM
+// ──────────────────────────────────────────────
+
+// Build one <select> row for catRowsContainer
+function buildCatSelectRow(selectedVal, rowIndex) {
+  const cats = getCats ? getCats().filter(c => c.id !== 'all') : [];
+  const opts = cats.map(c =>
+    `<option value="${c.id}" ${c.id===selectedVal?'selected':''}>${(c.icon?c.icon+' ':'')+c.name}</option>`
+  ).join('');
+  return `<div class="cat-row" style="display:flex;gap:6px;align-items:center">
+    <select class="finp pCatMulti" style="flex:1">${opts}</select>
+    ${rowIndex > 0 ? `<button type="button" onclick="this.parentElement.remove()" style="background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;flex-shrink:0">✕</button>` : '<div style="width:36px"></div>'}
+  </div>`;
+}
+
+// Add a new category row
+function addCatRow(selectedVal) {
+  const container = document.getElementById('catRowsContainer');
+  if (!container) return;
+  const idx = container.querySelectorAll('.cat-row').length;
+  const div = document.createElement('div');
+  div.innerHTML = buildCatSelectRow(selectedVal || '', idx);
+  container.appendChild(div.firstElementChild);
+}
+
+// Initialize cat rows for add/edit
+function initCatRows(catsArr) {
+  const container = document.getElementById('catRowsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const list = Array.isArray(catsArr) && catsArr.length ? catsArr : [catsArr || 'rgb'];
+  list.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.innerHTML = buildCatSelectRow(c, i);
+    container.appendChild(div.firstElementChild);
+  });
+}
+
+// Read selected cats from modal
+function getSelectedCats() {
+  const sels = document.querySelectorAll('#catRowsContainer .pCatMulti');
+  const vals = [...sels].map(s => s.value).filter(Boolean);
+  // Remove duplicates
+  return [...new Set(vals)];
 }
 
 // ======= DASHBOARD =======
@@ -1823,7 +1821,9 @@ function renderProdTbl(scrollToLast = false) {
         <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}${defaultTag}</div>
         ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>` : ''}
       </td>
-      <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat] || p.cat)}</span></td>
+      <td style="min-width:90px">${
+        (p.cats&&p.cats.length>0?p.cats:[p.cat||'?']).map(c=>`<span class="pill" style="background:#DBEAFE;color:#1E40AF;margin:1px 2px 1px 0;display:inline-block">${escHtml(catNames[c]||c)}</span>`).join('')
+      }</td>
       <td>৳${(p.price || 0).toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${(p.old || 0).toLocaleString()}</span></td>
       <td>
         <div style="display:flex;align-items:center;gap:4px">
@@ -1966,7 +1966,7 @@ function openAddProd(){
   document.getElementById('pWarranty').value='৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি';
   document.getElementById('imgMgr').innerHTML='';addImgRow('💡');addImgRow('');
   document.getElementById('specEd').innerHTML='';addSpecRow('','');addSpecRow('','');addSpecRow('','');
-  populateCatDropdown('pCat'); // ✅ Dynamic categories
+  initCatRows([]); // ✅ Multi-cat: শুরুতে ১টি row
   switchProdTab('basic', document.querySelector('#prodModal .tab-btn'));
   document.getElementById('prodModal').classList.add('show');
 }
@@ -1976,7 +1976,7 @@ function editProd(id){
   document.getElementById('prodModalTitle').textContent='প্রোডাক্ট এডিট করুন';
   document.getElementById('editId').value=id;
   document.getElementById('pName').value=p.name||'';
-  populateCatDropdown('pCat', p.cat||'rgb'); // ✅ Dynamic + correct selection
+  initCatRows(p.cats || (p.cat ? [p.cat] : ['rgb'])); // ✅ Multi-cat support
   document.getElementById('pPrice').value=p.price||'';
   document.getElementById('pOld').value=p.old||'';
   document.getElementById('pStock').value=p.stock??0;
@@ -2243,7 +2243,8 @@ async function saveProd(){
   // Build full product object
   const data_obj={
     name,
-    cat:document.getElementById('pCat').value,
+    cats:getSelectedCats(),
+    cat:getSelectedCats()[0]||'rgb', // backward compat: primary cat
     price,
     old:parseInt(document.getElementById('pOld').value)||price,
     stock:(v=>isNaN(v)?0:v)(parseInt(document.getElementById('pStock').value)),
@@ -2275,7 +2276,7 @@ async function saveProd(){
       // Edit: existing product update
       const {data,error} = await supabaseClient.from('custom_products').update({
         name:data_obj.name, price:data_obj.price, old:data_obj.old,
-        cat:data_obj.cat, stock:data_obj.stock, warranty:data_obj.warranty,
+        cat:data_obj.cat, cats:data_obj.cats, stock:data_obj.stock, warranty:data_obj.warranty,
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
@@ -2290,7 +2291,7 @@ async function saveProd(){
       // New: Supabase auto-generate করবে id (serial/bigserial)
       const {data,error} = await supabaseClient.from('custom_products').insert([{
         name:data_obj.name, price:data_obj.price, old:data_obj.old,
-        cat:data_obj.cat, stock:data_obj.stock, warranty:data_obj.warranty,
+        cat:data_obj.cat, cats:data_obj.cats, stock:data_obj.stock, warranty:data_obj.warranty,
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
@@ -2364,17 +2365,30 @@ async function cleanupExtraProducts(){
 
 // ======= CUSTOMERS =======
 function renderCustomers(){
-  const usersFromOrders = _cachedOrders.reduce((acc,o)=>{if(o.name&&o.phone){const k=o.phone;if(!acc[k])acc[k]={name:o.name,phone:o.phone,email:o.email||'',orders:0,total:0};acc[k].orders++;acc[k].total+=(o.total||0);}return acc;},{});
+  // ✅ FIX: customer data o.customer.name/phone তে আছে, o.name এ নয়
+  const usersFromOrders = _cachedOrders.reduce((acc,o)=>{
+    const name = o.customer?.name || o.name || '';
+    const phone = o.customer?.phone || o.phone || '';
+    const email = o.customer?.email || o.custEmail || o.email || '';
+    if(phone || name){
+      const k = phone || name;
+      if(!acc[k]) acc[k]={name, phone, email, orders:0, total:0, lastDate: o.date||o.created_at||''};
+      acc[k].orders++;
+      acc[k].total += (o.total||o.total_amount||0);
+      if(o.date > acc[k].lastDate) acc[k].lastDate = o.date;
+    }
+    return acc;
+  },{});
   const users=Object.values(usersFromOrders);
-  const orders=getOrders();
   document.getElementById('custTbl').innerHTML=users.length?users.map(u=>{
-    const mo=orders.filter(o=>o.userId===u.id||o.custEmail===u.email);
-    const spent=mo.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
-    return`<tr><td>${escHtml(u.name||'-')}</td><td>${escHtml(u.email||'-')}</td>
-      <td style="font-size:11px;color:var(--gray)">${new Date(u.createdAt||Date.now()).toLocaleDateString('bn-BD')}</td>
-      <td><span class="pill p-confirmed">${mo.length}টি</span></td>
-      <td>৳${spent.toLocaleString()}</td></tr>`;
-  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:24px">কোনো নিবন্ধিত গ্রাহক নেই</td></tr>';
+    return`<tr>
+      <td>${escHtml(u.name||'-')}</td>
+      <td>${escHtml(u.phone||'-')}</td>
+      <td>${escHtml(u.email||'-')}</td>
+      <td style="font-size:11px;color:var(--gray)">${u.lastDate?new Date(u.lastDate).toLocaleDateString('en-GB'):'-'}</td>
+      <td><span class="pill p-confirmed">${u.orders}টি</span></td>
+      <td>৳${(u.total||0).toLocaleString()}</td></tr>`;
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:24px">কোনো কাস্টমার নেই — অর্ডার আসলে এখানে দেখাবে</td></tr>';
 }
 
 // ======= LOGO =======
@@ -2467,37 +2481,77 @@ function saveFooter(){
 
 // ======= CATEGORY MANAGEMENT =======
 const DEFAULT_CATS=[
-  {id:'all',name:'All Products',icon:'🛍️',locked:true},
-  {id:'rgb',name:'RGB Lights',icon:'💡',locked:true},
-  {id:'smartwatch',name:'Smartwatches',icon:'⌚',locked:true},
-  {id:'powerbank',name:'Power Bank',icon:'🔋',locked:true},
-  {id:'tws',name:'TWS Earbuds',icon:'🎧',locked:true},
-  {id:'headphone',name:'BT Headphones',icon:'🎵',locked:true},
-  {id:'lamp',name:'Acrylic Lamp',icon:'🪔',locked:true},
-  {id:'fan',name:'Rechargeable Fan',icon:'💨',locked:true},
+  {id:'all',          name:'সকল পণ্য',          icon:'🛍️', locked:true},
+  {id:'unique',       name:'Unique Collection',  icon:'✨', locked:true},
+  {id:'tws',          name:'TWS',                icon:'🎧', locked:true},
+  {id:'headphone',    name:'Headphone',          icon:'🎵', locked:true},
+  {id:'acrylic-clamp',name:'Acrylic Clamp',      icon:'🗜️', locked:true},
+  {id:'crystal-ball', name:'Crystal Ball',       icon:'🔮', locked:true},
+  {id:'water-bottle', name:'Water Bottle',       icon:'🍶', locked:true},
+  {id:'humidifier',   name:'Humidifier',         icon:'💧', locked:true},
+  {id:'fan',          name:'Rechargeable Fan',   icon:'💨', locked:true},
+  {id:'gimbal',       name:'Gimbal',             icon:'📷', locked:true},
+  {id:'powerbank',    name:'Power Bank',         icon:'🔋', locked:true},
+  {id:'rgb',          name:'RGB Light',          icon:'💡', locked:true},
+  {id:'wgp',          name:'WGP',                icon:'🎮', locked:true},
+  {id:'smartwatch',   name:'Smart Watch',        icon:'⌚', locked:true},
+  {id:'light',        name:'Light',              icon:'🕯️', locked:true},
+  {id:'keyboard',     name:'Keyboard',           icon:'⌨️', locked:true},
+  {id:'mouse',        name:'Mouse',              icon:'🖱️', locked:true},
+  {id:'cable',        name:'Cable And Charges',  icon:'🔌', locked:true},
+  {id:'unique-tools', name:'Unique Tools',       icon:'🔧', locked:true},
+  {id:'hair-dryer',   name:'Hair Dryer',         icon:'💇', locked:true},
+  {id:'lamp',         name:'Lamp',               icon:'🪔', locked:true},
 ];
 let editCatIdx=-1;
 function getCats(){
   const saved=_adminSettings['vc_categories']||null;
-  if(!saved)return [...DEFAULT_CATS];
-  return saved;
+  if(!saved||!saved.length) return [...DEFAULT_CATS];
+  // ✅ FIX: saved cats এ missing DEFAULT_CATS merge করো
+  // এতে Supabase এ পুরানো/কম cats থাকলেও সব ২১টি দেখাবে
+  const merged=[...saved];
+  DEFAULT_CATS.forEach(def=>{
+    if(!merged.find(c=>c.id===def.id)){
+      merged.push(def); // missing default cat যোগ করো শেষে
+    }
+  });
+  return merged;
 }
-function saveCats(cats){saveSettingToSupabase('vc_categories', cats);syncCatsToSite(cats);}
-function syncCatsToSite(cats){/* Site reads vc_categories on load */}
+function saveCats(cats){
+  _adminSettings['vc_categories'] = cats;
+  saveSettingToSupabase('vc_categories', cats);
+  // ✅ সব জায়গায় realtime refresh
+  populateCatFilter();           // product page filter dropdown
+  renderCatCountBadges();        // product page cat badges
+  populateCatDropdown('pCat');   // product add/edit modal
+  populateCatDropdown('r_cat');  // other dropdowns
+  populateCathCatDropdown('');   // hero card editor dropdown
+  renderCategoryList();          // category management list
+  initCatRows([]);               // reset multi-cat rows in modal
+}
 function getCatProdCount(catId){
-  const custom=adminProds||[];
-  const defaultCount=DEFAULT_PRODS.filter(p=>p.cat===catId).length;
-  const customCount=custom.filter(p=>p.cat===catId).length;
-  return defaultCount+customCount;
+  if(catId==='all') return getAllProds().length;
+  const all=getAllProds();
+  // ✅ Support multiple cats (p.cats array)
+  return all.filter(p=>{
+    if(Array.isArray(p.cats)&&p.cats.length) return p.cats.includes(catId);
+    return p.cat===catId;
+  }).length;
 }
 function renderCategoryList(){
   const cats=getCats();
   const list=document.getElementById('catList');
   if(!list)return;
-  list.innerHTML=cats.map((c,i)=>{
+  list.innerHTML='';
+  cats.forEach((c,i)=>{
     const prodCount=getCatProdCount(c.id);
-    return`<div style="background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:2px">
-    <div style="display:flex;align-items:center;gap:12px;padding:12px">
+    const row=document.createElement('div');
+    row.className='cat-drag-row';
+    row.draggable=true;
+    row.dataset.idx=i;
+    row.style.cssText='background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:4px;transition:opacity .15s,box-shadow .15s';
+    row.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px">
+      <span class="cat-drag-handle" title="ড্র্যাগ করে সাজান" style="cursor:grab;color:var(--gray);font-size:18px;user-select:none;flex-shrink:0">⠿</span>
       <span style="font-size:22px;min-width:32px;text-align:center">${escHtml(c.icon)}</span>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700">${escHtml(c.name)}</div>
@@ -2505,18 +2559,39 @@ function renderCategoryList(){
       </div>
       <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${escHtml(c.id)}','${escHtml(c.name)}')">+ প্রোডাক্ট</button>
       ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️</button>
-      <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:
-      '<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
-    </div>
+      <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:'<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
     </div>`;
-  }).join('');
+    // ── Drag events ──
+    row.addEventListener('dragstart',e=>{
+      e.dataTransfer.effectAllowed='move';
+      window._catDragIdx=i;
+      row.style.opacity='.4';
+    });
+    row.addEventListener('dragend',()=>{row.style.opacity='1';row.style.boxShadow='';});
+    row.addEventListener('dragover',e=>{e.preventDefault();row.style.boxShadow='0 0 0 2px var(--blue)';});
+    row.addEventListener('dragleave',()=>{row.style.boxShadow='';});
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      row.style.boxShadow='';
+      const from=window._catDragIdx;
+      const to=i;
+      if(from===to)return;
+      const cats2=getCats();
+      const moved=cats2.splice(from,1)[0];
+      cats2.splice(to,0,moved);
+      saveCats(cats2);
+      showAdminToast('✅ ক্যাটাগরি সাজানো হয়েছে ও সেভ হয়েছে!');
+    });
+    list.appendChild(row);
+  });
 }
 // Category page এ product add — modal খুলবে category pre-selected করে
 function openAddProdForCat(catId,catName){
   openAddProd();
   // Pre-select the category
   setTimeout(()=>{
-    const sel=document.getElementById('pCat');
+    // multi-cat: set first row to catId
+    initCatRows([catId]);
     if(sel){sel.value=catId;}
     document.getElementById('prodModalTitle').textContent=`প্রোডাক্ট যোগ করুন — ${catName}`;
   },50);
@@ -2560,16 +2635,12 @@ function saveCategoryEdit(){
   }
   saveCats(cats);
   document.getElementById('catEditor').style.display='none';
-  renderCategoryList();
-  populateAIParserCatDropdown(); // ✅ AI Planner dropdown sync
 }
 function deleteCategory(i){
   if(!confirm('এই ক্যাটাগরি মুছে দিবেন?'))return;
   const cats=getCats();
   cats.splice(i,1);
   saveCats(cats);
-  renderCategoryList();
-  populateAIParserCatDropdown(); // ✅ AI Planner dropdown sync
   showAdminToast('🗑️ ক্যাটাগরি মুছে গেছে');
 }
 
@@ -2718,7 +2789,7 @@ async function runAIParser(){
     document.getElementById('editId').value = '';
 
     // Category dropdown populate + select
-    populateCatDropdown('pCat', parsed.cat || 'rgb');
+    initCatRows(parsed.cats || (parsed.cat ? [parsed.cat] : ['rgb']));
 
     // Basic Info fields
     document.getElementById('pName').value = parsed.name || '';

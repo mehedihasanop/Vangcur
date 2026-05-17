@@ -347,12 +347,17 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-carousel-arrow.clicked{background:var(--dark);color:#fff;border-color:var(--dark)}
 .cat-carousel-arrow.prev{left:0}
 .cat-carousel-arrow.next{right:0}
-.cat-cards-viewport{overflow:visible;padding-top:6px}
-.cat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.cat-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;transition:var(--tr)}
-.cat-card:hover{border-color:var(--dark);transform:translateY(-3px);box-shadow:var(--sh2)}
-.cat-card-icon{font-size:24px;margin-bottom:6px}
-.cat-card-name{font-size:10.5px;font-weight:600;line-height:1.3}
+.cat-cards-viewport{overflow:hidden;padding-top:6px;touch-action:pan-y}
+.cat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+/* Reference image style: horizontal card, icon circle + bold text */
+.cat-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:16px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--tr);box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.cat-card:hover{border-color:var(--dark);transform:translateY(-2px);box-shadow:var(--sh2)}
+.cat-card-icon-wrap{width:52px;height:52px;border-radius:50%;background:var(--cream);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px}
+.cat-card-icon{font-size:26px}
+.cat-card-name{font-size:13px;font-weight:700;color:var(--dark);line-height:1.3}
+/* Dot indicators */
+.cat-dot{width:8px;height:8px;border-radius:50%;background:#D1D5DB;cursor:pointer;transition:var(--tr)}
+.cat-dot.active{background:#1A1A1A;width:22px;border-radius:4px}
 
 /* PRODUCT GRID */
 .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
@@ -746,8 +751,8 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .post-box{background:var(--white);border-radius:22px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;animation:slideUp .25s ease}
 
 /* RESPONSIVE */
-@media(max-width:1024px){.cat-cards{grid-template-columns:repeat(4,1fr)}.footer-top{grid-template-columns:1fr 1fr}.pp-inner{grid-template-columns:1fr}.pp-gallery{position:static}}
-@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}}
+@media(max-width:1024px){.cat-cards{grid-template-columns:repeat(3,1fr)}.footer-top{grid-template-columns:1fr 1fr}.pp-inner{grid-template-columns:1fr}.pp-gallery{position:static}}
+@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}.cat-card{padding:13px 12px;gap:10px}.cat-card-icon-wrap{width:44px;height:44px;font-size:22px}.cat-card-name{font-size:12px}}
 @media(max-width:480px){.prod-grid{grid-template-columns:repeat(2,1fr)}.cat-cards{grid-template-columns:repeat(2,1fr)}.hero-stats{display:none}.hero-slide-fallback{padding:32px 22px}
   @keyframes slideUpSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
 }
@@ -935,14 +940,7 @@ body.dark .prod-badge{opacity:.88}
 <!-- CAT BAR (hidden — kept for JS filtering logic) -->
 <div class="cat-bar" style="display:none">
   <div class="cat-inner">
-    <button class="cat-pill active" data-cat="all" onclick="filterCat('all',this,event)" ontouchend="filterCat('all',this,event)">সকল পণ্য</button>
-    <button class="cat-pill" data-cat="rgb" onclick="filterCat('rgb',this,event)" ontouchend="filterCat('rgb',this,event)">RGB Lights</button>
-    <button class="cat-pill" data-cat="smartwatch" onclick="filterCat('smartwatch',this,event)" ontouchend="filterCat('smartwatch',this,event)">Smartwatches</button>
-    <button class="cat-pill" data-cat="powerbank" onclick="filterCat('powerbank',this,event)" ontouchend="filterCat('powerbank',this,event)">Power Bank</button>
-    <button class="cat-pill" data-cat="tws" onclick="filterCat('tws',this,event)" ontouchend="filterCat('tws',this,event)">TWS</button>
-    <button class="cat-pill" data-cat="headphone" onclick="filterCat('headphone',this,event)" ontouchend="filterCat('headphone',this,event)">BT Headphones</button>
-    <button class="cat-pill" data-cat="lamp" onclick="filterCat('lamp',this,event)" ontouchend="filterCat('lamp',this,event)">Acrylic Lamp</button>
-    <button class="cat-pill" data-cat="fan" onclick="filterCat('fan',this,event)" ontouchend="filterCat('fan',this,event)">Rechargeable Fan</button>
+    <!-- JS দ্বারা populate হবে -->
   </div>
 </div>
 
@@ -1099,20 +1097,15 @@ body.dark .prod-badge{opacity:.88}
   <div class="sec-head"><h2 class="sec-title">ক্যাটাগরি <span>সমূহ</span></h2></div>
   <div class="cat-carousel-wrap">
     <button class="cat-carousel-arrow prev" id="catPrevBtn" onclick="catCarouselSlide(-1,this)">&#8249;</button>
-    <div class="cat-cards-viewport">
+    <div class="cat-cards-viewport" id="catViewport">
       <div class="cat-cards" id="catCardsGrid">
-        <div class="cat-card" onclick="filterCat('all',null)"><div class="cat-card-icon">🛍️</div><div class="cat-card-name">All Products</div></div>
-        <div class="cat-card" onclick="filterCat('rgb',null)"><div class="cat-card-icon">💡</div><div class="cat-card-name">RGB Lights</div></div>
-        <div class="cat-card" onclick="filterCat('smartwatch',null)"><div class="cat-card-icon">⌚</div><div class="cat-card-name">Smartwatches</div></div>
-        <div class="cat-card" onclick="filterCat('powerbank',null)"><div class="cat-card-icon">🔋</div><div class="cat-card-name">Power Bank</div></div>
-        <div class="cat-card" onclick="filterCat('tws',null)"><div class="cat-card-icon">🎧</div><div class="cat-card-name">TWS Earbuds</div></div>
-        <div class="cat-card" onclick="filterCat('headphone',null)"><div class="cat-card-icon">🎵</div><div class="cat-card-name">BT Headphones</div></div>
-        <div class="cat-card" onclick="filterCat('lamp',null)"><div class="cat-card-icon">🪔</div><div class="cat-card-name">Acrylic Lamp</div></div>
-        <div class="cat-card" onclick="filterCat('fan',null)"><div class="cat-card-icon">💨</div><div class="cat-card-name">Recharge. Fan</div></div>
+        <!-- JS দ্বারা populate হবে -->
       </div>
     </div>
     <button class="cat-carousel-arrow next" id="catNextBtn" onclick="catCarouselSlide(1,this)">&#8250;</button>
   </div>
+  <!-- Dot indicators -->
+  <div id="catDots" style="display:flex;justify-content:center;gap:6px;margin-top:14px"></div>
 </div>
 
 <!-- PRODUCTS -->
@@ -2174,7 +2167,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         // ✅ যেকোনো settings change হলে live apply
         if(key==='vc_stock'){
           PRODS.forEach(p=>{if(val[p.id]!==undefined)p.stock=val[p.id];});
-          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         } else if(key==='vc_hero_slides'){
           heroSlides = val;
@@ -2197,12 +2190,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           // Admin deleted a default product — remove from PRODS
           if(Array.isArray(val)){val.forEach(id=>{const idx=PRODS.findIndex(p=>p.id===id);if(idx>-1)PRODS.splice(idx,1);});}
           applyProdOrder();
-          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         } else if(key==='vc_prod_order'){
           // Admin reordered products
           applyProdOrder();
-          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         }
       })
@@ -2224,7 +2217,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           };
           PRODS.push(mapped);
           updateCatPillCounts();
-          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         }
       })
@@ -2248,14 +2241,14 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};}
           else{PRODS.push(mapped);}
           updateCatPillCounts();
-          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);
+          const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         }
       })
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.old&&payload.old.id){
           const idx=PRODS.findIndex(x=>x.id===payload.old.id);
-          if(idx>-1){PRODS.splice(idx,1);updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+          if(idx>-1){PRODS.splice(idx,1);updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));renderProds(cur);}
         }
       })
       // ✅ Fix #15: wishlist Supabase realtime sync
@@ -2566,23 +2559,14 @@ function renderProds(list){
 let _filterCatLock=false;
 // ✅ Category bar re-render (vc_categories Supabase থেকে পরিবর্তন হলে)
 function updateCatPillCounts(){
-  const catLabels={all:'সকল পণ্য',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
-  // Custom categories থেকে label নাও
+  const catLabels={};
   const savedCats=_settings['vc_categories']||[];
   savedCats.forEach(c=>{if(c.id&&c.name)catLabels[c.id]=c.name;});
-
   document.querySelectorAll('.cat-pill').forEach(b=>{
-    // data-cat attribute থেকে নাও (onclick parse এর চেয়ে reliable)
     let cat=b.dataset.cat;
-    if(!cat){
-      // fallback: onclick string parse
-      const fn=b.getAttribute('onclick')||'';
-      const m=fn.match(/'([^']+)'/);
-      if(!m)return;
-      cat=m[1];
-    }
-    const cnt=cat==='all'?PRODS.length:PRODS.filter(p=>p.cat===cat).length;
-    const label=catLabels[cat]||cat;
+    if(!cat){const fn=b.getAttribute('onclick')||'';const m=fn.match(/'([^']+)'/);if(!m)return;cat=m[1];}
+    const cnt=cat==='all'?PRODS.length:PRODS.filter(p=>prodInCat(p,cat)).length;
+    const label=catLabels[cat]||b.textContent.split('(')[0].trim()||cat;
     b.textContent=label+' ('+cnt+')';
   });
 }
@@ -2609,12 +2593,11 @@ function filterCat(cat,btn,evt){
       if(b.dataset.cat===cat) b.classList.add('active');
     });
   }
-  const titles={all:'সকল',rgb:'RGB Lights',smartwatch:'Smartwatches',powerbank:'Power Bank',tws:'TWS Earbuds',headphone:'BT Headphones',lamp:'Acrylic Lamp',fan:'Rechargeable Fan'};
-  // Custom categories থেকেও title নাও
+  const titles={};
   const savedCats=_settings['vc_categories']||[];
   savedCats.forEach(c=>{if(c.id&&c.name)titles[c.id]=c.name;});
 
-  const list=cat==='all'?PRODS:PRODS.filter(p=>p.cat===cat);
+  const list=cat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,cat));
   document.getElementById('secTitle').innerHTML=`${titles[cat]||'প্রোডাক্ট'} <span>সমূহ</span>`;
   const countEl=document.getElementById('prodCount');
   if(countEl){
@@ -2701,11 +2684,37 @@ function showSearchDropdown(q, source) {
   const catNames = {rgb:'RGB Lights',smartwatch:'Smartwatch',powerbank:'Power Bank',tws:'TWS',headphone:'Headphone',lamp:'Lamp',fan:'Fan'};
   const disc = p => Math.round((1 - p.price/p.old)*100);
 
+  // ✅ Category suggestions: _settings['vc_categories'] বা defaultCats থেকে নাও
+  const _catList = (_settings && _settings['vc_categories'] && _settings['vc_categories'].length)
+    ? _settings['vc_categories']
+    : (document.querySelectorAll('.cat-pill').length
+        ? [...document.querySelectorAll('.cat-pill')].map(p=>({id:p.dataset.cat, name:p.textContent, icon:''}))
+        : []);
+  const allCats = _catList.filter(c => c.id !== 'all');
+  const catMatches = allCats.filter(c => {
+    const haystack = ((c.name||'') + ' ' + (c.icon||'') + ' ' + (c.id||'')).toLowerCase();
+    return words.some(w => haystack.includes(w));
+  }).slice(0, 3);
+
+  const catSuggestHtml = catMatches.length ? `
+    <div style="height:1px;background:var(--border);margin:4px 14px"></div>
+    <div style="padding:8px 14px 4px;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px">ক্যাটাগরি</div>
+    ${catMatches.map(c => `
+      <div class="sd-item" onclick="goToCat('${c.id}')" style="padding:9px 14px">
+        <div class="sd-emoji" style="font-size:20px">${c.icon||'📂'}</div>
+        <div class="sd-info">
+          <div class="sd-name" style="font-size:13px">${escHtml(c.name)}</div>
+          <div class="sd-meta">ক্যাটাগরি দেখুন →</div>
+        </div>
+      </div>`).join('')}
+  ` : '';
+
   dd.innerHTML = `
     <div class="sd-header">
       <span>${matches.length}টি পণ্য পাওয়া গেছে</span>
       <a class="sd-view-all" onclick="viewAllSearch('${q.replace(/'/g,"\'")}')">সব দেখুন →</a>
     </div>
+    <div style="padding:6px 14px 2px;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px">পণ্য</div>
     ${matches.map(p => `
       <div class="sd-item" onclick="openPPFromSearch(${p.id})">
         <div class="sd-emoji">${(p.imgs||['📦'])[0]}</div>
@@ -2719,6 +2728,7 @@ function showSearchDropdown(q, source) {
         </div>
       </div>
     `).join('')}
+    ${catSuggestHtml}
     <div class="sd-footer">
       <button class="sd-view-all-btn" onclick="viewAllSearch('${q.replace(/'/g,"\'")}')">
         🔍 "${escHtml(q)}" এর সব ফলাফল দেখুন
@@ -2744,6 +2754,27 @@ function viewAllSearch(q) {
   if(mb) mb.classList.remove('show');
 }
 
+// ✅ Category suggestion click → go to that category
+function goToCat(catId) {
+  closeSearchDropdowns();
+  // Clear search inputs
+  const i1 = document.getElementById('desktopSearchInput');
+  const i2 = document.getElementById('mobileSearchInput');
+  if(i1) i1.value = '';
+  if(i2) i2.value = '';
+  // Click the category pill
+  const pill = document.querySelector(`.cat-pill[data-cat="${catId}"]`);
+  if(pill) pill.click();
+  else {
+    activeCat = catId;
+    const list = PRODS.filter(p => prodInCat(p, catId));
+    renderProds(list);
+    document.getElementById('prodSec')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  const mb = document.getElementById('mobileSearchBar');
+  if(mb) mb.classList.remove('show');
+}
+
 function closeSearchDropdowns() {
   document.querySelectorAll('.search-dropdown').forEach(d => d.classList.remove('show'));
 }
@@ -2754,6 +2785,13 @@ document.addEventListener('click', (e) => {
     closeSearchDropdowns();
   }
 });
+
+// ✅ Multi-cat helper: product কি এই ক্যাটাগরিতে আছে?
+function prodInCat(p, catId) {
+  if (catId === 'all') return true;
+  if (Array.isArray(p.cats) && p.cats.length) return p.cats.includes(catId);
+  return p.cat === catId;
+}
 
 async function filterProducts(q){
   const l=q.toLowerCase().trim();
@@ -3310,7 +3348,7 @@ function addToCart(id,qty){
   showFloatCart();
   // স্টক শূন্য হলে UI আপডেট করো
   if(p.stock<=0){
-    const cur=activeCat==='all'?PRODS:PRODS.filter(x=>x.cat===activeCat);
+    const cur=activeCat==='all'?PRODS:PRODS.filter(x=>prodInCat(x,activeCat));
     renderProds(cur);
   }
 }
@@ -3509,10 +3547,23 @@ async function confirmOrder(){
     }
   }
   // B-2: Lock permanently until order completes — no timeout reset
-  // B-1: Race-condition safe order number — timestamp + random suffix (no shared counter)
-  const ts=Date.now().toString(36).toUpperCase();
-  const rnd=Math.floor(Math.random()*9000+1000);
-  const num='#VC-'+ts+'-'+rnd;
+  // ✅ FIX: Sequential order number VC-504, VC-505... from Supabase counter
+  let num = '#VC-504'; // fallback
+  try {
+    // store_settings এ 'vc_order_counter' key তে সর্বশেষ number থাকে
+    const {data: cRow} = await supabaseClient
+      .from('store_settings')
+      .select('setting_value')
+      .eq('setting_key', 'vc_order_counter')
+      .single();
+    const nextNum = cRow ? (parseInt(cRow.setting_value) || 503) + 1 : 504;
+    num = '#VC-' + nextNum;
+    // counter আপডেট করো
+    await supabaseClient.from('store_settings').upsert([{setting_key:'vc_order_counter', setting_value: nextNum}]);
+  } catch(e) {
+    // Supabase না পেলে timestamp fallback
+    num = '#VC-' + Date.now().toString(36).toUpperCase();
+  }
   const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   // S-5+S-6: Verify prices from PRODS (authoritative), ignore any tampered cart prices
@@ -3950,7 +4001,7 @@ document.addEventListener('visibilitychange',()=>{
             PRODS.push(p);changed=true;
           }
         });
-        if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>p.cat===activeCat);renderProds(cur);}
+        if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));renderProds(cur);}
       }
     }catch(e){}})();
     if(pendingOrdId&&!_pollInterval){
@@ -4215,24 +4266,37 @@ async function doTrackOrder(){
   let sbFound=[];
   try{
     let qb=supabaseClient.from('orders').select('*');
-    if(q.startsWith('#')||q.startsWith('vc')||q.includes('-')){
-      qb=qb.ilike('order_num','%'+q.toUpperCase().replace('#','')+'%');
-    } else if(qPhone.length>=10){
-      qb=qb.eq('customer_phone',qPhone);
+    // ✅ FIX: '#VC-504' বা '504' বা phone দিয়ে সার্চ করা যাবে
+    const cleanQ = q.replace('#','').toUpperCase().trim();
+    if(qPhone.length >= 10) {
+      // ফোন নম্বর দিয়ে সার্চ
+      qb = qb.ilike('customer_phone', '%' + qPhone + '%');
     } else {
-      qb=qb.or(`order_num.ilike.%${q}%,customer_phone.ilike.%${qPhone}%`);
+      // অর্ডার নম্বর দিয়ে সার্চ (VC-504 বা 504 বা full)
+      qb = qb.ilike('order_num', '%' + cleanQ + '%');
     }
     const{data,error}=await qb.limit(10);
     if(!error&&data){
-      sbFound=data.map(row=>({
-        id:row.id,
-        orderNum:row.order_num||row.orderNum||'',
-        date:row.created_at||row.date,
-        status:row.status||'pending',
-        total:row.total_amount||row.total||0,
-        items:row.items||[],
-        customer:{name:row.customer_name||'',phone:row.customer_phone||'',district:row.customer_district||'',address:row.customer_address||''}
-      }));
+      sbFound=data.map(row=>{
+        // ✅ FIX: items JSON.stringify হয়ে save হয়, parse করতে হবে
+        let items=[];
+        try{ items=typeof row.items==='string'?JSON.parse(row.items):(row.items||[]); }catch(e){}
+        return {
+          id:row.id,
+          orderNum:row.order_num||row.orderNum||'',
+          date:row.created_at||row.date||'',
+          status:row.status||'pending',
+          // ✅ FIX: Supabase এ total column এর নাম 'total' (insert এও same)
+          total:row.total||row.total_amount||0,
+          items,
+          customer:{
+            name:row.customer_name||'',
+            phone:row.customer_phone||'',
+            district:row.customer_district||'',
+            address:row.customer_address||''
+          }
+        };
+      });
     }
   }catch(e){console.log('Supabase track search skipped:',e.message);}
 
@@ -4241,7 +4305,11 @@ async function doTrackOrder(){
   const found=[...sbFound,...localFound.filter(o=>!sbIds.has(o.orderNum))];
 
   if(!found.length){
-    resultEl.innerHTML=`<div style="text-align:center;padding:20px 0;color:var(--gray);font-size:13px">😔 কোনো অর্ডার পাওয়া যায়নি।<br><small>অর্ডার নম্বর বা রেজিস্টার্ড ফোন নম্বর দিয়ে খুঁজুন।</small></div>`;
+    resultEl.innerHTML=`<div style="text-align:center;padding:24px 16px;color:var(--gray);font-size:13px">
+      <div style="font-size:32px;margin-bottom:10px">😔</div>
+      <div style="font-weight:700;color:var(--dark);margin-bottom:6px">কোনো অর্ডার পাওয়া যায়নি</div>
+      <div style="font-size:12px;line-height:1.7">অর্ডার নম্বরটি ভুল হতে পারে।<br>সঠিক অর্ডার নম্বর দিন (যেমন: <b>#VC-504</b>)<br>অথবা অর্ডারের সময় দেওয়া ফোন নম্বর দিন।</div>
+    </div>`;
     return;
   }
 
@@ -4389,7 +4457,7 @@ window.addEventListener('scroll',()=>{
 function applySortFilter(){
   const sort=document.getElementById('sortSelect')?.value||'default';
   const activeFilter=document.querySelector('.cat-pill.active')?.dataset?.cat||'all';
-  let list=activeFilter==='all'?[...PRODS]:PRODS.filter(p=>p.cat===activeFilter);
+  let list=activeFilter==='all'?[...PRODS]:PRODS.filter(p=>prodInCat(p,activeFilter));
   if(sort==='price-asc')list.sort((a,b)=>a.price-b.price);
   else if(sort==='price-desc')list.sort((a,b)=>b.price-a.price);
   else if(sort==='discount')list.sort((a,b)=>((b.old-b.price)/b.old)-((a.old-a.price)/a.old));
@@ -4588,7 +4656,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 // RELATED PRODUCTS
 function renderRelated(prod){
-  const related=PRODS.filter(p=>p.cat===prod.cat&&p.id!==prod.id).slice(0,4);
+  const related=PRODS.filter(p=>prodInCat(p,prod.cat)&&p.id!==prod.id).slice(0,4);
   const sec=document.getElementById('relatedSec');
   const grid=document.getElementById('relatedGrid');
   if(!related.length){sec.style.display='none';return;}
@@ -4686,117 +4754,137 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart
 
 // CATEGORY CAROUSEL
 let catPage=0;
-const CAT_PER_PAGE=4;
+function getCatPerPage(){return window.innerWidth<=768?4:8;}
 function getCatItems(){return document.querySelectorAll('#catCardsGrid .cat-card');}
+
 function updateCatCarousel(){
   const items=getCatItems();
   const total=items.length;
-  const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
+  const CPP=getCatPerPage();
+  const maxPage=Math.max(0,Math.ceil(total/CPP)-1);
   catPage=Math.max(0,Math.min(catPage,maxPage));
-  const offset=catPage*(100/Math.ceil(total/CAT_PER_PAGE));
-  // Update grid to show 4 per row based on page
+  items.forEach((item,i)=>{
+    const start=catPage*CPP;
+    item.style.display=(i>=start&&i<start+CPP)?'':'none';
+  });
+  // Dots
+  const dotsEl=document.getElementById('catDots');
+  if(dotsEl){
+    const pages=maxPage+1;
+    dotsEl.innerHTML='';
+    for(let p=0;p<pages;p++){
+      const dot=document.createElement('div');
+      dot.className='cat-dot'+(p===catPage?' active':'');
+      dot.onclick=(pp=>()=>{catPage=pp;updateCatCarousel();})(p);
+      dotsEl.appendChild(dot);
+    }
+  }
   const grid=document.getElementById('catCardsGrid');
   if(grid){
-    // Set columns dynamically based on viewport
-    const cols=window.innerWidth<=768?2:4;
-    grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-    const itemWidth=100/cols;
-    // Show/hide items by page
-    let shown=0;
-    items.forEach((item,i)=>{
-      const startIdx=catPage*CAT_PER_PAGE;
-      const endIdx=startIdx+CAT_PER_PAGE;
-      if(i>=startIdx&&i<endIdx){item.style.display='';shown++;}
-      else{item.style.display='none';}
-    });
+    const cols=window.innerWidth<=768?2:(window.innerWidth<=1024?3:4);
+    grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
   }
-  const prev=document.getElementById('catPrevBtn');
-  const next=document.getElementById('catNextBtn');
-  if(prev)prev.style.opacity='1';
-  if(next)next.style.opacity='1';
 }
+
 function catCarouselSlide(dir,btn){
   const items=getCatItems();
   const total=items.length;
   if(total===0)return;
-  const maxPage=Math.max(0,Math.ceil(total/CAT_PER_PAGE)-1);
-  catPage=catPage+dir;
-  // ইনফিনিটি লুপ — শেষ হলে শুরু থেকে, শুরুর আগে গেলে শেষ থেকে
+  const CPP=getCatPerPage();
+  const maxPage=Math.max(0,Math.ceil(total/CPP)-1);
+  catPage+=dir;
   if(catPage>maxPage)catPage=0;
   if(catPage<0)catPage=maxPage;
   updateCatCarousel();
-  // Click feedback: color ০.৫ সেকেন্ড পরে reset হবে
-  if(btn){
-    btn.classList.add('clicked');
-    clearTimeout(btn._resetTimer);
-    btn._resetTimer=setTimeout(()=>btn.classList.remove('clicked'),500);
-  }
+  if(btn){btn.classList.add('clicked');clearTimeout(btn._resetTimer);btn._resetTimer=setTimeout(()=>btn.classList.remove('clicked'),500);}
 }
-// Init carousel on load
-document.addEventListener('DOMContentLoaded',function(){
-  // ✅ Fix: Autofill clear — page load হলেই search input খালি করো
-  // Browser (Chrome/Edge) login autofill search field এ ঢুকিয়ে দেয়, এটা বন্ধ করা হচ্ছে
-  setTimeout(function(){
-    const dsi = document.getElementById('desktopSearchInput');
-    const msi = document.getElementById('mobileSearchInput');
-    if(dsi && dsi.value) { dsi.value = ''; }
-    if(msi && msi.value) { msi.value = ''; }
-  }, 100);
 
-  updateCatCarousel();
-  // Load custom categories from admin
+// Touch swipe support
+(function(){
+  let sx=0,sy=0;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const vp=document.getElementById('catViewport');
+    if(!vp)return;
+    vp.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+    vp.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-sx;
+      const dy=e.changedTouches[0].clientY-sy;
+      if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){catCarouselSlide(dx<0?1:-1,null);}
+    },{passive:true});
+  });
+})();
+
+window.addEventListener('resize',()=>updateCatCarousel());
+
+document.addEventListener('DOMContentLoaded',function(){
+  setTimeout(function(){
+    const dsi=document.getElementById('desktopSearchInput');
+    const msi=document.getElementById('mobileSearchInput');
+    if(dsi&&dsi.value){dsi.value='';}
+    if(msi&&msi.value){msi.value='';}
+  },100);
   loadCustomCategories();
-  // Load hero cath-card customizations from admin
   loadCathCardData();
 });
-// Rebuild carousel when categories are loaded from admin
+
 function loadCustomCategories(){
   const saved=_settings['vc_categories']||null;
   const catBar=document.querySelector('.cat-inner');
-  const grid=document.getElementById('catCardsGrid');
-
-  // DEFAULT categories (যদি vc_categories না থাকে)
   const defaultCats=[
-    {id:'all', name:'সকল পণ্য', icon:'🛍️'},
-    {id:'rgb', name:'RGB Lights', icon:'💡'},
-    {id:'smartwatch', name:'Smartwatches', icon:'⌚'},
-    {id:'powerbank', name:'Power Bank', icon:'🔋'},
-    {id:'tws', name:'TWS Earbuds', icon:'🎧'},
-    {id:'headphone', name:'BT Headphones', icon:'🎵'},
-    {id:'lamp', name:'Acrylic Lamp', icon:'🪔'},
-    {id:'fan', name:'Rechargeable Fan', icon:'💨'},
+    {id:'all',name:'সকল পণ্য',icon:'🛍️'},
+    {id:'unique',name:'Unique Collection',icon:'✨'},
+    {id:'tws',name:'TWS',icon:'🎧'},
+    {id:'headphone',name:'Headphone',icon:'🎵'},
+    {id:'acrylic-clamp',name:'Acrylic Clamp',icon:'🗜️'},
+    {id:'crystal-ball',name:'Crystal Ball',icon:'🔮'},
+    {id:'water-bottle',name:'Water Bottle',icon:'🍶'},
+    {id:'humidifier',name:'Humidifier',icon:'💧'},
+    {id:'fan',name:'Rechargeable Fan',icon:'💨'},
+    {id:'gimbal',name:'Gimbal',icon:'📷'},
+    {id:'powerbank',name:'Power Bank',icon:'🔋'},
+    {id:'rgb',name:'RGB Light',icon:'💡'},
+    {id:'wgp',name:'WGP',icon:'🎮'},
+    {id:'smartwatch',name:'Smart Watch',icon:'⌚'},
+    {id:'light',name:'Light',icon:'🕯️'},
+    {id:'keyboard',name:'Keyboard',icon:'⌨️'},
+    {id:'mouse',name:'Mouse',icon:'🖱️'},
+    {id:'cable',name:'Cable And Charges',icon:'🔌'},
+    {id:'unique-tools',name:'Unique Tools',icon:'🔧'},
+    {id:'hair-dryer',name:'Hair Dryer',icon:'💇'},
+    {id:'lamp',name:'Lamp',icon:'🪔'},
   ];
-
-  // যে list ব্যবহার করা হবে
-  const cats = (saved && saved.length) ? saved : defaultCats;
-
-  // ── Cat Bar (pill strip) rebuild ──
+  // ✅ FIX: saved cats এ missing defaultCats merge করো (Supabase এ পুরানো কম cats থাকলেও সব দেখাবে)
+  let cats;
+  if(saved&&saved.length){
+    const merged=[...saved];
+    defaultCats.forEach(def=>{if(!merged.find(c=>c.id===def.id))merged.push(def);});
+    cats=merged;
+  } else {
+    cats=defaultCats;
+  }
   if(catBar){
     catBar.innerHTML='';
-    cats.forEach((cat,i)=>{
+    cats.forEach(cat=>{
       const pill=document.createElement('button');
       pill.className='cat-pill'+(cat.id==='all'?' active':'');
       pill.dataset.cat=cat.id;
       pill.textContent=cat.name;
-      // onclick function — event parameter সহ
-      pill.addEventListener('click', function(e){ filterCat(cat.id, pill, e); });
+      pill.addEventListener('click',function(e){filterCat(cat.id,pill,e);});
       catBar.appendChild(pill);
     });
   }
-
-  // ── Cat Cards Grid rebuild ──
+  const grid=document.getElementById('catCardsGrid');
   if(grid){
+    catPage=0;
     grid.innerHTML='';
     cats.forEach(cat=>{
-      // 'all' আলাদাভাবে যোগ হয়
       const card=document.createElement('div');
       card.className='cat-card';
-      card.innerHTML=`<div class="cat-card-icon">${escHtml(cat.icon||'📦')}</div><div class="cat-card-name">${escHtml(cat.name)}</div>`;
+      card.innerHTML='<div class="cat-card-icon-wrap">'+escHtml(cat.icon||'📦')+'</div><div class="cat-card-name">'+escHtml(cat.name)+'</div>';
       card.onclick=()=>filterCat(cat.id,null);
       grid.appendChild(card);
     });
   }
-
   updateCatCarousel();
   updateCatPillCounts();
 }
