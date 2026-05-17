@@ -1132,7 +1132,7 @@ body.dark .prod-badge{opacity:.88}
     <div>
       <div class="f-logo">Vangcur</div>
       <div class="f-logo-sub">ভাঙচুর</div>
-      <p class="f-desc">Your first choice for gadgets. অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ। সারা বাংলাদেশে হোম ডেলিভারি।</p>
+      <p class="f-desc" id="footerDescText">Vangcur - ভাঙচুর বাংলাদেশের একটি আধুনিক Gadget &amp; Accessories ভিত্তিক E-commerce Brand। Official ও Unofficial সব ধরনের গ্যাজেট পাবেন Warranty Support সহ। সারা বাংলাদেশে Fast Home Delivery।</p>
       <div class="f-social">
         <a class="soc-btn" href="https://facebook.com/vangcurbdofficial" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
         <a class="soc-btn" href="https://instagram.com/vangcur_official" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
@@ -1771,6 +1771,15 @@ function applyAdminSettings(){
       }
     }
   }catch(e){}
+
+  // ✅ Footer বিবরণ (admin থেকে সেভ হলে)
+  const footerCfg = _settings['vc_footer'] || null;
+  if(footerCfg){
+    const fd = document.getElementById('footerDescText');
+    if(fd && footerCfg.desc) fd.textContent = footerCfg.desc;
+    const fc = document.querySelector('.f-copy');
+    if(fc && footerCfg.copy) fc.textContent = footerCfg.copy;
+  }
 }
 
 // ============ NEW CATEGORY HERO SLIDER ============
@@ -3917,6 +3926,9 @@ async function checkOrderStatusFromSupabase(ordId){
   return o?o.status:null;
 }
 
+// ✅ ওয়েটিং পেজের confirmed order ID সংরক্ষণ করার জন্য
+let _confirmedOrdId=null;
+
 function handleOrderStatusUpdate(status,ordId){
   if(['confirmed','shipped','delivered'].includes(status)){
     clearInterval(_pollInterval);_pollInterval=null;
@@ -3930,6 +3942,8 @@ function handleOrderStatusUpdate(status,ordId){
       // confirmed order number দেখাও
       const _cn=document.getElementById('confirmedNum');
       if(_cn){const _wn=document.getElementById('waitNum');if(_wn)_cn.textContent=_wn.textContent;}
+      // ✅ ordId সংরক্ষণ করো যাতে dlInvoice() পরে কাজ করে
+      _confirmedOrdId=ordId;
       playConfirmSound();
     } else {
       // find order for popup
@@ -4367,16 +4381,20 @@ function dlInvoiceFromPopup(){
 
 // INVOICE
 function dlInvoice(){
-  // Supabase থেকে order আনো
+  // pendingOrdId (যদি এখনো থাকে) অথবা _confirmedOrdId ব্যবহার করো
+  const targetId = pendingOrdId || _confirmedOrdId;
   (async()=>{
     let o = null;
-    try{
-      const {data}=await supabaseClient.from('orders').select('*').eq('id',pendingOrdId).single();
-      if(data) o=data;
-    }catch(e){}
-    // localStorage fallback
-    if(!o){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');o=orders.find(x=>x.id===pendingOrdId);}
+    if(targetId){
+      try{
+        const {data}=await supabaseClient.from('orders').select('*').eq('id',targetId).single();
+        if(data) o=data;
+      }catch(e){}
+      // localStorage fallback
+      if(!o){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');o=orders.find(x=>x.id===targetId);}
+    }
     if(o) genInvoice(o);
+    else { showToast('❌ অর্ডার তথ্য পাওয়া যাচ্ছে না'); }
     document.getElementById('waitOverlay').classList.remove('show');
   })();
 }
@@ -4472,7 +4490,9 @@ function genInvoice(o){
     const a=document.createElement('a');
     a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
     a.download='Vangcur_Invoice_${o.orderNum.replace('#','')}.html';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   }
   // Back button handler — show post-order info overlay
   function showPostInfo(){
@@ -4480,7 +4500,10 @@ function genInvoice(o){
     if(postEl){ postEl.classList.add('show'); window.close(); }
     else { window.close(); }
   }
-  // No auto-download on open (download already triggered from main page)
+  // অটোমেটিক ডাউনলোড — পেজ লোড হওয়ার সাথে সাথে
+  window.addEventListener('load', function(){
+    setTimeout(function(){ downloadInvoiceFile(); }, 800);
+  });
   <\/script>
   </body></html>`;
 
@@ -4714,12 +4737,18 @@ function togFAQ(i,el){
 // INFO PAGES
 const INFO={
   shipping:`<h2>শিপিং তথ্য</h2><h3>ডেলিভারি চার্জ</h3><p>ঢাকা সিটি কর্পোরেশন: ৯০ টাকা (Pathao Courier)</p><p>সারা বাংলাদেশ: ১৩০ টাকা (Pathao Courier)</p><h3>ডেলিভারি সময়</h3><p>ঢাকার মধ্যে: ১-৩ কার্যদিবস | ঢাকার বাইরে: ২-৫ কার্যদিবস</p><h3>ক্লোজড বক্স ডেলিভারি</h3><p>সকল পার্সেল ক্লোজড বক্সে ডেলিভারি হবে। ডেলিভারির সময় আগে পেমেন্ট করতে হবে। সমস্যায় WhatsApp: 01816365504</p>`,
-  returns:`<h2>রিটার্ন ও রিফান্ড পলিসি</h2><h3>রিটার্নের যোগ্যতা</h3><p>ইনভয়েস তারিখ থেকে ৭ দিনের মধ্যে প্রোডাক্টে ফল্ট প্রমাণিত হলে রিটার্ন করা যাবে।</p><h3>রিটার্ন প্রক্রিয়া</h3><ul><li>WhatsApp এ যোগাযোগ: 01816365504</li><li>আনবক্সিং ভিডিও প্রমাণ পাঠান</li><li>আমরা কুরিয়ার ঠিকানা জানাব (SA Paribohon নয়)</li></ul><h3>সমাধান সময়</h3><p>রিটার্ন পাওয়ার পর ৫-১০ কার্যদিবসের মধ্যে সমাধান।</p>`,
-  privacy:`<h2>প্রাইভেসি পলিসি</h2><h3>তথ্য সংগ্রহ</h3><p>অর্ডার প্রক্রিয়াকরণের জন্য নাম, ফোন, ঠিকানা ও ইমেইল সংগ্রহ করা হয়।</p><h3>তথ্য ব্যবহার</h3><p>শুধুমাত্র ডেলিভারি ও অর্ডার সংক্রান্ত যোগাযোগের জন্য ব্যবহার করা হয়।</p><h3>তৃতীয় পক্ষ</h3><p>আপনার তথ্য কোনো তৃতীয় পক্ষের কাছে বিক্রি বা শেয়ার করা হয় না।</p>`,
-  terms:`<h2>শর্তাবলী</h2><h3>অর্ডারের শর্ত</h3><ul><li>অর্ডার কনফার্মে ন্যূনতম ২০০ টাকা এডভান্স পেমেন্ট বাধ্যতামূলক</li><li>ভুল তথ্য দিলে পেমেন্ট যাচাই করা সম্ভব হবে না এবং অর্ডার বাতিল হয়ে যাবে</li></ul><h3>ওয়ারেন্টির শর্ত</h3><ul><li>আনবক্সিং ভিডিও প্রমাণ ছাড়া ওয়ারেন্টি ক্লেইম গ্রহণযোগ্য নয়</li><li>৬ মাসের ওয়ারেন্টি পণ্যের বক্স সংরক্ষণ করুন</li></ul>`,
-  about:`<h2>Vangcur সম্পর্কে</h2><p>Vangcur (ভাঙচুর) বাংলাদেশের একটি বিশ্বস্ত ই-কমার্স গ্যাজেট ব্র্যান্ড। আমরা সকল ধরনের গ্যাজেট ওয়ারেন্টি সহ সরবরাহ করি।</p><h3>আমাদের বৈশিষ্ট্য</h3><ul><li>৩০০০+ সন্তুষ্ট গ্রাহক</li><li>সারা বাংলাদেশে হোম ডেলিভারি</li><li>১০০% অথেনটিক প্রোডাক্ট</li></ul><h3>যোগাযোগ</h3><p>📞 01816-365504 | ✉️ vangcurbd@gmail.com</p>`,
+  returns:`<h2>Returns &amp; Refunds Policy</h2><h3>কিভাবে Return করবেন?</h3><p>Invoice Date থেকে <strong>৭ দিনের মধ্যে</strong> Fault প্রমাণিত হলে Return Request করতে পারবেন। Product সুন্দরভাবে প্যাকেজিং করে Courier করতে হবে। Product Box-এর উপর Tape লাগানো যাবে না। Original Accessories ও Box অবশ্যই থাকতে হবে।</p><h3>কোন ক্ষেত্রে Return গ্রহণযোগ্য?</h3><ul><li>✅ Wrong Product Delivered</li><li>✅ Missing Item</li><li>✅ Manufacturing Fault</li><li>✅ Dead on Arrival Product</li></ul><h3>কোন ক্ষেত্রে Return গ্রহণযোগ্য নয়?</h3><ul><li>❌ আনবক্সিং ভিডিও না থাকলে</li><li>❌ Physical Damage থাকলে</li><li>❌ User Damage হলে</li><li>❌ Box বা Accessories Missing থাকলে</li><li>❌ Used বা Resell Unfit Condition হলে</li></ul><h3>Return Processing Time</h3><p>Product Receive করার পর <strong>৫–১০ কার্যদিবস</strong> পর্যন্ত সময় লাগতে পারে Issue Verify ও Solution দিতে।</p><h3>Refund Policy</h3><p>Approved Refund প্রয়োজন হলে Mobile Banking অথবা Bank Transfer-এর মাধ্যমে Refund প্রদান করা হবে। Courier Charge সাধারণত Refundable নয়, যদি না ভুলটি Vangcur-এর পক্ষ থেকে হয়ে থাকে।</p>`,
+  privacy:`<h2>Vangcur Privacy Policy</h2><p>Vangcur আপনার ব্যক্তিগত তথ্যের নিরাপত্তাকে গুরুত্ব সহকারে বিবেচনা করে।</p><h3>আমরা যেসব তথ্য সংগ্রহ করি</h3><ul><li>নাম</li><li>ফোন নাম্বার</li><li>ডেলিভারি ঠিকানা</li><li>ইমেইল (Optional)</li><li>Payment Related Information</li></ul><h3>তথ্য ব্যবহারের উদ্দেশ্য</h3><ul><li>অর্ডার প্রসেস করার জন্য</li><li>ডেলিভারি সম্পন্ন করার জন্য</li><li>Customer Support দেওয়ার জন্য</li><li>Order Confirmation ও Updates পাঠানোর জন্য</li></ul><h3>তথ্য নিরাপত্তা</h3><p>আপনার তথ্য কোনো Third Party-এর কাছে বিক্রি করা হয় না। শুধুমাত্র Courier ও প্রয়োজনীয় Service Provider-এর সাথে প্রয়োজন অনুযায়ী শেয়ার করা হতে পারে।</p><h3>Payment Information</h3><p>Vangcur সরাসরি কোনো Card বা Banking Password সংরক্ষণ করে না। Payment Gateway বা Mobile Banking Provider নিজস্ব নিরাপত্তা নীতিতে পরিচালিত হয়।</p><h3>Cookies</h3><p>Website Experience উন্নত করার জন্য Cookies ব্যবহার করা হতে পারে।</p><h3>Policy Updates</h3><p>যেকোনো সময় Privacy Policy পরিবর্তন বা আপডেট করার অধিকার Vangcur সংরক্ষণ করে।</p>`,
+  terms:`<h2>Vangcur Terms &amp; Conditions</h2><p>Vangcur - ভাঙচুর থেকে অর্ডার করার মাধ্যমে আপনি নিচের শর্তাবলীর সাথে সম্মতি প্রদান করছেন।</p><h3>১. অর্ডার কনফার্মেশন</h3><ul><li>অর্ডার নিশ্চিত করতে ন্যূনতম <strong>২০০ টাকা এডভান্স পেমেন্ট</strong> বাধ্যতামূলক।</li><li>সম্পূর্ণ COD ভিত্তিক অর্ডার গ্রহণ করা হয় না।</li><li>Advance Payment করার পর উভয় পক্ষ অর্ডার সম্পন্ন করতে বাধ্য থাকবে।</li></ul><h3>২. ভুল তথ্য প্রদান</h3><p>ভুল নাম, ফোন নম্বর, জেলা বা ঠিকানার কারণে ডেলিভারি সমস্যা বা অর্ডার বাতিল হলে Vangcur দায়ী থাকবে না। সঠিক ও সম্পূর্ণ তথ্য প্রদান করতে হবে।</p><h3>৩. ডেলিভারি পলিসি</h3><ul><li>সকল পার্সেল <strong>Closed Box Delivery</strong> সিস্টেমে পাঠানো হয়।</li><li>ডেলিভারির সময় আগে Payment Complete করে পার্সেল রিসিভ করতে হবে।</li><li>Delivery Man-এর সামনে Product Open করে পছন্দ না হলে Return-এর সুযোগ নেই।</li></ul><h3>৪. আনবক্সিং ভিডিও বাধ্যতামূলক</h3><ul><li>Product হাতে পাওয়ার পর অবশ্যই <strong>Full Unboxing Video</strong> করতে হবে।</li><li>ভিডিওতে কোনো Cut বা Pause গ্রহণযোগ্য নয়।</li><li>ভিডিও ছাড়া Missing, Damaged, Wrong Product বা Warranty Claim গ্রহণ করা হবে না।</li></ul><h3>৫. Warranty ও Replacement</h3><ul><li>অধিকাংশ প্রোডাক্টে ন্যূনতম <strong>৭ দিনের Replacement Warranty</strong> প্রদান করা হয়।</li><li>৬ মাস বা তার বেশি Warranty-র ক্ষেত্রে Product Box ও Warranty Papers সংরক্ষণ বাধ্যতামূলক।</li><li>Physical Damage, Water Damage বা User Damage Warranty-র অন্তর্ভুক্ত নয়।</li></ul><h3>৬. রিটার্ন প্রসেস</h3><ul><li>Invoice Date থেকে ৭ দিনের মধ্যে Fault প্রমাণিত হলে Return Request করা যাবে।</li><li>Product অবশ্যই Original Box, Accessories ও Proper Packaging সহ পাঠাতে হবে।</li></ul><h3>৭. প্রাইস ও স্টক</h3><p>যেকোনো সময় Product Price, Stock ও Offer পরিবর্তন করার অধিকার Vangcur সংরক্ষণ করে। Limited Stock-এর ক্ষেত্রে আগে Confirm করা Order Priority পাবে।</p><h3>৮. Fraud Prevention</h3><p>Fake Order, Fraud Activity বা Suspicious Behaviour শনাক্ত হলে Vangcur যেকোনো Order Cancel করার অধিকার রাখে।</p>`,
+  about:`<h2>About Vangcur — ভাঙচুর</h2><p>Vangcur - ভাঙচুর হচ্ছে বাংলাদেশের একটি আধুনিক <strong>Gadget &amp; Accessories</strong> ভিত্তিক E-commerce Brand, যেখানে আপনি পাবেন বিভিন্ন ধরনের Official এবং Unofficial Gadget Items সম্পূর্ণ Warranty Support সহ। আমরা চেষ্টা করি ট্রেন্ডিং এবং প্রয়োজনীয় গ্যাজেটগুলো সাশ্রয়ী মূল্যে বাংলাদেশের যেকোনো প্রান্তে পৌঁছে দিতে।</p><p style="margin-top:10px">আমাদের লক্ষ্য শুধুমাত্র প্রোডাক্ট বিক্রি করা নয়, বরং কাস্টমারকে একটি নিরাপদ এবং ট্রাস্টেড অনলাইন শপিং এক্সপেরিয়েন্স দেওয়া। প্রতিটি অর্ডার প্রসেসিং থেকে শুরু করে ডেলিভারি এবং আফটার সেলস সাপোর্ট পর্যন্ত আমরা সর্বোচ্চ দায়িত্বশীলতা বজায় রাখি।</p><p style="margin-top:10px">বর্তমানে Vangcur বাংলাদেশের বিভিন্ন জেলার <strong>৩০০০+</strong> সন্তুষ্ট কাস্টমারকে সার্ভিস প্রদান করেছে এবং প্রতিদিন নতুন নতুন Gadget ও Accessories যুক্ত করা হচ্ছে। আমরা বিশ্বাস করি — <em>"Customer Satisfaction is the Main Priority."</em></p><h3>কেন Vangcur-কে বিশ্বাস করবেন?</h3><ul><li>✅ Authentic ও Quality Product</li><li>✅ Warranty &amp; Replacement Support</li><li>✅ Fast Home Delivery All Over Bangladesh</li><li>✅ Dedicated Customer Support</li><li>✅ Secure Advance Order Confirmation System</li><li>✅ Product Unboxing Proof Based Safety Policy</li></ul><h3>যোগাযোগ</h3><p>📞 01816-365504 &nbsp;|&nbsp; ✉️ vangcurbd@gmail.com<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 Dhaka, Bangladesh</p>`,
 };
-function openInfo(p){document.getElementById('infoContent').innerHTML=INFO[p]||'';document.getElementById('infoOverlay').classList.add('show');document.body.style.overflow='hidden';}
+function openInfo(p){
+  // ✅ Admin থেকে সেভ করা কাস্টম কন্টেন্ট থাকলে সেটা দেখাও
+  const custom = _settings && _settings['vc_info_pages'] && _settings['vc_info_pages'][p];
+  document.getElementById('infoContent').innerHTML = custom || INFO[p] || '';
+  document.getElementById('infoOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
 function closeInfo(){document.getElementById('infoOverlay').classList.remove('show');document.body.style.overflow='';}
 
 

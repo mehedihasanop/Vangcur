@@ -622,6 +622,42 @@ A: App ও Remote দিয়ে..."></textarea>
       <br><br>
       <button class="btn btn-dark" onclick="saveFooter()">💾 Footer সেভ করুন</button>
     </div>
+
+    <!-- ✅ নতুন: পলিসি পেজ এডিটর -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><span class="card-title">📄 পলিসি পেজ এডিটর</span><span class="card-sub">About, Returns, Privacy, Terms এডিট করুন</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-dark btn-sm" onclick="switchInfoTab('about',this)" id="itab-about">👤 About</button>
+        <button class="btn btn-outline btn-sm" onclick="switchInfoTab('returns',this)" id="itab-returns">🔄 Returns</button>
+        <button class="btn btn-outline btn-sm" onclick="switchInfoTab('privacy',this)" id="itab-privacy">🔒 Privacy</button>
+        <button class="btn btn-outline btn-sm" onclick="switchInfoTab('terms',this)" id="itab-terms">📋 Terms</button>
+      </div>
+      <div id="ipanel-about">
+        <div class="fg"><label>About Vangcur <span class="hint">— HTML সাপোর্ট করে (h2, h3, p, ul, li, strong)</span></label>
+          <textarea class="finp" id="ipage-about" rows="12" style="font-family:monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+      <div id="ipanel-returns" style="display:none">
+        <div class="fg"><label>Returns &amp; Refunds Policy</label>
+          <textarea class="finp" id="ipage-returns" rows="12" style="font-family:monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+      <div id="ipanel-privacy" style="display:none">
+        <div class="fg"><label>Privacy Policy</label>
+          <textarea class="finp" id="ipage-privacy" rows="12" style="font-family:monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+      <div id="ipanel-terms" style="display:none">
+        <div class="fg"><label>Terms &amp; Conditions</label>
+          <textarea class="finp" id="ipage-terms" rows="12" style="font-family:monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <button class="btn btn-dark" onclick="saveInfoPages()">💾 পলিসি সেভ করুন</button>
+        <button class="btn btn-outline btn-sm" onclick="previewInfoPage()">👁 প্রিভিউ দেখুন</button>
+        <span id="infoSaveMsg" style="font-size:12px;color:var(--green);display:none">✅ সেভ হয়েছে!</span>
+      </div>
+    </div>
   </div>
 
   <!-- ===== HERO CATH-CARDS ===== -->
@@ -1317,6 +1353,8 @@ async function syncAdminData(){
       deletedDefaultIds = _adminSettings['vc_deleted_defaults'] || [];
       prodOrder = _adminSettings['vc_prod_order'] || null;
     }
+    // ✅ পলিসি এডিটর populate করো
+    if(typeof loadInfoPageEditor === 'function') loadInfoPageEditor();
   } catch(e){ console.warn('Settings sync failed:', e); }
 
   // Supabase থেকে custom_products load করো
@@ -2479,10 +2517,81 @@ function addFooterLink(){
   document.getElementById('footerLinks').appendChild(d);
 }
 function saveFooter(){
-  const links=[...document.querySelectorAll('#footerLinks .spec-row')].map(r=>({label:r.querySelector('.sk').value,url:r.querySelector('.sv').value})).filter(l=>l.label);
-  // Footer settings are saved to Supabase via saveSettingToSupabase below
+  const desc = document.getElementById('footerDesc')?.value || '';
+  const copy = document.getElementById('footerCopy')?.value || '';
+  const fb = document.getElementById('sfb')?.value || '';
+  const ig = document.getElementById('sig')?.value || '';
+  const tk = document.getElementById('stk')?.value || '';
+  const yt = document.getElementById('syt')?.value || '';
+  const wa = document.getElementById('swa')?.value || '';
+  const footerData = { desc, copy, fb, ig, tk, yt, wa };
+  saveSettingToSupabase('vc_footer', footerData);
+  _adminSettings['vc_footer'] = footerData;
   showAdminToast('✅ Footer সেভ হয়েছে!');
 }
+
+// ✅ পলিসি পেজ ট্যাব সুইচ
+let _currentInfoTab = 'about';
+function switchInfoTab(tab, btn){
+  _currentInfoTab = tab;
+  ['about','returns','privacy','terms'].forEach(t=>{
+    document.getElementById('ipanel-'+t).style.display = t===tab ? '' : 'none';
+    const b = document.getElementById('itab-'+t);
+    if(b){ b.className = t===tab ? 'btn btn-dark btn-sm' : 'btn btn-outline btn-sm'; }
+  });
+}
+
+// ✅ পলিসি পেজ সেভ
+async function saveInfoPages(){
+  const pages = {
+    about:   document.getElementById('ipage-about')?.value   || '',
+    returns: document.getElementById('ipage-returns')?.value || '',
+    privacy: document.getElementById('ipage-privacy')?.value || '',
+    terms:   document.getElementById('ipage-terms')?.value   || '',
+  };
+  await saveSettingToSupabase('vc_info_pages', pages);
+  _adminSettings['vc_info_pages'] = pages;
+  const msg = document.getElementById('infoSaveMsg');
+  if(msg){ msg.style.display='inline'; setTimeout(()=>msg.style.display='none', 2500); }
+  showAdminToast('✅ পলিসি পেজ সেভ হয়েছে!');
+}
+
+// ✅ পলিসি প্রিভিউ
+function previewInfoPage(){
+  const content = document.getElementById('ipage-'+_currentInfoTab)?.value || '';
+  const w = window.open('','_blank','width=600,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:'DM Sans',sans-serif;padding:28px;max-width:600px;margin:0 auto;color:#1a1a1a;line-height:1.7}
+    h2{font-size:20px;font-weight:700;margin-bottom:12px;color:#1a1a1a}
+    h3{font-size:15px;font-weight:700;margin:18px 0 8px;color:#374151}
+    p{margin-bottom:10px;font-size:14px}
+    ul{padding-left:20px;margin-bottom:10px}
+    li{font-size:14px;margin-bottom:4px}
+    strong{font-weight:700}em{font-style:italic}
+  </style></head><body>${content}</body></html>`);
+  w.document.close();
+}
+
+// ✅ Admin লোড হলে পলিসি textarea populate করো
+function loadInfoPageEditor(){
+  const saved = _adminSettings['vc_info_pages'] || {};
+  // Default content (মেইন সাইটের সাথে মিল রেখে)
+  const defaults = {
+    about: `<h2>About Vangcur — ভাঙচুর</h2><p>Vangcur - ভাঙচুর হচ্ছে বাংলাদেশের একটি আধুনিক <strong>Gadget &amp; Accessories</strong> ভিত্তিক E-commerce Brand, যেখানে আপনি পাবেন বিভিন্ন ধরনের Official এবং Unofficial Gadget Items সম্পূর্ণ Warranty Support সহ।</p><h3>কেন Vangcur-কে বিশ্বাস করবেন?</h3><ul><li>✅ Authentic ও Quality Product</li><li>✅ Warranty &amp; Replacement Support</li><li>✅ Fast Home Delivery All Over Bangladesh</li><li>✅ Dedicated Customer Support</li><li>✅ Secure Advance Order Confirmation System</li><li>✅ Product Unboxing Proof Based Safety Policy</li></ul>`,
+    returns: `<h2>Returns &amp; Refunds Policy</h2><h3>কিভাবে Return করবেন?</h3><p>Invoice Date থেকে <strong>৭ দিনের মধ্যে</strong> Fault প্রমাণিত হলে Return Request করতে পারবেন।</p><h3>কোন ক্ষেত্রে Return গ্রহণযোগ্য?</h3><ul><li>✅ Wrong Product Delivered</li><li>✅ Missing Item</li><li>✅ Manufacturing Fault</li><li>✅ Dead on Arrival Product</li></ul><h3>কোন ক্ষেত্রে Return গ্রহণযোগ্য নয়?</h3><ul><li>❌ আনবক্সিং ভিডিও না থাকলে</li><li>❌ Physical Damage থাকলে</li><li>❌ User Damage হলে</li></ul>`,
+    privacy: `<h2>Vangcur Privacy Policy</h2><p>Vangcur আপনার ব্যক্তিগত তথ্যের নিরাপত্তাকে গুরুত্ব সহকারে বিবেচনা করে।</p><h3>আমরা যেসব তথ্য সংগ্রহ করি</h3><ul><li>নাম</li><li>ফোন নাম্বার</li><li>ডেলিভারি ঠিকানা</li><li>ইমেইল (Optional)</li></ul>`,
+    terms: `<h2>Vangcur Terms &amp; Conditions</h2><p>Vangcur - ভাঙচুর থেকে অর্ডার করার মাধ্যমে আপনি নিচের শর্তাবলীর সাথে সম্মতি প্রদান করছেন।</p><h3>১. অর্ডার কনফার্মেশন</h3><ul><li>অর্ডার নিশ্চিত করতে ন্যূনতম <strong>২০০ টাকা এডভান্স পেমেন্ট</strong> বাধ্যতামূলক।</li><li>সম্পূর্ণ COD ভিত্তিক অর্ডার গ্রহণ করা হয় না।</li></ul>`,
+  };
+  ['about','returns','privacy','terms'].forEach(k=>{
+    const el = document.getElementById('ipage-'+k);
+    if(el) el.value = saved[k] || defaults[k];
+  });
+  // Footer desc load
+  const footerCfg = _adminSettings['vc_footer'] || {};
+  if(footerCfg.desc){ const fd=document.getElementById('footerDesc'); if(fd) fd.value=footerCfg.desc; }
+  if(footerCfg.copy){ const fc=document.getElementById('footerCopy'); if(fc) fc.value=footerCfg.copy; }
+}
+
 
 // ======= CATEGORY MANAGEMENT =======
 const DEFAULT_CATS=[
