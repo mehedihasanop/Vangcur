@@ -672,7 +672,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 
 /* WAITING PAGE */
 .wait-overlay{position:fixed;inset:0;background:var(--cream);z-index:5000;display:none;overflow-y:auto}
-.wait-overlay.show{display:block}
+.wait-overlay.show{display:flex;flex-direction:column;align-items:center}
 .wait-box{background:var(--white);max-width:480px;width:100%;margin:0 auto;padding:28px 28px;text-align:center;min-height:100vh;}
 .pulse{width:76px;height:76px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:pulse-anim 2s infinite;font-size:34px}
 @keyframes pulse-anim{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.3)}50%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
@@ -1224,7 +1224,7 @@ body.dark .prod-badge{opacity:.88}
       <div class="pp-actions">
         <button class="pp-btn pp-btn-order" id="ppBtnOrder" onclick="orderNow()">⚡ এখনই অর্ডার করুন</button>
         <button class="pp-btn pp-btn-cart" id="ppBtnCart" onclick="addCartFromPP()">🛒 কার্টে যোগ করুন</button>
-        <button class="pp-btn pp-btn-wa" onclick="waOrder()"><svg width="17" height="17" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp এ অর্ডার করুন</button>
+        <button class="pp-btn pp-btn-wa" id="ppBtnWa" onclick="waOrder()"><svg width="17" height="17" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp এ অর্ডার করুন</button>
       </div>
     </div>
   </div>
@@ -1506,10 +1506,13 @@ body.dark .prod-badge{opacity:.88}
       <div class="pulse">⏳</div>
       <h2>ধন্যবাদ!</h2>
       <p>আপনার অর্ডারটি পেন্ডিং অবস্থায় আছে। আপনার ২০০ টাকার পেমেন্ট আমরা যাচাই করছি। সাধারণত <strong>৫–১০ মিনিটের মধ্যে</strong> কনফার্মেশন পাবেন (সর্বোচ্চ ৩০ মিনিট)।</p>
-      <div class="wait-order-num">অর্ডার নম্বর: <strong id="waitNum">#00001</strong></div>
+      <div class="wait-order-num" style="display:flex;align-items:center;justify-content:center;gap:8px">
+        অর্ডার নম্বর: <strong id="waitNum">#00001</strong>
+        <button onclick="copyOrderNum('waitNum')" title="কপি করুন" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:3px">📋 কপি</button>
+      </div>
       <div class="status-track">
         <div class="st-item"><div class="st-icon st-done">✅</div><div class="st-text"><strong>অর্ডার রিসিভড</strong><span>সিস্টেমে জমা হয়েছে</span></div></div>
-        <div class="st-item"><div class="st-icon st-cur">🔍</div><div class="st-text"><strong>পেমেন্ট ভেরিফিকেশন</strong><span>ট্রানজেকশন চেক করছি</span></div></div>
+        <div class="st-item"><div class="st-icon st-cur">🔍</div><div class="st-text"><strong>পেমেন্ট ভেরিফিকেশন</strong><span>ট্রানজেকশন চেক করা হচ্ছে</span></div></div>
         <div class="st-item"><div class="st-icon st-pend">⭕</div><div class="st-text"><strong>অর্ডার কনফার্ম</strong><span>পেমেন্ট সঠিক হলে সবুজ হবে</span></div></div>
       </div>
       <div style="background:var(--light);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);text-align:center;line-height:1.7">
@@ -1528,33 +1531,33 @@ body.dark .prod-badge{opacity:.88}
       </div>
       <button onclick="exitWaitAndBrowse()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🏠 ওয়েবসাইটে ফিরে যান</button>
     </div>
-    <div class="confirmed-state" id="confirmedState">
-      <div class="pulse" style="background:#D1FAE5;animation:none">✅</div>
-      <h2 style="color:var(--green)">অর্ডার কনফার্ম হয়েছে! 🎉</h2>
-      <p>আপনার পেমেন্ট যাচাই হয়েছে।</p>
-      <button class="btn-next" onclick="dlInvoice()" style="width:100%;margin-top:16px">📄 ইনভয়েস ডাউনলোড করুন</button>
+    <div class="confirmed-state" id="confirmedState" style="text-align:center">
+      <div style="width:72px;height:72px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px">🎉</div>
+      <h2 style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px">অর্ডার কনফার্ম হয়েছে!</h2>
+      <p style="font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:6px">আপনার পেমেন্ট যাচাই হয়েছে এবং অর্ডারটি সফলভাবে কনফার্ম করা হয়েছে।</p>
+      <p style="font-size:13px;font-weight:700;margin-bottom:20px">অর্ডার নম্বর: <span id="confirmedNum" style="color:var(--red)"></span> <button onclick="copyOrderNum('confirmedNum')" title="কপি করুন" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer">📋</button></p>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:18px">🔍 অর্ডার ট্র্যাক করতে ওয়েবসাইটের "অর্ডার ট্র্যাক" অপশন ব্যবহার করুন।</p>
+      <button onclick="dlInvoice()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⬇️ ইনভয়েস ডাউনলোড করুন (বাধ্যতামূলক)</button>
     </div>
-    <div class="rejected-state" id="rejectedState">
-      <div class="pulse" style="background:#FEE2E2;animation:none">❌</div>
-      <h2 style="color:var(--red)">দুঃখিত!</h2>
-      <p style="color:var(--red)">আপনার পেমেন্ট তথ্যটি সঠিক নয়। সঠিক তথ্য দিয়ে আবার চেষ্টা করুন অথবা WhatsApp এ যোগাযোগ করুন।</p>
-      <a href="https://wa.me/8801816365504" target="_blank" style="display:block;width:100%;background:#25D366;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;margin-top:16px;text-align:center;text-decoration:none">WhatsApp এ যোগাযোগ করুন</a>
+    <div class="rejected-state" id="rejectedState" style="text-align:center">
+      <div style="width:72px;height:72px;background:#FEE2E2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px">❌</div>
+      <h2 style="color:var(--red);font-size:20px;font-weight:700;margin-bottom:10px">দুঃখিত!</h2>
+      <p style="color:var(--gray);font-size:13px;line-height:1.7;margin-bottom:20px">আপনার পেমেন্ট তথ্যটি সঠিক নয়। সঠিক তথ্য দিয়ে আবার চেষ্টা করুন অথবা WhatsApp এ যোগাযোগ করুন।</p>
+      <a href="https://wa.me/8801816365504" target="_blank" style="display:block;width:100%;background:#25D366;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;margin-top:0;text-align:center;text-decoration:none">WhatsApp এ যোগাযোগ করুন</a>
       <button onclick="closeWait();openOrder(false)" style="width:100%;margin-top:10px;background:none;border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">আবার চেষ্টা করুন</button>
     </div>
   </div>
 </div>
 
 <!-- BACKGROUND CONFIRM POPUP -->
-<div class="modal-bg" id="bgConfirmPopup" style="z-index:7000">
-  <div style="background:var(--white);border-radius:22px;max-width:420px;width:100%;padding:34px 28px;text-align:center;animation:slideUp .3s ease">
+<div class="modal-bg" id="bgConfirmPopup" style="z-index:7000;align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:22px;max-width:420px;width:92%;padding:34px 28px;text-align:center;animation:slideUp .3s ease;margin:auto">
     <div style="width:72px;height:72px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px">🎉</div>
     <h2 style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px">অর্ডার কনফার্ম হয়েছে!</h2>
     <p style="font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:6px">আপনার পেমেন্ট যাচাই হয়েছে এবং অর্ডারটি সফলভাবে কনফার্ম করা হয়েছে।</p>
-    <p style="font-size:13px;font-weight:700;margin-bottom:20px">অর্ডার নম্বর: <span id="bgConfirmNum" style="color:var(--red)"></span></p>
-    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px 14px;font-size:12px;color:#78350F;text-align:left;line-height:1.8;margin-bottom:18px">
-      📹 <strong>গুরুত্বপূর্ণ:</strong> প্রোডাক্ট পাওয়ার সাথে সাথে একটানা আনবক্সিং ভিডিও করুন (কোনো কাট বা পজ নয়)। ওয়ারেন্টি ক্লেইমের জন্য এই ভিডিও বাধ্যতামূলক।
-    </div>
-    <button onclick="dlInvoiceFromPopup()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px">📄 ইনভয়েস ডাউনলোড করুন</button>
+    <p style="font-size:13px;font-weight:700;margin-bottom:8px">অর্ডার নম্বর: <span id="bgConfirmNum" style="color:var(--red)"></span> <button onclick="copyOrderNum('bgConfirmNum')" title="কপি করুন" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer">📋</button></p>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:18px">🔍 অর্ডার ট্র্যাক করতে ওয়েবসাইটের "অর্ডার ট্র্যাক" অপশন ব্যবহার করুন।</p>
+    <button onclick="dlInvoiceFromPopup()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⬇️ ইনভয়েস ডাউনলোড করুন (বাধ্যতামূলক)</button>
   </div>
 </div>
 
@@ -1613,6 +1616,7 @@ body.dark .prod-badge{opacity:.88}
     </div>
     <button class="pp-btn pp-btn-order" style="width:auto;padding:11px 24px;flex-shrink:0" id="ppStickyOrderBtn" onclick="orderNow()">⚡ অর্ডার করুন</button>
     <button class="pp-btn pp-btn-cart pp-sticky-cart-btn" style="width:auto;padding:11px 16px;flex-shrink:0" id="ppStickyCartBtn" onclick="addCartFromPP()">🛒 কার্ট</button>
+    <button class="pp-btn" style="width:100%;padding:11px 24px;background:var(--gray);color:#fff;cursor:not-allowed;display:none" id="ppStickySoldBtn" disabled>দুঃখিত স্টক শেষ</button>
   </div>
 </div>
 
@@ -2549,8 +2553,11 @@ function renderProds(list){
       </div>
       <div class="prod-price-row"><span class="prod-price">৳${p.price.toLocaleString()}</span><span class="prod-old">৳${p.old.toLocaleString()}</span></div>
       <div class="prod-cta-row">
-        <button class="prod-cta" onclick="quickOrder(${p.id})" ${sold?'disabled':''}>${sold?'স্টক শেষ':'⚡ অর্ডার করুন'}</button>
-        <button class="prod-cart-icon-btn" onclick="quickCart(${p.id})" ${sold?'disabled':''} title="কার্টে যোগ করুন">🛒</button>
+        ${sold
+          ? `<button class="prod-cta" disabled style="width:100%;background:var(--gray);cursor:not-allowed">স্টক শেষ</button>`
+          : `<button class="prod-cta" onclick="quickOrder(${p.id})">⚡ অর্ডার করুন</button>
+             <button class="prod-cart-icon-btn" onclick="quickCart(${p.id})" title="কার্টে যোগ করুন">🛒</button>`
+        }
       </div>
     </div>`;
     g.appendChild(d);
@@ -2853,14 +2860,33 @@ function openPP(id){
   buildGallery(curProd.imgs);
   initGallerySwipe();
   const sold=curProd.stock<=0;
-  ['ppBtnOrder','ppBtnOrder2'].forEach(bid=>{
-    const b=document.getElementById(bid);
-    if(b){b.disabled=sold;b.textContent=sold?'স্টক শেষ':'⚡ অর্ডার করুন';}
-  });
-  ['ppBtnCart','ppBtnCart2'].forEach(bid=>{
-    const b=document.getElementById(bid);
-    if(b){b.disabled=sold;b.textContent=sold?'স্টক শেষ':'🛒 কার্টে যোগ করুন';}
-  });
+  if(sold){
+    // আউট অফ স্টক — শুধু একটা "স্টক শেষ" বাটন দেখাও
+    ['ppBtnOrder','ppBtnOrder2'].forEach(bid=>{
+      const b=document.getElementById(bid);
+      if(b){b.disabled=true;b.textContent='স্টক শেষ';b.style.width='100%';}
+    });
+    // Cart ও WA বাটন লুকাও
+    ['ppBtnCart','ppBtnCart2'].forEach(bid=>{
+      const b=document.getElementById(bid);
+      if(b) b.style.display='none';
+    });
+    const wa=document.getElementById('ppBtnWa');
+    if(wa) wa.style.display='none';
+    // Sticky bar — আউট অফ স্টকে সম্পূর্ণ hide (openProdPage এ handle হয়)
+  } else {
+    ['ppBtnOrder','ppBtnOrder2'].forEach(bid=>{
+      const b=document.getElementById(bid);
+      if(b){b.disabled=false;b.textContent='⚡ এখনই অর্ডার করুন';b.style.width='';}
+    });
+    ['ppBtnCart','ppBtnCart2'].forEach(bid=>{
+      const b=document.getElementById(bid);
+      if(b){b.disabled=false;b.textContent='🛒 কার্টে যোগ করুন';b.style.display='';}
+    });
+    const wa=document.getElementById('ppBtnWa');
+    if(wa) wa.style.display='';
+
+  }
   // Wishlist icon sync
   const wb=document.getElementById('ppWishBtn');
   if(wb){wb.textContent=isWishlisted(curProd.id)?'❤️':'🤍';wb.style.background=isWishlisted(curProd.id)?'#FFF0F0':'var(--light)';}
@@ -2969,29 +2995,28 @@ function openPP(id){
   const stickyBar=document.getElementById('ppStickyBar');
   const stickyName=document.getElementById('ppStickyName');
   const stickyPrice=document.getElementById('ppStickyPrice');
-  if(stickyBar&&curProd){
-    // Mobile: truncate to 25 chars; Desktop: show more (up to 45 chars)
+  // আউট অফ স্টক প্রোডাক্টে sticky bar দেখাবে না
+  if(stickyBar&&curProd&&curProd.stock>0){
     const isMobile = window.innerWidth <= 600;
     const maxLen = isMobile ? 25 : 45;
     const stickyDisplayName = curProd.name.length > maxLen ? curProd.name.slice(0, maxLen) + '...' : curProd.name;
     stickyName.textContent=stickyDisplayName;
     stickyPrice.textContent='৳'+curProd.price.toLocaleString();
-    document.getElementById('ppStickyOrderBtn').disabled=curProd.stock<=0;
-    document.getElementById('ppStickyCartBtn').disabled=curProd.stock<=0;
     const ppInner=document.getElementById('ppOverlay');
     ppInner._stickyHandler=()=>{
       const tabsWrap=document.getElementById('ppTabsWrap');
       if(tabsWrap){
-        // ppOverlay এর top থেকে tabsWrap কতটা নিচে আছে সেটা measure করো
         const overlayRect=ppInner.getBoundingClientRect();
         const tabsRect=tabsWrap.getBoundingClientRect();
-        // tabsWrap যখন ppOverlay এর top এ বা উপরে চলে আসে তখন show করো
         stickyBar.classList.toggle('show', tabsRect.top <= overlayRect.top + 70);
       } else {
         stickyBar.classList.toggle('show',ppInner.scrollTop>200);
       }
     };
     ppInner.addEventListener('scroll',ppInner._stickyHandler);
+  } else if(stickyBar){
+    // আউট অফ স্টক — sticky bar সম্পূর্ণ hide
+    stickyBar.classList.remove('show');
   }
 }
 
@@ -3581,6 +3606,10 @@ function handleOrderStatusUpdate(status,ordId){
     if(document.getElementById('waitOverlay').classList.contains('show')){
       document.getElementById('pendingState').style.display='none';
       document.getElementById('confirmedState').style.display='block';
+      // confirmed order number দেখাও
+      const _cn=document.getElementById('confirmedNum');
+      if(_cn){const _wn=document.getElementById('waitNum');if(_wn)_cn.textContent=_wn.textContent;}
+      playConfirmSound();
     } else {
       // find order for popup
       const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
@@ -3950,14 +3979,56 @@ function exitWaitAndBrowse(){
   document.body.style.overflow='';
   // pendingOrdId stays set — polling continues
 }
+function copyOrderNum(elId){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const txt=el.textContent||el.innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    showToast('✅ অর্ডার নম্বর কপি হয়েছে!');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    showToast('✅ অর্ডার নম্বর কপি হয়েছে!');
+  });
+}
+
 function closeWait(){document.getElementById('waitOverlay').classList.remove('show');document.body.style.overflow='';pendingOrdId=null;sessionStorage.removeItem('vc_pending');}
 
 // BACKGROUND CONFIRM POPUP
 let bgConfirmOrder=null;
+// ✅ Payment Success Sound — Web Audio API (iPhone payment sound এর মতো)
+function playConfirmSound(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [
+      {freq:523.25, start:0,    dur:0.18, gain:0.5},
+      {freq:659.25, start:0.14, dur:0.18, gain:0.45},
+      {freq:783.99, start:0.26, dur:0.22, gain:0.4},
+      {freq:1046.5, start:0.36, dur:0.38, gain:0.55},
+    ];
+    notes.forEach(({freq, start, dur, gain}) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime + start);
+      gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + start + 0.04);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    });
+    setTimeout(() => ctx.close(), 1200);
+  } catch(e){}
+}
+
 function showBgConfirmPopup(order){
   bgConfirmOrder=order;
   document.getElementById('bgConfirmNum').textContent=order.orderNum;
   document.getElementById('bgConfirmPopup').classList.add('show');
+  playConfirmSound();
   document.body.style.overflow='hidden';
 }
 function closeBgConfirmPopup(){
@@ -3968,27 +4039,33 @@ function closeBgConfirmPopup(){
 function dlInvoiceFromPopup(){
   if(bgConfirmOrder)genInvoice(bgConfirmOrder);
   closeBgConfirmPopup();
-  document.getElementById('postOverlay').classList.add('show');
+  // postOverlay invoice tab এর back button এ দেখাবে
 }
 
 // INVOICE
 function dlInvoice(){
-  const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
-  const o=orders.find(x=>x.id===pendingOrdId);if(o)genInvoice(o);
-  // Also show post info
-  document.getElementById('waitOverlay').classList.remove('show');
-  document.getElementById('postOverlay').classList.add('show');
+  // Supabase থেকে order আনো
+  (async()=>{
+    let o = null;
+    try{
+      const {data}=await supabaseClient.from('orders').select('*').eq('id',pendingOrdId).single();
+      if(data) o=data;
+    }catch(e){}
+    // localStorage fallback
+    if(!o){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');o=orders.find(x=>x.id===pendingOrdId);}
+    if(o) genInvoice(o);
+    document.getElementById('waitOverlay').classList.remove('show');
+  })();
 }
 function dlInvoiceById(id){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===id);if(o)genInvoice(o);}
 function genInvoice(o){
   const ds=new Date(o.date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const advancePaid=o.advancePaid||200;
   const balanceDue=Math.max(0,o.total-advancePaid);
-  const pi=`<div style="margin-top:18px;padding:13px 16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:12px;line-height:1.9"><strong>📦 Post-Delivery Instructions:</strong><br>
-  • Record an unboxing video immediately upon receiving the product (no cuts or pauses)<br>
-  • Warranty claims are not valid without unboxing video proof<br>
-  • Keep box & documents for products with 6-month warranty<br>
-  • For issues, WhatsApp: 01816-365504</div>`;
+  const dueMsg = balanceDue > 0
+    ? `Hey! Please hand ৳${balanceDue.toLocaleString()} to the delivery man when you receive your package — that's your remaining balance (COD). Once you've got it home, make sure to record a continuous unboxing video from the top (no cuts or pauses). This video is mandatory for any warranty claim. Enjoy your order! 🎉`
+    : `Great news — you've already paid in full! Once you receive your package, make sure to record a continuous unboxing video from the top (no cuts or pauses). This video is mandatory for any warranty claim. Enjoy your order! 🎉`;
+  const pi=`<div style="margin-top:18px;padding:16px 18px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:13px;line-height:1.8;color:#1e3a5f">${dueMsg}</div>`;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice ${o.orderNum}</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -4024,11 +4101,12 @@ function genInvoice(o){
     .payment-badge{display:inline-flex;align-items:center;gap:6px;background:#e6f7ef;color:#065f46;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;margin-bottom:20px;}
     .footer-note{margin-top:0;font-size:11.5px;color:#888;text-align:center;line-height:2;border-top:1px solid #f0f0f0;padding-top:16px;}
     @media print{.inv-topbar{display:none}.invoice-wrap{box-shadow:none;border-radius:0}}
+    @media(max-width:600px){body{padding:0 !important;background:#fff;}.invoice-wrap{border-radius:0;box-shadow:none;max-width:100%;}}
   </style>
   </head><body>
   <div class="invoice-wrap">
     <div class="inv-topbar">
-      <button class="inv-back-btn" onclick="window.close()">← Back</button>
+      <button class="inv-back-btn" onclick="showPostInfo()">← Back</button>
       <button class="inv-dl-btn" title="Download Invoice" onclick="downloadInvoiceFile()">
         <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
@@ -4073,26 +4151,28 @@ function genInvoice(o){
     a.download='Vangcur_Invoice_${o.orderNum.replace('#','')}.html';
     a.click();
   }
-  // Auto-trigger download on open
-  window.addEventListener('load',function(){
-    setTimeout(downloadInvoiceFile,600);
-  });
+  // Back button handler — show post-order info overlay
+  function showPostInfo(){
+    const postEl = window.opener && window.opener.document.getElementById('postOverlay');
+    if(postEl){ postEl.classList.add('show'); window.close(); }
+    else { window.close(); }
+  }
+  // No auto-download on open (download already triggered from main page)
   <\/script>
   </body></html>`;
 
-  // 1) Directly trigger download
-  const dlLink=document.createElement('a');
-  dlLink.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
-  dlLink.download=`Vangcur_Invoice_${o.orderNum.replace('#','')}.html`;
-  dlLink.click();
-
-  // 2) Also open the invoice page in a new tab
+  // শুধু invoice tab খোলো — tab এর ভেতরে download button আছে
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   window.open(url,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url),120000);
 }
-function closePost(){document.getElementById('postOverlay').classList.remove('show');document.body.style.overflow='';}
+function closePost(){
+  document.getElementById('postOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  // হোম পেজে নিয়ে যাও
+  window.location.replace(window.location.pathname);
+}
 
 // ============ ORDER TRACKING ============
 function openTrackOrder(){
