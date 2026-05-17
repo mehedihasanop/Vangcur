@@ -1646,11 +1646,12 @@ function viewOrder(id){
 }
 
 async function setOrderStatus(id,status){
-  // Supabase update (cross-device realtime)
+  // Supabase update
   try{
-    await supabaseClient.from('orders').update({status}).eq('id',id);
-  }catch(e){console.warn('Supabase status update failed:',e);}
-  // Also update localStorage
+    const {error}=await supabaseClient.from('orders').update({status}).eq('id',id);
+    if(error){showAdminToast('⚠️ আপডেট ব্যর্থ: '+error.message);return;}
+  }catch(e){showAdminToast('⚠️ সংযোগ সমস্যা, স্ট্যাটাস আপডেট হয়নি');return;}
+  // Update in-memory cache so loadAndRenderOrders() doesn't overwrite with stale data
   const orders=getOrders();
   const o=orders.find(x=>x.id===id);
   if(o)o.status=status;
