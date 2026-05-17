@@ -4494,13 +4494,14 @@ function playConfirmSound(){
 }
 
 function showBgConfirmPopup(order){
-  // Supabase raw row হলে map করো, নইলে সরাসরি ব্যবহার করো
   const o = (order.order_num !== undefined) ? mapSupabaseOrderRow(order) : order;
   bgConfirmOrder = o;
   document.getElementById('bgConfirmNum').textContent = o.orderNum || o.id || '';
   document.getElementById('bgConfirmPopup').classList.add('show');
   playConfirmSound();
   document.body.style.overflow='hidden';
+  // ✅ localStorage এ সেভ — refresh বা নতুন visit এও দেখাবে
+  try{ localStorage.setItem('vc_pending_confirm', JSON.stringify(o)); }catch(e){}
 }
 function closeBgConfirmPopup(){
   document.getElementById('bgConfirmPopup').classList.remove('show');
@@ -4510,6 +4511,8 @@ function closeBgConfirmPopup(){
 function dlInvoiceFromPopup(){
   if(bgConfirmOrder){
     genInvoice(bgConfirmOrder);
+    // ✅ invoice দেখানো হয়েছে — pending confirm clear করো
+    try{ localStorage.removeItem('vc_pending_confirm'); }catch(e){}
     closeBgConfirmPopup();
   }
 }
@@ -4684,59 +4687,61 @@ function genInvoice(o){
   showInvoiceModal(html, o.orderNum);
 }
 
-// ✅ নতুন: Invoice modal — সব ডিভাইসে কাজ করবে
+// ✅ Invoice modal — iframe ছাড়া, সরাসরি scrollable div এ render
 function showInvoiceModal(html, orderNum){
-  // পুরনো modal থাকলে সরাও
   const old=document.getElementById('invoiceModal');
   if(old)old.remove();
 
+  // invoice body শুধু extract করো (topbar বাদ দিয়ে)
+  const bodyMatch=html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  const bodyContent=bodyMatch?bodyMatch[1]:'';
+  // topbar div লুকাও
+  const cleanBody=bodyContent.replace(/<div class="inv-topbar">/,'<div class="inv-topbar" style="display:none">');
+
+  // invoice এর CSS extract করো
+  const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/i);
+  const invCss=styleMatch?styleMatch[1]:'';
+
   const modal=document.createElement('div');
   modal.id='invoiceModal';
-  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;overflow:hidden;';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f6fa;display:flex;flex-direction:column;overflow:hidden;';
 
   // Top bar
-  const topbar=document.createElement('div');
-  topbar.style.cssText='display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 16px;flex-shrink:0;';
-  topbar.innerHTML=`
-    <button onclick="document.getElementById('invoiceModal').remove();document.getElementById('postOverlay').classList.add('show');"
-      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">
-      ← Back
-    </button>
-    <button id="invDlBtn"
-      style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
-      ⬇️ ডাউনলোড
-    </button>`;
-  modal.appendChild(topbar);
-
-  // iframe for invoice content
-  const iframe=document.createElement('iframe');
-  iframe.style.cssText='flex:1;border:none;width:100%;';
-  iframe.setAttribute('sandbox','allow-same-origin allow-scripts');
-  modal.appendChild(iframe);
+  modal.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 16px;flex-shrink:0;">
+      <button id="invBackBtn" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">← Back</button>
+      <button id="invDlBtn" style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">⬇️ ডাউনলোড</button>
+    </div>
+    <div id="invBody" style="flex:1;overflow-y:auto;padding:20px 12px;">
+      <style>${invCss}</style>
+      ${cleanBody}
+    </div>`;
 
   document.body.appendChild(modal);
   document.body.style.overflow='hidden';
 
-  // iframe এ HTML লোড করো
-  const doc=iframe.contentDocument||iframe.contentWindow.document;
-  doc.open();
-  // iframe এর ভেতরে topbar লুকাও (আমাদের বাইরের topbar আছে)
-  const iframeHtml=html.replace('<div class="inv-topbar">','<div class="inv-topbar" style="display:none">');
-  doc.write(iframeHtml);
-  doc.close();
-
-  // ✅ Download button — direct download, কোনো new tab নয়
-  document.getElementById('invDlBtn').onclick=function(){
-    const a=document.createElement('a');
+  // ✅ Download function — সরাসরি Blob download
+  function doDownload(){
     const blob=new Blob([html],{type:'text/html;charset=utf-8'});
     const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
     a.href=url;
     a.download='Vangcur_Invoice_'+(orderNum||'').replace('#','')+'.html';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+  }
+
+  document.getElementById('invDlBtn').onclick=doDownload;
+  document.getElementById('invBackBtn').onclick=function(){
+    modal.remove();
+    document.body.style.overflow='';
+    document.getElementById('postOverlay').classList.add('show');
   };
+
+  // ✅ Auto-download — modal খোলার সাথে সাথে
+  setTimeout(doDownload, 600);
 }
 function closePost(){
   document.getElementById('postOverlay').classList.remove('show');
@@ -5392,6 +5397,29 @@ function catCarouselSlide(dir,btn){
 window.addEventListener('resize',()=>updateCatCarousel());
 
 document.addEventListener('DOMContentLoaded',function(){
+  // ✅ Persistent confirmation check — refresh বা নতুন visit এ
+  try{
+    const pendingConfirm=localStorage.getItem('vc_pending_confirm');
+    if(pendingConfirm){
+      const o=JSON.parse(pendingConfirm);
+      // order টা confirmed কিনা Supabase থেকে verify করো
+      (async()=>{
+        let stillPending=true;
+        try{
+          const {data}=await supabaseClient.from('orders').select('status').eq('id',o.id).single();
+          // শুধু confirmed/shipped/delivered হলে দেখাও
+          if(data&&['confirmed','shipped','delivered'].includes(data.status))stillPending=true;
+          else if(data&&['pending','cancelled','rejected'].includes(data.status))stillPending=false;
+        }catch(e){}
+        if(stillPending){
+          setTimeout(()=>showBgConfirmPopup(o),1200);
+        } else {
+          localStorage.removeItem('vc_pending_confirm');
+        }
+      })();
+    }
+  }catch(e){}
+
   setTimeout(function(){
     const dsi=document.getElementById('desktopSearchInput');
     const msi=document.getElementById('mobileSearchInput');
