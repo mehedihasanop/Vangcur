@@ -1595,7 +1595,7 @@ function renderOrders(){
 function toggleSelectAll(cb){document.querySelectorAll('.ord-chk').forEach(c=>c.checked=cb.checked);updateBulkCount();}
 function updateBulkCount(){const n=document.querySelectorAll('.ord-chk:checked').length;const el=document.getElementById('bulkCount');if(el)el.textContent=n?`${n}টি সিলেক্ট`:'';}
 
-function bulkChangeStatus(){
+async function bulkChangeStatus(){
   const sel=document.getElementById('bulkStatus').value;
   if(!sel){showAdminToast('প্রথমে স্ট্যাটাস বেছে নিন');return;}
   const ids=[...document.querySelectorAll('.ord-chk:checked')].map(c=>c.dataset.id);
@@ -1604,6 +1604,10 @@ function bulkChangeStatus(){
   let changed=0;
   orders.forEach(o=>{if(ids.includes(o.id)){o.status=sel;changed++;}});
   saveOrders(orders);renderOrders();initDash();
+  // ✅ FIX: Supabase তেও সব অর্ডার আপডেট করো (realtime কাস্টমারের কাছে পৌঁছাবে)
+  try{
+    await Promise.all(ids.map(id=>supabaseClient.from('orders').update({status:sel}).eq('id',id)));
+  }catch(e){console.warn('Supabase bulk status update failed:',e);}
   showAdminToast(`✅ ${changed}টি অর্ডার → ${sel}`);
   document.getElementById('selAll').checked=false;
   document.getElementById('bulkStatus').value='';
