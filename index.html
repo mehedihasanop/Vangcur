@@ -3944,6 +3944,9 @@ function handleOrderStatusUpdate(status,ordId){
       if(_cn){const _wn=document.getElementById('waitNum');if(_wn)_cn.textContent=_wn.textContent;}
       // ✅ ordId সংরক্ষণ করো যাতে dlInvoice() পরে কাজ করে
       _confirmedOrdId=ordId;
+      // ✅ বাটনের onclick সরাসরি এই ordId দিয়ে override করো — সবচেয়ে নির্ভরযোগ্য
+      const _dlBtn=document.querySelector('#confirmedState button');
+      if(_dlBtn){ _dlBtn.onclick=function(){ dlInvoiceById(ordId); }; }
       playConfirmSound();
     } else {
       // find order for popup
@@ -4398,7 +4401,20 @@ function dlInvoice(){
     document.getElementById('waitOverlay').classList.remove('show');
   })();
 }
-function dlInvoiceById(id){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===id);if(o)genInvoice(o);}
+function dlInvoiceById(id){
+  (async()=>{
+    let o=null;
+    // Supabase থেকে fresh data আনো
+    try{
+      const {data}=await supabaseClient.from('orders').select('*').eq('id',id).single();
+      if(data) o=data;
+    }catch(e){}
+    // localStorage fallback
+    if(!o){const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');o=orders.find(x=>x.id===id);}
+    if(o) genInvoice(o);
+    else showToast('❌ অর্ডার তথ্য পাওয়া যাচ্ছে না');
+  })();
+}
 function genInvoice(o){
   const ds=new Date(o.date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const advancePaid=o.advancePaid||200;
