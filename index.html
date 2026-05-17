@@ -1664,11 +1664,17 @@ function applyProdOrder(orderArr){
 const DISTRICTS=['ঢাকা','চট্টগ্রাম','রাজশাহী','খুলনা','বরিশাল','সিলেট','রংপুর','ময়মনসিংহ','কুমিল্লা','ফেনী','নোয়াখালী','লক্ষ্মীপুর','চাঁদপুর','ব্রাহ্মণবাড়িয়া','কিশোরগঞ্জ','নরসিংদী','নারায়ণগঞ্জ','মুন্সীগঞ্জ','মানিকগঞ্জ','গাজীপুর','টাঙ্গাইল','ফরিদপুর','মাদারীপুর','শরীয়তপুর','রাজবাড়ী','গোপালগঞ্জ','বগুড়া','নওগাঁ','নাটোর','পাবনা','সিরাজগঞ্জ','জয়পুরহাট','চাঁপাইনবাবগঞ্জ','যশোর','সাতক্ষীরা','মেহেরপুর','নড়াইল','চুয়াডাঙ্গা','কুষ্টিয়া','মাগুরা','ঝিনাইদহ','বাগেরহাট','পিরোজপুর','ঝালকাঠি','পটুয়াখালী','বরগুনা','ভোলা','সুনামগঞ্জ','হবিগঞ্জ','মৌলভীবাজার','নেত্রকোনা','জামালপুর','শেরপুর','গাইবান্ধা','নীলফামারী','লালমনিরহাট','কুড়িগ্রাম','ঠাকুরগাঁও','পঞ্চগড়','দিনাজপুর','কক্সবাজার','বান্দরবান','রাঙ্গামাটি','খাগড়াছড়ি'];
 
 // STATE
-// S-5: Load stock from in-memory stockData (loaded from Supabase), not localStorage
+// S-5: Load stock from Supabase data
+// Default products: vc_stock (store_settings) থেকে
+// Custom products: custom_products.stock column থেকে সরাসরি (product load এর সময়ই নেওয়া হয়)
 let _stockData = {};
 function loadStock(stockMap){
   if(stockMap) _stockData = stockMap;
-  PRODS.forEach(p=>{if(_stockData[p.id]!==undefined)p.stock=_stockData[p.id];});
+  const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
+  // শুধু default products এর stock update করো (custom products এর stock আলাদা থেকে আসে)
+  PRODS.forEach(p=>{
+    if(defaultIds.has(p.id) && _stockData[p.id]!==undefined) p.stock=_stockData[p.id];
+  });
 }
 async function saveStock(){
   const map={};PRODS.forEach(p=>{map[p.id]=p.stock;});
@@ -2117,7 +2123,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           name: p.name || '',
           price: p.price || 0,
           old: p.old || p.price || 0,
-          stock: p.stock !== undefined ? p.stock : 20,
+          stock: p.stock !== undefined ? p.stock : 0,
           badge: p.badge || '',
           warranty: p.warranty || '৭ দিন',
           rating: p.rating || 4.5,
@@ -2202,7 +2208,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           const mapped = {
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
-            stock:p.stock!==undefined?p.stock:20, badge:p.badge||'',
+            stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -2224,7 +2230,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           const mapped = {
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
-            stock:p.stock!==undefined?p.stock:20, badge:p.badge||'',
+            stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -2807,7 +2813,7 @@ async function filterProducts(q){
         id:'sb_'+row.id,cat:row.category||row.cat||'all',
         name:row.name||'',nameBn:row.name_bn||row.name||'',
         price:row.price||0,old:row.original_price||row.old||row.price||0,
-        stock:row.stock??20,rating:row.rating||4.5,
+        stock:row.stock??0,rating:row.rating||4.5,
         imgs:Array.isArray(row.images)?row.images:(row.imgs||['📦']),
         warranty:row.warranty||'৭ দিন',badge:row.badge||'',
         desc:row.description||row.desc||''
@@ -3898,7 +3904,7 @@ document.addEventListener('visibilitychange',()=>{
           const p = {
             id:raw.id, cat:raw.cat||'rgb', name:raw.name||'',
             price:raw.price||0, old:raw.old||raw.price||0,
-            stock:raw.stock!==undefined?raw.stock:20, badge:raw.badge||'',
+            stock:raw.stock!==undefined?raw.stock:0, badge:raw.badge||'',
             warranty:raw.warranty||'৭ দিন', rating:raw.rating||4.5,
             imgs:Array.isArray(raw.imgs)?raw.imgs:(raw.imgs?[raw.imgs]:['📦']),
             specs:raw.specs||{},

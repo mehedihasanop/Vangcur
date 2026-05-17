@@ -1800,7 +1800,7 @@ function renderProdTbl(scrollToLast = false) {
   if (!tbody) return;
 
   tbody.innerHTML = list.length ? list.map((p, idx) => {
-    const stock = p.stock || 0;
+    const stock = p.stock ?? 0;
     const stockPill = stock === 0
       ? `<span class="pill p-cancelled">Sold Out</span>`
       : stock <= 5
@@ -1825,7 +1825,12 @@ function renderProdTbl(scrollToLast = false) {
       </td>
       <td><span class="pill" style="background:#DBEAFE;color:#1E40AF">${escHtml(catNames[p.cat] || p.cat)}</span></td>
       <td>৳${(p.price || 0).toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${(p.old || 0).toLocaleString()}</span></td>
-      <td>${stockPill}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          ${stockPill}
+          <button onclick="openStockEdit(${p.id},event)" title="স্টক সম্পাদনা" style="background:none;border:1px solid #e5e7eb;border-radius:5px;padding:2px 5px;cursor:pointer;font-size:11px">✏️</button>
+        </div>
+      </td>
       <td style="font-size:11px;max-width:110px">${p.warranty || '-'}</td>
       <td style="white-space:nowrap">${actionBtns}</td>
     </tr>`;
@@ -1956,7 +1961,7 @@ function openAddProd(){
   document.getElementById('prodModalTitle').textContent='প্রোডাক্ট যোগ করুন';
   document.getElementById('editId').value='';
   ['pName','pPrice','pOld','pBadge','pWarranty','pDesc','pQuickSpecs','pLongDesc','pFeatures','pClosing','pFaqs','pTechSpecs'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
-  document.getElementById('pStock').value=20;
+  document.getElementById('pStock').value=0;
   document.getElementById('pRating').value=4.5;
   document.getElementById('pWarranty').value='৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি';
   document.getElementById('imgMgr').innerHTML='';addImgRow('💡');addImgRow('');
@@ -1974,7 +1979,7 @@ function editProd(id){
   populateCatDropdown('pCat', p.cat||'rgb'); // ✅ Dynamic + correct selection
   document.getElementById('pPrice').value=p.price||'';
   document.getElementById('pOld').value=p.old||'';
-  document.getElementById('pStock').value=p.stock||20;
+  document.getElementById('pStock').value=p.stock??0;
   document.getElementById('pBadge').value=p.badge||'';
   document.getElementById('pWarranty').value=p.warranty||'';
   document.getElementById('pRating').value=p.rating||4.5;
@@ -2135,14 +2140,83 @@ function addSpecRow(k='',v=''){
   document.getElementById('specEd').appendChild(d);
 }
 
+// ── Inline Stock Edit ──
+function openStockEdit(prodId, event){
+  event && event.stopPropagation();
+  const allProds = getAllProds();
+  const p = allProds.find(x=>x.id===prodId);
+  if(!p) return;
+
+  // পুরানো popup সরাও
+  document.getElementById('_stockPopup')?.remove();
+
+  const popup = document.createElement('div');
+  popup.id = '_stockPopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:20px;z-index:9999;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.15)';
+  popup.innerHTML = `
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px">স্টক আপডেট</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:12px">${escHtml(p.name)}</div>
+    <input id="_stockInput" type="number" min="0" value="${p.stock??0}"
+      style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:16px;font-weight:700;text-align:center;margin-bottom:12px">
+    <div style="display:flex;gap:8px">
+      <button onclick="saveInlineStock(${prodId})"
+        style="flex:1;background:#111;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">
+        ✅ সেভ করুন
+      </button>
+      <button onclick="document.getElementById('_stockPopup').remove()"
+        style="flex:1;background:#f3f4f6;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">
+        বাতিল
+      </button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById('_stockInput').focus();
+  document.getElementById('_stockInput').select();
+}
+
+async function saveInlineStock(prodId){
+  const input = document.getElementById('_stockInput');
+  const newStock = parseInt(input.value);
+  if(isNaN(newStock)||newStock<0){showAdminToast('❌ সঠিক স্টক সংখ্যা দিন');return;}
+
+  // Memory update
+  const defProd = DEFAULT_PRODS.find(p=>p.id===prodId);
+  const customProd = adminProds.find(p=>p.id===prodId);
+  if(defProd) defProd.stock = newStock;
+  if(customProd) customProd.stock = newStock;
+
+  // Supabase update
+  try{
+    if(customProd){
+      // Custom product — custom_products টেবিলে সরাসরি
+      const {error} = await supabaseClient.from('custom_products').update({stock:newStock}).eq('id',prodId);
+      if(error) throw error;
+    }
+    // সব product এর vc_stock ও আপডেট করো (default products এর জন্য)
+    await syncStockToSupabase();
+    document.getElementById('_stockPopup')?.remove();
+    renderProdTbl();
+    showAdminToast('✅ স্টক আপডেট হয়েছে!');
+  }catch(e){
+    console.error('Stock save error:',e);
+    showAdminToast('❌ স্টক সেভ ব্যর্থ: '+(e.message||'error'));
+  }
+}
+
 // ✅ সব product এর stock একসাথে Supabase vc_stock এ save করে
 async function syncStockToSupabase(){
   try{
+    // ১. store_settings এ vc_stock update (default products এর জন্য)
     const stockMap={};
     DEFAULT_PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
     adminProds.forEach(p=>{stockMap[p.id]=p.stock;});
     _adminSettings['vc_stock']=stockMap;
     await supabaseClient.from('store_settings').upsert({setting_key:'vc_stock',setting_value:stockMap});
+
+    // ২. custom_products টেবিলে প্রতিটির stock column সরাসরি update করো
+    for(const p of adminProds){
+      await supabaseClient.from('custom_products').update({stock: p.stock}).eq('id', p.id);
+    }
   }catch(e){console.warn('Stock sync failed:',e);}
 }
 
@@ -2172,7 +2246,7 @@ async function saveProd(){
     cat:document.getElementById('pCat').value,
     price,
     old:parseInt(document.getElementById('pOld').value)||price,
-    stock:parseInt(document.getElementById('pStock').value)||20,
+    stock:(v=>isNaN(v)?0:v)(parseInt(document.getElementById('pStock').value)),
     badge:(document.getElementById('pBadge').value||'').toUpperCase(),
     warranty:document.getElementById('pWarranty').value||'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',
     rating:parseFloat(document.getElementById('pRating').value)||4.5,
@@ -2650,7 +2724,7 @@ async function runAIParser(){
     document.getElementById('pName').value = parsed.name || '';
     document.getElementById('pPrice').value = parsed.price || '';
     document.getElementById('pOld').value = parsed.old || '';
-    document.getElementById('pStock').value = parsed.stock || 20;
+    document.getElementById('pStock').value = parsed.stock??0;
     document.getElementById('pRating').value = parsed.rating || 4.5;
     document.getElementById('pWarranty').value = parsed.warranty || '';
     document.getElementById('pBadge').value = (parsed.badge || '').toUpperCase();
@@ -2877,7 +2951,7 @@ function smartParse(raw){
 
   // ── Stock default ──
   let stockRaw = findVal(['Stock','স্টক','Quantity']);
-  let stock = parseInt(stockRaw) || 20;
+  let stock = parseInt(stockRaw)??0;
 
   return { name, cat, price, old, stock, rating, warranty, badge, quick_specs: quickSpecs, desc, features, tech_specs, faqs, closing };
 }
@@ -2887,7 +2961,7 @@ function fillParsedForm(p){
   document.getElementById('r_name').value = safe(p.name, '');
   document.getElementById('r_price').value = safe(p.price, '');
   document.getElementById('r_old').value = safe(p.old, '');
-  document.getElementById('r_stock').value = safe(p.stock, 20);
+  document.getElementById('r_stock').value = (p.stock??0);
   document.getElementById('r_rating').value = safe(p.rating, 4.5);
   document.getElementById('r_warranty').value = safe(p.warranty, '');
   document.getElementById('r_quick_specs').value = safe(p.quick_specs, '');
@@ -3034,7 +3108,7 @@ async function sendToProductForm(){
     imgs: imgs.length ? imgs : ['📦'],
     price: parseFloat(document.getElementById('r_price').value) || 0,
     old: parseFloat(document.getElementById('r_old').value) || 0,
-    stock: parseInt(document.getElementById('r_stock').value) || 20,
+    stock: (v=>isNaN(v)?0:v)(parseInt(document.getElementById('r_stock').value)),
     rating: parseFloat(document.getElementById('r_rating').value) || 4.5,
     warranty: document.getElementById('r_warranty').value || '১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',
     badge: badgeVal ? badgeVal.value.toUpperCase() : '',
