@@ -900,7 +900,7 @@ body.dark .prod-badge{opacity:.88}
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a class="logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">
+    <a class="logo" href="#" onclick="location.reload();return false">
       <div><div class="logo-mark">Vangcur</div><div class="logo-sub">ভাঙচুর</div></div>
     </a>
     <div class="nav-search">
@@ -4048,24 +4048,43 @@ function handleOrderStatusUpdate(status,ordId){
     sessionStorage.removeItem('vc_pending');
     // Sync localStorage status too
     try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
-    if(document.getElementById('waitOverlay').classList.contains('show')){
-      document.getElementById('pendingState').style.display='none';
-      document.getElementById('confirmedState').style.display='block';
-      // confirmed order number দেখাও
-      const _cn=document.getElementById('confirmedNum');
-      if(_cn){const _wn=document.getElementById('waitNum');if(_wn)_cn.textContent=_wn.textContent;}
-      // ✅ ordId সংরক্ষণ করো যাতে dlInvoice() পরে কাজ করে
-      _confirmedOrdId=ordId;
-      // ✅ বাটনের onclick সরাসরি এই ordId দিয়ে override করো — সবচেয়ে নির্ভরযোগ্য
-      const _dlBtn=document.querySelector('#confirmedState button');
-      if(_dlBtn){ _dlBtn.onclick=function(){ dlInvoiceById(ordId); }; }
-      playConfirmSound();
-    } else {
-      // find order for popup
-      const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
-      const o=orders.find(x=>x.id===ordId);
-      if(o)showBgConfirmPopup(o);
-    }
+    // ✅ Supabase থেকে সরাসরি full order fetch করো (localStorage নয়)
+    (async()=>{
+      let fullOrder=null;
+      try{
+        const {data}=await supabaseClient.from('orders').select('*').eq('id',ordId).single();
+        if(data)fullOrder=data;
+      }catch(e){}
+      // localStorage fallback
+      if(!fullOrder){const _lo=JSON.parse(localStorage.getItem('vc_orders')||'[]');fullOrder=_lo.find(x=>x.id===ordId)||null;}
+
+      if(document.getElementById('waitOverlay').classList.contains('show')){
+        // ✅ waitOverlay বন্ধ করো — bgConfirmPopup style এ দেখাবো
+        document.getElementById('waitOverlay').classList.remove('show');
+        document.body.style.overflow='';
+        // ✅ bgConfirmPopup এর exact same system ব্যবহার করো
+        if(fullOrder){
+          showBgConfirmPopup(fullOrder);
+        } else {
+          // order না পেলে basic popup
+          document.getElementById('bgConfirmNum').textContent=document.getElementById('waitNum').textContent||ordId;
+          bgConfirmOrder={id:ordId,orderNum:document.getElementById('waitNum').textContent||ordId};
+          document.getElementById('bgConfirmPopup').classList.add('show');
+          playConfirmSound();
+          document.body.style.overflow='hidden';
+        }
+      } else {
+        // background এ ছিল — same bgConfirmPopup
+        if(fullOrder)showBgConfirmPopup(fullOrder);
+        else{
+          document.getElementById('bgConfirmNum').textContent=ordId;
+          bgConfirmOrder={id:ordId,orderNum:ordId};
+          document.getElementById('bgConfirmPopup').classList.add('show');
+          playConfirmSound();
+          document.body.style.overflow='hidden';
+        }
+      }
+    })();
     pendingOrdId=null;
   } else if(status==='cancelled'||status==='rejected'){
     clearInterval(_pollInterval);_pollInterval=null;
