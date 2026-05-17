@@ -4048,40 +4048,38 @@ function handleOrderStatusUpdate(status,ordId){
     sessionStorage.removeItem('vc_pending');
     // Sync localStorage status too
     try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
-    // ✅ Supabase থেকে সরাসরি full order fetch করো (localStorage নয়)
+    // ✅ Supabase থেকে full order fetch → map → bgConfirmPopup (waiting & background উভয়ের জন্য)
     (async()=>{
-      let fullOrder=null;
+      let rawOrder = null;
       try{
-        const {data}=await supabaseClient.from('orders').select('*').eq('id',ordId).single();
-        if(data)fullOrder=data;
+        const {data} = await supabaseClient.from('orders').select('*').eq('id', ordId).single();
+        if(data) rawOrder = data;
       }catch(e){}
-      // localStorage fallback
-      if(!fullOrder){const _lo=JSON.parse(localStorage.getItem('vc_orders')||'[]');fullOrder=_lo.find(x=>x.id===ordId)||null;}
 
-      if(document.getElementById('waitOverlay').classList.contains('show')){
-        // ✅ waitOverlay বন্ধ করো — bgConfirmPopup style এ দেখাবো
-        document.getElementById('waitOverlay').classList.remove('show');
-        document.body.style.overflow='';
-        // ✅ bgConfirmPopup এর exact same system ব্যবহার করো
-        if(fullOrder){
-          showBgConfirmPopup(fullOrder);
-        } else {
-          // order না পেলে basic popup
-          document.getElementById('bgConfirmNum').textContent=document.getElementById('waitNum').textContent||ordId;
-          bgConfirmOrder={id:ordId,orderNum:document.getElementById('waitNum').textContent||ordId};
-          document.getElementById('bgConfirmPopup').classList.add('show');
-          playConfirmSound();
-          document.body.style.overflow='hidden';
-        }
+      // waitOverlay খোলা থাকলে বন্ধ করো
+      const waitEl = document.getElementById('waitOverlay');
+      if(waitEl && waitEl.classList.contains('show')){
+        waitEl.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      if(rawOrder){
+        // Supabase row → mapped object → bgConfirmPopup
+        showBgConfirmPopup(rawOrder);
       } else {
-        // background এ ছিল — same bgConfirmPopup
-        if(fullOrder)showBgConfirmPopup(fullOrder);
-        else{
-          document.getElementById('bgConfirmNum').textContent=ordId;
-          bgConfirmOrder={id:ordId,orderNum:ordId};
+        // Supabase fail — localStorage fallback
+        const _lo = JSON.parse(localStorage.getItem('vc_orders') || '[]');
+        const localOrder = _lo.find(x => x.id === ordId);
+        if(localOrder){
+          showBgConfirmPopup(localOrder);
+        } else {
+          // শেষ fallback — orderNum শুধু দেখাও
+          const numText = document.getElementById('waitNum') ? document.getElementById('waitNum').textContent : ordId;
+          bgConfirmOrder = {id: ordId, orderNum: numText, customer:{name:'',phone:'',district:'',address:''}, items:[], total:0, shippingCost:0, shipping:'bd', date: new Date().toISOString()};
+          document.getElementById('bgConfirmNum').textContent = numText;
           document.getElementById('bgConfirmPopup').classList.add('show');
           playConfirmSound();
-          document.body.style.overflow='hidden';
+          document.body.style.overflow = 'hidden';
         }
       }
     })();
@@ -4496,8 +4494,10 @@ function playConfirmSound(){
 }
 
 function showBgConfirmPopup(order){
-  bgConfirmOrder=order;
-  document.getElementById('bgConfirmNum').textContent=order.orderNum;
+  // Supabase raw row হলে map করো, নইলে সরাসরি ব্যবহার করো
+  const o = (order.order_num !== undefined) ? mapSupabaseOrderRow(order) : order;
+  bgConfirmOrder = o;
+  document.getElementById('bgConfirmNum').textContent = o.orderNum || o.id || '';
   document.getElementById('bgConfirmPopup').classList.add('show');
   playConfirmSound();
   document.body.style.overflow='hidden';
@@ -4508,9 +4508,10 @@ function closeBgConfirmPopup(){
   bgConfirmOrder=null;
 }
 function dlInvoiceFromPopup(){
-  if(bgConfirmOrder)genInvoice(bgConfirmOrder);
-  closeBgConfirmPopup();
-  // postOverlay invoice tab এর back button এ দেখাবে
+  if(bgConfirmOrder){
+    genInvoice(bgConfirmOrder);
+    closeBgConfirmPopup();
+  }
 }
 
 // INVOICE
@@ -4546,6 +4547,31 @@ function dlInvoiceById(id){
     else showToast('❌ অর্ডার তথ্য পাওয়া যাচ্ছে না');
   })();
 }
+// ✅ Supabase raw row → genInvoice() compatible object
+function mapSupabaseOrderRow(row){
+  let items=[];
+  try{ items=typeof row.items==='string'?JSON.parse(row.items):(row.items||[]); }catch(e){}
+  return {
+    id: row.id,
+    orderNum: row.order_num || row.orderNum || '',
+    date: row.created_at || row.date || new Date().toISOString(),
+    status: row.status || 'pending',
+    total: row.total || 0,
+    subtotal: row.subtotal || 0,
+    shippingCost: row.shipping_cost || row.shippingCost || 0,
+    shipping: row.shipping || 'bd',
+    advancePaid: row.advance_paid || row.advancePaid || 200,
+    items: items,
+    customer: row.customer || {
+      name: row.customer_name || '',
+      phone: row.customer_phone || '',
+      district: row.customer_district || '',
+      address: row.customer_address || ''
+    },
+    payment: row.payment || { txnId: row.payment_txn || '', last4: row.payment_last4 || '' }
+  };
+}
+
 function genInvoice(o){
   const ds=new Date(o.date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const advancePaid=o.advancePaid||200;
