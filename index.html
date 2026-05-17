@@ -1396,9 +1396,24 @@ body.dark .prod-badge{opacity:.88}
     <div class="acc-header">
       <div class="acc-header-row">
         <div class="acc-av" id="accAv">?</div>
-        <div><div class="acc-name-txt" id="accNameTxt">-</div><div class="acc-email-txt" id="accEmailTxt">-</div></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="acc-name-txt" id="accNameTxt">-</div>
+            <button onclick="openNameEdit()" title="নাম পরিবর্তন" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">✏️ এডিট</button>
+          </div>
+          <div class="acc-email-txt" id="accEmailTxt">-</div>
+        </div>
       </div>
-      <button class="acc-logout-btn" onclick="doLogout()">লগআউট</button>
+      <div id="nameEditForm" style="display:none;margin-top:12px;background:rgba(255,255,255,.1);border-radius:10px;padding:12px;">
+        <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:7px;font-weight:600;">নতুন নাম লিখুন</div>
+        <div style="display:flex;gap:8px;">
+          <input id="nameEditInput" type="text" placeholder="আপনার নাম" style="flex:1;padding:9px 13px;border-radius:8px;border:none;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;color:#1a1a1a;outline:none;">
+          <button onclick="saveNameEdit()" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;">সেভ</button>
+          <button onclick="closeNameEdit()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:9px 11px;font-size:12.5px;cursor:pointer;">✕</button>
+        </div>
+        <div id="nameEditErr" style="color:#FCA5A5;font-size:11.5px;margin-top:5px;min-height:14px;"></div>
+      </div>
+      <button class="acc-logout-btn" onclick="doLogout()" style="margin-top:12px;">লগআউট</button>
     </div>
     <div class="acc-card">
       <div class="acc-card-title">📦 অর্ডার সমূহ</div>
@@ -2480,6 +2495,14 @@ async function doRegister(){
     return;
   }
 
+  // FIX: session null = email confirmation দরকার
+  if(!data.session){
+    document.getElementById('loginModal').classList.remove('show');
+    document.body.style.overflow='';
+    showEmailVerifyPopup(em, nm, ph);
+    return;
+  }
+
   const safeUser = { id: data.user.id, email: data.user.email, name: nm, phone: ph, createdAt: new Date().toISOString() };
   currentUser=safeUser;
   localStorage.setItem('vc_user',JSON.stringify(safeUser));
@@ -2487,13 +2510,102 @@ async function doRegister(){
   const localWish=getWishlist();
   if(localWish.length)saveWishlistToSupabase(localWish);
   else syncWishlistFromSupabase();
-  _closeLoginOrderMode(); // order mode cleanup
+  _closeLoginOrderMode();
   updateNavAuth();showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!');
-  // ✅ preConfirm flow
   if(_pendingOrderAfterLogin){
     _pendingOrderAfterLogin=false;
     setTimeout(()=>confirmOrder(),200);
   }
+}
+
+function showEmailVerifyPopup(email, name, phone){
+  const old=document.getElementById('emailVerifyModal');
+  if(old)old.remove();
+  const modal=document.createElement('div');
+  modal.id='emailVerifyModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(10,10,20,.65);backdrop-filter:blur(8px);z-index:6000;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML=`<div style="background:#fff;border-radius:24px;max-width:390px;width:100%;padding:36px 28px;text-align:center;animation:slideUp .3s ease;box-shadow:0 32px 80px rgba(0,0,0,.18);">
+    <div style="width:68px;height:68px;background:#1a1a1a;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;">🛍️</div>
+    <div style="width:46px;height:46px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;">✅</div>
+    <h2 style="font-size:19px;font-weight:800;color:#1a1a1a;margin-bottom:10px;font-family:'Hind Siliguri','DM Sans',sans-serif;">প্রায় শেষ! মেইল চেক করুন</h2>
+    <p style="font-size:13.5px;color:#555;line-height:1.8;margin-bottom:8px;font-family:'Hind Siliguri','DM Sans',sans-serif;">
+      🎉 Vangcur পরিবারে আপনাকে স্বাগতম!<br><br>
+      <strong style="color:#1a1a1a;">${email}</strong> — এই ইমেইলে একটি কনফার্মেশন লিংক পাঠানো হয়েছে।<br><br>
+      📩 ইমেইলটি খুলুন এবং <strong>"Confirm your mail"</strong> বাটনে ক্লিক করুন।<br><br>
+      কনফার্ম করলেই আপনার অ্যাকাউন্ট তৈরি হয়ে যাবে।
+    </p>
+    <p style="font-size:11.5px;color:#999;margin-bottom:22px;font-family:'Hind Siliguri','DM Sans',sans-serif;">ইমেইল না পেলে Spam ফোল্ডার চেক করুন।</p>
+    <button onclick="document.getElementById('emailVerifyModal').remove();document.body.style.overflow='';switchToLogin();"
+      style="width:100%;background:#1a1a1a;color:#fff;border:none;padding:14px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Hind Siliguri','DM Sans',sans-serif;">
+      লগইন পেজে যান
+    </button>
+  </div>`;
+  document.body.appendChild(modal);
+  document.body.style.overflow='hidden';
+  // Auto login when email confirmed in another tab
+  const {data:{subscription}} = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if(event==='SIGNED_IN' && session){
+      subscription.unsubscribe();
+      const m=document.getElementById('emailVerifyModal');
+      if(m){m.remove();document.body.style.overflow='';}
+      const u=session.user;
+      const safeUser={id:u.id,email:u.email,name:name||u.user_metadata?.name||'Customer',phone:phone||u.user_metadata?.phone||'',createdAt:new Date().toISOString()};
+      currentUser=safeUser;
+      localStorage.setItem('vc_user',JSON.stringify(safeUser));
+      mergeGuestOrdersToUser(safeUser.email,safeUser.id);
+      updateNavAuth();
+      showToast('✅ ইমেইল কনফার্ম হয়েছে! স্বাগতম 🎉');
+    }
+  });
+}
+
+function openNameEdit(){
+  const form=document.getElementById('nameEditForm');
+  const input=document.getElementById('nameEditInput');
+  form.style.display='block';
+  if(currentUser)input.value=currentUser.name||'';
+  input.focus();
+}
+function closeNameEdit(){
+  document.getElementById('nameEditForm').style.display='none';
+  document.getElementById('nameEditErr').textContent='';
+}
+async function saveNameEdit(){
+  const nm=document.getElementById('nameEditInput').value.trim();
+  const errEl=document.getElementById('nameEditErr');
+  if(!nm||nm.length<2){errEl.textContent='অন্তত ২ অক্ষরের নাম দিন';return;}
+  if(!currentUser){errEl.textContent='লগইন করুন';return;}
+  errEl.textContent='';
+  // Supabase auth metadata আপডেট
+  try{
+    const {error}=await supabaseClient.auth.updateUser({data:{name:nm}});
+    if(error)throw error;
+  }catch(e){console.warn('Supabase updateUser:',e);}
+  // Supabase profiles table আপডেট (যদি থাকে)
+  try{
+    await supabaseClient.from('profiles').upsert({id:currentUser.id,name:nm,updated_at:new Date().toISOString()});
+  }catch(e){}
+  // Orders এ customer name আপডেট করো (এই user এর সব pending/confirmed order)
+  try{
+    const {data:userOrders}=await supabaseClient.from('orders').select('id,customer').eq('user_id',currentUser.id);
+    if(userOrders&&userOrders.length){
+      for(const ord of userOrders){
+        const updCustomer={...ord.customer,name:nm};
+        await supabaseClient.from('orders').update({customer:updCustomer}).eq('id',ord.id);
+      }
+    }
+  }catch(e){}
+  // localStorage আপডেট
+  currentUser.name=nm;
+  localStorage.setItem('vc_user',JSON.stringify(currentUser));
+  // UI আপডেট
+  const accNameEl=document.getElementById('accNameTxt');
+  if(accNameEl)accNameEl.textContent=nm;
+  const accAvEl=document.getElementById('accAv');
+  if(accAvEl)accAvEl.textContent=nm.charAt(0).toUpperCase();
+  updateNavAuth();
+  closeNameEdit();
+  showToast('✅ নাম পরিবর্তন হয়েছে');
 }
 
 async function doLogout(){
@@ -4523,11 +4635,63 @@ function genInvoice(o){
   <\/script>
   </body></html>`;
 
-  // শুধু invoice tab খোলো — tab এর ভেতরে download button আছে
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),120000);
+  // ✅ FIX: window.open মোবাইলে block হয় — তাই inline invoice modal দেখাও
+  showInvoiceModal(html, o.orderNum);
+}
+
+// ✅ নতুন: Invoice modal — সব ডিভাইসে কাজ করবে
+function showInvoiceModal(html, orderNum){
+  // পুরনো modal থাকলে সরাও
+  const old=document.getElementById('invoiceModal');
+  if(old)old.remove();
+
+  const modal=document.createElement('div');
+  modal.id='invoiceModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;overflow:hidden;';
+
+  // Top bar
+  const topbar=document.createElement('div');
+  topbar.style.cssText='display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 16px;flex-shrink:0;';
+  topbar.innerHTML=`
+    <button onclick="document.getElementById('invoiceModal').remove();document.getElementById('postOverlay').classList.add('show');"
+      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">
+      ← Back
+    </button>
+    <button id="invDlBtn"
+      style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+      ⬇️ ডাউনলোড
+    </button>`;
+  modal.appendChild(topbar);
+
+  // iframe for invoice content
+  const iframe=document.createElement('iframe');
+  iframe.style.cssText='flex:1;border:none;width:100%;';
+  iframe.setAttribute('sandbox','allow-same-origin allow-scripts');
+  modal.appendChild(iframe);
+
+  document.body.appendChild(modal);
+  document.body.style.overflow='hidden';
+
+  // iframe এ HTML লোড করো
+  const doc=iframe.contentDocument||iframe.contentWindow.document;
+  doc.open();
+  // iframe এর ভেতরে topbar লুকাও (আমাদের বাইরের topbar আছে)
+  const iframeHtml=html.replace('<div class="inv-topbar">','<div class="inv-topbar" style="display:none">');
+  doc.write(iframeHtml);
+  doc.close();
+
+  // ✅ Download button — direct download, কোনো new tab নয়
+  document.getElementById('invDlBtn').onclick=function(){
+    const a=document.createElement('a');
+    const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    a.href=url;
+    a.download='Vangcur_Invoice_'+(orderNum||'').replace('#','')+'.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+  };
 }
 function closePost(){
   document.getElementById('postOverlay').classList.remove('show');
