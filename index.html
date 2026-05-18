@@ -4297,6 +4297,19 @@ async function confirmOrder(){
         const idx=lo.findIndex(x=>x.id===oid);
         if(idx>-1){lo[idx].id=savedId;lo[idx].subtotal=order.subtotal;lo[idx].total=order.total;localStorage.setItem('vc_orders',JSON.stringify(lo));}
       }catch(e2){}
+      // ✅ FIX: Real ID পাওয়ার পরে Realtime channel নতুন ID দিয়ে re-subscribe করো
+      if(_supabaseChannel){
+        supabaseClient.removeChannel(_supabaseChannel);
+        _supabaseChannel=null;
+      }
+      try{
+        _supabaseChannel=supabaseClient
+          .channel('order-status-'+savedId)
+          .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:'id=eq.'+savedId},(payload)=>{
+            if(payload.new&&payload.new.status){handleOrderStatusUpdate(payload.new.status,savedId);}
+          })
+          .subscribe();
+      }catch(e3){console.warn('Realtime re-subscribe failed:',e3);}
     }
   })();
   // Also save to guest orders if not logged in (for later merge)
@@ -4441,8 +4454,10 @@ function startPolling(){
       if(p){const pEl=p.querySelector('p');if(pEl)pEl.textContent='অর্ডার যাচাই সময়সীমা শেষ। WhatsApp এ যোগাযোগ করুন: 01816-365504';}
       return;
     }
-    const status=await checkOrderStatusFromSupabase(ordId);
-    if(status)handleOrderStatusUpdate(status,ordId);
+    // ✅ FIX: সবসময় latest pendingOrdId ব্যবহার করো (RPC থেকে real UUID আসার পরে)
+    const currentOrdId = pendingOrdId || ordId;
+    const status=await checkOrderStatusFromSupabase(currentOrdId);
+    if(status)handleOrderStatusUpdate(status,currentOrdId);
   },5000);
 }
 // S-11: Intercept browser back button when wait overlay is open
