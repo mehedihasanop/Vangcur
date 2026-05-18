@@ -4230,10 +4230,11 @@ async function confirmOrder(){
     status:'pending',ip:'client-ip'};
   const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
   orders.push(order);localStorage.setItem('vc_orders',JSON.stringify(orders));
-  // ✅ Supabase place_order RPC দিয়ে order save করো — server নিজেই price calculate করবে
+  // ✅ Supabase এ order save করো — RPC প্রথমে, fail হলে direct insert
   (async()=>{
+    let savedId = null;
     try{
-      // items থেকে শুধু id ও qty পাঠাও — server custom_products থেকে real price নেবে
+      // Method 1: place_order RPC
       const rpcItems = order.items.map(i=>({id:i.id, qty:i.qty}));
       const {data:rpcRes, error:rpcErr} = await supabaseClient.rpc('place_order',{
         p_order_num: order.orderNum,
@@ -4249,22 +4250,54 @@ async function confirmOrder(){
         p_payment_txn: order.payment.txnId||'',
         p_payment_last4: order.payment.last4||''
       });
-      if(rpcErr) throw rpcErr;
-      if(rpcRes && rpcRes.success){
-        // Server থেকে verified id, subtotal, total দিয়ে local order আপডেট করো
-        order.id = rpcRes.id;
+      if(!rpcErr && rpcRes && rpcRes.success){
+        savedId = rpcRes.id;
         order.subtotal = rpcRes.subtotal;
         order.total = rpcRes.total;
-        pendingOrdId = rpcRes.id;
-        sessionStorage.setItem('vc_pending', rpcRes.id);
-        // localStorage এও আপডেট
-        try{
-          const lo=JSON.parse(localStorage.getItem('vc_orders')||'[]');
-          const idx=lo.findIndex(x=>x.id===oid);
-          if(idx>-1){lo[idx].id=rpcRes.id;lo[idx].subtotal=rpcRes.subtotal;lo[idx].total=rpcRes.total;localStorage.setItem('vc_orders',JSON.stringify(lo));}
-        }catch(e2){}
+      } else {
+        throw rpcErr || new Error('RPC no success');
       }
-    }catch(e){console.warn('Supabase place_order RPC failed (localStorage fallback active):',e);}
+    }catch(e){
+      console.warn('place_order RPC failed, trying direct insert:', e);
+      // ✅ Method 2: Direct insert fallback — RPC fail হলেও Supabase এ order যাবে
+      try{
+        const insertPayload = {
+          order_num: order.orderNum,
+          created_at: order.date,
+          customer_name: order.customer.name,
+          customer_phone: order.customer.phone,
+          customer_district: order.customer.district,
+          customer_address: order.customer.address,
+          customer_email: order.customer.email||'',
+          items: JSON.stringify(order.items),
+          shipping: order.shipping,
+          shipping_cost: order.shippingCost,
+          subtotal: order.subtotal,
+          total: order.total,
+          payment_txn: order.payment.txnId||'',
+          payment_last4: order.payment.last4||'',
+          status: 'pending'
+        };
+        if(order.userId) insertPayload.user_id = order.userId;
+        const {data:insData, error:insErr} = await supabaseClient.from('orders').insert([insertPayload]).select('id').single();
+        if(!insErr && insData && insData.id){
+          savedId = insData.id;
+        } else {
+          console.warn('Direct insert also failed:', insErr);
+        }
+      }catch(e2){console.warn('Direct insert exception:', e2);}
+    }
+    // ✅ Supabase থেকে real ID পাওয়া গেলে সব জায়গায় আপডেট করো
+    if(savedId){
+      order.id = savedId;
+      pendingOrdId = savedId;
+      sessionStorage.setItem('vc_pending', savedId);
+      try{
+        const lo=JSON.parse(localStorage.getItem('vc_orders')||'[]');
+        const idx=lo.findIndex(x=>x.id===oid);
+        if(idx>-1){lo[idx].id=savedId;lo[idx].subtotal=order.subtotal;lo[idx].total=order.total;localStorage.setItem('vc_orders',JSON.stringify(lo));}
+      }catch(e2){}
+    }
   })();
   // Also save to guest orders if not logged in (for later merge)
   if(!currentUser){
@@ -5606,19 +5639,28 @@ document.addEventListener('DOMContentLoaded',function(){
     const pendingConfirm=localStorage.getItem('vc_pending_confirm');
     if(pendingConfirm){
       const o=JSON.parse(pendingConfirm);
-      // order টা confirmed কিনা Supabase থেকে verify করো
       (async()=>{
-        let stillPending=true;
         try{
           const {data}=await supabaseClient.from('orders').select('status').eq('id',o.id).single();
-          // শুধু confirmed/shipped/delivered হলে দেখাও
-          if(data&&['confirmed','shipped','delivered'].includes(data.status))stillPending=true;
-          else if(data&&['pending','cancelled','rejected'].includes(data.status))stillPending=false;
-        }catch(e){}
-        if(stillPending){
+          if(data){
+            if(['confirmed','shipped','delivered'].includes(data.status)){
+              // ✅ Admin confirm করেছে — popup দেখাও
+              setTimeout(()=>showBgConfirmPopup(o),1200);
+            } else if(['cancelled','rejected'].includes(data.status)){
+              // ❌ Cancelled/rejected — popup দেখানো দরকার নেই, clear করো
+              localStorage.removeItem('vc_pending_confirm');
+            } else {
+              // ⏳ Still pending — popup দেখাও যাতে কাস্টমার wait করে
+              // (admin এখনো confirm করেনি, কিন্তু কাস্টমার ফিরে এসেছে)
+              setTimeout(()=>showBgConfirmPopup(o),1200);
+            }
+          } else {
+            // Supabase এ order পাওয়া গেল না — তারপরও popup দেখাও (offline বা নতুন order)
+            setTimeout(()=>showBgConfirmPopup(o),1200);
+          }
+        }catch(e){
+          // Supabase error — popup দেখাও (network সমস্যা হলে user কে আটকানো ঠিক না)
           setTimeout(()=>showBgConfirmPopup(o),1200);
-        } else {
-          localStorage.removeItem('vc_pending_confirm');
         }
       })();
     }
