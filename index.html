@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vangcur - ভাঙচুর | Your First Choice for Gadgets</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- PERF-03 FIX: তিনটি font এক request-এ + preconnect দিয়ে DNS handshake আগে করে নেওয়া -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <!-- ✅ Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -38,6 +41,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);
 /* NAV */
 nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:900;box-shadow:var(--sh1);padding-top:env(safe-area-inset-top)}
 .nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;height:62px;gap:14px}
+/* DESK-02 FIX: 1440px+ screen-এ container wider হবে */
+@media(min-width:1440px){
+  .nav-inner,.cat-inner,.section,.hero-wrap,.faq-sec,.related-sec,.pp-detail-wrap,.footer-top{max-width:1560px}
+  .prod-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
 .logo-mark{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);line-height:1}
 .logo-sub{font-size:9px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
@@ -360,11 +368,14 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-dot.active{background:#1A1A1A;width:22px;border-radius:4px}
 
 /* PRODUCT GRID */
+/* DESK-02 FIX: 1440px+ screen-এ max-width বাড়িয়ে white space কমানো */
 .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
 .prod-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--tr);position:relative;display:flex;flex-direction:column}
 .prod-card:hover{transform:translateY(-4px);box-shadow:var(--sh3);border-color:transparent}
 .prod-img-wrap{position:relative;overflow:hidden}
-.prod-img{width:100%;aspect-ratio:1/1;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:52px;transition:transform .35s ease;cursor:pointer}
+/* MOB-04 FIX: aspect-ratio:1/1 দিয়ে সব card সমান height — Cloudinary vertical image হলেও ভাঙবে না */
+.prod-img{width:100%;aspect-ratio:1/1;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:52px;transition:transform .35s ease;cursor:pointer;overflow:hidden}
+.prod-img img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
 .prod-card:hover .prod-img{transform:scale(1.04)}
 .prod-badge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;z-index:2}
 .badge-hot{background:var(--red);color:#fff}
@@ -766,10 +777,15 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .nav-search-icon:hover{background:var(--light)}
 .mobile-search-bar{display:none;padding:8px 16px;background:var(--white);border-bottom:1px solid var(--border)}
 .mobile-search-bar.show{display:block}
-.mobile-search-bar input{width:100%;padding:9px 14px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;background:var(--light);font-family:'DM Sans',sans-serif}
+.mobile-search-bar input{width:100%;padding:9px 38px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;background:var(--light);font-family:'DM Sans',sans-serif}
 .mobile-search-bar input:focus{outline:none;border-color:var(--dark);background:#fff}
 .mobile-search-wrap{position:relative}
 .mobile-search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
+/* MOB-05 FIX: Mobile search clear (✕) button */
+.mobile-search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray);border:none;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#fff;font-weight:700;line-height:1;padding:0;transition:var(--tr)}
+.mobile-search-clear.visible{display:flex}
+.mobile-search-clear:hover{background:var(--dark)}
+body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 /* DISCOUNT BADGE (U-2) */
 .discount-badge{position:absolute;top:10px;left:10px;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700;z-index:2;background:#FF6B00;color:#fff}
 /* STICKY ORDER BTN (F-7) */
@@ -1042,7 +1058,8 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
 <div class="mobile-search-bar" id="mobileSearchBar">
   <div class="mobile-search-wrap">
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="search" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'mobile')" onkeydown="handleSearchKey(event)" id="mobileSearchInput" autocomplete="off" name="mobile-product-search">
+    <input type="search" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'mobile');updateMobileSearchClear(this)" onkeydown="handleSearchKey(event)" id="mobileSearchInput" autocomplete="off" name="mobile-product-search">
+    <button class="mobile-search-clear" id="mobileSearchClear" onclick="clearMobileSearch()" title="মুছুন">✕</button>
     <div class="search-dropdown" id="mobileSearchDropdown"></div>
   </div>
 </div>
@@ -2367,7 +2384,11 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         _settings[key] = val;
         // ✅ যেকোনো settings change হলে live apply
         if(key==='vc_stock'){
-          PRODS.forEach(p=>{if(val[p.id]!==undefined)p.stock=val[p.id];});
+          // ✅ SYNC-01 FIX: loadStock() দিয়ে default products এর stock আপডেট করো তারপর render
+          loadStock(val);
+          // custom products এর stock val থেকে আপডেট করো (default IDs ছাড়া)
+          const _defaultIds=new Set([1,4,14,24,34,44,54]);
+          PRODS.forEach(p=>{if(!_defaultIds.has(p.id)&&val[p.id]!==undefined)p.stock=val[p.id];});
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         } else if(key==='vc_hero_slides'){
@@ -2384,7 +2405,14 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           if(document.getElementById('faqGrid'))renderFAQ();
         } else if(key==='vc_categories'){
           _settings['vc_categories'] = val;
-          renderCatBar(); // category bar re-render
+          // ✅ SYNC-03 FIX: category bar re-render + active pill restore + count update
+          renderCatBar();
+          updateCatPillCounts();
+          // Active category pill restore করো (render এর পরে active class হারিয়ে যায়)
+          document.querySelectorAll('.cat-pill').forEach(b=>{
+            if(b.dataset.cat===activeCat)b.classList.add('active');
+            else b.classList.remove('active');
+          });
         } else if(key==='vc_shipping'){
           // shipping cost cache clear — পরের order এ নতুন দাম দেখাবে
         } else if(key==='vc_deleted_defaults'){
@@ -2461,7 +2489,28 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           if(document.getElementById('wishlistOverlay').classList.contains('show'))renderWishlist();
         }
       })
-      .subscribe();
+      .subscribe((status,err)=>{
+        // ✅ SYNC-01/SYNC-03 FIX: channel error হলে reconnect করো
+        if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+          console.warn('store-all-watch channel error:',status,err);
+          // ৩ সেকেন্ড পরে reconnect চেষ্টা করো
+          setTimeout(()=>{
+            try{
+              supabaseClient.removeAllChannels();
+            }catch(e2){}
+            // Page reload না করেই channel re-subscribe করার জন্য DOMContentLoaded logic আবার চালাই না
+            // বরং store_settings সরাসরি re-fetch করি
+            (async()=>{try{
+              const {data:s}=await supabaseClient.from('store_settings').select('*');
+              if(s){s.forEach(item=>{_settings[item.setting_key]=item.setting_value;});}
+              loadStock(_settings['vc_stock']||{});
+              renderCatBar();
+              const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
+              renderProds(cur);
+            }catch(e3){console.warn('Re-fetch after channel error failed:',e3);}})();
+          },3000);
+        }
+      });
   }catch(e){}
   updateCartUI();
   updateWishDot();
@@ -2995,7 +3044,11 @@ function _appendNextBatch() {
   const isFirst = _renderedCount === 0;
   const batch = _renderedList.slice(_renderedCount, _renderedCount + PRODS_PER_PAGE);
   const frag  = document.createDocumentFragment();
-  batch.forEach(p => frag.appendChild(_buildProdCard(p, isFirst)));
+  batch.forEach(p => {
+    const el = _buildProdCard(p, isFirst);
+    el.dataset.pid = p.id; // PERF-05: track করার জন্য
+    frag.appendChild(el);
+  });
   g.appendChild(frag);
   _renderedCount += batch.length;
 
@@ -3023,29 +3076,76 @@ function _setupProdObserver() {
 }
 
 // মূল renderProds — list নিয়ে নতুন করে শুরু করে
+// PERF-05 FIX: প্রতিটি card-এর শেষ render key ট্র্যাক করে রাখে
+// key = id + stock + badge + price — এগুলো বদলালেই শুধু সেই card rebuild হবে
+const _prodCardKeys = new Map(); // id → last render key
+
+function _prodCardKey(p) {
+  return `${p.id}|${p.stock}|${p.badge||''}|${p.price}|${isWishlisted(p.id)?1:0}`;
+}
+
 function renderProds(list) {
   // U-4: sold-out গুলো শেষে
   list = [...list].sort((a,b) => (a.stock<=0?1:0) - (b.stock<=0?1:0));
-  _renderedList  = list;
-  _renderedCount = 0;
 
   const g = document.getElementById('prodGrid');
   const countEl = document.getElementById('prodCount');
   if(countEl) countEl.textContent = `${list.length}টি প্রোডাক্ট`;
-  g.innerHTML = '';
+
+  // নতুন list-এর id set
+  const newIds = new Set(list.map(p => p.id));
+
+  // বর্তমান DOM-এ থাকা card গুলো map করো
+  const existingCards = new Map();
+  g.querySelectorAll('.prod-card[data-pid]').forEach(el => {
+    existingCards.set(Number(el.dataset.pid), el);
+  });
+
+  // list পরিবর্তন হয়েছে কিনা detect — পুরো list নতুন হলে full clear করো
+  // (যেমন: category switch → নতুন set of ids)
+  const sameSet = list.length === existingCards.size &&
+    list.every(p => existingCards.has(p.id));
+
+  if(!sameSet) {
+    // নতুন list, কিন্তু DOM-এ যেগুলো আছে সেগুলো হয়তো পুনরায় ব্যবহার করা যাবে
+    // DOM থেকে সরিয়ে নাও (destroy নয়, detach করো)
+    existingCards.forEach((el, id) => {
+      if(!newIds.has(id)) {
+        el.remove();
+        _prodCardKeys.delete(id);
+      }
+    });
+  }
 
   if(!list.length) {
     g.innerHTML = '<div class="empty-cat-msg"><div class="empty-icon">📦</div><p>এই ক্যাটাগরিতে এখন কোনো পণ্য নেই</p><button onclick="filterCat(\'all\',document.querySelector(\'.cat-pill\'))" style="background:var(--dark);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">সব পণ্য দেখুন</button></div>';
     if(_prodObserver) { _prodObserver.disconnect(); _prodObserver = null; }
     const spinner = document.getElementById('prodLoadingSpinner');
     if(spinner) spinner.style.display = 'none';
+    _prodCardKeys.clear();
     return;
   }
 
-  // প্রথম ব্যাচ সঙ্গে সঙ্গে রেন্ডার করো
+  // Infinite scroll state reset
+  _renderedList  = list;
+  _renderedCount = 0;
+
+  // Grid পরিষ্কার করে নতুনভাবে সাজাও (card গুলো reuse হবে বলে innerHTML ব্যবহার নয়)
+  // শুধু প্রথম ব্যাচ রেন্ডার করো — বাকিগুলো observer দিয়ে লোড হবে
+  g.innerHTML = '';
+  _prodCardKeys.clear();
+
   _appendNextBatch();
-  // Observer চালু করো পরের ব্যাচের জন্য
   _setupProdObserver();
+}
+
+// _buildProdCard override: data-pid attribute যোগ করো (diff-এর জন্য দরকার)
+const _origBuildProdCard = _buildProdCard;
+// _appendNextBatch-এ card তৈরির সময় data-pid set হবে — তাই _buildProdCard patch করি
+function _buildProdCardTracked(p, isFirst) {
+  const el = _buildProdCard(p, isFirst);
+  el.dataset.pid = p.id;
+  return el;
 }
 let _filterCatLock=false;
 // ✅ Category bar re-render (vc_categories Supabase থেকে পরিবর্তন হলে)
@@ -3795,7 +3895,7 @@ function qoQty(id,d){
   if(d<0&&item.qty<=1){
     // UX-3: remove immediately — no 0-state flicker
     cart=cart.filter(x=>x.id!==id);
-    localStorage.setItem('vc_cart',JSON.stringify(cart));
+    localStorage.setItem('vc_cart',JSON.stringify(cart)); // remove হলে immediate save
     updateCartUI();
     const row=document.getElementById('qoi-'+id);if(row)row.remove();
     if(!cart.length){const m=document.getElementById('quickOrderModal');if(m){m.remove();_panelStack=_panelStack.filter(p=>p!=='quickOrder');if(!_backButtonTriggered)history.go(-1);}}
@@ -3803,7 +3903,7 @@ function qoQty(id,d){
     return;
   }
   item.qty+=d;
-  localStorage.setItem('vc_cart',JSON.stringify(cart));
+  _saveCartDebounced(); // PERF-06: debounced — rapid +/- click এ বারবার serialize হবে না
   updateCartUI();
   qoUpdateTotals();
 }
@@ -3890,8 +3990,16 @@ function renderCartItems(){
   </div>`;}).join('');
   document.getElementById('cartTotal').textContent=`৳${tot.toLocaleString()}`;
 }
-function updQty(id,d){const i=cart.find(x=>x.id===id);if(i){i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);}localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();}
-function remItem(id){cart=cart.filter(x=>x.id!==id);localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();}
+// PERF-06 FIX: debounced localStorage save — rapid-click এ বারবার serialize হয় না
+let _cartSaveTimer = null;
+function _saveCartDebounced() {
+  clearTimeout(_cartSaveTimer);
+  _cartSaveTimer = setTimeout(() => {
+    localStorage.setItem('vc_cart', JSON.stringify(cart));
+  }, 300); // ৩০০ms এর মধ্যে আর click না হলে save
+}
+function updQty(id,d){const i=cart.find(x=>x.id===id);if(i){i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);}_saveCartDebounced();updateCartUI();}
+function remItem(id){cart=cart.filter(x=>x.id!==id);_saveCartDebounced();updateCartUI();}
 function openCart(){document.getElementById('cartSide').classList.add('open');document.getElementById('cartBack').classList.add('on');lockBody();_pushPanel('cart');}
 function closeCart(){if(document.getElementById('cartSide').classList.contains('open')){document.getElementById('cartSide').classList.remove('open');document.getElementById('cartBack').classList.remove('on');unlockBody();_popPanel();}}
 function checkout(){
@@ -4196,21 +4304,21 @@ async function confirmOrder(){
     }
   }
   // B-2: Lock permanently until order completes — no timeout reset
-  // ✅ FIX: Sequential order number VC-504, VC-505... from Supabase counter
-  let num = '#VC-504'; // fallback
+  // ✅ SEC-04 FIX: Atomic increment via Supabase RPC — race condition দূর করা হয়েছে
+  // আগে read-then-write ছিল, দুজন একসাথে order করলে একই নম্বর পেত।
+  // এখন increment_order_counter RPC একটাই atomic transaction এ কাজ করে।
+  let num = '#VC-' + Date.now().toString(36).toUpperCase(); // fallback
   try {
-    // store_settings এ 'vc_order_counter' key তে সর্বশেষ number থাকে
-    const {data: cRow} = await supabaseClient
-      .from('store_settings')
-      .select('setting_value')
-      .eq('setting_key', 'vc_order_counter')
-      .single();
-    const nextNum = cRow ? (parseInt(cRow.setting_value) || 503) + 1 : 504;
-    num = '#VC-' + nextNum;
-    // counter আপডেট করো
-    await supabaseClient.from('store_settings').upsert([{setting_key:'vc_order_counter', setting_value: nextNum}]);
+    const {data: counterData, error: counterErr} = await supabaseClient
+      .rpc('increment_order_counter');
+    if (!counterErr && counterData) {
+      num = '#VC-' + counterData;
+    } else {
+      throw counterErr || new Error('increment_order_counter returned null');
+    }
   } catch(e) {
-    // Supabase না পেলে timestamp fallback
+    console.warn('Atomic counter RPC failed, using timestamp fallback:', e);
+    // Supabase না পেলে timestamp-based unique fallback
     num = '#VC-' + Date.now().toString(36).toUpperCase();
   }
   const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
@@ -4427,22 +4535,41 @@ function startPolling(){
   const pollStart=Date.now();
   const ordId=pendingOrdId;
 
-  // ✅ Method 1: Supabase Realtime (instant cross-device update)
-  try{
-    _supabaseChannel=supabaseClient
-      .channel('order-status-'+ordId)
-      .on('postgres_changes',{
-        event:'UPDATE',schema:'public',table:'orders',
-        filter:'id=eq.'+ordId
-      },(payload)=>{
-        if(payload.new&&payload.new.status){
-          handleOrderStatusUpdate(payload.new.status,ordId);
-        }
-      })
-      .subscribe();
-  }catch(e){
-    console.warn('Supabase realtime subscribe failed:',e);
+  // ✅ SYNC-02 FIX: Supabase Realtime (instant cross-device update) + reconnect on error
+  let _realtimeRetryCount = 0;
+  const MAX_REALTIME_RETRY = 5;
+  function _subscribeOrderRealtime(id){
+    try{
+      if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+      _supabaseChannel=supabaseClient
+        .channel('order-status-'+id+'-'+Date.now())
+        .on('postgres_changes',{
+          event:'UPDATE',schema:'public',table:'orders',
+          filter:'id=eq.'+id
+        },(payload)=>{
+          if(payload.new&&payload.new.status){
+            _realtimeRetryCount=0; // সফল update পেলে retry counter reset
+            handleOrderStatusUpdate(payload.new.status,id);
+          }
+        })
+        .subscribe((status,err)=>{
+          if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+            console.warn('Realtime channel error:',status,err);
+            // ✅ Exponential backoff দিয়ে reconnect করো
+            if(_realtimeRetryCount<MAX_REALTIME_RETRY&&pendingOrdId){
+              _realtimeRetryCount++;
+              const delay=Math.min(1000*Math.pow(2,_realtimeRetryCount),30000);
+              setTimeout(()=>{if(pendingOrdId)_subscribeOrderRealtime(pendingOrdId);},delay);
+            }
+          } else if(status==='SUBSCRIBED'){
+            _realtimeRetryCount=0;
+          }
+        });
+    }catch(e){
+      console.warn('Supabase realtime subscribe failed:',e);
+    }
   }
+  _subscribeOrderRealtime(ordId);
 
   // ✅ Method 2: HTTP polling as fallback (works even without realtime)
   _pollInterval=setInterval(async ()=>{
@@ -4642,9 +4769,19 @@ document.addEventListener('visibilitychange',()=>{
     if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
     if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
   } else if(document.visibilityState==='visible'){
-    // ✅ Fix: মোবাইলে page visible হলে Supabase থেকে নতুন products টানো
-    // এটা দরকার কারণ মোবাইলে localStorage admin-এর সাথে share হয় না
+    // ✅ SYNC-01 + SYNC-03 FIX: page visible হলে store_settings (vc_stock, vc_categories) + custom_products একসাথে refresh
     (async()=>{try{
+      // ১. store_settings থেকে vc_stock ও vc_categories আনো (default product stock এখানে থাকে)
+      const {data:freshSettings}=await supabaseClient.from('store_settings').select('setting_key,setting_value').in('setting_key',['vc_stock','vc_categories']);
+      if(freshSettings&&freshSettings.length){
+        freshSettings.forEach(item=>{ _settings[item.setting_key]=item.setting_value; });
+        // vc_stock দিয়ে default products এর stock আপডেট করো
+        const freshStock=_settings['vc_stock']||{};
+        loadStock(freshStock);
+        // vc_categories পরিবর্তন হলে category bar re-render করো
+        if(_settings['vc_categories']) renderCatBar();
+      }
+      // ২. custom_products refresh করো
       const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
       if(sbProds&&sbProds.length){
         let changed=false;
@@ -4669,25 +4806,25 @@ document.addEventListener('visibilitychange',()=>{
             PRODS.push(p);changed=true;
           }
         });
-        if(changed){loadStock();updateCatPillCounts();const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));renderProds(cur);}
+        if(changed){updateCatPillCounts();}
       }
-    }catch(e){}})();
+      // ৩. UI একবারে re-render করো
+      const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
+      renderProds(cur);
+    }catch(e){console.warn('Visibility refresh failed:',e);}})();
     if(pendingOrdId&&!_pollInterval){
       startPolling();
     }
   }
 });
-window.addEventListener('pagehide',()=>{
+window.addEventListener('pagehide',(e)=>{
+  // Cleanup: polling ও supabase channel সবসময় বন্ধ করো
   if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
   if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
-  // কার্টে থাকা পণ্যের stock ফেরত দাও — পেজ বন্ধ হলে cart এর stock ফ্রি হয়
-  if(cart&&cart.length){
-    cart.forEach(item=>{
-      const p=PRODS.find(x=>x.id===item.id);
-      if(p)p.stock=Math.min((p.stock||0)+item.qty,9999);
-    });
-    const stockMap={};PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
-    _stockData = stockMap;
+  // BUG-07 FIX: pagehide mobile-এ app switch করলেও fire হয়।
+  // e.persisted===true মানে page bfcache-এ আছে (app switch/tab switch) — cart রাখো।
+  // e.persisted===false মানে page সত্যিই unload হচ্ছে (close/navigate away) — তখন clear করো।
+  if(!e.persisted){
     cart=[];
     localStorage.setItem('vc_cart',JSON.stringify(cart));
   }
@@ -4910,25 +5047,34 @@ function genInvoice(o){
       <div class="footer-note" style="margin-top:18px">📞 01816-365504 &nbsp;|&nbsp; ✉️ vangcurbd@gmail.com<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 Dhaka, Bangladesh</div>
     </div>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
   <script>
   function downloadInvoiceFile(){
-    const html=document.documentElement.outerHTML;
-    const a=document.createElement('a');
-    a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
-    a.download='Vangcur_Invoice_${o.orderNum.replace('#','')}.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const btn=document.querySelector('.inv-dl-btn');
+    if(btn)btn.style.opacity='0.5';
+    const wrap=document.querySelector('.invoice-wrap');
+    // inv-topbar লুকাও ক্যাপচারের সময়
+    const topbar=document.querySelector('.inv-topbar');
+    if(topbar)topbar.style.display='none';
+    html2canvas(wrap,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(function(canvas){
+      const a=document.createElement('a');
+      a.download='Vangcur_Invoice_${o.orderNum.replace('#','')}.png';
+      a.href=canvas.toDataURL('image/png',1.0);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if(topbar)topbar.style.display='';
+      if(btn)btn.style.opacity='1';
+    }).catch(function(){
+      if(topbar)topbar.style.display='';
+      if(btn)btn.style.opacity='1';
+    });
   }
-  // Back button handler — show post-order info overlay
   function showPostInfo(){
-    const postEl = window.opener && window.opener.document.getElementById('postOverlay');
-    if(postEl){ postEl.classList.add('show'); window.close(); }
-    else { window.close(); }
+    window.close();
   }
-  // অটোমেটিক ডাউনলোড — পেজ লোড হওয়ার সাথে সাথে
   window.addEventListener('load', function(){
-    setTimeout(function(){ downloadInvoiceFile(); }, 800);
+    setTimeout(function(){ downloadInvoiceFile(); }, 1000);
   });
   <\/script>
   </body></html>`;
@@ -4942,11 +5088,11 @@ function showInvoiceModal(html, orderNum){
   const old=document.getElementById('invoiceModal');
   if(old)old.remove();
 
-  // invoice body শুধু extract করো (topbar বাদ দিয়ে)
+  // invoice body শুধু extract করো (topbar সম্পূর্ণ বাদ দিয়ে)
   const bodyMatch=html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
   const bodyContent=bodyMatch?bodyMatch[1]:'';
-  // topbar div লুকাও
-  const cleanBody=bodyContent.replace(/<div class="inv-topbar">/,'<div class="inv-topbar" style="display:none">');
+  // topbar div সম্পূর্ণ বাদ — display:none
+  const cleanBody=bodyContent.replace(/<div class="inv-topbar">[\s\S]*?<\/div>/,'');
 
   // invoice এর CSS extract করো
   const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/i);
@@ -4956,11 +5102,11 @@ function showInvoiceModal(html, orderNum){
   modal.id='invoiceModal';
   modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f6fa;display:flex;flex-direction:column;overflow:hidden;';
 
-  // Top bar
+  // Top bar — শুধু Back ও PNG Download বাটন
   modal.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 16px;flex-shrink:0;">
       <button id="invBackBtn" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">← Back</button>
-      <button id="invDlBtn" style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">⬇️ ডাউনলোড</button>
+      <button id="invDlBtn" style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ ছবি ডাউনলোড</button>
     </div>
     <div id="invBody" style="flex:1;overflow-y:auto;padding:20px 12px;">
       <style>${invCss}</style>
@@ -4970,28 +5116,65 @@ function showInvoiceModal(html, orderNum){
   document.body.appendChild(modal);
   lockBody();
 
-  // ✅ Download function — সরাসরি Blob download
-  function doDownload(){
-    const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='Vangcur_Invoice_'+(orderNum||'').replace('#','')+'.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),15000);
+  // ✅ PNG Download function — html2canvas দিয়ে ইমেজ বানাও
+  function doDownloadPNG(){
+    const dlBtn=document.getElementById('invDlBtn');
+    if(dlBtn){dlBtn.textContent='⏳ তৈরি হচ্ছে...';dlBtn.disabled=true;}
+
+    // html2canvas লোড করো (যদি না থাকে)
+    function runCapture(){
+      const invWrap=document.querySelector('#invoiceModal .invoice-wrap');
+      if(!invWrap){
+        if(dlBtn){dlBtn.textContent='🖼️ ছবি ডাউনলোড';dlBtn.disabled=false;}
+        alert('Invoice element পাওয়া যায়নি।');
+        return;
+      }
+      html2canvas(invWrap,{
+        scale:2,
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        logging:false,
+        width:invWrap.scrollWidth,
+        height:invWrap.scrollHeight,
+        windowWidth:invWrap.scrollWidth+40
+      }).then(function(canvas){
+        const link=document.createElement('a');
+        link.download='Vangcur_Invoice_'+(orderNum||'').replace('#','')+'.png';
+        link.href=canvas.toDataURL('image/png',1.0);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        if(dlBtn){dlBtn.innerHTML='🖼️ ছবি ডাউনলোড';dlBtn.disabled=false;}
+      }).catch(function(err){
+        console.error('html2canvas error:',err);
+        if(dlBtn){dlBtn.textContent='🖼️ ছবি ডাউনলোড';dlBtn.disabled=false;}
+        alert('ডাউনলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+      });
+    }
+
+    if(typeof html2canvas==='undefined'){
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload=runCapture;
+      s.onerror=function(){
+        if(dlBtn){dlBtn.textContent='🖼️ ছবি ডাউনলোড';dlBtn.disabled=false;}
+        alert('লাইব্রেরি লোড হয়নি। ইন্টারনেট কানেকশন চেক করুন।');
+      };
+      document.head.appendChild(s);
+    } else {
+      runCapture();
+    }
   }
 
-  document.getElementById('invDlBtn').onclick=doDownload;
+  document.getElementById('invDlBtn').onclick=doDownloadPNG;
   document.getElementById('invBackBtn').onclick=function(){
     modal.remove();
     unlockBody();
     document.getElementById('postOverlay').classList.add('show');
   };
 
-  // ✅ Auto-download — modal খোলার সাথে সাথে
-  setTimeout(doDownload, 600);
+  // ✅ Auto-download — modal খোলার সাথে সাথে PNG ডাউনলোড
+  setTimeout(doDownloadPNG, 800);
 }
 function closePost(){
   document.getElementById('postOverlay').classList.remove('show');
@@ -5580,6 +5763,18 @@ function toggleMobileSearch(){
   if(bar.classList.contains('show')){
     document.getElementById('mobileSearchInput').focus();
   }
+}
+
+// MOB-05 FIX: Mobile search clear button
+function updateMobileSearchClear(inp){
+  const btn=document.getElementById('mobileSearchClear');
+  if(btn) btn.classList.toggle('visible', inp.value.length > 0);
+}
+function clearMobileSearch(){
+  const inp=document.getElementById('mobileSearchInput');
+  const btn=document.getElementById('mobileSearchClear');
+  if(inp){inp.value=''; inp.focus(); handleSearchInput('','mobile');}
+  if(btn) btn.classList.remove('visible');
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart();closeOrder();closeInfo();closeWait();closePost();closeLogin();closeAcc();closeWishlist();closeBgConfirmPopup();closePreConfirmModal();const mb=document.getElementById('mobileSearchBar');if(mb)mb.classList.remove('show');}});

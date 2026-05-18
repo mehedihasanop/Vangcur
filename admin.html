@@ -44,6 +44,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1A1A1A;min-hei
 .l-hint{color:var(--gray);font-size:11px;margin-top:10px}
 
 /* SIDEBAR */
+/* DESK-01 FIX: Responsive sidebar width — wide screen-এ ছোট না দেখানোর জন্য */
 .sidebar{width:220px;background:var(--side);min-height:100vh;padding:20px 12px;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;display:none;z-index:100}
 .sidebar.show{display:block}
 .sb-logo{color:#fff;font-size:18px;font-weight:700;margin-bottom:4px;padding:0 8px;font-family:'Playfair Display',serif}
@@ -247,6 +248,13 @@ tr:hover td{background:#FAFAFA}
   .sidebar{display:block !important;left:0}
   .main{margin-left:220px}
 }
+/* DESK-01 FIX: 1440px+ wide screen-এ sidebar wider, main area সঠিক margin নেবে */
+@media(min-width:1440px){
+  .sidebar{width:260px;padding:20px 16px}
+  .main{margin-left:260px}
+  .sb-logo{font-size:20px}
+  .nav-item{font-size:13px;padding:10px 13px}
+}
 @media(max-width:480px){
   .stats{grid-template-columns:1fr}
   .main{padding:10px}
@@ -278,7 +286,7 @@ tr:hover td{background:#FAFAFA}
     <input class="l-inp" type="password" id="lPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="l-btn" onclick="doLogin()">লগইন করুন</button>
     <div class="l-err" id="lErr"></div>
-    <div class="l-hint">Default: admin / vangcur2025</div>
+
   </div>
 </div>
 
@@ -1390,26 +1398,39 @@ let adminFAQs=_adminSettings['vc_faqs']||[
 let delSlideIdx=null;
 
 // ======= LOGIN =======
+// ✅ Admin panel unlock — শুধু verified Supabase session থাকলেই
+function unlockAdminPanel(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('mainArea').classList.add('show');
+  if(window.innerWidth<=768){document.getElementById('mobTopbar').style.display='flex';}
+}
+
 async function doLogin(){
   const u=document.getElementById('lUser').value.trim();
   const p=document.getElementById('lPass').value;
-  
-  // 'admin' লিখলে সেটাকে ইমেইলে কনভার্ট করে নিবে
-  const email = u === 'admin' ? 'admin@vangcur.com' : u;
+  const errEl=document.getElementById('lErr');
+  const btn=document.querySelector('.l-btn');
+  if(!u||!p){errEl.textContent='Username ও Password দিন';return;}
+
+  // 'admin' লিখলে ইমেইলে convert
+  const email = u==='admin' ? 'admin@vangcur.com' : u;
+
+  if(btn){btn.textContent='যাচাই হচ্ছে...';btn.disabled=true;}
+  errEl.textContent='';
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: email,
     password: p
   });
 
+  if(btn){btn.textContent='লগইন করুন';btn.disabled=false;}
+
   if(error){
-    document.getElementById('lErr').textContent='ভুল username বা password';
+    errEl.textContent='ভুল username বা password';
   } else {
-    sessionStorage.setItem('vc_admin_session','1');
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('sidebar').classList.add('show');
-    document.getElementById('mainArea').classList.add('show');
-    if(window.innerWidth<=768){document.getElementById('mobTopbar').style.display='flex';}
+    // ✅ Supabase session verified — panel unlock করো
+    unlockAdminPanel();
     requestNotifPermission();
     updateNotifBtn();
     initDash();
@@ -1417,18 +1438,20 @@ async function doLogin(){
 }
 document.getElementById('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-if(sessionStorage.getItem('vc_admin_session')==='1'){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('sidebar').classList.add('show');
-  document.getElementById('mainArea').classList.add('show');
-  if(window.innerWidth<=768)document.getElementById('mobTopbar').style.display='flex';
-  updateNotifBtn();
-  initDash();
-}
+// ✅ Page load এ Supabase-এর real session চেক — sessionStorage নয়
+(async function checkExistingSession(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if(session && session.user){
+    // সত্যিকারের valid session আছে — unlock করো
+    unlockAdminPanel();
+    updateNotifBtn();
+    initDash();
+  }
+  // session নেই → login screen দেখানো থাকবে (default)
+})();
 
 async function adminLogout(){
   await supabaseClient.auth.signOut();
-  sessionStorage.removeItem('vc_admin_session');
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('mainArea').classList.remove('show');
@@ -1852,7 +1875,13 @@ function renderProdTbl(scrollToLast = false) {
   const q = (document.getElementById('pQ')?.value || '').toLowerCase();
   const cat = document.getElementById('pCatF')?.value || 'all';
   const all = getAllProds();
-  const list = all.filter(p => (!q || p.name.toLowerCase().includes(q)) && (cat === 'all' || p.cat === cat));
+  const list = all.filter(p => {
+    const nameMatch = !q || p.name.toLowerCase().includes(q);
+    // BUG-08 FIX: p.cats (array) এবং p.cat (string) দুটোই check করো
+    const catMatch = cat === 'all'
+      || (Array.isArray(p.cats) && p.cats.length ? p.cats.includes(cat) : p.cat === cat);
+    return nameMatch && catMatch;
+  });
 
   const countEl = document.getElementById('allProdCount');
   if (countEl) countEl.textContent = `মোট ${all.length}টি প্রোডাক্ট`;
@@ -3469,6 +3498,8 @@ try{
       if(!isLoggedIn) return;
       await loadAndRenderOrders();
       await initDash();
+      // Pending badge আপডেট
+      if(typeof updatePendingBadge==='function') updatePendingBadge(_cachedOrders||[]);
       alertNewOrder(payload.new?.order_num||payload.new?.id||'');
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},async ()=>{
@@ -3476,6 +3507,8 @@ try{
       if(!isLoggedIn) return;
       await loadAndRenderOrders();
       await initDash();
+      // Pending badge আপডেট
+      if(typeof updatePendingBadge==='function') updatePendingBadge(_cachedOrders||[]);
     })
     .subscribe();
 }catch(e){console.warn('Admin realtime failed:',e);}
@@ -3500,41 +3533,16 @@ try{
     .subscribe();
 }catch(e){console.warn('Admin stock realtime failed:',e);}
 
-// --- Fallback polling every 10s (when Supabase realtime unavailable) ---
-setInterval(async ()=>{
-  const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-  if(!isLoggedIn) return;
-  const orders=await getOrdersAsync();
-  const current=orders.length;
-  if(current>_lastOrderCount){
-    const newOrder=orders[orders.length-1];
-    _lastOrderCount=current;
-    _cachedOrders = orders;
-    renderOrders();
-    await initDash();
-    alertNewOrder(newOrder?.orderNum||'');
-  } else if(current!==_lastOrderCount){
-    _lastOrderCount=current;
-    _cachedOrders = orders;
-    renderOrders();
-    await initDash();
-  }
-  // Pending badge update
-  const p=orders.filter(o=>o.status==='pending').length;
+// PERF-04 FIX: Polling সরানো হয়েছে — Supabase Realtime subscription-ই যথেষ্ট।
+// Orders এবং Stock উভয় change উপরের admin-orders-watch ও admin-stock-watch realtime
+// channel-এ ধরা পড়ছে। অতিরিক্ত setInterval API quota নষ্ট করছিল।
+
+// Helper: pending badge সব জায়গা থেকে call করা যাবে
+function updatePendingBadge(orders){
+  const p=(orders||[]).filter(o=>o.status==='pending').length;
   const pb=document.getElementById('pendBadge');
   if(pb){pb.style.display=p>0?'inline':'none';pb.textContent=p;}
-  // Stock sync — Supabase থেকে latest stock pull করো
-  try{
-    const{data:stockRow}=await supabaseClient.from('store_settings').select('setting_value').eq('setting_key','vc_stock').single();
-    if(stockRow&&stockRow.setting_value){
-      const stockMap=stockRow.setting_value;
-      [...DEFAULT_PRODS,...adminProds].forEach(p=>{if(stockMap[p.id]!==undefined)p.stock=stockMap[p.id];});
-      _adminSettings['vc_stock'] = stockMap;
-      const prodPage=document.getElementById('page-products');
-      if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
-    }
-  }catch(e){}
-},10000);
+}
 
 // ESC close modals
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();}});
