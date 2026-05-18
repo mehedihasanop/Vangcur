@@ -1000,8 +1000,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
 .float-wish-inner{position:relative;width:50px;height:50px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:22px;transition:transform .2s;border:2px solid #FFD6D6}
 .float-wish-inner:hover{transform:scale(1.1)}
 </style>
-<!-- ✅ Cloudflare Turnstile — Bot Protection -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 </head>
 <body>
 
@@ -1619,16 +1618,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
       </div>
       <div style="background:var(--light);padding:10px 13px;border-radius:8px;margin-bottom:14px;font-size:12px;display:flex;justify-content:space-between"><span>Payment Method</span><span style="font-weight:700">bKash Online Payment</span></div>
       <div class="cust-recap" id="custRecap"></div>
-      <!-- ✅ Cloudflare Turnstile Widget -->
-      <div id="turnstileWrap" style="margin-bottom:12px;display:flex;justify-content:center">
-        <div class="cf-turnstile"
-             data-sitekey="0x4AAAAAARbMpCS61AwpczA"
-             data-callback="onTurnstileSuccess"
-             data-expired-callback="onTurnstileExpired"
-             data-theme="light"
-             data-size="flexible"></div>
-      </div>
-      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()" disabled style="opacity:.5;cursor:not-allowed">✅ অর্ডার কনফার্ম করুন</button></div>
+      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()">✅ অর্ডার কনফার্ম করুন</button></div>
     </div>
   </div>
 </div>
@@ -4190,37 +4180,9 @@ function _closeLoginOrderMode(){
 }
 
 let _confirmLock=false;
-// ─── Cloudflare Turnstile Callbacks ──────────────────────────────────────────
-let _turnstileToken = null;
-function onTurnstileSuccess(token) {
-  _turnstileToken = token;
-  const btn = document.getElementById('confirmOrderBtn');
-  if(btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
-}
-function onTurnstileExpired() {
-  _turnstileToken = null;
-  const btn = document.getElementById('confirmOrderBtn');
-  if(btn) { btn.disabled = true; btn.style.opacity = '.5'; btn.style.cursor = 'not-allowed'; }
-  showToast('⚠️ Verification মেয়াদ শেষ, আবার চেক করুন');
-}
-// order step 3 তে গেলে Turnstile reset করো
-function resetTurnstile() {
-  _turnstileToken = null;
-  const btn = document.getElementById('confirmOrderBtn');
-  if(btn) { btn.disabled = true; btn.style.opacity = '.5'; btn.style.cursor = 'not-allowed'; }
-  if(window.turnstile) {
-    try { window.turnstile.reset(); } catch(e) {}
-  }
-}
 
 async function confirmOrder(){
   if(_confirmLock){showToast('⏳ অর্ডার প্রক্রিয়া হচ্ছে...');return;}
-  // ✅ Turnstile token check — bot হলে এখানেই আটকে যাবে
-  if(!_turnstileToken){
-    showToast('⚠️ অনুগ্রহ করে verification সম্পন্ন করুন');
-    _confirmLock=false;
-    return;
-  }
   _confirmLock=true;
   // S-10: Server-side rate limit via Supabase
   const phoneForRL=document.getElementById('cPhone')?.value?.trim();
@@ -5317,8 +5279,6 @@ function goS(n){
   if(n>1 && !_backButtonTriggered){
     history.pushState({vcStack:[..._panelStack], orderStep:n},'','');
   }
-  // Step 3 এ গেলে Turnstile reset — fresh verification দরকার
-  if(n===3) resetTurnstile();
 }
 
 // COPY BKASH NUMBER
