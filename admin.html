@@ -348,7 +348,10 @@ tr:hover td{background:#FAFAFA}
   <div class="page" id="page-orders">
     <div class="page-head">
       <div><div class="page-title">অর্ডার ম্যানেজমেন্ট</div><div class="page-sub">সকল গ্রাহকের অর্ডার — Confirm করুন বা Cancel করুন</div></div>
-      <button class="btn btn-dark btn-sm" onclick="exportCSV()">📊 CSV</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green btn-sm" onclick="loadAndRenderOrders();showAdminToast('🔄 অর্ডার রিফ্রেশ হচ্ছে...')">🔄 রিফ্রেশ</button>
+        <button class="btn btn-dark btn-sm" onclick="exportCSV()">📊 CSV</button>
+      </div>
     </div>
     <div class="card">
       <div class="search-bar">
@@ -1540,10 +1543,14 @@ function getSelectedCats() {
 // Supabase থেকে orders load করে, localStorage fallback
 async function getOrdersAsync(){
   try{
-    // ✅ FIX: error না থাকলে এবং data array হলেই process করো (খালি array [] নিয়ে আসলেও valid দেখাবে)
+    const sessionRes = await supabaseClient.auth.getSession();
+    const session = sessionRes?.data?.session;
+    console.log('[Orders] Auth:', session ? 'logged in: '+session.user.email : 'NO SESSION (anon)');
+
     const {data, error}=await supabaseClient.from('orders').select('*').order('created_at',{ascending:false});
+    console.log('[Orders] count:', data ? data.length : 'null', '| error:', error ? error.message : 'none');
+
     if(!error && Array.isArray(data)){
-      // Normalize Supabase format to match existing code
       return data.map(o=>({
         id:o.id, orderNum:o.order_num, date:o.created_at,
         customer:{name:o.customer_name,phone:o.customer_phone,district:o.customer_district,address:o.customer_address,email:o.customer_email},
@@ -1554,8 +1561,13 @@ async function getOrdersAsync(){
         status:o.status||'pending', ip:o.ip||''
       }));
     }
-    if(error) console.warn('Supabase getOrders error:',error.message);
-  }catch(e){console.warn('Supabase getOrders failed:',e);}
+    if(error){
+      console.error('[Orders] ERROR code:', error.code, '| message:', error.message);
+      if(error.code==='42501'||error.message?.includes('permission')||error.message?.includes('policy')){
+        showAdminToast('⚠️ Supabase RLS error: ' + error.message);
+      }
+    }
+  }catch(e){console.error('[Orders] Exception:',e);}
   return _cachedOrders;
 }
 // Orders are loaded from Supabase in loadOrdersFromSupabase()
@@ -1565,10 +1577,16 @@ function getOrders(){return _cachedOrders;}
 function saveOrders(o){_cachedOrders = o;}
 
 async function loadAndRenderOrders(){
-  const orders=await getOrdersAsync();
-  // In-memory cache update
+  // Loading indicator দেখাও
+  const tbl = document.getElementById('ordTbl');
+  if(tbl) tbl.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray)">⏳ লোড হচ্ছে...</td></tr>';
+
+  const orders = await getOrdersAsync();
   _cachedOrders = orders;
   renderOrders();
+
+  // Debug info
+  console.log('[loadAndRenderOrders] Loaded', orders.length, 'orders');
 }
 
 async function initDash(){
