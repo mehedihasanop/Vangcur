@@ -1448,7 +1448,7 @@ function showPage(id,btn){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   if(btn)btn.classList.add('active');
-  if(id==='orders')renderOrders();
+  if(id==='orders')loadAndRenderOrders(); // ✅ FIX: Supabase থেকে fresh data টানো
   if(id==='products'){
     // ✅ FIX: Products page খুললে Supabase থেকে fresh data টানো (cross-device sync)
     syncAdminData().then(() => { loadAdminStock(); renderProdTbl(); });
@@ -1540,8 +1540,9 @@ function getSelectedCats() {
 // Supabase থেকে orders load করে, localStorage fallback
 async function getOrdersAsync(){
   try{
-    const {data}=await supabaseClient.from('orders').select('*').order('created_at',{ascending:false});
-    if(data&&data.length){
+    // ✅ FIX: error না থাকলে এবং data array হলেই process করো (খালি array [] নিয়ে আসলেও valid দেখাবে)
+    const {data, error}=await supabaseClient.from('orders').select('*').order('created_at',{ascending:false});
+    if(!error && Array.isArray(data)){
       // Normalize Supabase format to match existing code
       return data.map(o=>({
         id:o.id, orderNum:o.order_num, date:o.created_at,
@@ -1553,6 +1554,7 @@ async function getOrdersAsync(){
         status:o.status||'pending', ip:o.ip||''
       }));
     }
+    if(error) console.warn('Supabase getOrders error:',error.message);
   }catch(e){console.warn('Supabase getOrders failed:',e);}
   return _cachedOrders;
 }
@@ -1617,7 +1619,7 @@ function renderOrders(){
       (o.customer?.phone?.replace(/\D/g,'').includes(q.replace(/\D/g,'')))||
       (o.customer?.district?.toLowerCase().includes(q));
     return mq&&(f==='all'||o.status===f);
-  }).reverse();
+  }); // ✅ FIX: Supabase ইতিমধ্যেই created_at DESC দিয়ে দেয়, তাই .reverse() দরকার নেই
   document.getElementById('ordTbl').innerHTML=list.length?list.map(o=>`<tr>
     <td><input type="checkbox" class="ord-chk" data-id="${escHtml(o.id)}" onchange="updateBulkCount()"></td>
     <td><strong>${escHtml(o.orderNum)}</strong></td>
