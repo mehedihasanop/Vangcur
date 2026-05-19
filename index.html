@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Vangcur - ভাঙচুর | Your First Choice for Gadgets</title>
 <!-- PERF-03 FIX: তিনটি font এক request-এ + preconnect দিয়ে DNS handshake আগে করে নেওয়া -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,6 +31,8 @@
 </script>
 <style>
 :root{--cream:#FAF8F5;--white:#fff;--dark:#1A1A1A;--gray:#6B7280;--light:#F3F4F6;--border:#E5E7EB;--red:#E63946;--red2:#C1121F;--gold:#D4A853;--green:#10B981;--blue:#3B82F6;--sh1:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 18px rgba(0,0,0,.10);--sh3:0 8px 36px rgba(0,0,0,.13);--r:12px;--tr:all .25s cubic-bezier(.4,0,.2,1)}
+/* ব্রাউজার force dark mode আটকানো */
+:root{color-scheme:light}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 html::-webkit-scrollbar{width:5px}
@@ -632,11 +635,11 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .o-step{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--gray);position:relative}
 .o-step::after{content:'';position:absolute;top:9px;left:58%;right:-42%;height:2px;background:var(--border)}
 .o-step:last-child::after{display:none}
-.o-step.done::after{background:var(--dark)}
+.o-step.done::after{background:#10B981}
 .o-step-num{width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--gray);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:3px}
-.o-step.active{color:var(--dark)}
-.o-step.active .o-step-num{background:var(--dark);color:#fff}
-.o-step.done .o-step-num{background:var(--green);color:#fff}
+.o-step.active{color:#3B82F6}
+.o-step.active .o-step-num{background:#3B82F6;color:#fff}
+.o-step.done .o-step-num{background:#10B981;color:#fff}
 .order-body{padding:20px 24px}
 .fg2{margin-bottom:15px}
 .fg2 label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
@@ -674,13 +677,13 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .or-div{text-align:center;font-size:12px;font-weight:600;color:var(--gray);margin:5px 0}
 .pay-hint{background:var(--light);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--dark);line-height:1.65}
 /* SUMMARY */
-.sum-card{background:var(--light);border-radius:12px;padding:14px;margin-bottom:16px}
-.sum-card h4{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-.sum-row{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
-.sum-row.total{font-size:14px;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:6px}
-.sum-row.paid{color:var(--green);font-weight:600}
-.sum-row.balance{color:var(--red);font-weight:700}
-.cust-recap{background:var(--light);border-radius:10px;padding:13px;font-size:12.5px;line-height:1.85;margin-bottom:16px}
+.sum-card{background:var(--light);border-radius:12px;padding:14px;margin-bottom:16px;color:#1A1A1A}
+.sum-card h4{font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.sum-row{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;color:#1A1A1A}
+.sum-row.total{font-size:14px;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:6px;color:#1A1A1A}
+.sum-row.paid{color:#059669;font-weight:600}
+.sum-row.balance{color:#DC2626;font-weight:700}
+.cust-recap{background:var(--light);border-radius:10px;padding:13px;font-size:12.5px;line-height:1.85;margin-bottom:16px;color:#1A1A1A}
 /* ORDER FOOTER */
 .o-foot{padding:14px 24px 22px;border-top:1px solid var(--border);display:flex;gap:9px}
 .btn-back{background:var(--light);color:var(--dark);border:none;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
@@ -693,8 +696,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .wait-box{background:var(--white);max-width:480px;width:100%;margin:0 auto;padding:28px 28px;text-align:center;min-height:100vh;}
 .pulse{width:76px;height:76px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:pulse-anim 2s infinite;font-size:34px}
 @keyframes pulse-anim{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.3)}50%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
-.wait-box h2{font-size:20px;font-weight:700;margin-bottom:8px}
-.wait-box p{font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:22px}
+.wait-box h2{font-size:20px;font-weight:700;margin-bottom:8px;color:#1A1A1A}
+.wait-box p{font-size:13px;color:#4B5563;line-height:1.7;margin-bottom:22px}
 .status-track{text-align:left;margin-bottom:22px}
 .st-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
 .st-item:last-child{border:none}
@@ -702,9 +705,9 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .st-done{background:#D1FAE5}
 .st-cur{background:#FEF3C7;animation:pulse-anim 2s infinite}
 .st-pend{background:var(--light)}
-.st-text strong{display:block;font-size:12.5px;font-weight:600}
-.st-text span{font-size:11px;color:var(--gray)}
-.wait-order-num{font-size:13px;color:var(--gray);margin-bottom:16px}
+.st-text strong{display:block;font-size:12.5px;font-weight:600;color:#1A1A1A}
+.st-text span{font-size:11px;color:#6B7280}
+.wait-order-num{font-size:13px;color:#1A1A1A;font-weight:600;margin-bottom:16px}
 .confirmed-state,.rejected-state{display:none}
 
 /* INFO OVERLAY */
@@ -800,7 +803,7 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 /* CHECKOUT PROGRESS BAR (U-6) */
 .o-progress-wrap{padding:0 24px 4px;background:var(--white)}
 .o-progress-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px}
-.o-progress-fill{height:100%;background:var(--dark);border-radius:4px;transition:width .4s ease}
+.o-progress-fill{height:100%;background:#3B82F6;border-radius:4px;transition:width .4s ease}
 .o-progress-hint{font-size:11px;color:var(--green);font-weight:600;text-align:right}
 /* TABLE SCROLL INDICATOR (D-3) */
 .tbl-scroll-hint{font-size:11px;color:var(--gray);text-align:right;margin-bottom:4px;display:none}
@@ -831,6 +834,8 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 .wl-btn{border:none;padding:7px 12px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr)}
 .wl-add{background:var(--dark);color:#fff}
 .wl-add:hover{background:var(--red)}
+.wl-order-btn{background:#10B981;color:#fff}
+.wl-order-btn:hover{background:#059669}
 .wl-rem{background:var(--light);color:var(--gray)}
 .wl-rem:hover{background:#FEE2E2;color:var(--red)}
 
@@ -852,116 +857,188 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 /* ============================================================
    FULL DARK MODE — চোখবান্ধব ডার্ক থিম
    ============================================================ */
-body.dark{--white:#1e1e1e;--cream:#121212;--light:#2a2a2a;--border:#3a3a3a;--gray:#9ca3af;--dark:#f0f0f0;--red:#FCA5A5;--red2:#f87171;--gold:#FCD34D;--green:#6ee7b7;--blue:#93c5fd;--sh1:0 1px 4px rgba(0,0,0,.4);--sh2:0 4px 18px rgba(0,0,0,.5);--sh3:0 8px 36px rgba(0,0,0,.6)}
-body.dark{background:#121212;color:#e0e0e0}
+body.dark{--white:#1C1C1E;--cream:#111113;--light:#2C2C2E;--border:#3A3A3C;--gray:#8E8E93;--dark:#F2F2F7;--red:#FF6B6B;--red2:#FF4757;--gold:#FFD700;--green:#30D158;--blue:#64ACFF;--sh1:0 1px 6px rgba(0,0,0,.5);--sh2:0 4px 20px rgba(0,0,0,.6);--sh3:0 8px 40px rgba(0,0,0,.7)}
+body.dark{background:#111113;color:#E5E5EA}
 
-/* Nav & bars */
-body.dark nav{background:#1e1e1e;border-bottom-color:#3a3a3a}
-body.dark .cat-bar{background:#1e1e1e;border-bottom-color:#3a3a3a}
-body.dark .cat-bar::after{background:linear-gradient(to right,transparent,#1e1e1e)}
-body.dark .cat-pill{color:#9ca3af}
-body.dark .cat-pill:hover,body.dark .cat-pill.active{background:#f0f0f0;color:#121212}
+/* ── Nav & bars ── */
+body.dark nav{background:#1C1C1E;border-bottom-color:#3A3A3C}
+body.dark .cat-bar{background:#1C1C1E;border-bottom-color:#3A3A3C}
+body.dark .cat-bar::after{background:linear-gradient(to right,transparent,#1C1C1E)}
+body.dark .cat-pill{color:#8E8E93}
+body.dark .cat-pill:hover,body.dark .cat-pill.active{background:#FF6B6B;color:#fff}
 
-/* Search */
-body.dark .nav-search input{background:#2a2a2a;border-color:#3a3a3a;color:#e0e0e0}
-body.dark .nav-search input:focus{border-color:#f0f0f0;background:#2a2a2a}
-body.dark .nav-search svg{color:#9ca3af}
-body.dark .search-dropdown{background:#1e1e1e;border-color:#3a3a3a}
-body.dark .sd-item:hover{background:#2a2a2a}
-body.dark .sd-emoji{background:#2a2a2a}
-body.dark .sd-footer{border-top-color:#3a3a3a}
-body.dark .sd-header{border-bottom-color:#3a3a3a;color:#9ca3af}
+/* ── Search ── */
+body.dark .nav-search input{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
+body.dark .nav-search input:focus{border-color:#FF6B6B;background:#2C2C2E}
+body.dark .nav-search svg{color:#8E8E93}
+body.dark .search-dropdown{background:#1C1C1E;border-color:#3A3A3C}
+body.dark .sd-item:hover{background:#2C2C2E}
+body.dark .sd-emoji{background:#2C2C2E}
+body.dark .sd-footer{border-top-color:#3A3A3C;color:#8E8E93}
+body.dark .sd-header{border-bottom-color:#3A3A3C;color:#8E8E93}
 
-/* Buttons */
-body.dark .nav-icon-btn{color:#e0e0e0}
-body.dark .nav-icon-btn:hover{background:#2a2a2a}
-body.dark .nav-login-btn{background:#f0f0f0;color:#121212}
-body.dark .nav-login-btn:hover{background:#FCA5A5;color:#121212}
-body.dark .nav-user-btn{background:#2a2a2a;color:#e0e0e0}
-body.dark .nav-user-btn:hover{background:#3a3a3a}
+/* ── Nav Buttons ── */
+body.dark .nav-icon-btn{color:#E5E5EA}
+body.dark .nav-icon-btn:hover{background:#2C2C2E}
+body.dark .nav-login-btn{background:#FF6B6B;color:#fff}
+body.dark .nav-login-btn:hover{background:#FF4757;color:#fff}
+body.dark .nav-user-btn{background:#2C2C2E;color:#E5E5EA}
+body.dark .nav-user-btn:hover{background:#3A3A3C}
 
-/* Product cards */
-body.dark .prod-card{background:#1e1e1e;border-color:#3a3a3a}
-body.dark .prod-img{background:#2a2a2a}
-body.dark .prod-cta{background:#f0f0f0;color:#121212}
-body.dark .prod-cta:hover{background:#FCA5A5;color:#121212}
-body.dark .prod-cart-icon-btn{background:#2a2a2a;border-color:#3a3a3a;color:#e0e0e0}
-body.dark .prod-cart-icon-btn:hover{background:#3a3a3a}
+/* ── Product cards ── */
+body.dark .prod-card{background:#1C1C1E;border-color:#3A3A3C}
+body.dark .prod-img{background:#2C2C2E}
+body.dark .prod-name{color:#E5E5EA}
+body.dark .prod-price{color:#FF6B6B}
+body.dark .prod-cta{background:#FF6B6B;color:#fff}
+body.dark .prod-cta:hover{background:#FF4757;color:#fff}
+body.dark .prod-cart-icon-btn{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
+body.dark .prod-cart-icon-btn:hover{background:#3A3A3C}
 
-/* Badges */
-body.dark .badge-hot{background:rgba(252,165,165,.75);color:#121212}
-body.dark .badge-new{background:rgba(147,197,253,.75);color:#121212}
-body.dark .badge-sale{background:rgba(252,211,77,.75);color:#121212}
-body.dark .badge-best{background:rgba(252,211,77,.75);color:#121212}
-body.dark .prod-badge{opacity:.9}
+/* ── Badges ── */
+body.dark .badge-hot{background:rgba(255,71,87,.85);color:#fff}
+body.dark .badge-new{background:rgba(100,172,255,.85);color:#fff}
+body.dark .badge-sale{background:rgba(255,215,0,.85);color:#111}
+body.dark .badge-best{background:rgba(255,215,0,.85);color:#111}
 
-/* Category cards */
-body.dark .cat-card{background:#1e1e1e;border-color:#3a3a3a;color:#e0e0e0}
-body.dark .cat-card:hover{border-color:#f0f0f0}
-body.dark .cat-card-name{color:#e0e0e0}
+/* ── Category cards ── */
+body.dark .cat-card{background:#1C1C1E;border-color:#3A3A3C;color:#E5E5EA}
+body.dark .cat-card:hover{border-color:#FF6B6B;background:#2C2C2E}
+body.dark .cat-card-name{color:#E5E5EA}
 
-/* Hero slider */
-body.dark .hero-slider{background:#0a0a0a}
+/* ── Hero slider ── */
+body.dark .hero-slider{background:#0A0A0B}
 
-/* Product page */
-body.dark .pp-nav{background:#1e1e1e;border-bottom-color:#3a3a3a}
-body.dark .pp-main-img{background:#2a2a2a}
-body.dark .pp-thumb{border-color:#3a3a3a;background:#2a2a2a}
-body.dark .pp-thumb.on{border-color:#f0f0f0}
-body.dark .pp-tab{color:#9ca3af;border-bottom-color:#3a3a3a}
-body.dark .pp-tab.on{color:#f0f0f0;border-bottom-color:#f0f0f0}
-body.dark .pp-tab:hover{color:#e0e0e0}
-body.dark .pp-specs{background:#2a2a2a;border-color:#3a3a3a}
-body.dark .pp-specs-title{color:#e0e0e0}
-body.dark .pp-tech-table th{background:#2a2a2a;color:#e0e0e0}
-body.dark .pp-tech-table td{border-color:#3a3a3a;color:#e0e0e0}
-body.dark .pp-btn-order{background:#f0f0f0;color:#121212}
-body.dark .pp-btn-cart{background:#2a2a2a;color:#e0e0e0;border-color:#3a3a3a}
-body.dark .pp-rev-item{border-bottom-color:#3a3a3a}
-body.dark .pp-rev-avatar{background:#3a3a3a;color:#e0e0e0}
+/* ── Product page nav ── */
+body.dark .pp-nav{background:#1C1C1E;border-bottom-color:#3A3A3C}
+body.dark .pp-back{background:#2C2C2E;color:#E5E5EA;border:1.5px solid #3A3A3C}
+body.dark .pp-back:hover{background:#3A3A3C;color:#fff}
+body.dark .pp-bread{color:#8E8E93}
+body.dark .pp-bread span{color:#E5E5EA}
+body.dark .pp-main-img{background:#2C2C2E}
+body.dark .pp-thumb{border-color:#3A3A3C;background:#2C2C2E}
+body.dark .pp-thumb.on{border-color:#FF6B6B}
+body.dark .pp-tab{color:#8E8E93;border-bottom-color:#3A3A3C}
+body.dark .pp-tab.on{color:#FF6B6B;border-bottom-color:#FF6B6B}
+body.dark .pp-tab:hover{color:#E5E5EA}
+body.dark .pp-name{color:#F2F2F7}
+body.dark .pp-price{color:#FF6B6B}
+body.dark .pp-old{color:#636366}
 
-/* Cart sidebar */
-body.dark .cartSide{background:#1e1e1e}
-body.dark .cart-item{border-bottom-color:#3a3a3a}
-body.dark .btn-checkout{background:#f0f0f0;color:#121212}
-body.dark .btn-checkout:hover{background:#FCA5A5;color:#121212}
+/* ── প্রোডাক্ট বিস্তারিত বিবরণ ── */
+body.dark .pp-desc{background:#1C1C1E;color:#C7C7CC;border:1px solid #3A3A3C}
 
-/* Order overlay */
-body.dark .orderOverlay,.dark .loginModal,.dark .wishSide,.dark .accPanel{background:#1e1e1e}
-body.dark .fctrl{background:#2a2a2a;border-color:#3a3a3a;color:#e0e0e0}
-body.dark .fctrl:focus{border-color:#f0f0f0}
-body.dark .ship-opt{border-color:#3a3a3a;background:#2a2a2a}
-body.dark .ship-opt.selected{border-color:#f0f0f0;background:#2a2a2a}
-body.dark .bkash-copy-btn{background:#f0f0f0;color:#121212}
-body.dark .pay-hint{background:#2a2a2a;color:#e0e0e0}
-body.dark .btn-back{background:#2a2a2a;color:#e0e0e0}
-body.dark .btn-next{background:#f0f0f0;color:#121212}
-body.dark .o-step.active{color:#f0f0f0}
-body.dark .o-step.active .o-step-num{background:#f0f0f0;color:#121212}
-body.dark .o-step.done::after{background:#f0f0f0}
-body.dark .o-progress-fill{background:#f0f0f0}
+/* ── স্পেসিফিকেশন ── */
+body.dark .pp-specs{background:#1C1C1E;border-color:#3A3A3C}
+body.dark .pp-specs-title{color:#E5E5EA}
+body.dark .pp-detail-section{border-bottom-color:#3A3A3C}
+body.dark .pp-detail-section h2,body.dark .pp-detail-section h3,body.dark .pp-detail-section h4{color:#E5E5EA}
+body.dark .pp-detail-section p,body.dark .pp-detail-section li{color:#C7C7CC}
 
-/* Account panel */
-body.dark .acc-nav{background:#1e1e1e;border-bottom-color:#3a3a3a}
-body.dark .acc-header{background:#2a2a2a}
+/* ── স্পেসিফিকেশন টেবিল (জেব্রা ফিক্স) ── */
+body.dark .pp-tech-table{border-radius:10px;overflow:hidden;border:1px solid #3A3A3C}
+body.dark .pp-tech-table th{background:#2C2C2E;color:#E5E5EA;border-bottom:1px solid #3A3A3C}
+body.dark .pp-tech-table td{border-color:#3A3A3C;color:#E5E5EA}
+body.dark .pp-tech-table tr:nth-child(even) td{background:#1C1C1E}
+body.dark .pp-tech-table tr:nth-child(odd) td{background:#111113}
 
-/* Footer */
-body.dark footer{background:#0a0a0a}
+/* ── ফিচারস ── */
+body.dark .pp-feature-item{background:#1C1C1E;border-color:#3A3A3C}
+body.dark .pp-feature-text{color:#C7C7CC}
+body.dark .pp-feature-text strong{color:#E5E5EA}
 
-/* Toast */
-body.dark .toast{background:#f0f0f0;color:#121212}
+/* ── FAQ ── */
+body.dark .pp-faq-item{border-color:#3A3A3C}
+body.dark .pp-faq-q{background:#1C1C1E;color:#E5E5EA}
+body.dark .pp-faq-q:hover{background:#2C2C2E}
+body.dark .pp-faq-a{background:#111113;color:#C7C7CC}
+
+/* ── রিভিউ ── */
+body.dark .pp-rev-name{color:#E5E5EA}
+body.dark .pp-rev-text{color:#C7C7CC}
+body.dark .pp-rev-date{color:#636366}
+body.dark .pp-rev-item{border-bottom-color:#3A3A3C}
+body.dark .pp-rev-avatar{background:#2C2C2E;color:#E5E5EA}
+
+/* ── Order buttons ── */
+body.dark .pp-btn-order{background:#FF6B6B;color:#fff}
+body.dark .pp-btn-cart{background:#2C2C2E;color:#E5E5EA;border-color:#3A3A3C}
+
+/* ── Cart sidebar ── */
+body.dark .cartSide{background:#1C1C1E}
+body.dark .cart-item{border-bottom-color:#3A3A3C}
+body.dark .btn-checkout{background:#FF6B6B;color:#fff}
+body.dark .btn-checkout:hover{background:#FF4757;color:#fff}
+
+/* ── Order overlay, Login, Wishlist, Account ── */
+body.dark .orderOverlay,.dark .loginModal,.dark .wishSide,.dark .accPanel{background:#1C1C1E}
+body.dark .fctrl{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
+body.dark .fctrl:focus{border-color:#FF6B6B}
+body.dark .ship-opt{border-color:#3A3A3C;background:#2C2C2E;color:#E5E5EA}
+body.dark .ship-opt.selected{border-color:#FF6B6B;background:#1C1C1E}
+body.dark .bkash-copy-btn{background:#FF6B6B;color:#fff}
+body.dark .pay-hint{background:#2C2C2E;color:#C7C7CC;border:1px solid #3A3A3C}
+body.dark .btn-back{background:#2C2C2E;color:#E5E5EA;border:1px solid #3A3A3C}
+body.dark .btn-next{background:#FF6B6B;color:#fff}
+body.dark .btn-next:hover{background:#FF4757}
+body.dark #confirmOrderBtn{background:#10B981 !important;color:#fff !important}
+body.dark #confirmOrderBtn:hover{background:#059669 !important}
+body.dark #orderItemsSummary{background:#1C1C1E !important}
+body.dark #orderItemsList{color:#E5E5EA !important}
+body.dark #orderItemsTotal{color:#E5E5EA !important}
+
+/* ── Account panel ── */
+body.dark .acc-nav{background:#1C1C1E;border-bottom-color:#3A3A3C}
+body.dark .acc-header{background:#2C2C2E;border-bottom:1px solid #3A3A3C}
+
+/* ── Order step progress (dark) ── */
+body.dark .o-step.active{color:#64ACFF}
+body.dark .o-step.active .o-step-num{background:#3B82F6;color:#fff}
+body.dark .o-step.done .o-step-num{background:#10B981;color:#fff}
+body.dark .o-step.done::after{background:#10B981}
+body.dark .o-progress-fill{background:#3B82F6}
+
+/* ── Sum card (dark) ── */
+body.dark .sum-card{background:#2C2C2E;color:#E5E5EA}
+body.dark .sum-card h4{color:#8E8E93}
+body.dark .sum-row{color:#E5E5EA}
+body.dark .sum-row.total{color:#E5E5EA;border-top-color:#3A3A3C}
+body.dark .cust-recap{background:#2C2C2E;color:#E5E5EA}
+
+/* ── Wait screen (dark) ── */
+body.dark .wait-box{background:#1C1C1E}
+body.dark .wait-box h2{color:#E5E5EA}
+body.dark .wait-box p{color:#8E8E93}
+body.dark .st-text strong{color:#E5E5EA}
+body.dark .st-text span{color:#8E8E93}
+body.dark .st-item{border-bottom-color:#3A3A3C}
+body.dark .wait-order-num{color:#E5E5EA}
+
+/* ── Footer ── */
+body.dark footer{background:#0A0A0B}
+
+/* ── Back to top ── */
+body.dark .back-to-top{background:#2C2C2E;color:#E5E5EA;border:1px solid #3A3A3C}
+body.dark .back-to-top:hover{background:#FF6B6B;border-color:#FF6B6B;color:#fff}
+
+/* ── WL ── */
+body.dark .wl-add{background:#FF6B6B;color:#fff}
+
+/* ── Toast ── */
+body.dark .toast{background:#2C2C2E;color:#E5E5EA;border:1px solid #3A3A3C}
 
 /* Search dropdown dark */
-body.dark .mobile-search-bar{background:#1e1e1e;border-bottom-color:#3a3a3a}
-body.dark .mobile-search-wrap{background:#2a2a2a;border-color:#3a3a3a}
-body.dark .mobile-search-wrap input{color:#e0e0e0;background:#2a2a2a}
+body.dark .mobile-search-bar{background:#1C1C1E;border-bottom-color:#3A3A3C}
+body.dark .mobile-search-wrap{background:#2C2C2E;border-color:#3A3A3C}
+body.dark .mobile-search-wrap input{color:#E5E5EA;background:#2C2C2E}
+body.dark .mobile-search-clear{background:#3A3A3C;color:#E5E5EA}
 
 /* Related cards */
-body.dark .rel-card{background:#1e1e1e;border-color:#3a3a3a}
-body.dark .rel-card-btn{background:#f0f0f0;color:#121212}
-body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
+body.dark .rel-card{background:#1C1C1E;border-color:#3A3A3C}
+body.dark .rel-card-btn{background:#2C2C2E;color:#E5E5EA;border:1.5px solid #3A3A3C}
+body.dark .rel-card-btn:hover{background:#3A3A3C}
+body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 
-/* Dark toggle button style — removed (auto system detection used) */
 
 /* SEARCH DROPDOWN */
 .search-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--sh3);z-index:1100;overflow:hidden;display:none;max-height:420px;overflow-y:auto}
@@ -1576,10 +1653,10 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
       <button id="orderCloseBtn" onclick="closeOrder()" style="display:none;background:var(--light);border:1.5px solid var(--border);border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--dark)">✕ বন্ধ করুন</button>
     </div>
     <!-- Order items mini summary (shown only on step 1 & 2) -->
-    <div id="orderItemsSummary" style="background:#F8F9FA;border-bottom:1px solid var(--border);padding:10px 24px;display:none">
-      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Your Order</div>
-      <div id="orderItemsList" style="display:flex;flex-direction:column;gap:5px"></div>
-      <div id="orderItemsTotal" style="font-size:13px;font-weight:700;border-top:1px solid var(--border);margin-top:7px;padding-top:7px;display:flex;justify-content:space-between"></div>
+    <div id="orderItemsSummary" style="background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:none">
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">YOUR ORDER</div>
+      <div id="orderItemsList" style="display:flex;flex-direction:column;gap:5px;color:#1A1A1A"></div>
+      <div id="orderItemsTotal" style="font-size:13px;font-weight:700;border-top:1px solid var(--border);margin-top:7px;padding-top:7px;display:flex;justify-content:space-between;color:#1A1A1A"></div>
     </div>
     <div class="steps-bar">
       <div class="o-step active" id="os1"><div class="o-step-num">1</div><div>তথ্য</div></div>
@@ -1639,9 +1716,9 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
         <div class="sum-row paid"><span>✅ Paid (bKash Advance)</span><span>৳200</span></div>
         <div class="sum-row balance"><span>Balance Due (COD)</span><span id="sumBal"></span></div>
       </div>
-      <div style="background:var(--light);padding:10px 13px;border-radius:8px;margin-bottom:14px;font-size:12px;display:flex;justify-content:space-between"><span>Payment Method</span><span style="font-weight:700">bKash Online Payment</span></div>
+      <div style="background:var(--light);padding:10px 13px;border-radius:8px;margin-bottom:14px;font-size:12px;display:flex;justify-content:space-between;color:#1A1A1A"><span>Payment Method</span><span style="font-weight:700">bKash Online Payment</span></div>
       <div class="cust-recap" id="custRecap"></div>
-      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()">✅ অর্ডার কনফার্ম করুন</button></div>
+      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()" style="background:#10B981">✅ অর্ডার কনফার্ম করুন</button></div>
     </div>
   </div>
 </div>
@@ -1740,7 +1817,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
     <div style="width:72px;height:72px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px">🎉</div>
     <h2 style="font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px">অর্ডার কনফার্ম হয়েছে!</h2>
     <p style="font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:6px">আপনার পেমেন্ট যাচাই হয়েছে এবং অর্ডারটি সফলভাবে কনফার্ম করা হয়েছে।</p>
-    <p style="font-size:13px;font-weight:700;margin-bottom:8px">অর্ডার নম্বর: <span id="bgConfirmNum" style="color:var(--red)"></span> <button onclick="copyOrderNum('bgConfirmNum')" title="কপি করুন" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer">📋</button></p>
+    <p style="font-size:13px;font-weight:700;margin-bottom:8px;color:#1A1A1A">অর্ডার নম্বর: <span id="bgConfirmNum" style="color:#10B981;font-size:15px"></span> <button onclick="copyOrderNum('bgConfirmNum')" title="কপি করুন" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer">📋</button></p>
     <p style="font-size:12px;color:var(--gray);margin-bottom:18px">🔍 অর্ডার ট্র্যাক করতে ওয়েবসাইটের "অর্ডার ট্র্যাক" অপশন ব্যবহার করুন।</p>
     <button onclick="dlInvoiceFromPopup()" style="width:100%;background:var(--dark);color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⬇️ ইনভয়েস ডাউনলোড করুন (বাধ্যতামূলক)</button>
   </div>
@@ -2654,9 +2731,33 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateNavAuth();
   initCathSlider();
   initDuoSlider();
+  // ✅ FIX: pid — sessionStorage (same-tab) অথবা localStorage (page replace/reload) থেকে নাও
+  const pid = (()=>{
+    try{
+      // sessionStorage থেকে আগে চেক করো (সবচেয়ে reliable)
+      const ss = sessionStorage.getItem('vc_pending');
+      if(ss) return ss;
+      // sessionStorage না থাকলে localStorage চেক করো
+      const ls = localStorage.getItem('vc_pending_ls');
+      const ts = parseInt(localStorage.getItem('vc_pending_ts')||'0',10);
+      // ৩০ মিনিটের বেশি পুরনো হলে discard
+      if(ls && Date.now() - ts < 30*60*1000){
+        // sessionStorage তেও restore করো যাতে পরের refresh এ কাজ করে
+        sessionStorage.setItem('vc_pending', ls);
+        const lsNum = localStorage.getItem('vc_pending_num_ls')||'';
+        if(lsNum) sessionStorage.setItem('vc_pending_num', lsNum);
+        return ls;
+      }
+      // মেয়াদ শেষ — cleanup
+      localStorage.removeItem('vc_pending_ls');
+      localStorage.removeItem('vc_pending_num_ls');
+      localStorage.removeItem('vc_pending_ts');
+    }catch(e){}
+    return null;
+  })();
   if(pid){
     pendingOrdId=pid;
-    const pnum=sessionStorage.getItem('vc_pending_num')||'';
+    const pnum=sessionStorage.getItem('vc_pending_num')||localStorage.getItem('vc_pending_num_ls')||'';
     // ✅ FIX: Supabase থেকে সর্বশেষ status চেক করো (admin পেজ রিফ্রেশ ছাড়াও কাজ করবে)
     document.getElementById('waitNum').textContent=pnum;
     document.getElementById('waitOverlay').classList.add('show');
@@ -4638,7 +4739,7 @@ async function confirmOrder(){
     guestOrders.push(order);localStorage.setItem('vc_guest_orders',JSON.stringify(guestOrders));
   }
   localStorage.setItem('vc_last_order_time',String(Date.now())); // S-10: rate limit timestamp
-  pendingOrdId=oid;sessionStorage.setItem('vc_pending',oid);sessionStorage.setItem('vc_pending_num',num);
+  pendingOrdId=oid;sessionStorage.setItem('vc_pending',oid);sessionStorage.setItem('vc_pending_num',num);try{localStorage.setItem('vc_pending_ls',oid);localStorage.setItem('vc_pending_num_ls',num);localStorage.setItem('vc_pending_ts',String(Date.now()));}catch(e){}
   // Reduce stock (S-5: persist)
   orderItems.forEach(oi=>{const p=PRODS.find(x=>x.id===oi.id);if(p)p.stock=Math.max(0,p.stock-oi.qty);});
   saveStock();
@@ -4686,6 +4787,7 @@ function handleOrderStatusUpdate(status,ordId){
     clearInterval(_pollInterval);_pollInterval=null;
     if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
     sessionStorage.removeItem('vc_pending');
+    try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}
     // Sync localStorage status too
     try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
     // ✅ Supabase থেকে full order fetch → map → bgConfirmPopup (waiting & background উভয়ের জন্য)
@@ -4728,6 +4830,7 @@ function handleOrderStatusUpdate(status,ordId){
     clearInterval(_pollInterval);_pollInterval=null;
     if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
     sessionStorage.removeItem('vc_pending');
+    try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}
     // Sync localStorage
     try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
     if(document.getElementById('waitOverlay').classList.contains('show')){
@@ -4788,7 +4891,7 @@ function startPolling(){
     if(Date.now()-pollStart>MAX_POLL){
       clearInterval(_pollInterval);_pollInterval=null;
       if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
-      sessionStorage.removeItem('vc_pending');pendingOrdId=null;
+      sessionStorage.removeItem('vc_pending');try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}pendingOrdId=null;
       const p=document.getElementById('pendingState');
       if(p){const pEl=p.querySelector('p');if(pEl)pEl.textContent='অর্ডার যাচাই সময়সীমা শেষ। WhatsApp এ যোগাযোগ করুন: 01816-365504';}
       return;
@@ -4978,8 +5081,10 @@ window.addEventListener('popstate', function(e){
 
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){
+    // ✅ FIX (রাস্তা ২): hidden হলে channel বন্ধ করব না — polling শুধু pause
+    // Supabase realtime channel চালু রাখো যাতে ফিরে আসলে instant update পাওয়া যায়
     if(_pollInterval){clearInterval(_pollInterval);_pollInterval=null;}
-    if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+    // _supabaseChannel বন্ধ করা হচ্ছে না (tab ফিরলে still active থাকবে)
   } else if(document.visibilityState==='visible'){
     // ✅ SYNC-01 + SYNC-03 FIX: page visible হলে store_settings (vc_stock, vc_categories) + custom_products একসাথে refresh
     (async()=>{try{
@@ -5025,6 +5130,36 @@ document.addEventListener('visibilitychange',()=>{
       const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
       renderProds(cur);
     }catch(e){console.warn('Visibility refresh failed:',e);}})();
+    // ✅ FIX: Tab ফিরে আসলে cath slider ও duo slider layout re-calculate
+    // (Tab hidden থাকলে clientWidth=0 হয় — তাই card গুলো invisible হয়)
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        try{ updateCathSlider(); }catch(e){}
+        try{ duoSetPosition(false); }catch(e){}
+      }, 80);
+    });
+    // ✅ FIX: pendingOrdId না থাকলে localStorage থেকে restore করো
+    if(!pendingOrdId){
+      try{
+        const lsId = localStorage.getItem('vc_pending_ls');
+        const lsTs = parseInt(localStorage.getItem('vc_pending_ts')||'0',10);
+        if(lsId && Date.now()-lsTs < 30*60*1000){
+          pendingOrdId = lsId;
+          const lsNum = localStorage.getItem('vc_pending_num_ls')||'';
+          const waitNumEl = document.getElementById('waitNum');
+          if(waitNumEl && lsNum) waitNumEl.textContent = lsNum;
+          // waiting overlay দেখাও
+          const waitEl = document.getElementById('waitOverlay');
+          if(waitEl && !waitEl.classList.contains('show')){
+            document.getElementById('pendingState').style.display='block';
+            document.getElementById('confirmedState').style.display='none';
+            document.getElementById('rejectedState').style.display='none';
+            waitEl.classList.add('show');
+            lockBody();
+          }
+        }
+      }catch(e){}
+    }
     if(pendingOrdId&&!_pollInterval){
       startPolling();
     }
@@ -5062,7 +5197,7 @@ function copyOrderNum(elId){
   });
 }
 
-function closeWait(){document.getElementById('waitOverlay').classList.remove('show');unlockBody();pendingOrdId=null;sessionStorage.removeItem('vc_pending');}
+function closeWait(){document.getElementById('waitOverlay').classList.remove('show');unlockBody();pendingOrdId=null;sessionStorage.removeItem('vc_pending');try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}}
 
 // BACKGROUND CONFIRM POPUP
 let bgConfirmOrder=null;
@@ -5420,21 +5555,74 @@ function openTrackOrder(){
   modal.classList.add('show');
   lockBody();
   _pushPanel('track');
-  // ✅ লগইন না থাকলে login prompt, থাকলে নিজের orders দেখাও
+  // ✅ লগইন না থাকলে — guest এর শেষ order দেখাও (যদি থাকে), নইলে notice
   if(!currentUser){
     document.getElementById('trackInput').value='';
-    document.getElementById('trackResult').innerHTML=`
-      <div style="text-align:center;padding:24px 12px">
-        <div style="font-size:40px;margin-bottom:12px">🔐</div>
-        <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:8px">অর্ডার ট্র্যাক করতে লগইন করুন</div>
-        <div style="font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:20px">আপনার অর্ডারের তথ্য সুরক্ষিত রাখতে লগইন করা প্রয়োজন।</div>
-        <button onclick="trackModalOpenLogin()" style="background:var(--dark);color:#fff;border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">লগইন করুন</button>
-      </div>`;
     // search bar লুকিয়ে রাখো
     const searchRow=modal.querySelector('#trackInput');
     if(searchRow){searchRow.closest('div').style.display='none';}
     const hint=modal.querySelector('p');
     if(hint)hint.style.display='none';
+
+    // Guest এর সাম্প্রতিক order খোঁজো (vc_pending_confirm বা vc_orders থেকে)
+    let guestOrder = null;
+    try{
+      const raw = localStorage.getItem('vc_pending_confirm');
+      if(raw) guestOrder = JSON.parse(raw);
+    }catch(e){}
+    // vc_pending_confirm না থাকলে vc_orders এ শেষ অতিথি order খোঁজো
+    if(!guestOrder){
+      try{
+        const all = JSON.parse(localStorage.getItem('vc_orders')||'[]');
+        // userId নেই এমন (guest) orders এর সর্বশেষটা নাও
+        const guestOrders = all.filter(o=>!o.userId && !o.user_id);
+        if(guestOrders.length) guestOrder = guestOrders[guestOrders.length-1];
+      }catch(e){}
+    }
+
+    if(guestOrder){
+      // Guest এর order পাওয়া গেছে — দেখাও
+      const statusLabel={pending:'⏳ পেন্ডিং',confirmed:'✅ কনফার্ম',shipped:'🚚 শিপড',delivered:'📦 ডেলিভার্ড',cancelled:'❌ বাতিল',rejected:'❌ বাতিল'};
+      const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',cancelled:'#E63946',rejected:'#E63946'};
+      const o = guestOrder;
+      const st = o.status || 'pending';
+      const items = (o.items||[]).map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6"><span style="font-size:20px">${i.emoji||'📦'}</span><div style="flex:1"><div style="font-size:12.5px;font-weight:600">${escHtml(i.name||'')}</div><div style="font-size:11.5px;color:#6B7280">× ${i.qty} — ৳${((i.price||0)*i.qty).toLocaleString()}</div></div></div>`).join('');
+      document.getElementById('trackResult').innerHTML=`
+        <div style="margin-bottom:14px">
+          <div style="border:1.5px solid var(--border);border-radius:14px;overflow:hidden">
+            <div style="background:var(--dark);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+              <div style="color:#fff;font-size:14px;font-weight:700">${escHtml(o.orderNum||o.id||'')}</div>
+              <div style="font-size:11.5px;font-weight:700;background:${statusColor[st]||'#888'};color:#fff;padding:4px 12px;border-radius:20px">${statusLabel[st]||st}</div>
+            </div>
+            <div style="padding:14px 16px">
+              <div style="font-size:12px;color:var(--gray);margin-bottom:10px">📅 ${new Date(o.date||Date.now()).toLocaleDateString('en-GB')} &nbsp;|&nbsp; 👤 ${escHtml(o.customer?.name||'')}</div>
+              <div style="margin-bottom:12px">${items}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
+                <div style="font-size:13.5px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
+                ${['confirmed','shipped','delivered'].includes(st)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>`:''}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.9;color:#92400E">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#78350F">⚠️ গেস্ট হিসেবে অর্ডার করা হয়েছে</div>
+          আপনি এই মুহূর্তে <strong>লগইন ছাড়া</strong> অর্ডার করেছেন। এই অর্ডারের তথ্য আপনার ডিভাইসে সাময়িকভাবে সংরক্ষিত আছে।<br><br>
+          <strong>⚠️ গুরুত্বপূর্ণ:</strong> আপনি যদি এখন ওয়েবসাইটে <strong>লগইন করেন</strong>, তাহলে এই অর্ডারটি আপনার অ্যাকাউন্টে দেখা যাবে না। আপনার ব্যক্তিগত তথ্যের সুরক্ষার জন্য গেস্ট এবং লগইন অর্ডার আলাদাভাবে সংরক্ষণ করা হয়।<br><br>
+          📋 অর্ডার নম্বর সেভ রাখুন: <strong style="color:#92400E">${escHtml(o.orderNum||o.id||'')}</strong> — WhatsApp (01816-365504) এ যোগাযোগ করলে এই নম্বর দিয়ে আপনার অর্ডার খুঁজে পাওয়া যাবে।
+        </div>`;
+    } else {
+      // কোনো guest order নেই — সাধারণ notice
+      document.getElementById('trackResult').innerHTML=`
+        <div style="text-align:center;padding:28px 12px">
+          <div style="font-size:44px;margin-bottom:14px">📦</div>
+          <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:8px">কোনো অর্ডার পাওয়া যায়নি</div>
+          <div style="font-size:13px;color:var(--gray);line-height:1.8;margin-bottom:20px">আপনি এখনো কোনো অর্ডার করেননি, অথবা এই ডিভাইসে অর্ডারের তথ্য নেই।</div>
+          <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#166534;line-height:1.8;text-align:left">
+            💡 অর্ডার করার পরে এই বাটনে ক্লিক করলে আপনার অর্ডারের তথ্য দেখা যাবে।<br>
+            অর্ডার ট্র্যাকিং বা সাহায্যের জন্য WhatsApp এ যোগাযোগ করুন: <strong>01816-365504</strong>
+          </div>
+        </div>`;
+    }
   } else {
     // লগইন অবস্থায় — search bar দেখাও, তার নিজের orders লোড করো
     const searchRow=modal.querySelector('#trackInput');
@@ -5851,8 +6039,8 @@ function renderWishlist(){
       </div>
     </div>
     <div class="wl-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();orderItems=[{...PRODS.find(p=>p.id===${item.id}),qty:1}];openOrder(false)">⚡ অর্ডার করুন</button>
-      <button class="wl-btn wl-add" onclick="addToCart(${item.id},1);showToast('✅ কার্টে যোগ হয়েছে')">কার্টে যোগ</button>
+      <button class="wl-btn" style="background:#10B981;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();orderItems=[{...PRODS.find(p=>p.id===${item.id}),qty:1}];openOrder(false)">⚡ অর্ডার করুন</button>
+      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="addToCart(${item.id},1);showToast('✅ কার্টে যোগ হয়েছে')">🛒 কার্টে যোগ</button>
     </div>
   </div>`).join('');
 }
@@ -6172,18 +6360,17 @@ function loadCustomCategories(){
 }
 
 // ============================================================
-// DARK MODE — System preference অনুযায়ী অটোমেটিক
+// DARK MODE — সম্পূর্ণ বন্ধ করা হয়েছে
+// ওয়েবসাইট সবসময় লাইট মোডে থাকবে
+// ব্রাউজার যতই dark mode দেখাতে চাক না কেন
 // ============================================================
 (function(){
-  // ফোনে/ব্রাউজারে ডার্ক মোড অন থাকলে অটো apply
-  function applyDark(isDark){
-    if(isDark){document.body.classList.add('dark');}
-    else{document.body.classList.remove('dark');}
-  }
-  // প্রথমে চেক করো
-  applyDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
-  // পরে যদি ইউজার সিস্টেম সেটিং পরিবর্তন করে, সাথে সাথে আপডেট হবে
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>applyDark(e.matches));
+  // সবসময় body থেকে dark class সরিয়ে ফেলো
+  document.body.classList.remove('dark');
+  document.documentElement.classList.remove('sys-dark');
+  
+  // এখন থেকে কোনো dark mode apply হবে না
+  // মোবাইল বা ডেস্কটপের সিস্টেম dark mode হলেও ওয়েবসাইট লাইটই থাকবে
 })();
 </script>
 
