@@ -1949,9 +1949,6 @@ function delDefaultProd(id) {
   showAdminToast('🗑️ প্রোডাক্ট মুছে ফেলা হয়েছে');
 }
 
-// ── Legacy: renderDefaultProdTbl (no-op now) ──
-function renderDefaultProdTbl() { renderProdTbl(); }
-
 // ══════════════════════════════════════
 //  DRAG & DROP PRODUCT REORDERING
 // ══════════════════════════════════════
@@ -3189,27 +3186,6 @@ function smartParse(raw){
 
   return { name, cat, price, old, stock, rating, warranty, badge, quick_specs: quickSpecs, desc, features, tech_specs, faqs, closing };
 }
-
-function fillParsedForm(p){
-  const safe = (v, fb) => (v !== undefined && v !== null) ? v : fb;
-  document.getElementById('r_name').value = safe(p.name, '');
-  document.getElementById('r_price').value = safe(p.price, '');
-  document.getElementById('r_old').value = safe(p.old, '');
-  document.getElementById('r_stock').value = (p.stock??0);
-  document.getElementById('r_rating').value = safe(p.rating, 4.5);
-  document.getElementById('r_warranty').value = safe(p.warranty, '');
-  document.getElementById('r_quick_specs').value = safe(p.quick_specs, '');
-  document.getElementById('r_desc').value = safe(p.desc, '');
-  document.getElementById('r_features').value = Array.isArray(p.features) ? p.features.join('\n') : safe(p.features, '');
-  document.getElementById('r_tech_specs').value = safe(p.tech_specs, '');
-  document.getElementById('r_faqs').value = safe(p.faqs, '');
-  document.getElementById('r_closing').value = safe(p.closing, '');
-
-  // Set badge dropdown
-  const badgeSel = document.getElementById('r_badge');
-  if(badgeSel && p.badge){
-    [...badgeSel.options].forEach(o => { if(o.value === p.badge.toUpperCase()) o.selected = true; });
-  }
 
   // Set category dropdown
   const catSel = document.getElementById('r_cat');
