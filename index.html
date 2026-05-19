@@ -448,9 +448,14 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .pp-btn-order:hover:not(:disabled){background:var(--red)}
 .pp-btn-cart{background:var(--light);color:var(--dark);border:1.5px solid var(--border)}
 .pp-btn-cart:hover:not(:disabled){background:var(--border)}
-.pp-btn-wa{background:#25D366;color:#fff}
-.pp-btn-wa:hover{background:#1ebe5d}
+.pp-btn-wa{background:#0084FF;color:#fff;position:relative;overflow:hidden}
+.pp-btn-wa:hover{background:#0070d4}
+.pp-btn-wa::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .2s}
+.pp-btn-wa:active::after{background:rgba(255,255,255,.15)}
 .pp-btn:disabled{background:var(--gray);color:#fff;cursor:not-allowed}
+/* Smooth click feedback for WA/Messenger floating buttons */
+.f-btn{transition:transform .15s ease,box-shadow .15s ease}
+.f-btn:active{transform:scale(.92)!important}
 /* Cart button visible on mobile too */
 
 /* PRODUCT DETAIL TABS */
@@ -1211,7 +1216,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
     <div class="t-item"><div class="t-icon">🚚</div><div><div class="t-label">দ্রুত ডেলিভারি</div><div class="t-sub">ঢাকা ১-৩ দিন</div></div></div>
     <div class="t-item"><div class="t-icon">🛡️</div><div><div class="t-label">ওয়ারেন্টি</div><div class="t-sub">সকল প্রোডাক্টে</div></div></div>
     <div class="t-item"><div class="t-icon">✅</div><div><div class="t-label">অথেনটিক</div><div class="t-sub">১০০% নিশ্চিত</div></div></div>
-    <div class="t-item"><div class="t-icon">💬</div><div><div class="t-label">সাপোর্ট</div><div class="t-sub">WhatsApp: 01816-365504</div></div></div>
+    <div class="t-item"><div class="t-icon">💬</div><div><div class="t-label">সাপোর্ট</div><div class="t-sub" id="trustWaNum">WhatsApp: 01816-365504</div></div></div>
     <div class="t-item"><div class="t-icon">🔄</div><div><div class="t-label">রিটার্ন পলিসি</div><div class="t-sub">৭ দিনের মধ্যে</div></div></div>
   </div>
 </div>
@@ -1261,18 +1266,22 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
 <footer>
   <div class="footer-top">
     <div>
-      <div class="f-logo">Vangcur</div>
-      <div class="f-logo-sub">ভাঙচুর</div>
+      <!-- Logo: text or image — updated from admin -->
+      <div id="footerLogoWrap">
+        <div class="f-logo" id="footerLogoText">Vangcur</div>
+        <div class="f-logo-sub" id="footerLogoSub">ভাঙচুর</div>
+        <img id="footerLogoImg" src="" alt="Vangcur Logo" style="display:none;max-height:50px;width:auto;margin-bottom:8px">
+      </div>
       <p class="f-desc" id="footerDescText">Vangcur - ভাঙচুর বাংলাদেশের একটি আধুনিক Gadget &amp; Accessories ভিত্তিক E-commerce Brand। Official ও Unofficial সব ধরনের গ্যাজেট পাবেন Warranty Support সহ। সারা বাংলাদেশে Fast Home Delivery।</p>
-      <div class="f-social">
-        <a class="soc-btn" href="https://facebook.com/vangcurbdofficial" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-        <a class="soc-btn" href="https://instagram.com/vangcur_official" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-        <a class="soc-btn" href="https://tiktok.com/@vangcur.com" target="_blank" title="TikTok"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg></a>
-        <a class="soc-btn" href="https://wa.me/8801816365504" target="_blank" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
-        <a class="soc-btn" href="https://youtube.com/@vangcur" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+      <div class="f-social" id="footerSocialLinks">
+        <a class="soc-btn" id="socialFb" href="https://facebook.com/vangcurbdofficial" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+        <a class="soc-btn" id="socialIg" href="https://instagram.com/vangcur_official" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+        <a class="soc-btn" id="socialTk" href="https://tiktok.com/@vangcur.com" target="_blank" title="TikTok"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg></a>
+        <a class="soc-btn" id="socialWa" href="https://wa.me/8801816365504" target="_blank" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+        <a class="soc-btn" id="socialYt" href="https://youtube.com/@vangcur" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
       </div>
     </div>
-    <div class="f-col">
+    <div class="f-col" id="footerServiceCol">
       <h4>Customer Service</h4>
       <button onclick="document.getElementById('faqSec').scrollIntoView({behavior:'smooth'})">FAQ</button>
       <button onclick="openInfo('shipping')">Shipping Info</button>
@@ -1280,16 +1289,16 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
       <button onclick="openInfo('privacy')">Privacy Policy</button>
       <button onclick="openInfo('terms')">Terms &amp; Conditions</button>
     </div>
-    <div class="f-col">
+    <div class="f-col" id="footerContactCol">
       <h4>যোগাযোগ</h4>
-      <a href="tel:01816365504">📞 01816-365504</a>
-      <a href="mailto:vangcurbd@gmail.com">✉️ vangcurbd@gmail.com</a>
-      <a href="https://wa.me/8801816365504" target="_blank">💬 WhatsApp Support</a>
-      <a href="https://facebook.com/vangcurbdofficial" target="_blank">📘 Facebook Page</a>
-      <p style="color:rgba(255,255,255,.75);font-size:12px;margin-top:8px">📍 Dhaka, Bangladesh</p>
+      <a id="contactPhoneLink" href="tel:01816365504">📞 01816-365504</a>
+      <a id="contactEmailLink" href="mailto:vangcurbd@gmail.com">✉️ vangcurbd@gmail.com</a>
+      <a id="contactWaLink" href="https://wa.me/8801816365504" target="_blank">💬 WhatsApp Support</a>
+      <a id="contactFbLink" href="https://facebook.com/vangcurbdofficial" target="_blank">📘 Facebook Page</a>
+      <p id="contactAddrText" style="color:rgba(255,255,255,.75);font-size:12px;margin-top:8px">📍 Dhaka, Bangladesh</p>
     </div>
   </div>
-  <div class="footer-bottom"><div class="f-copy">© 2026 Vangcur - ভাঙচুর. All rights reserved.</div></div>
+  <div class="footer-bottom"><div class="f-copy" id="footerCopyText">© 2026 Vangcur - ভাঙচুর. All rights reserved.</div></div>
 </footer>
 
 <!-- BACK TO TOP -->
@@ -1342,13 +1351,13 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
         <div id="ppQtyTotal" style="display:none;background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--dark)"></div>
         <div style="margin-left:auto;display:flex;gap:8px">
           <button id="ppWishBtn" onclick="toggleWishFromPP()" title="Wishlist এ যোগ করুন" style="width:40px;height:40px;border-radius:10px;background:var(--light);border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:var(--tr)">🤍</button>
-          <button onclick="shareProduct()" title="WhatsApp এ শেয়ার করুন" style="width:40px;height:40px;border-radius:10px;background:#E8FFF1;border:1.5px solid #BBF7D0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:var(--tr)">🔗</button>
+          <button onclick="waOrder()" title="WhatsApp এ অর্ডার করুন" style="width:40px;height:40px;border-radius:10px;background:#25D366;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr)"><svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>
         </div>
       </div>
       <div class="pp-actions">
         <button class="pp-btn pp-btn-order" id="ppBtnOrder" onclick="orderNow()">⚡ এখনই অর্ডার করুন</button>
         <button class="pp-btn pp-btn-cart" id="ppBtnCart" onclick="addCartFromPP()">🛒 কার্টে যোগ করুন</button>
-        <button class="pp-btn pp-btn-wa" id="ppBtnWa" onclick="waOrder()"><svg width="17" height="17" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp এ অর্ডার করুন</button>
+        <button class="pp-btn pp-btn-wa" id="ppBtnWa" onclick="msgOrder()" style="background:#0084FF"><svg width="17" height="17" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.9 1.19 5.44 3.14 7.17.16.14.26.35.27.57l.05 1.78c.02.57.61.94 1.13.7l1.98-.87c.17-.08.36-.09.54-.04.9.25 1.87.38 2.89.38C17.64 21.4 22 17.27 22 11.7 22 6.13 17.64 2 12 2zm6.11 7.37l-2.96 4.7c-.47.74-1.47.93-2.17.41l-2.36-1.76c-.22-.16-.51-.16-.72 0l-3.18 2.41c-.42.32-.97-.16-.69-.62l2.96-4.7c.47-.74 1.47-.93 2.17-.41l2.36 1.76c.22.16.51.16.72 0l3.18-2.41c.43-.32.97.17.69.62z"/></svg> Messenger এ অর্ডার করুন</button>
       </div>
     </div>
   </div>
@@ -1602,7 +1611,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#e0e0e0}
             <div class="bkash-icon">📱</div>
             <div>
               <div class="bkash-label">bKash Send Money</div>
-              <div class="bkash-number">01816-365504</div>
+              <div class="bkash-number" id="bkashDisplayNumber">01816-365504</div>
             </div>
           </div>
           <button id="bkashCopyBtn" class="bkash-copy-btn" onclick="copyBkash(this)">
@@ -1912,30 +1921,163 @@ const HERO_IMAGES=[];
 // _settings: Supabase থেকে লোড হওয়া settings object
 let _settings = {};
 function applyAdminSettings(){
-  // Logo
+  // ===== LOGO (header + footer) =====
   const logo=_settings['vc_logo']||null;
   if(logo){
-    const lm=document.querySelector('.logo-mark');const ls=document.querySelector('.logo-sub');
-    if(lm&&logo.main)lm.textContent=logo.main;
-    if(ls&&logo.sub)ls.textContent=logo.sub;
-    if(lm&&logo.color)lm.style.color=logo.color;
-    if(ls&&logo.subColor)ls.style.color=logo.subColor;
+    if(logo.type === 'image' && logo.img){
+      // Image logo — header
+      const lm = document.querySelector('.logo-mark');
+      const ls = document.querySelector('.logo-sub');
+      if(lm){ lm.style.display='none'; }
+      if(ls){ ls.style.display='none'; }
+      // Check if header logo img exists
+      let headerLogoImg = document.getElementById('headerLogoImg');
+      if(!headerLogoImg){
+        headerLogoImg = document.createElement('img');
+        headerLogoImg.id = 'headerLogoImg';
+        headerLogoImg.style.cssText = 'height:'+(logo.height||40)+'px;width:auto;vertical-align:middle;cursor:pointer';
+        headerLogoImg.onclick = ()=>{ window.scrollTo({top:0,behavior:'smooth'}); };
+        if(lm && lm.parentElement) lm.parentElement.insertBefore(headerLogoImg, lm);
+      }
+      headerLogoImg.src = logo.img;
+      headerLogoImg.alt = logo.alt || 'Vangcur Logo';
+      headerLogoImg.style.height = (logo.height||40)+'px';
+      // Footer logo image
+      const fli = document.getElementById('footerLogoImg');
+      const flt = document.getElementById('footerLogoText');
+      const fls = document.getElementById('footerLogoSub');
+      if(fli){ fli.src=logo.img; fli.alt=logo.alt||'Vangcur Logo'; fli.style.display='block'; fli.style.maxHeight=(logo.height||50)+'px'; }
+      if(flt) flt.style.display='none';
+      if(fls) fls.style.display='none';
+    } else {
+      // Text logo
+      const lm=document.querySelector('.logo-mark');const ls=document.querySelector('.logo-sub');
+      if(lm&&logo.main){ lm.textContent=logo.main; lm.style.display=''; }
+      if(ls&&logo.sub){ ls.textContent=logo.sub; ls.style.display=''; }
+      if(lm&&logo.color) lm.style.color=logo.color;
+      if(ls&&logo.subColor) ls.style.color=logo.subColor;
+      // Footer text logo
+      const flt=document.getElementById('footerLogoText');const fls=document.getElementById('footerLogoSub');
+      if(flt&&logo.main){ flt.textContent=logo.main; flt.style.display=''; }
+      if(fls&&logo.sub){ fls.textContent=logo.sub; fls.style.display=''; }
+      const fli=document.getElementById('footerLogoImg');
+      if(fli) fli.style.display='none';
+    }
     if(logo.favicon){const fi=document.querySelector("link[rel='icon']")||document.createElement('link');fi.rel='icon';fi.href=logo.favicon;document.head.appendChild(fi);}
   }
+
   // Brand/title
   const brand=_settings['vc_brand']||null;
   if(brand&&brand.title)document.title=brand.title;
-  // Contact settings (WhatsApp number etc.)
+
+  // ===== CONTACT =====
   const contact=_settings['vc_contact']||null;
   if(contact){
-    // Update WhatsApp links
+    if(contact.phone){
+      const el=document.getElementById('contactPhoneLink');
+      if(el){ el.href='tel:'+contact.phone.replace(/\D/g,''); el.textContent='📞 '+contact.phone; }
+    }
     if(contact.wa){
-      document.querySelectorAll('a[href*="wa.me/8801816"]').forEach(a=>{
-        a.href=a.href.replace(/wa\.me\/880\d+/,'wa.me/88'+contact.wa.replace(/\D/g,''));
+      const waNum='88'+contact.wa.replace(/^88/,'').replace(/\D/g,'');
+      const el=document.getElementById('contactWaLink');
+      if(el){ el.href='https://wa.me/'+waNum; }
+      // Update all wa.me links
+      document.querySelectorAll('a[href*="wa.me/"]').forEach(a=>{
+        if(!a.id||a.id!=='contactFbLink') a.href=a.href.replace(/wa\.me\/\d+/,'wa.me/'+waNum);
+      });
+      // Update floating WA button
+      const fbWa=document.querySelector('.f-btn.fb-wa');
+      if(fbWa) fbWa.setAttribute('onclick',`window.open('https://wa.me/${waNum}','_blank')`);
+      // Update trust strip WA number
+      document.querySelectorAll('.t-sub').forEach(el=>{
+        if(el.textContent.includes('WhatsApp:')) el.textContent='WhatsApp: '+contact.wa;
+      });
+      // Update important warning
+      document.querySelectorAll('li strong').forEach(el=>{
+        if(el.parentElement&&el.parentElement.textContent.includes('WhatsApp:')) el.textContent=contact.wa;
+      });
+      // Update waOrder references in FAQ/static text
+      document.querySelectorAll('p,li').forEach(el=>{
+        if(el.textContent.includes('01816-365504')||el.textContent.includes('01816365504')){
+          el.innerHTML=el.innerHTML.replace(/01816-365504/g,contact.wa).replace(/01816365504/g,contact.wa.replace(/-/g,''));
+        }
+      });
+    }
+    if(contact.bk){
+      // Update bkash number display in payment step
+      const bkEl=document.getElementById('bkashDisplayNumber');
+      if(bkEl) bkEl.textContent=contact.bk;
+    }
+    if(contact.messenger){
+      // Update floating messenger button
+      const fbMsg=document.querySelector('.f-btn.fb-msg');
+      if(fbMsg) fbMsg.setAttribute('onclick',`window.open('${contact.messenger}','_blank')`);
+    }
+    if(contact.email){
+      const el=document.getElementById('contactEmailLink');
+      if(el){ el.href='mailto:'+contact.email; el.textContent='✉️ '+contact.email; }
+    }
+    if(contact.fb){
+      const el=document.getElementById('contactFbLink');
+      if(el){ el.href=contact.fb; }
+    }
+    if(contact.addr){
+      const el=document.getElementById('contactAddrText');
+      if(el) el.textContent='📍 '+contact.addr;
+    }
+  }
+
+  // ===== SOCIAL LINKS =====
+  const footerCfg = _settings['vc_footer'] || null;
+  if(footerCfg){
+    const fd = document.getElementById('footerDescText');
+    if(fd && footerCfg.desc) fd.textContent = footerCfg.desc;
+    const fc = document.getElementById('footerCopyText') || document.querySelector('.f-copy');
+    if(fc && footerCfg.copy) fc.textContent = footerCfg.copy;
+    if(footerCfg.fb){ const el=document.getElementById('socialFb'); if(el) el.href=footerCfg.fb; }
+    if(footerCfg.ig){ const el=document.getElementById('socialIg'); if(el) el.href=footerCfg.ig; }
+    if(footerCfg.tk){ const el=document.getElementById('socialTk'); if(el) el.href=footerCfg.tk; }
+    if(footerCfg.yt){ const el=document.getElementById('socialYt'); if(el) el.href=footerCfg.yt; }
+    if(footerCfg.wa){ const el=document.getElementById('socialWa'); if(el) el.href='https://wa.me/'+footerCfg.wa.replace(/\D/g,''); }
+  }
+
+  // ===== CUSTOMER SERVICE LINKS =====
+  const footerLinks = _settings['vc_footer_links'];
+  if(footerLinks && Array.isArray(footerLinks) && footerLinks.length){
+    const col = document.getElementById('footerServiceCol');
+    if(col){
+      col.innerHTML = '<h4>Customer Service</h4>';
+      footerLinks.forEach(lnk=>{
+        const url = lnk.url || '#';
+        const label = lnk.label || '';
+        if(url.startsWith('#') || url === ''){
+          // Scroll or section
+          const btn = document.createElement('button');
+          btn.textContent = label;
+          if(url === '#faqSec' || url.toLowerCase().includes('faq')){
+            btn.onclick = ()=>document.getElementById('faqSec')?.scrollIntoView({behavior:'smooth'});
+          } else if(url === 'shipping' || url === '#shipping'){
+            btn.onclick = ()=>openInfo('shipping');
+          } else if(url === 'returns' || url === '#returns'){
+            btn.onclick = ()=>openInfo('returns');
+          } else if(url === 'privacy' || url === '#privacy'){
+            btn.onclick = ()=>openInfo('privacy');
+          } else if(url === 'terms' || url === '#terms'){
+            btn.onclick = ()=>openInfo('terms');
+          } else {
+            btn.onclick = ()=>{ try{ document.querySelector(url)?.scrollIntoView({behavior:'smooth'}); }catch(e){} };
+          }
+          col.appendChild(btn);
+        } else {
+          const a = document.createElement('a');
+          a.href = url; a.target='_blank'; a.textContent = label;
+          col.appendChild(a);
+        }
       });
     }
   }
-  // FAQs — সবসময় default দিয়ে শুরু করো, admin এ valid FAQ থাকলে replace করো
+
+  // ===== FAQs =====
   FAQS.length=0;
   DEFAULT_FAQS.forEach(f=>FAQS.push(f));
   try{
@@ -1948,15 +2090,6 @@ function applyAdminSettings(){
       }
     }
   }catch(e){}
-
-  // ✅ Footer বিবরণ (admin থেকে সেভ হলে)
-  const footerCfg = _settings['vc_footer'] || null;
-  if(footerCfg){
-    const fd = document.getElementById('footerDescText');
-    if(fd && footerCfg.desc) fd.textContent = footerCfg.desc;
-    const fc = document.querySelector('.f-copy');
-    if(fc && footerCfg.copy) fc.textContent = footerCfg.copy;
-  }
 }
 
 // ============ NEW CATEGORY HERO SLIDER ============
@@ -3831,13 +3964,33 @@ function orderNow(){
     openOrder(false);
   }
 }
+function _getWaNum(){
+  const contact=(_settings&&_settings['vc_contact'])||{};
+  const wa=contact.wa||'8801816365504';
+  return '88'+wa.replace(/^88/,'').replace(/\D/g,'');
+}
+function _getMsgUrl(){
+  const contact=(_settings&&_settings['vc_contact'])||{};
+  return contact.messenger||'https://m.me/vangcurbdofficial';
+}
+function _getBkashNum(){
+  const contact=(_settings&&_settings['vc_contact'])||{};
+  return contact.bk||contact.phone||'01816365504';
+}
 function waOrder(){
   if(!curProd)return;
-  // UX-4: use proper product reference URL
   const pageUrl=window.location.href.split('?')[0].split('#')[0];
   const productRef=`${pageUrl}#prod-${curProd.id}`;
   const msg=`হ্যালো Vangcur! অর্ডার করতে চাই:\n\n📦 ${curProd.name}\n💰 ৳${curProd.price.toLocaleString()}\n🔢 পরিমাণ: ${curQty}\n🛡️ ওয়ারেন্টি: ${curProd.warranty}\n\n🔗 পণ্য রেফ: ${productRef}\n\nবিস্তারিত জানান।`;
-  window.open(`https://wa.me/8801816365504?text=${encodeURIComponent(msg)}`,'_blank');
+  window.open(`https://wa.me/${_getWaNum()}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function msgOrder(){
+  if(!curProd)return;
+  const pageUrl=window.location.href.split('?')[0].split('#')[0];
+  const productRef=`${pageUrl}#prod-${curProd.id}`;
+  const msg=`হ্যালো Vangcur! অর্ডার করতে চাই:\n\n📦 ${curProd.name}\n💰 ৳${curProd.price.toLocaleString()}\n🔢 পরিমাণ: ${curQty}\n🛡️ ওয়ারেন্টি: ${curProd.warranty}\n\n🔗 পণ্য রেফ: ${productRef}\n\nবিস্তারিত জানান।`;
+  const base=_getMsgUrl();
+  window.open(`${base}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
 // CART
@@ -5104,7 +5257,7 @@ function genInvoice(o){
       </div>
       <div class="payment-badge">💳 Payment: bKash &nbsp;|&nbsp; 🚚 Courier: Pathao</div>
       ${pi}
-      <div class="footer-note" style="margin-top:18px">📞 01816-365504 &nbsp;|&nbsp; ✉️ vangcurbd@gmail.com<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 Dhaka, Bangladesh</div>
+      <div class="footer-note" style="margin-top:18px" id="invoiceFooterNote">📞 ${((_settings&&_settings['vc_contact']&&_settings['vc_contact'].phone)||'01816-365504')} &nbsp;|&nbsp; ✉️ ${((_settings&&_settings['vc_contact']&&_settings['vc_contact'].email)||'vangcurbd@gmail.com')}<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 ${((_settings&&_settings['vc_contact']&&_settings['vc_contact'].addr)||'Dhaka, Bangladesh')}</div>
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
@@ -5468,7 +5621,13 @@ const INFO={
 function openInfo(p){
   // ✅ Admin থেকে সেভ করা কাস্টম কন্টেন্ট থাকলে সেটা দেখাও
   const custom = _settings && _settings['vc_info_pages'] && _settings['vc_info_pages'][p];
-  document.getElementById('infoContent').innerHTML = custom || INFO[p] || '';
+  // Shipping page এ admin এর delivery charge দেখাও
+  if(p === 'shipping' && !custom){
+    const sc = _settings['vc_shipping'] || {dhaka:90, out:130, bd:130};
+    document.getElementById('infoContent').innerHTML = `<h2>শিপিং তথ্য</h2><h3>ডেলিভারি চার্জ</h3><p>ঢাকা সিটি কর্পোরেশন (ভেতরে): <strong>৳${sc.dhaka}</strong> (Pathao Courier)</p><p>ঢাকা সিটি কর্পোরেশনের বাইরে: <strong>৳${sc.out}</strong> (Pathao Courier)</p><p>সারা বাংলাদেশ: <strong>৳${sc.bd}</strong> (Pathao Courier)</p><h3>ডেলিভারি সময়</h3><p>ঢাকার মধ্যে: ১-৩ কার্যদিবস | ঢাকার বাইরে: ২-৫ কার্যদিবস</p><h3>ক্লোজড বক্স ডেলিভারি</h3><p>সকল পার্সেল ক্লোজড বক্সে ডেলিভারি হবে। ডেলিভারির সময় আগে পেমেন্ট করতে হবে। সমস্যায় WhatsApp: 01816365504</p>`;
+  } else {
+    document.getElementById('infoContent').innerHTML = custom || INFO[p] || '';
+  }
   document.getElementById('infoOverlay').classList.add('show');
   lockBody();
 }
@@ -5571,21 +5730,22 @@ function goS(n){
 
 // COPY BKASH NUMBER
 function copyBkash(btn){
-  navigator.clipboard.writeText('01816365504').then(()=>{
+  const num=_getBkashNum().replace(/\D/g,'');
+  navigator.clipboard.writeText(num).then(()=>{
     const orig=btn.innerHTML;
     btn.innerHTML='✅ কপি হয়েছে!';
     btn.style.background='#10B981';
-    setTimeout(()=>{btn.innerHTML=orig;btn.style.background='#E63946';},2000);
+    setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';},2000);
   }).catch(()=>{
     // fallback for older browsers
     const ta=document.createElement('textarea');
-    ta.value='01816365504';ta.style.position='fixed';ta.style.opacity='0';
+    ta.value=num;ta.style.position='fixed';ta.style.opacity='0';
     document.body.appendChild(ta);ta.select();document.execCommand('copy');
     document.body.removeChild(ta);
     const orig=btn.innerHTML;
     btn.innerHTML='✅ কপি হয়েছে!';
     btn.style.background='#10B981';
-    setTimeout(()=>{btn.innerHTML=orig;btn.style.background='#E63946';},2000);
+    setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';},2000);
   });
 }
 

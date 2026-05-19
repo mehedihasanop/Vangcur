@@ -303,12 +303,9 @@ tr:hover td{background:#FAFAFA}
   <button class="nav-item" onclick="showPage('customers',this)">👥 কাস্টমার</button>
 
   <div class="sb-section">ডিজাইন</div>
-  <button class="nav-item" onclick="showPage('design-logo',this)">🏷️ লোগো ও ব্র্যান্ড</button>
   <button class="nav-item" onclick="showPage('design-cath-cards',this)">🃏 হিরো ক্যাটাগরি কার্ড</button>
   <button class="nav-item" onclick="showPage('design-categories',this)">🗂️ ক্যাটাগরি</button>
-  <button class="nav-item" onclick="showPage('design-header',this)">📌 Header</button>
-  <button class="nav-item" onclick="showPage('design-footer',this)">🔻 Footer</button>
-  <button class="nav-item" onclick="showPage('design-colors',this)">🎨 রঙ ও ফন্ট</button>
+  <button class="nav-item" onclick="showPage('design-footer',this)">🔻 Footer ও লোগো</button>
 
   <div class="sb-section">সেটিংস</div>
   <button class="nav-item" onclick="showPage('settings',this)">⚙️ সাধারণ</button>
@@ -603,17 +600,80 @@ A: App ও Remote দিয়ে..."></textarea>
 
   <!-- ===== FOOTER ===== -->
   <div class="page" id="page-design-footer">
-    <div class="page-head"><div><div class="page-title">Footer সেটিংস</div><div class="page-sub">Footer কাস্টমাইজ করুন</div></div></div>
+    <div class="page-head"><div><div class="page-title">Footer ও লোগো সেটিংস</div><div class="page-sub">ওয়েবসাইটের Footer ও লোগো সব কিছু এখান থেকে পরিবর্তন করুন — সরাসরি ওয়েবসাইটে আপডেট হবে</div></div></div>
+
+    <!-- ===== LOGO SECTION ===== -->
     <div class="card">
-      <div class="card-head"><span class="card-title">লাইভ প্রিভিউ</span></div>
-      <div class="preview-footer" id="footerPreview">
+      <div class="card-head"><span class="card-title">🏷️ লোগো সেটিংস</span><span class="card-sub">Header ও Footer উভয় জায়গায় একসাথে পরিবর্তন হবে</span></div>
+      <div style="background:#FEF3C7;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#92400E;margin-bottom:14px">💡 লোগো Image আপলোড করলে সেটা Header ও Footer উভয়তে দেখাবে। Image না দিলে Text লোগো ব্যবহার হবে।</div>
+
+      <!-- Logo Type Toggle -->
+      <div class="tabs" style="margin-bottom:14px">
+        <button class="tab-btn on" id="logoTypeTextBtn" onclick="switchLogoType('text',this)">✏️ Text লোগো</button>
+        <button class="tab-btn" id="logoTypeImgBtn" onclick="switchLogoType('image',this)">🖼️ Image লোগো</button>
+      </div>
+
+      <!-- Text Logo Fields -->
+      <div id="logoTextSection">
+        <div class="fg2c">
+          <div class="fg"><label>লোগো মূল নাম</label><input class="finp" id="logoMain" value="Vangcur" oninput="updateLogoPreview()"></div>
+          <div class="fg"><label>লোগো সাব-টেক্সট</label><input class="finp" id="logoSub" value="ভাঙচুর" oninput="updateLogoPreview()"></div>
+        </div>
+        <!-- Logo Preview -->
+        <div style="background:#1A1A1A;border-radius:10px;padding:14px 18px;display:inline-block;margin-bottom:12px">
+          <div id="logoMainPrev" style="font-family:'Playfair Display',serif;font-size:22px;color:#fff;line-height:1">Vangcur</div>
+          <div id="logoSubPrev" style="font-size:9px;color:#E63946;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:2px">ভাঙচুর</div>
+        </div>
+      </div>
+
+      <!-- Image Logo Fields -->
+      <div id="logoImageSection" style="display:none">
+        <div class="fg">
+          <label>লোগো Image আপলোড করুন <span class="hint">(PNG/JPG/WebP — সর্বোচ্চ 2MB)</span></label>
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div id="logoImgPreviewWrap" style="width:120px;height:50px;background:#f3f4f6;border-radius:8px;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden">
+              <img id="logoImgPreview" src="" alt="" style="max-width:100%;max-height:100%;display:none">
+              <span id="logoImgEmpty" style="font-size:11px;color:var(--gray);text-align:center;padding:4px">ছবি নেই</span>
+            </div>
+            <div style="flex:1;min-width:160px">
+              <label style="display:inline-block;background:#1A1A1A;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;margin-bottom:8px">
+                📁 ফাইল বেছে নিন
+                <input type="file" accept="image/*" style="display:none" onchange="handleLogoImageUpload(this)">
+              </label>
+              <br>
+              <input class="finp" id="logoImgUrl" placeholder="অথবা Image URL দিন..." oninput="onLogoUrlInput(this.value)" style="font-size:12px">
+            </div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Alt টেক্সট <span class="hint">(SEO এর জন্য)</span></label>
+          <input class="finp" id="logoAltText" value="Vangcur Logo" placeholder="Vangcur Logo">
+        </div>
+        <div class="fg">
+          <label>লোগো উচ্চতা <span class="hint">(px — Header এ কতটুকু বড় দেখাবে)</span></label>
+          <input class="finp" id="logoHeight" type="number" value="40" min="20" max="80" style="max-width:120px">
+        </div>
+      </div>
+
+      <button class="btn btn-dark" onclick="saveLogo()">💾 লোগো সেভ করুন — ওয়েবসাইটে আপডেট হবে</button>
+    </div>
+
+    <!-- ===== FOOTER BASIC ===== -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">📝 Footer বিবরণ ও Copyright</span></div>
+      <div class="preview-footer" id="footerPreview" style="margin-bottom:14px">
         <div style="font-family:'Playfair Display',serif;font-size:18px;color:#fff;margin-bottom:4px" id="fpLogo">Vangcur</div>
         <div id="fpDesc" style="font-size:11px;line-height:1.7;margin-bottom:8px">Your first choice for gadgets...</div>
         <div id="fpCopy" style="color:#E63946;font-size:11px">© 2026 Vangcur - ভাঙচুর. All rights reserved.</div>
       </div>
-      <div class="fg"><label>Footer বিবরণ</label><textarea class="finp" id="footerDesc" rows="2" oninput="document.getElementById('fpDesc').textContent=this.value">Your first choice for gadgets. অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ। সারা বাংলাদেশে হোম ডেলিভারি।</textarea></div>
+      <div class="fg"><label>Footer বিবরণ <span class="hint">(লোগোর নিচে Vangcur সম্পর্কে লেখা)</span></label><textarea class="finp" id="footerDesc" rows="3" oninput="document.getElementById('fpDesc').textContent=this.value">Your first choice for gadgets. অফিশিয়াল ও আনঅফিশিয়াল সব ধরনের গ্যাজেট পাবেন ওয়ারেন্টি সহ। সারা বাংলাদেশে হোম ডেলিভারি।</textarea></div>
       <div class="fg"><label>Copyright লেখা</label><input class="finp" id="footerCopy" value="© 2026 Vangcur - ভাঙচুর. All rights reserved." oninput="document.getElementById('fpCopy').textContent=this.value"></div>
-      <div class="card-head" style="margin-top:16px"><span class="card-title">সোশ্যাল মিডিয়া লিংক</span></div>
+      <button class="btn btn-dark" onclick="saveFooter()">💾 Footer বিবরণ সেভ করুন</button>
+    </div>
+
+    <!-- ===== SOCIAL MEDIA ===== -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">📱 সোশ্যাল মিডিয়া লিংক</span></div>
       <div class="fg2c">
         <div class="fg"><label>Facebook URL</label><input class="finp" id="sfb" value="https://facebook.com/vangcurbdofficial"></div>
         <div class="fg"><label>Instagram URL</label><input class="finp" id="sig" value="https://instagram.com/vangcur_official"></div>
@@ -622,16 +682,42 @@ A: App ও Remote দিয়ে..."></textarea>
         <div class="fg"><label>TikTok URL</label><input class="finp" id="stk" value="https://tiktok.com/@vangcur.com"></div>
         <div class="fg"><label>YouTube URL</label><input class="finp" id="syt" value="https://youtube.com/@vangcur"></div>
       </div>
-      <div class="fg"><label>WhatsApp নম্বর</label><input class="finp" id="swa" value="8801816365504"></div>
-      <div class="card-head" style="margin-top:16px"><span class="card-title">Customer Service লিংক (Footer)</span></div>
+      <div class="fg"><label>WhatsApp নম্বর <span class="hint">(880 দিয়ে শুরু)</span></label><input class="finp" id="swa" value="8801816365504"></div>
+      <button class="btn btn-dark" onclick="saveSocial()">💾 সোশ্যাল লিংক সেভ করুন</button>
+    </div>
+
+    <!-- ===== CUSTOMER SERVICE LINKS ===== -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">🛎️ Customer Service লিংক</span><span class="card-sub">Footer-এ "Customer Service" কলামের লিংকগুলো</span></div>
       <div id="footerLinks" style="display:flex;flex-direction:column;gap:7px">
         <div class="spec-row"><input placeholder="লেবেল (যেমন: FAQ)" value="FAQ"><input placeholder="URL বা #id" value="#faqSec"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
-        <div class="spec-row"><input placeholder="লেবেল" value="Shipping Info"><input placeholder="URL" value="#"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
-        <div class="spec-row"><input placeholder="লেবেল" value="Returns & Refunds"><input placeholder="URL" value="#"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
+        <div class="spec-row"><input placeholder="লেবেল" value="Shipping Info"><input placeholder="URL বা #" value="shipping"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
+        <div class="spec-row"><input placeholder="লেবেল" value="Returns &amp; Refunds"><input placeholder="URL বা #" value="returns"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
+        <div class="spec-row"><input placeholder="লেবেল" value="Privacy Policy"><input placeholder="URL বা #" value="privacy"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
+        <div class="spec-row"><input placeholder="লেবেল" value="Terms &amp; Conditions"><input placeholder="URL বা #" value="terms"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button></div>
       </div>
       <button type="button" onclick="addFooterLink()" class="btn btn-outline btn-sm" style="margin-top:8px">+ লিংক যোগ করুন</button>
       <br><br>
-      <button class="btn btn-dark" onclick="saveFooter()">💾 Footer সেভ করুন</button>
+      <button class="btn btn-dark" onclick="saveFooterLinks()">💾 Customer Service লিংক সেভ করুন</button>
+    </div>
+
+    <!-- ===== CONTACT INFO ===== -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">📞 যোগাযোগ তথ্য</span><span class="card-sub">Footer-এ "যোগাযোগ" কলামের তথ্য</span></div>
+      <div class="fg2c">
+        <div class="fg"><label>ফোন নম্বর</label><input class="finp" id="contactPhone" value="01816365504" placeholder="01816365504"></div>
+        <div class="fg"><label>WhatsApp নম্বর</label><input class="finp" id="contactWa" value="8801816365504" placeholder="8801816365504"></div>
+      </div>
+      <div class="fg2c">
+        <div class="fg"><label>bKash নম্বর <span class="hint">— পেমেন্ট পেজে দেখাবে</span></label><input class="finp" id="contactBk" value="01816-365504" placeholder="01816-365504"></div>
+        <div class="fg"><label>Messenger Page URL <span class="hint">— m.me/yourpage</span></label><input class="finp" id="contactMessenger" value="https://m.me/vangcurbdofficial" placeholder="https://m.me/yourpage"></div>
+      </div>
+      <div class="fg2c">
+        <div class="fg"><label>ইমেইল</label><input class="finp" id="contactEmail" value="vangcurbd@gmail.com"></div>
+        <div class="fg"><label>Facebook Page URL</label><input class="finp" id="contactFb" value="https://facebook.com/vangcurbdofficial"></div>
+      </div>
+      <div class="fg"><label>ঠিকানা</label><input class="finp" id="contactAddr" value="Dhaka, Bangladesh"></div>
+      <button class="btn btn-dark" onclick="saveContactInfo()">💾 যোগাযোগ তথ্য সেভ করুন</button>
     </div>
 
     <!-- ✅ নতুন: পলিসি পেজ এডিটর -->
@@ -1366,6 +1452,8 @@ async function syncAdminData(){
     }
     // ✅ পলিসি এডিটর populate করো
     if(typeof loadInfoPageEditor === 'function') loadInfoPageEditor();
+    // ✅ Footer form populate করো
+    if(typeof loadFooterAdminForm === 'function') loadFooterAdminForm();
   } catch(e){ console.warn('Settings sync failed:', e); }
 
   // Supabase থেকে custom_products load করো
@@ -1481,7 +1569,7 @@ function showPage(id,btn){
   }
   if(id==='customers')renderCustomers();
   if(id==='dashboard')initDash();
-  if(id==='design-hero')renderHeroSlides();
+  if(id==='design-footer'){ loadFooterAdminForm(); loadInfoPageEditor(); }
   if(id==='design-cath-cards')renderCathCardList();
   if(id==='design-categories')renderCategoryList();
   if(id==='faq-settings')renderFAQSettings();
@@ -2565,21 +2653,181 @@ function saveHeader(){
 // ======= FOOTER SETTINGS =======
 function addFooterLink(){
   const d=document.createElement('div');d.className='spec-row';
-  d.innerHTML='<input placeholder="লেবেল" class="sk"><input placeholder="URL বা #id" class="sv"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>';
+  d.innerHTML='<input placeholder="লেবেল" class="sk"><input placeholder="URL বা #id (যেমন: shipping অথবা #faqSec)" class="sv"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>';
   document.getElementById('footerLinks').appendChild(d);
 }
+
+// Save footer desc + copyright only
 function saveFooter(){
   const desc = document.getElementById('footerDesc')?.value || '';
   const copy = document.getElementById('footerCopy')?.value || '';
+  const existing = _adminSettings['vc_footer'] || {};
+  const footerData = { ...existing, desc, copy };
+  saveSettingToSupabase('vc_footer', footerData);
+  _adminSettings['vc_footer'] = footerData;
+  showAdminToast('✅ Footer বিবরণ সেভ হয়েছে!');
+}
+
+// Save social links
+function saveSocial(){
   const fb = document.getElementById('sfb')?.value || '';
   const ig = document.getElementById('sig')?.value || '';
   const tk = document.getElementById('stk')?.value || '';
   const yt = document.getElementById('syt')?.value || '';
   const wa = document.getElementById('swa')?.value || '';
-  const footerData = { desc, copy, fb, ig, tk, yt, wa };
+  const existing = _adminSettings['vc_footer'] || {};
+  const footerData = { ...existing, fb, ig, tk, yt, wa };
   saveSettingToSupabase('vc_footer', footerData);
   _adminSettings['vc_footer'] = footerData;
-  showAdminToast('✅ Footer সেভ হয়েছে!');
+  showAdminToast('✅ সোশ্যাল লিংক সেভ হয়েছে!');
+}
+
+// Save footer customer service links
+function saveFooterLinks(){
+  const rows = document.querySelectorAll('#footerLinks .spec-row');
+  const links = [];
+  rows.forEach(r=>{
+    const inputs = r.querySelectorAll('input');
+    if(inputs.length>=2){
+      const label = inputs[0].value.trim();
+      const url   = inputs[1].value.trim();
+      if(label) links.push({label, url});
+    }
+  });
+  saveSettingToSupabase('vc_footer_links', links);
+  _adminSettings['vc_footer_links'] = links;
+  showAdminToast('✅ Customer Service লিংক সেভ হয়েছে!');
+}
+
+// Save contact info
+function saveContactInfo(){
+  const phone = document.getElementById('contactPhone')?.value || '';
+  const wa    = document.getElementById('contactWa')?.value || '';
+  const bk    = document.getElementById('contactBk')?.value || '';
+  const messenger = document.getElementById('contactMessenger')?.value || '';
+  const email = document.getElementById('contactEmail')?.value || '';
+  const fb    = document.getElementById('contactFb')?.value || '';
+  const addr  = document.getElementById('contactAddr')?.value || '';
+  const data  = { phone, wa, bk, messenger, email, fb, addr };
+  saveSettingToSupabase('vc_contact', data);
+  _adminSettings['vc_contact'] = data;
+  showAdminToast('✅ যোগাযোগ তথ্য সেভ হয়েছে!');
+}
+
+// ======= LOGO SETTINGS (New Unified) =======
+let _logoType = 'text'; // 'text' or 'image'
+let _logoImgData = ''; // base64 or URL
+
+function switchLogoType(type, btn){
+  _logoType = type;
+  document.getElementById('logoTextSection').style.display = type==='text' ? '' : 'none';
+  document.getElementById('logoImageSection').style.display = type==='image' ? '' : 'none';
+  ['logoTypeTextBtn','logoTypeImgBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.className = 'tab-btn' + (el.id === (type==='text'?'logoTypeTextBtn':'logoTypeImgBtn') ? ' on' : '');
+  });
+}
+
+function updateLogoPreview(){
+  const m = document.getElementById('logoMain')?.value || 'Vangcur';
+  const s = document.getElementById('logoSub')?.value || 'ভাঙচুর';
+  const pm = document.getElementById('logoMainPrev');
+  const ps = document.getElementById('logoSubPrev');
+  if(pm) pm.textContent = m;
+  if(ps) ps.textContent = s;
+}
+
+function handleLogoImageUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ showAdminToast('⚠️ ছবির সাইজ ২MB এর বেশি'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    _logoImgData = e.target.result;
+    showLogoImgPreview(_logoImgData);
+    document.getElementById('logoImgUrl').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function onLogoUrlInput(url){
+  _logoImgData = url;
+  if(url) showLogoImgPreview(url);
+  else { document.getElementById('logoImgPreview').style.display='none'; document.getElementById('logoImgEmpty').style.display=''; }
+}
+
+function showLogoImgPreview(src){
+  const img = document.getElementById('logoImgPreview');
+  const empty = document.getElementById('logoImgEmpty');
+  img.src = src;
+  img.style.display = 'block';
+  if(empty) empty.style.display = 'none';
+}
+
+function saveLogo(){
+  let logoData = {};
+  if(_logoType === 'image' && _logoImgData){
+    logoData = { type:'image', img:_logoImgData, alt: document.getElementById('logoAltText')?.value||'Vangcur Logo', height: document.getElementById('logoHeight')?.value||40 };
+  } else {
+    const main  = document.getElementById('logoMain')?.value || 'Vangcur';
+    const sub   = document.getElementById('logoSub')?.value || 'ভাঙচুর';
+    logoData = { type:'text', main, sub };
+  }
+  saveSettingToSupabase('vc_logo', logoData);
+  _adminSettings['vc_logo'] = logoData;
+  showAdminToast('✅ লোগো সেভ হয়েছে! ওয়েবসাইট রিলোড করলে দেখাবে।');
+}
+
+// Load footer settings into form fields when footer page is opened
+function loadFooterAdminForm(){
+  const footerCfg = _adminSettings['vc_footer'] || {};
+  if(footerCfg.desc){ const fd=document.getElementById('footerDesc'); if(fd){ fd.value=footerCfg.desc; document.getElementById('fpDesc').textContent=footerCfg.desc; } }
+  if(footerCfg.copy){ const fc=document.getElementById('footerCopy'); if(fc){ fc.value=footerCfg.copy; document.getElementById('fpCopy').textContent=footerCfg.copy; } }
+  if(footerCfg.fb){ const el=document.getElementById('sfb'); if(el) el.value=footerCfg.fb; }
+  if(footerCfg.ig){ const el=document.getElementById('sig'); if(el) el.value=footerCfg.ig; }
+  if(footerCfg.tk){ const el=document.getElementById('stk'); if(el) el.value=footerCfg.tk; }
+  if(footerCfg.yt){ const el=document.getElementById('syt'); if(el) el.value=footerCfg.yt; }
+  if(footerCfg.wa){ const el=document.getElementById('swa'); if(el) el.value=footerCfg.wa; }
+
+  // Contact
+  const contactCfg = _adminSettings['vc_contact'] || {};
+  if(contactCfg.phone){ const el=document.getElementById('contactPhone'); if(el) el.value=contactCfg.phone; }
+  if(contactCfg.wa){ const el=document.getElementById('contactWa'); if(el) el.value=contactCfg.wa; }
+  if(contactCfg.bk){ const el=document.getElementById('contactBk'); if(el) el.value=contactCfg.bk; }
+  if(contactCfg.messenger){ const el=document.getElementById('contactMessenger'); if(el) el.value=contactCfg.messenger; }
+  if(contactCfg.email){ const el=document.getElementById('contactEmail'); if(el) el.value=contactCfg.email; }
+  if(contactCfg.fb){ const el=document.getElementById('contactFb'); if(el) el.value=contactCfg.fb; }
+  if(contactCfg.addr){ const el=document.getElementById('contactAddr'); if(el) el.value=contactCfg.addr; }
+
+  // Footer links
+  const savedLinks = _adminSettings['vc_footer_links'];
+  if(savedLinks && savedLinks.length){
+    const cont = document.getElementById('footerLinks');
+    if(cont){
+      cont.innerHTML = '';
+      savedLinks.forEach(lnk=>{
+        const d=document.createElement('div'); d.className='spec-row';
+        d.innerHTML=`<input placeholder="লেবেল" value="${escHtml(lnk.label||'')}"><input placeholder="URL বা #id" value="${escHtml(lnk.url||'')}"><button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>`;
+        cont.appendChild(d);
+      });
+    }
+  }
+
+  // Logo
+  const logoCfg = _adminSettings['vc_logo'] || {};
+  if(logoCfg.type === 'image' && logoCfg.img){
+    _logoType = 'image';
+    _logoImgData = logoCfg.img;
+    switchLogoType('image', null);
+    showLogoImgPreview(logoCfg.img);
+    if(logoCfg.alt){ const el=document.getElementById('logoAltText'); if(el) el.value=logoCfg.alt; }
+    if(logoCfg.height){ const el=document.getElementById('logoHeight'); if(el) el.value=logoCfg.height; }
+  } else if(logoCfg.main){
+    const ml=document.getElementById('logoMain'); const sl=document.getElementById('logoSub');
+    if(ml) ml.value=logoCfg.main;
+    if(sl) sl.value=logoCfg.sub||'';
+    updateLogoPreview();
+  }
 }
 
 // ✅ পলিসি পেজ ট্যাব সুইচ
@@ -2842,7 +3090,16 @@ async function saveSettings(){
     showAdminToast('✅ পাসওয়ার্ড পরিবর্তন সফল!');
   }
   
-  saveSettingToSupabase('vc_contact', {wa:document.getElementById('setWa').value,bk:document.getElementById('setBk').value,email:document.getElementById('setEmail').value,addr:document.getElementById('setAddr').value});
+  // Merge old basic settings with existing contact settings to avoid overwriting bk/messenger
+  const existingContact = _adminSettings['vc_contact'] || {};
+  const mergedContact = Object.assign({}, existingContact, {
+    wa: document.getElementById('setWa')?.value || existingContact.wa || '',
+    bk: document.getElementById('setBk')?.value || existingContact.bk || '',
+    email: document.getElementById('setEmail')?.value || existingContact.email || '',
+    addr: document.getElementById('setAddr')?.value || existingContact.addr || ''
+  });
+  saveSettingToSupabase('vc_contact', mergedContact);
+  _adminSettings['vc_contact'] = mergedContact;
   showAdminToast('✅ সেটিংস সেভ হয়েছে!');
 }
 
