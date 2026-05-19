@@ -3187,13 +3187,6 @@ function smartParse(raw){
   return { name, cat, price, old, stock, rating, warranty, badge, quick_specs: quickSpecs, desc, features, tech_specs, faqs, closing };
 }
 
-  // Set category dropdown
-  const catSel = document.getElementById('r_cat');
-  if(catSel && p.cat){
-    [...catSel.options].forEach(o => { if(o.value === p.cat) o.selected = true; });
-  }
-}
-
 // ── Image Manager ──
 function addRImgRow(val){
   const mgr = document.getElementById('r_imgMgr');
