@@ -2389,9 +2389,16 @@ async function saveProd(){
       }]).select().single();
       if(error)throw error;
       savedProd = data;
-      adminProds.push(savedProd); // আগে push করো, তারপর stock sync
+      // ✅ FIX: stock সঠিকভাবে set করো — Supabase return data তে stock না থাকলে data_obj থেকে নাও
+      if(savedProd.stock===undefined||savedProd.stock===null) savedProd.stock=data_obj.stock||0;
+      adminProds.push(savedProd);
     }
-    // ✅ vc_stock আপডেট করো — নতুন product এর stock সহ Supabase এ save হবে
+    // ✅ FIX: syncStockToSupabase এর আগে adminProds এ stock নিশ্চিত করো
+    const _justSavedId = savedProd.id;
+    const _justSavedIdx = adminProds.findIndex(p=>p.id===_justSavedId);
+    if(_justSavedIdx>-1 && (adminProds[_justSavedIdx].stock===undefined||adminProds[_justSavedIdx].stock===null)){
+      adminProds[_justSavedIdx].stock = data_obj.stock||0;
+    }
     await syncStockToSupabase();
     showAdminToast('✅ প্রোডাক্ট সেভ হয়েছে — সব ডিভাইসে দেখা যাবে');
   }catch(e){
@@ -2399,7 +2406,13 @@ async function saveProd(){
     showAdminToast('⚠️ সেভ ব্যর্থ: '+( e.message||'Supabase error'));
     return;
   }
-  closeProdModal();renderProdTbl(!eidNum);if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
+  // ✅ FIX: Admin panel এ নতুন product দেখাতে syncAdminData() দিয়ে fresh reload করো
+  closeProdModal();
+  await syncAdminData();
+  loadAdminStock();
+  renderProdTbl(true);
+  if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();
+  showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
 }
 
 async function delProd(id){
@@ -3335,8 +3348,14 @@ async function sendToProductForm(){
     if(error) throw error;
     // adminProds এ সঠিক id সহ যোগ করো
     adminProds = adminProds.filter(p=>p.id!==prod.id); // temp entry সরাও
+    // ✅ FIX: AI Planner এও stock সঠিকভাবে set করো
+    if(savedProd.stock===undefined||savedProd.stock===null) savedProd.stock=prod.stock||0;
     adminProds.push(savedProd);
     await syncStockToSupabase(); // stock Supabase এ sync করো
+    // ✅ FIX: Admin panel refresh করো
+    await syncAdminData();
+    loadAdminStock();
+    renderProdTbl(true);
     showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
   } catch(e){
     console.error('Supabase AI product save failed:', e);
