@@ -1908,7 +1908,13 @@ function renderProdTbl(scrollToLast = false) {
 
     return `<tr data-prod-id="${p.id}" style="${rowStyle}cursor:default">
       <td style="cursor:grab;color:#9CA3AF;font-size:18px;text-align:center;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
-      <td style="font-size:22px">${(p.imgs || ['📦'])[0]}</td>
+      <td style="width:48px;padding:4px">${(()=>{
+        const imgVal=(p.imgs||['📦'])[0];
+        const isUrl=typeof imgVal==='string'&&(imgVal.startsWith('http')||imgVal.startsWith('/'));
+        return isUrl
+          ? `<img src="${imgVal}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span style="display:none;font-size:22px">📦</span>`
+          : `<span style="font-size:22px">${imgVal}</span>`;
+      })()}</td>
       <td style="max-width:200px">
         <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}${defaultTag}</div>
         ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>` : ''}
@@ -2389,16 +2395,9 @@ async function saveProd(){
       }]).select().single();
       if(error)throw error;
       savedProd = data;
-      // ✅ FIX: stock সঠিকভাবে set করো — Supabase return data তে stock না থাকলে data_obj থেকে নাও
-      if(savedProd.stock===undefined||savedProd.stock===null) savedProd.stock=data_obj.stock||0;
-      adminProds.push(savedProd);
+      adminProds.push(savedProd); // আগে push করো, তারপর stock sync
     }
-    // ✅ FIX: syncStockToSupabase এর আগে adminProds এ stock নিশ্চিত করো
-    const _justSavedId = savedProd.id;
-    const _justSavedIdx = adminProds.findIndex(p=>p.id===_justSavedId);
-    if(_justSavedIdx>-1 && (adminProds[_justSavedIdx].stock===undefined||adminProds[_justSavedIdx].stock===null)){
-      adminProds[_justSavedIdx].stock = data_obj.stock||0;
-    }
+    // ✅ vc_stock আপডেট করো — নতুন product এর stock সহ Supabase এ save হবে
     await syncStockToSupabase();
     showAdminToast('✅ প্রোডাক্ট সেভ হয়েছে — সব ডিভাইসে দেখা যাবে');
   }catch(e){
@@ -2406,13 +2405,7 @@ async function saveProd(){
     showAdminToast('⚠️ সেভ ব্যর্থ: '+( e.message||'Supabase error'));
     return;
   }
-  // ✅ FIX: Admin panel এ নতুন product দেখাতে syncAdminData() দিয়ে fresh reload করো
-  closeProdModal();
-  await syncAdminData();
-  loadAdminStock();
-  renderProdTbl(true);
-  if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();
-  showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
+  closeProdModal();renderProdTbl(!eidNum);if(document.getElementById('page-design-categories')?.classList.contains('active'))renderCategoryList();showAdminToast('✅ প্রোডাক্ট সেভ ও ওয়েবসাইটে যোগ হয়েছে!');
 }
 
 async function delProd(id){
@@ -3348,14 +3341,8 @@ async function sendToProductForm(){
     if(error) throw error;
     // adminProds এ সঠিক id সহ যোগ করো
     adminProds = adminProds.filter(p=>p.id!==prod.id); // temp entry সরাও
-    // ✅ FIX: AI Planner এও stock সঠিকভাবে set করো
-    if(savedProd.stock===undefined||savedProd.stock===null) savedProd.stock=prod.stock||0;
     adminProds.push(savedProd);
     await syncStockToSupabase(); // stock Supabase এ sync করো
-    // ✅ FIX: Admin panel refresh করো
-    await syncAdminData();
-    loadAdminStock();
-    renderProdTbl(true);
     showAdminToast('✅ প্রোডাক্ট পাবলিশ হয়েছে! ওয়েবসাইটে দেখাবে।');
   } catch(e){
     console.error('Supabase AI product save failed:', e);
