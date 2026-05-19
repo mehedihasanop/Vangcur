@@ -637,8 +637,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .o-step:last-child::after{display:none}
 .o-step.done::after{background:#10B981}
 .o-step-num{width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--gray);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:3px}
-.o-step.active{color:#3B82F6}
-.o-step.active .o-step-num{background:#3B82F6;color:#fff}
+.o-step.active{color:var(--dark)}
+.o-step.active .o-step-num{background:var(--dark);color:#fff}
 .o-step.done .o-step-num{background:#10B981;color:#fff}
 .order-body{padding:20px 24px}
 .fg2{margin-bottom:15px}
@@ -803,7 +803,7 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 /* CHECKOUT PROGRESS BAR (U-6) */
 .o-progress-wrap{padding:0 24px 4px;background:var(--white)}
 .o-progress-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px}
-.o-progress-fill{height:100%;background:#3B82F6;border-radius:4px;transition:width .4s ease}
+.o-progress-fill{height:100%;background:var(--dark);border-radius:4px;transition:width .4s ease}
 .o-progress-hint{font-size:11px;color:var(--green);font-weight:600;text-align:right}
 /* TABLE SCROLL INDICATOR (D-3) */
 .tbl-scroll-hint{font-size:11px;color:var(--gray);text-align:right;margin-bottom:4px;display:none}
@@ -992,11 +992,11 @@ body.dark .acc-nav{background:#1C1C1E;border-bottom-color:#3A3A3C}
 body.dark .acc-header{background:#2C2C2E;border-bottom:1px solid #3A3A3C}
 
 /* ── Order step progress (dark) ── */
-body.dark .o-step.active{color:#64ACFF}
-body.dark .o-step.active .o-step-num{background:#3B82F6;color:#fff}
+body.dark .o-step.active{color:#e0e0e0}
+body.dark .o-step.active .o-step-num{background:#e0e0e0;color:#111}
 body.dark .o-step.done .o-step-num{background:#10B981;color:#fff}
 body.dark .o-step.done::after{background:#10B981}
-body.dark .o-progress-fill{background:#3B82F6}
+body.dark .o-progress-fill{background:#e0e0e0}
 
 /* ── Sum card (dark) ── */
 body.dark .sum-card{background:#2C2C2E;color:#E5E5EA}
@@ -1718,7 +1718,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       </div>
       <div style="background:var(--light);padding:10px 13px;border-radius:8px;margin-bottom:14px;font-size:12px;display:flex;justify-content:space-between;color:#1A1A1A"><span>Payment Method</span><span style="font-weight:700">bKash Online Payment</span></div>
       <div class="cust-recap" id="custRecap"></div>
-      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()" style="background:#10B981">✅ অর্ডার কনফার্ম করুন</button></div>
+      <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()" style="background:var(--dark)">✅ অর্ডার কনফার্ম করুন</button></div>
     </div>
   </div>
 </div>
