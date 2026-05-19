@@ -2432,7 +2432,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         }
       })
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'custom_products'},async(payload)=>{
-        if(payload.new&&!PRODS.find(x=>x.id===payload.new.id)){
+        if(payload.new&&!PRODS.find(x=>String(x.id)===String(payload.new.id))){
           const p = payload.new;
           const mapped = {
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
@@ -2469,9 +2469,10 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             faqs:Array.isArray(p.faqs)?p.faqs:[],
             closing:p.closing||'',
           };
-          const idx=PRODS.findIndex(x=>x.id===mapped.id);
+          // ✅ FIX: String compare, এবং UPDATE এ কখনো push করবো না — শুধু existing update
+          const idx=PRODS.findIndex(x=>String(x.id)===String(mapped.id));
           if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};}
-          else{PRODS.push(mapped);}
+          // else: product এখনো PRODS এ নেই মানে INSERT realtime আসেনি — push করলে duplicate হবে, তাই skip
           updateCatPillCounts();
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
