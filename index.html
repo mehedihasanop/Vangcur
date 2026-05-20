@@ -2577,7 +2577,13 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           warranty: p.warranty || '৭ দিন',
           rating: p.rating || 4.5,
           imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
-          specs: p.specs || {},
+          specs: (()=>{
+            let s = p.specs || {};
+            if(typeof s === 'string'){
+              try { s = JSON.parse(s); } catch(e){}
+            }
+            return s;
+          })(),
           desc: p.desc_text || p.desc || '',
           longDesc: p.long_desc || p.desc_text || p.desc || '',
           features: Array.isArray(p.features) ? p.features : [],
@@ -3258,6 +3264,21 @@ function _prodImgHTML(imgVal, name, lazy) {
   return `<span style="font-size:52px">${escHtml(imgVal)}</span>`;
 }
 
+// Quick specs helper — reads _quick_keys order if present, filters internal keys
+function getCardSpecs(p) {
+  const specs = p.specs || {};
+  const quickKeys = specs._quick_keys;
+  let entries = [];
+  if (Array.isArray(quickKeys)) {
+    quickKeys.forEach(k => {
+      if (specs[k] !== undefined) entries.push([k, specs[k]]);
+    });
+  } else {
+    entries = Object.entries(specs).filter(([k]) => !k.startsWith('_'));
+  }
+  return entries.slice(0, 2).map(([k,v]) => `${escHtml(k)}: ${escHtml(v)}`).join(' • ');
+}
+
 // একটি প্রোডাক্ট card DOM element তৈরি করে দেয়
 function _buildProdCard(p, isFirst) {
   const sold = p.stock <= 0;
@@ -3281,7 +3302,7 @@ function _buildProdCard(p, isFirst) {
   </div>
   <div class="prod-info">
     <div class="prod-name" onclick="openPP(${JSON.stringify(p.id)})">${escHtml(p.name)}</div>
-    <div class="prod-spec">${Object.entries(p.specs||{}).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
+    <div class="prod-spec">${getCardSpecs(p)}</div>
     <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
       <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
       <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${Math.floor((Number(p.id)||1)*37+p.stock*13)%80+20})</span>
@@ -3754,8 +3775,16 @@ function openPP(id){
   // Quick specs (top)
   const qsEl=document.getElementById('ppQuickSpecs');
   if(qsEl){
-    const entries=Object.entries(curProd.specs||{}).slice(0,6);
-    qsEl.innerHTML=(entries.length?`<div style="width:100%;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">স্পেসিফিকেশন এক নজরে</div>`:'')+entries.map(([k,v])=>`<div class="pp-qs-item"><span>${k}:</span>${v}</div>`).join('');
+    const specs=curProd.specs||{};
+    const quickKeys=specs._quick_keys;
+    let entries=[];
+    if(Array.isArray(quickKeys)){
+      quickKeys.forEach(k=>{if(specs[k]!==undefined)entries.push([k,specs[k]]);});
+    } else {
+      entries=Object.entries(specs).filter(([k])=>!k.startsWith('_'));
+    }
+    const shown=entries.slice(0,6);
+    qsEl.innerHTML=(shown.length?`<div style="width:100%;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">স্পেসিফিকেশন এক নজরে</div>`:'')+shown.map(([k,v])=>`<div class="pp-qs-item"><span>${escHtml(k)}:</span>${escHtml(v)}</div>`).join('');
   }
 
   // Gallery
@@ -3834,8 +3863,17 @@ function openPP(id){
   const techBody=document.getElementById('ppTechBody');
   if(techBody){
     const specs=curProd.specs||{};
-    techBody.innerHTML=Object.entries(specs).map(([k,v])=>`<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`).join('');
-    if(!Object.keys(specs).length) techBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:var(--gray);padding:16px">স্পেসিফিকেশন শীঘ্রই যোগ করা হবে।</td></tr>';
+    const quickKeys=specs._quick_keys;
+    let specEntries=[];
+    if(Array.isArray(quickKeys)){
+      quickKeys.forEach(k=>{if(specs[k]!==undefined)specEntries.push([k,specs[k]]);});
+      // Also include any keys not in _quick_keys (but not internal _ keys)
+      Object.entries(specs).forEach(([k,v])=>{if(!k.startsWith('_')&&!quickKeys.includes(k))specEntries.push([k,v]);});
+    } else {
+      specEntries=Object.entries(specs).filter(([k])=>!k.startsWith('_'));
+    }
+    techBody.innerHTML=specEntries.map(([k,v])=>`<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`).join('');
+    if(!specEntries.length) techBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:var(--gray);padding:16px">স্পেসিফিকেশন শীঘ্রই যোগ করা হবে।</td></tr>';
   }
 
   // FAQs
