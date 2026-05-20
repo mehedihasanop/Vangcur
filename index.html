@@ -1889,6 +1889,18 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 // ESCAPE HTML — XSS Protection (সর্বত্র ব্যবহৃত, তাই শুরুতে define)
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 
+// FIX: emoji/image helper — URL হলে <img> tag, নয়তো emoji text
+// size: px value (default 30), shape: 'round'|'square'
+function emojiHtml(val, size, shape) {
+  size = size || 30;
+  const radius = shape === 'square' ? '6px' : '50%';
+  const s = String(val || '📦');
+  if (s.startsWith('http') || s.startsWith('/')) {
+    return `<img src="${escHtml(s)}" width="${size}" height="${size}" style="object-fit:cover;border-radius:${radius};vertical-align:middle;flex-shrink:0" onerror="this.src='';this.style.display='none'">`;
+  }
+  return `<span style="font-size:${Math.round(size*0.87)}px;line-height:1">${s}</span>`;
+}
+
 // ============ PRODUCTS DATA ============
 const PRODS=[
   {id:1,cat:'rgb',name:'GearUP NRGB50 5M RGB Neon Light with App & Remote Control',imgs:['💡','🌟','✨'],price:1490,old:1800,specs:{দৈর্ঘ্য:'৫ মিটার',ধরন:'Neon Flex',নিয়ন্ত্রণ:'App + Remote',ভোল্টেজ:'DC 12V / 220V',রং:'16 Million Color'},warranty:'৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি',badge:'HOT',stock:20,desc:'GearUP NRGB50 প্রিমিয়াম মানের ৫ মিটার RGB নিয়ন লাইট। অ্যাপ ও রিমোট উভয়ে নিয়ন্ত্রণযোগ্য। ঘরের সাজসজ্জায় অসাধারণ আলোর পরিবেশ তৈরি করে।',
@@ -2631,12 +2643,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         } else if(key==='vc_deleted_defaults'){
           // Admin deleted a default product — remove from PRODS
           if(Array.isArray(val)){val.forEach(id=>{const idx=PRODS.findIndex(p=>p.id===id);if(idx>-1)PRODS.splice(idx,1);});}
-          applyProdOrder();
+          applyProdOrder(_settings['vc_prod_order'] || null);
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         } else if(key==='vc_prod_order'){
           // Admin reordered products
-          applyProdOrder();
+          applyProdOrder(val);
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
         }
@@ -2731,6 +2743,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateNavAuth();
   initCathSlider();
   initDuoSlider();
+  // FIX8: Page load এ layout শেষ হওয়ার পরে position আবার set করো
+  setTimeout(()=>{ try{ duoSetPosition(false); }catch(e){} }, 300);
   // ✅ FIX: pid — sessionStorage (same-tab) অথবা localStorage (page replace/reload) থেকে নাও
   const pid = (()=>{
     try{
@@ -3213,7 +3227,7 @@ async function renderMyOrders(){
     }).join('')}</td>
     <td>৳${(o.total||0).toLocaleString()}</td>
     <td><span class="s-pill ${sm[o.status]||'s-pending'}">${lm[o.status]||'⏳ পেন্ডিং'}</span></td>
-    <td>${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${escHtml(o.id)}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">📄 ডাউনলোড</button>`:'-'}</td>
+    <td><button onclick="dlInvoiceById('${escHtml(o.id)}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">📄 ডাউনলোড</button></td>
   </tr>`).join('');
 }
 
@@ -4122,7 +4136,7 @@ function quickOrder(id){
 }
 function buildModalItemHTML(item){
   return`<div id="qoi-${item.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">
-    <div style="font-size:30px;min-width:40px;text-align:center;padding-top:2px">${item.emoji}</div>
+    <div style="min-width:40px;text-align:center;padding-top:2px;display:flex;align-items:center;justify-content:center">${emojiHtml(item.emoji, 38, 'square')}</div>
     <div style="flex:1;min-width:0">
       <div style="font-size:13px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
       <div style="font-size:12px;color:var(--gray);margin-top:2px">৳${item.price.toLocaleString()} / পিস</div>
@@ -4276,7 +4290,7 @@ function renderCartItems(){
   if(!cart.length){body.innerHTML='<div class="cart-empty"><div style="font-size:44px;margin-bottom:10px">🛒</div><p style="margin-bottom:16px">আপনার কার্ট খালি</p><button onclick="closeCart();document.getElementById(\'prodSec\').scrollIntoView({behavior:\'smooth\'})" style="background:var(--dark);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">প্রোডাক্ট দেখুন →</button></div>';foot.style.display='none';return;}
   foot.style.display='block';let tot=0;
   body.innerHTML=cart.map(item=>{tot+=item.price*item.qty;return`<div class="cart-item">
-    <div class="ci-img">${escHtml(item.emoji)}</div>
+    <div class="ci-img">${emojiHtml(item.emoji, 38, 'square')}</div>
     <div class="ci-info">
       <div class="ci-name">${escHtml(item.name)}</div>
       <div class="ci-price">৳${(item.price*item.qty).toLocaleString()}</div>
@@ -4348,7 +4362,7 @@ function openOrder(warn){
   if(summaryEl&&listEl&&totalEl&&orderItems.length>0){
     summaryEl.style.display='block';
     summaryEl.dataset.hasItems='1';
-    listEl.innerHTML=orderItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12.5px"><span>${escHtml(i.emoji||'')} ${escHtml(i.name.length>30?i.name.slice(0,30)+'...':i.name)} × ${i.qty}</span><span style="font-weight:600">৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+    listEl.innerHTML=orderItems.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;gap:6px"><span style="display:flex;align-items:center;gap:5px">${emojiHtml(i.emoji||'📦',22,'square')} ${escHtml(i.name.length>30?i.name.slice(0,30)+'...':i.name)} × ${i.qty}</span><span style="font-weight:600">৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
     const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
     totalEl.innerHTML=`<span>Subtotal</span><span style="color:var(--red)">৳${sub.toLocaleString()}</span>`;
   } else if(summaryEl){
@@ -4451,7 +4465,7 @@ function goS3(){
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
   const tot=sub+sc;
-  document.getElementById('sumItems').innerHTML=orderItems.map(i=>`<div class="sum-row"><span>${escHtml(i.emoji||'')} ${escHtml(i.name.length>28?i.name.slice(0,28)+'...':i.name)} × ${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+  document.getElementById('sumItems').innerHTML=orderItems.map(i=>`<div class="sum-row" style="display:flex;align-items:center;justify-content:space-between;gap:6px"><span style="display:flex;align-items:center;gap:5px">${emojiHtml(i.emoji||'📦',22,'square')} ${escHtml(i.name.length>28?i.name.slice(0,28)+'...':i.name)} × ${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
   document.getElementById('sumSub').textContent=`৳${sub.toLocaleString()}`;
   document.getElementById('sumShip').textContent=`৳${sc}`;
   document.getElementById('sumTotal').textContent=`৳${tot.toLocaleString()}`;
@@ -5130,12 +5144,18 @@ document.addEventListener('visibilitychange',()=>{
       const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
       renderProds(cur);
     }catch(e){console.warn('Visibility refresh failed:',e);}})();
-    // ✅ FIX: Tab ফিরে আসলে cath slider ও duo slider layout re-calculate
-    // (Tab hidden থাকলে clientWidth=0 হয় — তাই card গুলো invisible হয়)
+    // FIX: Tab ফিরে আসলে slider re-initialize (hidden থাকলে clientWidth=0 হয়)
     requestAnimationFrame(()=>{
       setTimeout(()=>{
         try{ updateCathSlider(); }catch(e){}
+        // duoSetPosition আগে run করি তারপর আরেকটু পরে আবার (DOM fully painted নিশ্চিত করতে)
         try{ duoSetPosition(false); }catch(e){}
+        setTimeout(()=>{
+          try{
+            const wrap = document.getElementById('cathHeroDuo');
+            if(wrap && wrap.clientWidth > 0){ duoSetPosition(false); }
+          }catch(e){}
+        }, 250);
       }, 80);
     });
     // ✅ FIX: pendingOrdId না থাকলে localStorage থেকে restore করো
@@ -5381,7 +5401,7 @@ function genInvoice(o){
       <table class="prod-table">
         <thead><tr><th>Product</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th></tr></thead>
         <tbody>
-          ${(o.items||[]).map(i=>`<tr><td>${i.emoji||''} ${escHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.qty).toLocaleString()}</td></tr>`).join('')}
+          ${(o.items||[]).map(i=>`<tr><td style='display:flex;align-items:center;gap:6px'>${emojiHtml(i.emoji||'📦',26,'square')} ${escHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.qty).toLocaleString()}</td></tr>`).join('')}
           <tr><td colspan="2" style="color:#888">Shipping (${o.shipping==='dhaka'?'Dhaka City':'All Bangladesh'})</td><td style="text-align:right">৳${o.shippingCost}</td></tr>
         </tbody>
       </table>
@@ -5586,7 +5606,7 @@ function openTrackOrder(){
       const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',cancelled:'#E63946',rejected:'#E63946'};
       const o = guestOrder;
       const st = o.status || 'pending';
-      const items = (o.items||[]).map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6"><span style="font-size:20px">${i.emoji||'📦'}</span><div style="flex:1"><div style="font-size:12.5px;font-weight:600">${escHtml(i.name||'')}</div><div style="font-size:11.5px;color:#6B7280">× ${i.qty} — ৳${((i.price||0)*i.qty).toLocaleString()}</div></div></div>`).join('');
+      const items = (o.items||[]).map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6">${emojiHtml(i.emoji||'📦',36,'square')}<div style="flex:1"><div style="font-size:12.5px;font-weight:600">${escHtml(i.name||'')}</div><div style="font-size:11.5px;color:#6B7280">× ${i.qty} — ৳${((i.price||0)*i.qty).toLocaleString()}</div></div></div>`).join('');
       document.getElementById('trackResult').innerHTML=`
         <div style="margin-bottom:14px">
           <div style="border:1.5px solid var(--border);border-radius:14px;overflow:hidden">
@@ -5731,7 +5751,7 @@ function renderTrackResults(found, resultEl, isSearch){
         <div style="font-size:11px;font-weight:700;background:${statusColor[o.status]||'#888'}20;color:${statusColor[o.status]||'#888'};padding:4px 10px;border-radius:20px">${statusLabel[o.status]||o.status}</div>
       </div>
       <div style="font-size:12px;color:var(--gray);margin-bottom:8px">তারিখ: ${new Date(o.date).toLocaleDateString('en-GB')} | গ্রাহক: ${escHtml(o.customer?.name||'')}</div>
-      <div style="font-size:12px;margin-bottom:10px">${(o.items||[]).map(i=>`${i.emoji||'📦'} ${escHtml(i.name)} × ${i.qty}`).join('<br>')}</div>
+      <div style="font-size:12px;margin-bottom:10px">${(o.items||[]).map(i=>`<span style="display:inline-flex;align-items:center;gap:4px">${emojiHtml(i.emoji||'📦',18,'square')} ${escHtml(i.name)} × ${i.qty}</span>`).join('<br>')}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
         <div style="font-size:13px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
         ${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>`:''}
@@ -6028,7 +6048,7 @@ function renderWishlist(){
   const body=document.getElementById('wishlistBody');
   if(!w.length){body.innerHTML='<div class="wl-empty"><div style="font-size:44px;margin-bottom:10px">🤍</div><p>আপনার Wishlist খালি</p></div>';return;}
   body.innerHTML=w.map(item=>`<div class="wl-item" id="wli_${item.id}">
-    <div class="wl-img" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer">${escHtml(item.emoji)}</div>
+    <div class="wl-img" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;display:flex;align-items:center;justify-content:center">${emojiHtml(item.emoji, 48, 'square')}</div>
     <div class="wl-info" style="flex:1;min-width:0">
       <div class="wl-name" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;text-decoration:none" title="প্রোডাক্ট দেখুন">${escHtml(item.name)}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
@@ -6039,8 +6059,8 @@ function renderWishlist(){
       </div>
     </div>
     <div class="wl-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-      <button class="wl-btn" style="background:#10B981;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();orderItems=[{...PRODS.find(p=>p.id===${item.id}),qty:1}];openOrder(false)">⚡ অর্ডার করুন</button>
-      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="addToCart(${item.id},1);showToast('✅ কার্টে যোগ হয়েছে')">🛒 কার্টে যোগ</button>
+      <button class="wl-btn" style="background:#F3F4F6;color:#1A1A1A;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="addToCart(${item.id},1);showToast('✅ কার্টে যোগ হয়েছে')">🛒 কার্টে যোগ</button>
+      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();orderItems=[{...PRODS.find(p=>p.id===${item.id}),qty:1}];openOrder(false)">⚡ অর্ডার করুন</button>
     </div>
   </div>`).join('');
 }

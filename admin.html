@@ -871,6 +871,7 @@ A: App ও Remote দিয়ে..."></textarea>
     <script>
     // ======= UTILITY (সবার আগে define — escHtml ছাড়া renderCathCardGrid crash করে) =======
     function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+    function emojiHtml(val,size,shape){size=size||26;const radius=shape==='square'?'5px':'50%';const s=String(val||'📦');if(s.startsWith('http')||s.startsWith('/'))return'<img src="'+escHtml(s)+'" width="'+size+'" height="'+size+'" style="object-fit:cover;border-radius:'+radius+';vertical-align:middle;flex-shrink:0" onerror="this.src=\'\';this.style.display=\'none\'">';return '<span style="font-size:'+Math.round(size*0.87)+'px;line-height:1">'+s+'</span>';}
 
     // ======= HERO CARD MANAGER (NEW) =======
     const DEFAULT_CATH_CARDS = [
@@ -1396,11 +1397,9 @@ A: App ও Remote দিয়ে..."></textarea>
         <div class="fg"><label>Product FAQ <span class="hint">(Q: ... A: ... format)</span></label><textarea class="finp" id="pFaqs" rows="4" placeholder="Q: পানিতে ব্যবহার করা যাবে?&#10;A: হ্যাঁ, IP68 রেটিং আছে।&#10;&#10;Q: চার্জ কতক্ষণ যায়?&#10;A: সাধারণত ৫-৭ দিন।"></textarea></div>
         <div class="fg"><label>Closing Statement</label><input class="finp" id="pClosing" placeholder="Vangcur থেকে সেরা দামে অর্ডার করুন..."></div>
       </div>
-      <!-- Legacy specs editor -->
-      <div class="fg">
-        <label>Legacy Specs (Key → Value) <span class="hint">পুরনো format — Technical Specs এর সাথে মিলিয়ে দেবে</span></label>
+      <!-- Legacy specs editor (hidden — kept for data compat) -->
+      <div style="display:none">
         <div class="spec-editor" id="specEd"></div>
-        <button type="button" onclick="addSpecRow()" class="btn btn-outline btn-sm" style="margin-top:7px">+ স্পেক যোগ করুন</button>
       </div>
     </div>
 
@@ -1799,7 +1798,7 @@ function viewOrder(id){
     <div class="det-item" style="margin-bottom:12px"><div class="det-label">ঠিকানা</div><div class="det-val">${escHtml(o.customer?.address)}</div></div>
     <div class="det-item" style="margin-bottom:12px"><div class="det-label">পেমেন্ট তথ্য</div><div class="det-val">${o.payment?.txnId?'TXN: '+escHtml(o.payment.txnId):(o.payment?.last4?'Last 4: '+escHtml(o.payment.last4):(o.payment?.last3?'Last 3: '+escHtml(o.payment.last3):'—'))}</div></div>
     <div style="font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">প্রোডাক্ট তালিকা</div>
-    ${(o.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px"><span>${escHtml(i.emoji||'')} ${escHtml(i.name)} × ${escHtml(String(i.qty))}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
+    ${(o.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px"><span>${emojiHtml(i.emoji||'📦',24,'square')} ${escHtml(i.name)} × ${escHtml(String(i.qty))}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
     <div style="margin-top:12px;font-size:12.5px">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>শিপিং</span><span>৳${o.shippingCost||0}</span></div>
       <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:4px"><span>মোট</span><span>৳${(o.total||0).toLocaleString()}</span></div>
@@ -2130,14 +2129,23 @@ function getRowFromPoint(x, y, tbody) {
   }) || null;
 }
 
-function saveCurrentOrder() {
+async function saveCurrentOrder() {
   const rows = document.querySelectorAll('#pTbl tr[data-prod-id]');
   const order = Array.from(rows).map(r => {
     const id = r.dataset.prodId;
     return isNaN(id) ? id : Number(id);
   });
-  saveProdOrder(order);
-  showAdminToast('✅ অর্ডার সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
+  // FIX10: prodOrder in-memory update করো আগে
+  prodOrder = order;
+  // Supabase তে await দিয়ে save করো
+  try {
+    await supabaseClient.from('store_settings').upsert({ setting_key: 'vc_prod_order', setting_value: order });
+    _adminSettings['vc_prod_order'] = order;
+    showAdminToast('✅ সাজানো সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
+  } catch(e) {
+    showAdminToast('❌ সেভ করতে সমস্যা হয়েছে, আবার চেষ্টা করুন');
+    console.warn('saveProdOrder failed:', e);
+  }
 }
 
 function openAddProd(){
@@ -3211,8 +3219,8 @@ async function runAIParser(){
     document.getElementById('prodModalTitle').textContent = '🤖 AI Parse — প্রোডাক্ট যোগ করুন';
     document.getElementById('editId').value = '';
 
-    // Category dropdown populate + select
-    initCatRows(parsed.cats || (parsed.cat ? [parsed.cat] : ['rgb']));
+    // Category: শুধু dropdown populate করো, auto-select করবে না — ব্যবহারকারী নিজে বেছে নেবেন
+    initCatRows([]); // empty — user manually selects
 
     // Basic Info fields
     document.getElementById('pName').value = parsed.name || '';
@@ -3222,8 +3230,24 @@ async function runAIParser(){
     document.getElementById('pRating').value = parsed.rating || 4.5;
     document.getElementById('pWarranty').value = parsed.warranty || '';
     document.getElementById('pBadge').value = (parsed.badge || '').toUpperCase();
+
+    // Quick Specs — explicit "Quick Specs:" line পেলে সেটা, না হলে স্পেসিফিকেশন (একনজরে) থেকে auto-pick
     const pQS = document.getElementById('pQuickSpecs');
-    if(pQS) pQS.value = parsed.quick_specs || '';
+    if(pQS){
+      if(parsed.quick_specs){
+        pQS.value = parsed.quick_specs;
+      } else if(parsed.tech_specs){
+        // tech_specs এর প্রথম ২-৩ টা line নাও, "Key: Value" format এ
+        const techLines = parsed.tech_specs.split('\n').filter(l => l.trim() && l.includes(':'));
+        const picked = techLines.slice(0, 3).map(l => {
+          const [k, ...vs] = l.split(':');
+          return k.trim() + ': ' + vs.join(':').trim();
+        });
+        pQS.value = picked.join(', ');
+      } else {
+        pQS.value = '';
+      }
+    }
 
     // Full Layout fields
     const pDesc = document.getElementById('pDesc');
@@ -3239,7 +3263,7 @@ async function runAIParser(){
     const pClose = document.getElementById('pClosing');
     if(pClose) pClose.value = parsed.closing || '';
 
-    // Specs editor (legacy)
+    // Legacy specs editor (hidden, but populate for data compat)
     const specEd = document.getElementById('specEd');
     if(specEd){
       specEd.innerHTML = '';
@@ -3267,7 +3291,7 @@ async function runAIParser(){
 
     document.getElementById('parserLoading').style.display = 'none';
     document.getElementById('prodModal').classList.add('show');
-    showAdminToast('✅ Parse সম্পন্ন! এডিট করুন তারপর সেভ করুন।');
+    showAdminToast('✅ Parse সম্পন্ন! ক্যাটাগরি বেছে নিন তারপর সেভ করুন।');
   }catch(e){
     document.getElementById('parserLoading').style.display = 'none';
     document.getElementById('parserError').style.display = 'block';
@@ -3343,6 +3367,27 @@ function smartParse(raw){
 
   // ── Quick Specs ──
   let quickSpecs = findVal(['Quick Specs','Quick Spec','কুইক স্পেক','দ্রুত স্পেক']);
+
+  // যদি explicit Quick Specs না থাকে, "স্পেসিফিকেশন (একনজরে)" বা "একনজরে" section থেকে নাও
+  if(!quickSpecs){
+    const ekNojoreKwds = ['স্পেসিফিকেশন (একনজরে)','একনজরে','এক নজরে','Key Specs','Key Features at a Glance'];
+    for(const kw of ekNojoreKwds){
+      const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
+      if(idx >= 0){
+        const picked = [];
+        for(let i = idx+1; i < lines.length && picked.length < 3; i++){
+          const l = lines[i].trim();
+          if(!l) continue;
+          if(/^(Q:|A:|FAQ|Feature|Product F|পণ্যটির|বিস্তারিত)/i.test(l)) break;
+          // "Key: Value" বা "Key Value" format
+          const m = l.match(/^(.{2,20})[:\s]+(.{2,40})$/);
+          if(m) picked.push(m[1].trim() + ': ' + m[2].trim());
+          else if(l.length < 60 && !l.startsWith('-')) picked.push(l);
+        }
+        if(picked.length) { quickSpecs = picked.join(', '); break; }
+      }
+    }
+  }
 
   // ── Category detection ──
   const text = raw.toLowerCase();
@@ -3433,19 +3478,33 @@ function smartParse(raw){
   const faqs = faqBlocks.join('\n\n');
 
   // ── Closing ──
+  // কনটেন্টের শেষে একটা closing sentence খুঁজি — FAQ বা spec এর বাইরে
   let closing = '';
-  const lastFeat = features[features.length-1] || '';
-  // Look for a closing line near the end
-  for(let i = lines.length-1; i >= 0; i--){
+  // পরিচিত closing pattern দিয়ে শুরু হওয়া line খুঁজি (order করুন, পেতে... etc)
+  const closingPatterns = /(?:অর্ডার করুন|পেতে|যোগাযোগ|থেকে সেরা|থেকে পাবেন|বিশ্বাস|পরিবার|নিশ্চিত|গ্যারান্টি|সাশ্রয়|সেরা দাম|এখনই|আজই|কিনুন)/i;
+  for(let i = lines.length-1; i >= Math.max(0, lines.length-10); i--){
     const l = lines[i].trim();
     if(l && !l.includes(':') && l.length > 15 && !/^(Q:|A:|FAQ|-|•|\*)/i.test(l) && !/^ADMIN/i.test(l)){
-      closing = l; break;
+      if(closingPatterns.test(l)){
+        closing = l; break;
+      }
+    }
+  }
+  // pattern না পেলে শেষের একটা decent line নাও
+  if(!closing){
+    for(let i = lines.length-1; i >= Math.max(0, lines.length-6); i--){
+      const l = lines[i].trim();
+      if(l && !l.includes(':') && l.length > 20 && l.length < 200 && !/^(Q:|A:|FAQ|-|•|\*|উত্তর|প্রশ্ন)/i.test(l) && !/^ADMIN/i.test(l)){
+        closing = l; break;
+      }
     }
   }
 
   // ── Stock default ──
-  let stockRaw = findVal(['Stock','স্টক','Quantity']);
-  let stock = parseInt(stockRaw)??0;
+  let stockRaw = findVal(['Stock','স্টক','Quantity','স্টক পরিমাণ']);
+  // Bangla digits convert করো (৬০ → 60)
+  if(stockRaw) stockRaw = stockRaw.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+  let stock = parseInt(stockRaw) || 0;
 
   return { name, cat, price, old, stock, rating, warranty, badge, quick_specs: quickSpecs, desc, features, tech_specs, faqs, closing };
 }
