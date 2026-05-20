@@ -3261,23 +3261,9 @@ async function runAIParser(){
     document.getElementById('pWarranty').value = parsed.warranty || '';
     document.getElementById('pBadge').value = (parsed.badge || '').toUpperCase();
 
-    // Quick Specs — explicit "Quick Specs:" line পেলে সেটা, না হলে স্পেসিফিকেশন (একনজরে) থেকে auto-pick
+    // স্পেসিফিকেশন এক নজরে — hidden input (compat)
     const pQS = document.getElementById('pQuickSpecs');
-    if(pQS){
-      if(parsed.quick_specs){
-        pQS.value = parsed.quick_specs;
-      } else if(parsed.tech_specs){
-        // tech_specs এর প্রথম ২-৩ টা line নাও, "Key: Value" format এ
-        const techLines = parsed.tech_specs.split('\n').filter(l => l.trim() && l.includes(':'));
-        const picked = techLines.slice(0, 3).map(l => {
-          const [k, ...vs] = l.split(':');
-          return k.trim() + ': ' + vs.join(':').trim();
-        });
-        pQS.value = picked.join(', ');
-      } else {
-        pQS.value = '';
-      }
-    }
+    if(pQS) pQS.value = parsed.quick_specs || '';
 
     // Full Layout fields
     const pDesc = document.getElementById('pDesc');
@@ -3293,38 +3279,45 @@ async function runAIParser(){
     const pClose = document.getElementById('pClosing');
     if(pClose) pClose.value = parsed.closing || '';
 
-    // স্পেসিফিকেশন এক নজরে editor populate — quick_specs থেকেই নাও, max 5
+    // ── স্পেসিফিকেশন এক নজরে editor ──
+    // শুধুমাত্র parsed.quick_specs থেকে নাও — tech_specs বা অন্য কিছু থেকে নেওয়া যাবে না
+    // যদি quick_specs না থাকে — blank rows রাখো, user নিজে fill করবেন
     const specEd = document.getElementById('specEd');
     if(specEd){
       specEd.innerHTML = '';
-      if(parsed.quick_specs){
-        // comma-separated "Key Value" বা "Key: Value" format parse করো
+      if(parsed.quick_specs && parsed.quick_specs.trim()){
+        // Format: "দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth"
+        // Split by comma, each part = "Key Value" or "Key: Value"
         const pairs = parsed.quick_specs.split(',');
         let count = 0;
         for(const pair of pairs){
           if(count >= 5) break;
           const trimmed = pair.trim();
           if(!trimmed) continue;
-          // "Key: Value" বা "Key Value" — প্রথম space/colon দিয়ে split
           const colonIdx = trimmed.indexOf(':');
           if(colonIdx > 0){
+            // "Key: Value"
             const k = trimmed.slice(0, colonIdx).trim();
             const v = trimmed.slice(colonIdx+1).trim();
-            if(k && v){ addSpecRow(k, v); count++; }
+            if(k){ addSpecRow(k, v); count++; }
           } else {
-            // No colon — space দিয়ে split: প্রথম word = key, বাকি = value
+            // "Key Value" — প্রথম whitespace দিয়ে split
             const spaceIdx = trimmed.search(/\s/);
             if(spaceIdx > 0){
               const k = trimmed.slice(0, spaceIdx).trim();
               const v = trimmed.slice(spaceIdx+1).trim();
-              if(k && v){ addSpecRow(k, v); count++; }
-            } else {
+              if(k){ addSpecRow(k, v); count++; }
+            } else if(trimmed){
               addSpecRow(trimmed, ''); count++;
             }
           }
         }
       }
-      if(!specEd.children.length){ addSpecRow('',''); addSpecRow('',''); }
+      // quick_specs না থাকলে — user নিজে দেবেন, blank rows
+      if(!specEd.children.length){
+        addSpecRow('','');
+        addSpecRow('','');
+      }
     }
 
     // Images: AI page এর image manager থেকে নিয়ে modal এ দাও
@@ -3417,33 +3410,41 @@ function smartParse(raw){
   else if(/sale/i.test(badgeRaw)) badge = 'SALE';
 
   // ── Quick Specs (স্পেসিফিকেশন এক নজরে) ──
-  // Format 1: "স্পেসিফিকেশন (একনজরে): দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote" — same line after colon
-  // Format 2: separate lines below the heading
-  let quickSpecs = findVal(['Quick Specs','Quick Spec','কুইক স্পেক','দ্রুত স্পেক']);
+  // ONLY take from explicit "স্পেসিফিকেশন (একনজরে)" or "Quick Specs" line
+  // NEVER auto-pick from tech_specs or other sections
+  let quickSpecs = '';
 
+  // Priority 1: exact label match in content
+  const ekNojorePatterns = [
+    /স্পেসিফিকেশন\s*\(একনজরে\)\s*[:：]\s*(.+)/i,
+    /স্পেসিফিকেশন\s*\(এক\s*নজরে\)\s*[:：]\s*(.+)/i,
+    /Quick\s*Specs?\s*[:：]\s*(.+)/i,
+    /এক\s*নজরে\s*[:：]\s*(.+)/i,
+  ];
+  for(const pat of ekNojorePatterns){
+    const m = raw.match(pat);
+    if(m && m[1] && m[1].trim().length > 3){
+      quickSpecs = m[1].trim();
+      break;
+    }
+  }
+
+  // Priority 2: heading on one line, values on next lines (bullet/plain format)
   if(!quickSpecs){
-    const ekNojoreKwds = ['স্পেসিফিকেশন (একনজরে)','স্পেসিফিকেশন (এক নজরে)','একনজরে','এক নজরে','Key Specs'];
-    for(const kw of ekNojoreKwds){
-      const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
-      if(idx < 0) continue;
-      const line = lines[idx];
-      // Format 1: colon পরে same line এ data আছে (e.g. "স্পেসিফিকেশন (একনজরে): দৈর্ঘ্য 5 Meter, কন্ট্রোল App")
-      const colonIdx = line.indexOf(':');
-      if(colonIdx >= 0 && line.slice(colonIdx+1).trim().length > 3){
-        quickSpecs = line.slice(colonIdx+1).trim();
-        break;
+    const headingPatterns = ['স্পেসিফিকেশন (একনজরে)','স্পেসিফিকেশন (এক নজরে)','একনজরে','এক নজরে'];
+    for(const kw of headingPatterns){
+      const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()) && !l.includes(':'));
+      if(idx >= 0){
+        const picked = [];
+        for(let i = idx+1; i < lines.length && picked.length < 5; i++){
+          const l = lines[i].trim();
+          if(!l) continue;
+          if(/^(Q:|A:|FAQ|Feature|বিস্তারিত|Description|Technical|Spec|ওয়ারেন্টি|Price|মূল্য)/i.test(l)) break;
+          if(l.length > 80) break; // too long — not a spec item
+          picked.push(l);
+        }
+        if(picked.length){ quickSpecs = picked.join(', '); break; }
       }
-      // Format 2: next lines এ data
-      const picked = [];
-      for(let i = idx+1; i < lines.length && picked.length < 5; i++){
-        const l = lines[i].trim();
-        if(!l) continue;
-        if(/^(Q:|A:|FAQ|Feature|বিস্তারিত|Description|Technical)/i.test(l)) break;
-        const m = l.match(/^(.{2,25})[:\s]+(.{1,50})$/);
-        if(m) picked.push(m[1].trim() + ': ' + m[2].trim());
-        else if(l.length < 60 && !l.startsWith('-')) picked.push(l);
-      }
-      if(picked.length){ quickSpecs = picked.join(', '); break; }
     }
   }
 
