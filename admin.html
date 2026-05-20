@@ -1435,17 +1435,22 @@ async function saveSettingToSupabase(key, value) {
   // In-memory update
   _adminSettings[key] = value;
   try {
-    // Try upsert with onConflict (works if unique constraint exists)
+    // Step 1: পুরানো সব row মুছো (duplicate problem সমাধান)
+    await supabaseClient.from('store_settings').delete().eq('setting_key', key);
+    // Step 2: নতুন করে insert করো
     const { error } = await supabaseClient.from('store_settings')
-      .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
-    if(error){
-      // No unique constraint — just insert; load logic picks latest by id
-      await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
-    }
+      .insert({ setting_key: key, setting_value: value });
+    if(error) throw error;
   } catch (e) {
+    // Fallback: delete fail হলেও upsert try করো
     try {
-      await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
-    } catch(e2) { console.warn('Supabase save failed:', e2); }
+      await supabaseClient.from('store_settings')
+        .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+    } catch(e2) {
+      try {
+        await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
+      } catch(e3) { console.warn('Supabase save failed:', e3); }
+    }
   }
 }
 
@@ -2150,27 +2155,11 @@ async function saveCurrentOrder() {
     const id = r.dataset.prodId;
     return isNaN(id) ? id : Number(id);
   });
-  // In-memory update first
+  // In-memory update
   prodOrder = order;
-  _adminSettings['vc_prod_order'] = order;
-  // Save to Supabase — delete first to avoid duplicate rows, then insert fresh
-  try {
-    await supabaseClient.from('store_settings').delete().eq('setting_key', 'vc_prod_order');
-    const { error } = await supabaseClient.from('store_settings')
-      .insert({ setting_key: 'vc_prod_order', setting_value: order });
-    if (error) throw error;
-    showAdminToast('✅ সাজানো সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
-  } catch(e) {
-    // Fallback: try upsert as last resort
-    try {
-      await supabaseClient.from('store_settings')
-        .upsert({ setting_key: 'vc_prod_order', setting_value: order }, { onConflict: 'setting_key' });
-      showAdminToast('✅ সাজানো সেভ হয়েছে!');
-    } catch(e2) {
-      showAdminToast('❌ সেভ করতে সমস্যা হয়েছে, আবার চেষ্টা করুন');
-      console.warn('saveProdOrder failed:', e2);
-    }
-  }
+  // saveSettingToSupabase নিজেই delete+insert করে — duplicate হবে না
+  await saveSettingToSupabase('vc_prod_order', order);
+  showAdminToast('✅ সাজানো সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
 }
 
 function openAddProd(){
@@ -2429,7 +2418,7 @@ async function syncStockToSupabase(){
     DEFAULT_PRODS.forEach(p=>{stockMap[p.id]=p.stock;});
     adminProds.forEach(p=>{stockMap[p.id]=p.stock;});
     _adminSettings['vc_stock']=stockMap;
-    await supabaseClient.from('store_settings').upsert({setting_key:'vc_stock',setting_value:stockMap});
+    await saveSettingToSupabase('vc_stock', stockMap);
 
     // ২. custom_products টেবিলে প্রতিটির stock column সরাসরি update করো
     for(const p of adminProds){
@@ -2574,8 +2563,8 @@ async function cleanupExtraProducts(){
   prodOrder = null;
   
   // Supabase-এ পরিষ্কার করো
-  try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_deleted_defaults', setting_value:[]}); } catch(e){}
-  try { await supabaseClient.from('store_settings').upsert({setting_key:'vc_prod_order', setting_value:[]}); } catch(e){}
+  try { await saveSettingToSupabase('vc_deleted_defaults', []); } catch(e){}
+  try { await saveSettingToSupabase('vc_prod_order', []); } catch(e){}
   
   renderProdTbl();
   showAdminToast(`✅ ${extraCount}টি extra প্রোডাক্ট মুছে ফেলা হয়েছে — শুধু ৭টি ডিফল্ট প্রোডাক্ট থাকবে`);
@@ -3278,13 +3267,12 @@ async function runAIParser(){
 
     // ── স্পেসিফিকেশন এক নজরে editor ──
     // শুধুমাত্র parsed.quick_specs থেকে নাও — tech_specs বা অন্য কিছু থেকে নেওয়া যাবে না
-    // যদি quick_specs না থাকে — blank rows রাখো, user নিজে fill করবেন
     const specEd = document.getElementById('specEd');
     if(specEd){
       specEd.innerHTML = '';
       if(parsed.quick_specs && parsed.quick_specs.trim()){
-        // Format: "দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth"
-        // Split by comma, each part = "Key Value" or "Key: Value"
+        // Format: "দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote, কানেক্টিভিটি Bluetooth, কালার RGB"
+        // প্রতিটা comma-separated part: "Key: Value" অথবা "Key Value"
         const pairs = parsed.quick_specs.split(',');
         let count = 0;
         for(const pair of pairs){
@@ -3293,16 +3281,17 @@ async function runAIParser(){
           if(!trimmed) continue;
           const colonIdx = trimmed.indexOf(':');
           if(colonIdx > 0){
-            // "Key: Value"
+            // "Key: Value" format
             const k = trimmed.slice(0, colonIdx).trim();
-            const v = trimmed.slice(colonIdx+1).trim();
+            const v = trimmed.slice(colonIdx + 1).trim();
             if(k){ addSpecRow(k, v); count++; }
           } else {
-            // "Key Value" — প্রথম whitespace দিয়ে split
+            // "Key Value" format — প্রথম space দিয়ে split
+            // "দৈর্ঘ্য 5 Meter" → key="দৈর্ঘ্য", value="5 Meter"
             const spaceIdx = trimmed.search(/\s/);
             if(spaceIdx > 0){
               const k = trimmed.slice(0, spaceIdx).trim();
-              const v = trimmed.slice(spaceIdx+1).trim();
+              const v = trimmed.slice(spaceIdx + 1).trim();
               if(k){ addSpecRow(k, v); count++; }
             } else if(trimmed){
               addSpecRow(trimmed, ''); count++;
@@ -3310,10 +3299,10 @@ async function runAIParser(){
           }
         }
       }
-      // quick_specs না থাকলে — user নিজে দেবেন, blank rows
+      // quick_specs না থাকলে blank rows — user নিজে fill করবেন
       if(!specEd.children.length){
-        addSpecRow('','');
-        addSpecRow('','');
+        addSpecRow('', '');
+        addSpecRow('', '');
       }
     }
 
@@ -3407,64 +3396,48 @@ function smartParse(raw){
   else if(/sale/i.test(badgeRaw)) badge = 'SALE';
 
   // ── Quick Specs (স্পেসিফিকেশন এক নজরে) ──
-  // ONLY take from explicit "স্পেসিফিকেশন (একনজরে)" or "Quick Specs" line
-  // NEVER auto-pick from tech_specs or other sections
+  // শুধুমাত্র "স্পেসিফিকেশন (একনজরে):" বা "Quick Specs:" line থেকে নাও
+  // কখনো tech_specs বা অন্য section থেকে auto-fill করা যাবে না
   let quickSpecs = '';
 
-  // Priority 1: exact label match in content
-  const ekNojorePatterns = [
-    /স্পেসিফিকেশন\s*\(একনজরে\)\s*[:：]\s*(.+)/i,
-    /স্পেসিফিকেশন\s*\(এক\s*নজরে\)\s*[:：]\s*(.+)/i,
+  // Robust patterns — space variations handle করে
+  const qsPatterns = [
+    /স্পেসিফিকেশন\s*\(\s*একনজরে\s*\)\s*[:：]\s*(.+)/i,
+    /স্পেসিফিকেশন\s*\(\s*এক\s*নজরে\s*\)\s*[:：]\s*(.+)/i,
     /Quick\s*Specs?\s*[:：]\s*(.+)/i,
     /এক\s*নজরে\s*[:：]\s*(.+)/i,
   ];
-  for(const pat of ekNojorePatterns){
+  for(const pat of qsPatterns){
     const m = raw.match(pat);
-    if(m && m[1] && m[1].trim().length > 3){
+    if(m && m[1] && m[1].trim().length > 2){
       quickSpecs = m[1].trim();
       break;
     }
   }
-  // Fallback: label পাওয়া গেছে কিন্তু same line-এ value নেই — পরের line-এ খোঁজো
+
+  // Fallback: heading alone on a line, value on next line
   if(!quickSpecs){
-    const ekNojoreLinePatterns = [
-      /স্পেসিফিকেশন\s*\(একনজরে\)/i,
-      /স্পেসিফিকেশন\s*\(এক\s*নজরে\)/i,
+    const qsHeadings = [
+      /স্পেসিফিকেশন\s*\(\s*একনজরে\s*\)/i,
+      /স্পেসিফিকেশন\s*\(\s*এক\s*নজরে\s*\)/i,
       /Quick\s*Specs?/i,
     ];
-    for(const pat of ekNojoreLinePatterns){
-      const idx = lines.findIndex(l => pat.test(l) && (l.includes(':') || l.trim().match(pat)?.[0] === l.trim()));
+    for(const hPat of qsHeadings){
+      const idx = lines.findIndex(l => hPat.test(l));
       if(idx >= 0){
-        // Same line-এ colon-এর পরে কিছু আছে কি?
+        // Same line-এ colon-এর পরে value আছে কি?
         const colonIdx = lines[idx].indexOf(':');
-        const sameLine = colonIdx >= 0 ? lines[idx].slice(colonIdx+1).trim() : '';
-        if(sameLine.length > 3){ quickSpecs = sameLine; break; }
-        // পরের non-empty line-এ কমা-separated থাকতে পারে
-        for(let j = idx+1; j < lines.length && j <= idx+3; j++){
+        if(colonIdx >= 0){
+          const after = lines[idx].slice(colonIdx+1).trim();
+          if(after.length > 2){ quickSpecs = after; break; }
+        }
+        // পরের line-এ value খোঁজো
+        for(let j = idx+1; j < lines.length && j <= idx+2; j++){
           const nl = lines[j].trim();
           if(!nl) continue;
-          if(nl.includes(',') || nl.length > 5){ quickSpecs = nl; break; }
+          if(nl.length > 2){ quickSpecs = nl; break; }
         }
         if(quickSpecs) break;
-      }
-    }
-  }
-
-  // Priority 2: heading on one line, values on next lines (bullet/plain format)
-  if(!quickSpecs){
-    const headingPatterns = ['স্পেসিফিকেশন (একনজরে)','স্পেসিফিকেশন (এক নজরে)','একনজরে','এক নজরে'];
-    for(const kw of headingPatterns){
-      const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()) && !l.includes(':'));
-      if(idx >= 0){
-        const picked = [];
-        for(let i = idx+1; i < lines.length && picked.length < 5; i++){
-          const l = lines[i].trim();
-          if(!l) continue;
-          if(/^(Q:|A:|FAQ|Feature|বিস্তারিত|Description|Technical|Spec|ওয়ারেন্টি|Price|মূল্য)/i.test(l)) break;
-          if(l.length > 80) break; // too long — not a spec item
-          picked.push(l);
-        }
-        if(picked.length){ quickSpecs = picked.join(', '); break; }
       }
     }
   }
