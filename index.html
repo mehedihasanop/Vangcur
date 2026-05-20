@@ -2533,8 +2533,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
 
   // Step 1: Supabase থেকে সব settings এক সাথে আনো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*');
+    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
     if (settings) {
+      // Duplicate key হলে শেষ (latest) row টাই জিতে — ascending order এ loop করলে সেটাই হবে
       settings.forEach(item => {
         const val = item.setting_value;
         _settings[item.setting_key] = val;
@@ -2569,7 +2570,6 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           rating: p.rating || 4.5,
           imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
           specs: p.specs || {},
-          ek_nojore: p.ek_nojore || p.specs || {}, // ✅ একনজরে data
           desc: p.desc_text || p.desc || '',
           longDesc: p.long_desc || p.desc_text || p.desc || '',
           features: Array.isArray(p.features) ? p.features : [],
@@ -2663,7 +2663,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
-            specs:p.specs||{}, ek_nojore:p.ek_nojore||p.specs||{},
+            specs:p.specs||{},
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
             features:Array.isArray(p.features)?p.features:[],
@@ -2685,7 +2685,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
-            specs:p.specs||{}, ek_nojore:p.ek_nojore||p.specs||{},
+            specs:p.specs||{},
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
             features:Array.isArray(p.features)?p.features:[],
@@ -3273,7 +3273,7 @@ function _buildProdCard(p, isFirst) {
   </div>
   <div class="prod-info">
     <div class="prod-name" onclick="openPP(${JSON.stringify(p.id)})">${escHtml(p.name)}</div>
-    <div class="prod-spec">${Object.entries(p.ek_nojore||p.specs||{}).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
+    <div class="prod-spec">${Object.entries(p.specs||{}).slice(0,2).map(([k,v])=>`${escHtml(k)}: ${escHtml(v)}`).join(' • ')}</div>
     <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
       <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
       <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${Math.floor((Number(p.id)||1)*37+p.stock*13)%80+20})</span>
@@ -3743,10 +3743,10 @@ function openPP(id){
   document.getElementById('ppOld').textContent=`৳${curProd.old.toLocaleString()}`;
   document.getElementById('ppWarrantyTxt').textContent=curProd.warranty;
 
-  // Quick specs (top) — ek_nojore থেকে দেখাও, fallback specs
+  // Quick specs (top)
   const qsEl=document.getElementById('ppQuickSpecs');
   if(qsEl){
-    const entries=Object.entries(curProd.ek_nojore||curProd.specs||{}).slice(0,6);
+    const entries=Object.entries(curProd.specs||{}).slice(0,6);
     qsEl.innerHTML=(entries.length?`<div style="width:100%;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">স্পেসিফিকেশন এক নজরে</div>`:'')+entries.map(([k,v])=>`<div class="pp-qs-item"><span>${k}:</span>${v}</div>`).join('');
   }
 
