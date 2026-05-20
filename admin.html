@@ -1435,21 +1435,20 @@ async function saveSettingToSupabase(key, value) {
   // In-memory update
   _adminSettings[key] = value;
   try {
-    // Step 1: পুরানো সব row মুছো (duplicate problem সমাধান)
-    await supabaseClient.from('store_settings').delete().eq('setting_key', key);
-    // Step 2: নতুন করে insert করো
-    const { error } = await supabaseClient.from('store_settings')
-      .insert({ setting_key: key, setting_value: value });
-    if(error) throw error;
+    // Step 1: প্রথমে upsert চেষ্টা করো (সবচেয়ে efficient)
+    const { error: upsertError } = await supabaseClient.from('store_settings')
+      .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+    if (!upsertError) return; // সফল হলে শেষ
+    throw upsertError; // ব্যর্থ হলে fallback-এ যাও
   } catch (e) {
-    // Fallback: delete fail হলেও upsert try করো
+    // Step 2: Fallback — পুরানো row মুছে নতুন insert করো
     try {
-      await supabaseClient.from('store_settings')
-        .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+      await supabaseClient.from('store_settings').delete().eq('setting_key', key);
+      const { error } = await supabaseClient.from('store_settings')
+        .insert({ setting_key: key, setting_value: value });
+      if (error) throw error;
     } catch(e2) {
-      try {
-        await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
-      } catch(e3) { console.warn('Supabase save failed:', e3); }
+      console.warn('Supabase save failed:', e2);
     }
   }
 }
@@ -1461,12 +1460,17 @@ async function syncAdminData(){
     if (settings) {
       // Ascending order — শেষ match = সবচেয়ে latest (newest row wins)
       settings.forEach(item => {
-        _adminSettings[item.setting_key] = item.setting_value;
+        let val = item.setting_value;
+        // Supabase কখনো JSON string হিসেবে ফেরত দিতে পারে — safely parse করো
+        if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) {
+          try { val = JSON.parse(val); } catch(e) { /* parse ব্যর্থ হলে string-ই রাখো */ }
+        }
+        _adminSettings[item.setting_key] = val;
       });
       heroSlides = _adminSettings['vc_hero_slides'] || heroSlides;
-      adminFAQs = _adminSettings['vc_faqs'] || adminFAQs;
-      deletedDefaultIds = _adminSettings['vc_deleted_defaults'] || [];
-      prodOrder = _adminSettings['vc_prod_order'] || null;
+      // vc_faqs, vc_deleted_defaults, vc_prod_order — array হিসেবে নিশ্চিত করো
+      adminFAQs = Array.isArray(_adminSettings['vc_faqs']) ? _adminSettings['vc_faqs'] : adminFAQs;
+      deletedDefaultIds = Array.isArray(_adminSettings['vc_deleted_defaults']) ? _adminSettings['vc_deleted_defaults'] : [];
       prodOrder = _adminSettings['vc_prod_order'] || null;
     }
     // ✅ পলিসি এডিটর populate করো
@@ -1908,8 +1912,12 @@ function getAllProds() {
   const merged = [...visibleDefaults];
   allCustom.forEach(p => { if (!merged.find(x => x.id === p.id)) merged.push(p); });
   // Apply saved order
-  const order = getProdOrder();
-  if (order && order.length) {
+  let order = getProdOrder();
+  // Supabase কখনো JSON string হিসেবে ফেরত দিতে পারে — safely parse করো
+  if (typeof order === 'string' && (order.startsWith('[') || order.startsWith('{'))) {
+    try { order = JSON.parse(order); } catch(e) { order = null; }
+  }
+  if (Array.isArray(order) && order.length) {
     const orderMap = {};
     order.forEach((id, i) => { orderMap[id] = i; });
     merged.sort((a, b) => {
@@ -3400,12 +3408,13 @@ function smartParse(raw){
   // কখনো tech_specs বা অন্য section থেকে auto-fill করা যাবে না
   let quickSpecs = '';
 
-  // Robust patterns — space variations handle করে
+  // Robust patterns — colon, hyphen, em-dash, equal sign, space সব ধরনের separator handle করে
   const qsPatterns = [
-    /স্পেসিফিকেশন\s*\(\s*একনজরে\s*\)\s*[:：]\s*(.+)/i,
-    /স্পেসিফিকেশন\s*\(\s*এক\s*নজরে\s*\)\s*[:：]\s*(.+)/i,
-    /Quick\s*Specs?\s*[:：]\s*(.+)/i,
-    /এক\s*নজরে\s*[:：]\s*(.+)/i,
+    /স্পেসিফিকেশন\s*\(\s*এক\s*নজরে\s*\)\s*[:：=\-—\s]+\s*(.+)/i,
+    /স্পেসিফিকেশন\s*\(\s*একনজরে\s*\)\s*[:：=\-—\s]+\s*(.+)/i,
+    /Quick\s*Specs?\s*[:：=\-—\s]+\s*(.+)/i,
+    /এক\s*নজরে\s*[:：=\-—\s]+\s*(.+)/i,
+    /স্পেসিফিকেশন\s*[:：=\-—\s]+\s*(.+)/i,
   ];
   for(const pat of qsPatterns){
     const m = raw.match(pat);

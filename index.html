@@ -1933,8 +1933,12 @@ function applyDeletedDefaults(deletedArr){
 // ✅ Apply product order — Supabase থেকে আসা data দিয়ে কাজ করে (localStorage নয়)
 function applyProdOrder(orderArr){
   try{
-    const order=orderArr||null;
-    if(!order||!order.length)return;
+    let order = orderArr || null;
+    // Supabase কখনো JSON string হিসেবে ফেরত দিতে পারে — safely parse করো
+    if (typeof order === 'string' && (order.startsWith('[') || order.startsWith('{'))) {
+      try { order = JSON.parse(order); } catch(e) { order = null; }
+    }
+    if(!Array.isArray(order) || !order.length) return;
     const orderMap={};
     order.forEach((id,i)=>{orderMap[id]=i;});
     PRODS.sort((a,b)=>{
@@ -2537,7 +2541,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     if (settings) {
       // Ascending — শেষ match = latest। Duplicate হলে newest row জিতবে।
       settings.forEach(item => {
-        _settings[item.setting_key] = item.setting_value;
+        let val = item.setting_value;
+        // Supabase কখনো JSON string হিসেবে ফেরত দিতে পারে — safely parse করো
+        if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) {
+          try { val = JSON.parse(val); } catch(e) { /* parse ব্যর্থ হলে string-ই রাখো */ }
+        }
+        _settings[item.setting_key] = val;
       });
     }
   } catch (e) { console.warn('Supabase settings load failed:', e); }
