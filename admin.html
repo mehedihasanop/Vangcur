@@ -1456,7 +1456,7 @@ async function saveSettingToSupabase(key, value) {
 async function syncAdminData(){
   // ✅ SUPABASE-FIRST: সব data সরাসরি Supabase থেকে লোড করো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
+    const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
       // Ascending order — শেষ match = সবচেয়ে latest (newest row wins)
       settings.forEach(item => {

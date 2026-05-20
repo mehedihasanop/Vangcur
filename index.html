@@ -2537,7 +2537,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
 
   // Step 1: Supabase থেকে সব settings এক সাথে আনো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
+    const { data: settings } = await supabaseClient.from('store_settings').select('*');
     if (settings) {
       // Ascending — শেষ match = latest। Duplicate হলে newest row জিতবে।
       settings.forEach(item => {
@@ -2736,7 +2736,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             // Page reload না করেই channel re-subscribe করার জন্য DOMContentLoaded logic আবার চালাই না
             // বরং store_settings সরাসরি re-fetch করি
             (async()=>{try{
-              const {data:s}=await supabaseClient.from('store_settings').select('*').order('id',{ascending:true});
+              const {data:s}=await supabaseClient.from('store_settings').select('*');
               if(s){s.forEach(item=>{_settings[item.setting_key]=item.setting_value;});}
               loadStock(_settings['vc_stock']||{});
               renderCatBar();
