@@ -1452,15 +1452,11 @@ async function saveSettingToSupabase(key, value) {
 async function syncAdminData(){
   // ✅ SUPABASE-FIRST: সব data সরাসরি Supabase থেকে লোড করো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: false });
+    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
     if (settings) {
-      // Descending order — প্রথম match = সবচেয়ে latest (newest row wins)
-      const seen = new Set();
+      // Ascending order — শেষ match = সবচেয়ে latest (newest row wins)
       settings.forEach(item => {
-        if(!seen.has(item.setting_key)){
-          _adminSettings[item.setting_key] = item.setting_value;
-          seen.add(item.setting_key);
-        }
+        _adminSettings[item.setting_key] = item.setting_value;
       });
       heroSlides = _adminSettings['vc_hero_slides'] || heroSlides;
       adminFAQs = _adminSettings['vc_faqs'] || adminFAQs;
@@ -2157,17 +2153,18 @@ async function saveCurrentOrder() {
   // In-memory update first
   prodOrder = order;
   _adminSettings['vc_prod_order'] = order;
-  // Save to Supabase
+  // Save to Supabase — delete first to avoid duplicate rows, then insert fresh
   try {
+    await supabaseClient.from('store_settings').delete().eq('setting_key', 'vc_prod_order');
     const { error } = await supabaseClient.from('store_settings')
-      .upsert({ setting_key: 'vc_prod_order', setting_value: order }, { onConflict: 'setting_key' });
-    if(error){
-      await supabaseClient.from('store_settings').insert({ setting_key: 'vc_prod_order', setting_value: order });
-    }
+      .insert({ setting_key: 'vc_prod_order', setting_value: order });
+    if (error) throw error;
     showAdminToast('✅ সাজানো সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
   } catch(e) {
+    // Fallback: try upsert as last resort
     try {
-      await supabaseClient.from('store_settings').insert({ setting_key: 'vc_prod_order', setting_value: order });
+      await supabaseClient.from('store_settings')
+        .upsert({ setting_key: 'vc_prod_order', setting_value: order }, { onConflict: 'setting_key' });
       showAdminToast('✅ সাজানো সেভ হয়েছে!');
     } catch(e2) {
       showAdminToast('❌ সেভ করতে সমস্যা হয়েছে, আবার চেষ্টা করুন');
@@ -3428,6 +3425,30 @@ function smartParse(raw){
       break;
     }
   }
+  // Fallback: label পাওয়া গেছে কিন্তু same line-এ value নেই — পরের line-এ খোঁজো
+  if(!quickSpecs){
+    const ekNojoreLinePatterns = [
+      /স্পেসিফিকেশন\s*\(একনজরে\)/i,
+      /স্পেসিফিকেশন\s*\(এক\s*নজরে\)/i,
+      /Quick\s*Specs?/i,
+    ];
+    for(const pat of ekNojoreLinePatterns){
+      const idx = lines.findIndex(l => pat.test(l) && (l.includes(':') || l.trim().match(pat)?.[0] === l.trim()));
+      if(idx >= 0){
+        // Same line-এ colon-এর পরে কিছু আছে কি?
+        const colonIdx = lines[idx].indexOf(':');
+        const sameLine = colonIdx >= 0 ? lines[idx].slice(colonIdx+1).trim() : '';
+        if(sameLine.length > 3){ quickSpecs = sameLine; break; }
+        // পরের non-empty line-এ কমা-separated থাকতে পারে
+        for(let j = idx+1; j < lines.length && j <= idx+3; j++){
+          const nl = lines[j].trim();
+          if(!nl) continue;
+          if(nl.includes(',') || nl.length > 5){ quickSpecs = nl; break; }
+        }
+        if(quickSpecs) break;
+      }
+    }
+  }
 
   // Priority 2: heading on one line, values on next lines (bullet/plain format)
   if(!quickSpecs){
@@ -3500,9 +3521,10 @@ function smartParse(raw){
 
   // ── Technical Specs ──
   let techSpecLines = [];
-  const specKwds = ['Product Specifications','Technical Specs','Specifications','স্পেসিফিকেশন','কারিগরি তথ্য','Spec'];
+  const specKwds = ['Product Specifications','Technical Specs','Specifications','কারিগরি তথ্য'];
   for(const kw of specKwds){
-    const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
+    // "একনজরে" বা "এক নজরে" থাকলে এটা quickSpecs section — skip করো
+    const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()) && !l.includes('একনজরে') && !l.includes('এক নজরে'));
     if(idx >= 0){
       for(let i = idx+1; i < lines.length; i++){
         const l = lines[i].trim();
