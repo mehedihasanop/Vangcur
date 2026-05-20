@@ -2533,12 +2533,15 @@ document.addEventListener('DOMContentLoaded',async ()=>{
 
   // Step 1: Supabase থেকে সব settings এক সাথে আনো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
+    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: false });
     if (settings) {
-      // Duplicate key হলে শেষ (latest) row টাই জিতে — ascending order এ loop করলে সেটাই হবে
+      // Descending — প্রথম match = latest। Duplicate হলে newest row জিতবে।
+      const seen = new Set();
       settings.forEach(item => {
-        const val = item.setting_value;
-        _settings[item.setting_key] = val;
+        if(!seen.has(item.setting_key)){
+          _settings[item.setting_key] = item.setting_value;
+          seen.add(item.setting_key);
+        }
       });
     }
   } catch (e) { console.warn('Supabase settings load failed:', e); }
@@ -2728,8 +2731,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             // Page reload না করেই channel re-subscribe করার জন্য DOMContentLoaded logic আবার চালাই না
             // বরং store_settings সরাসরি re-fetch করি
             (async()=>{try{
-              const {data:s}=await supabaseClient.from('store_settings').select('*');
-              if(s){s.forEach(item=>{_settings[item.setting_key]=item.setting_value;});}
+              const {data:s}=await supabaseClient.from('store_settings').select('*').order('id',{ascending:false});
+              if(s){const seen=new Set();s.forEach(item=>{if(!seen.has(item.setting_key)){_settings[item.setting_key]=item.setting_value;seen.add(item.setting_key);}});}
               loadStock(_settings['vc_stock']||{});
               renderCatBar();
               const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));

@@ -1435,16 +1435,16 @@ async function saveSettingToSupabase(key, value) {
   // In-memory update
   _adminSettings[key] = value;
   try {
-    // Delete existing rows with this key first, then insert fresh — avoids duplicate row bugs
-    await supabaseClient.from('store_settings').delete().eq('setting_key', key);
-    await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
+    // Try upsert with onConflict (works if unique constraint exists)
+    const { error } = await supabaseClient.from('store_settings')
+      .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+    if(error){
+      // No unique constraint — just insert; load logic picks latest by id
+      await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
+    }
   } catch (e) {
-    // Fallback: try upsert
     try {
-      await supabaseClient.from('store_settings').upsert(
-        { setting_key: key, setting_value: value },
-        { onConflict: 'setting_key' }
-      );
+      await supabaseClient.from('store_settings').insert({ setting_key: key, setting_value: value });
     } catch(e2) { console.warn('Supabase save failed:', e2); }
   }
 }
@@ -1452,13 +1452,20 @@ async function saveSettingToSupabase(key, value) {
 async function syncAdminData(){
   // ✅ SUPABASE-FIRST: সব data সরাসরি Supabase থেকে লোড করো
   try {
-    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: true });
+    const { data: settings } = await supabaseClient.from('store_settings').select('*').order('id', { ascending: false });
     if (settings) {
-      // Duplicate key হলে শেষ (latest) row টাই নাও — override করতে করতে যাও
-      settings.forEach(item => { _adminSettings[item.setting_key] = item.setting_value; });
+      // Descending order — প্রথম match = সবচেয়ে latest (newest row wins)
+      const seen = new Set();
+      settings.forEach(item => {
+        if(!seen.has(item.setting_key)){
+          _adminSettings[item.setting_key] = item.setting_value;
+          seen.add(item.setting_key);
+        }
+      });
       heroSlides = _adminSettings['vc_hero_slides'] || heroSlides;
       adminFAQs = _adminSettings['vc_faqs'] || adminFAQs;
       deletedDefaultIds = _adminSettings['vc_deleted_defaults'] || [];
+      prodOrder = _adminSettings['vc_prod_order'] || null;
       prodOrder = _adminSettings['vc_prod_order'] || null;
     }
     // ✅ পলিসি এডিটর populate করো
@@ -2150,18 +2157,17 @@ async function saveCurrentOrder() {
   // In-memory update first
   prodOrder = order;
   _adminSettings['vc_prod_order'] = order;
-  // Save to Supabase: delete old rows then insert fresh (avoids duplicate bug)
+  // Save to Supabase
   try {
-    await supabaseClient.from('store_settings').delete().eq('setting_key', 'vc_prod_order');
-    await supabaseClient.from('store_settings').insert({ setting_key: 'vc_prod_order', setting_value: order });
+    const { error } = await supabaseClient.from('store_settings')
+      .upsert({ setting_key: 'vc_prod_order', setting_value: order }, { onConflict: 'setting_key' });
+    if(error){
+      await supabaseClient.from('store_settings').insert({ setting_key: 'vc_prod_order', setting_value: order });
+    }
     showAdminToast('✅ সাজানো সেভ হয়েছে! ওয়েবসাইটে আপডেট হচ্ছে...');
   } catch(e) {
-    // Fallback: upsert
     try {
-      await supabaseClient.from('store_settings').upsert(
-        { setting_key: 'vc_prod_order', setting_value: order },
-        { onConflict: 'setting_key' }
-      );
+      await supabaseClient.from('store_settings').insert({ setting_key: 'vc_prod_order', setting_value: order });
       showAdminToast('✅ সাজানো সেভ হয়েছে!');
     } catch(e2) {
       showAdminToast('❌ সেভ করতে সমস্যা হয়েছে, আবার চেষ্টা করুন');
@@ -2346,9 +2352,11 @@ async function uploadProdImage(fileInput){
 }
 
 function addSpecRow(k='',v=''){
+  const existing = document.querySelectorAll('#specEd .spec-row').length;
+  if(existing >= 5){ showAdminToast('সর্বোচ্চ ৫টি স্পেসিফিকেশন দেওয়া যাবে'); return; }
   const d=document.createElement('div');d.className='spec-row';
-  d.innerHTML=`<input placeholder="Key (ড্রাইভার, ব্যাটারি...)" value="${k}" class="sk">
-    <input placeholder="Value (13mm, 5000mAh...)" value="${v}" class="sv">
+  d.innerHTML=`<input placeholder="Key (দৈর্ঘ্য, কন্ট্রোল...)" value="${k}" class="sk">
+    <input placeholder="Value (5 Meter, App & Remote...)" value="${v}" class="sv">
     <button type="button" onclick="this.parentElement.remove()" class="btn btn-red btn-xs">✕</button>`;
   document.getElementById('specEd').appendChild(d);
 }
@@ -3285,21 +3293,36 @@ async function runAIParser(){
     const pClose = document.getElementById('pClosing');
     if(pClose) pClose.value = parsed.closing || '';
 
-    // স্পেসিফিকেশন এক নজরে editor populate — quick_specs অগ্রাধিকার, তারপর tech_specs
+    // স্পেসিফিকেশন এক নজরে editor populate — quick_specs থেকেই নাও, max 5
     const specEd = document.getElementById('specEd');
     if(specEd){
       specEd.innerHTML = '';
       if(parsed.quick_specs){
-        // comma-separated "Key: Value" format
-        parsed.quick_specs.split(',').forEach(pair => {
-          const [k, ...vs] = pair.split(':');
-          if(k && vs.length) addSpecRow(k.trim(), vs.join(':').trim());
-        });
-      } else if(parsed.tech_specs){
-        parsed.tech_specs.split('\n').forEach(line => {
-          const [k, ...vs] = line.split(':');
-          if(k && vs.length) addSpecRow(k.trim(), vs.join(':').trim());
-        });
+        // comma-separated "Key Value" বা "Key: Value" format parse করো
+        const pairs = parsed.quick_specs.split(',');
+        let count = 0;
+        for(const pair of pairs){
+          if(count >= 5) break;
+          const trimmed = pair.trim();
+          if(!trimmed) continue;
+          // "Key: Value" বা "Key Value" — প্রথম space/colon দিয়ে split
+          const colonIdx = trimmed.indexOf(':');
+          if(colonIdx > 0){
+            const k = trimmed.slice(0, colonIdx).trim();
+            const v = trimmed.slice(colonIdx+1).trim();
+            if(k && v){ addSpecRow(k, v); count++; }
+          } else {
+            // No colon — space দিয়ে split: প্রথম word = key, বাকি = value
+            const spaceIdx = trimmed.search(/\s/);
+            if(spaceIdx > 0){
+              const k = trimmed.slice(0, spaceIdx).trim();
+              const v = trimmed.slice(spaceIdx+1).trim();
+              if(k && v){ addSpecRow(k, v); count++; }
+            } else {
+              addSpecRow(trimmed, ''); count++;
+            }
+          }
+        }
       }
       if(!specEd.children.length){ addSpecRow('',''); addSpecRow('',''); }
     }
@@ -3393,27 +3416,34 @@ function smartParse(raw){
   else if(/new/i.test(badgeRaw)) badge = 'NEW';
   else if(/sale/i.test(badgeRaw)) badge = 'SALE';
 
-  // ── Quick Specs ──
+  // ── Quick Specs (স্পেসিফিকেশন এক নজরে) ──
+  // Format 1: "স্পেসিফিকেশন (একনজরে): দৈর্ঘ্য 5 Meter, কন্ট্রোল App & Remote" — same line after colon
+  // Format 2: separate lines below the heading
   let quickSpecs = findVal(['Quick Specs','Quick Spec','কুইক স্পেক','দ্রুত স্পেক']);
 
-  // যদি explicit Quick Specs না থাকে, "স্পেসিফিকেশন (একনজরে)" বা "একনজরে" section থেকে নাও
   if(!quickSpecs){
-    const ekNojoreKwds = ['স্পেসিফিকেশন (একনজরে)','একনজরে','এক নজরে','Key Specs','Key Features at a Glance'];
+    const ekNojoreKwds = ['স্পেসিফিকেশন (একনজরে)','স্পেসিফিকেশন (এক নজরে)','একনজরে','এক নজরে','Key Specs'];
     for(const kw of ekNojoreKwds){
       const idx = lines.findIndex(l => l.toLowerCase().includes(kw.toLowerCase()));
-      if(idx >= 0){
-        const picked = [];
-        for(let i = idx+1; i < lines.length && picked.length < 3; i++){
-          const l = lines[i].trim();
-          if(!l) continue;
-          if(/^(Q:|A:|FAQ|Feature|Product F|পণ্যটির|বিস্তারিত)/i.test(l)) break;
-          // "Key: Value" বা "Key Value" format
-          const m = l.match(/^(.{2,20})[:\s]+(.{2,40})$/);
-          if(m) picked.push(m[1].trim() + ': ' + m[2].trim());
-          else if(l.length < 60 && !l.startsWith('-')) picked.push(l);
-        }
-        if(picked.length) { quickSpecs = picked.join(', '); break; }
+      if(idx < 0) continue;
+      const line = lines[idx];
+      // Format 1: colon পরে same line এ data আছে (e.g. "স্পেসিফিকেশন (একনজরে): দৈর্ঘ্য 5 Meter, কন্ট্রোল App")
+      const colonIdx = line.indexOf(':');
+      if(colonIdx >= 0 && line.slice(colonIdx+1).trim().length > 3){
+        quickSpecs = line.slice(colonIdx+1).trim();
+        break;
       }
+      // Format 2: next lines এ data
+      const picked = [];
+      for(let i = idx+1; i < lines.length && picked.length < 5; i++){
+        const l = lines[i].trim();
+        if(!l) continue;
+        if(/^(Q:|A:|FAQ|Feature|বিস্তারিত|Description|Technical)/i.test(l)) break;
+        const m = l.match(/^(.{2,25})[:\s]+(.{1,50})$/);
+        if(m) picked.push(m[1].trim() + ': ' + m[2].trim());
+        else if(l.length < 60 && !l.startsWith('-')) picked.push(l);
+      }
+      if(picked.length){ quickSpecs = picked.join(', '); break; }
     }
   }
 
