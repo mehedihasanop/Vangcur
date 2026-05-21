@@ -1451,10 +1451,12 @@ A: App ও Remote দিয়ে..."></textarea>
 async function saveSettingToSupabase(key, value) {
   // In-memory update
   _adminSettings[key] = value;
+  // ✅ FIX: Object/Array হলে JSON string করো — Supabase JSONB column সব device-এ consistent থাকবে
+  const storeValue = (typeof value === 'object' && value !== null) ? JSON.stringify(value) : value;
   try {
     // Step 1: প্রথমে upsert চেষ্টা করো (সবচেয়ে efficient)
     const { error: upsertError } = await supabaseClient.from('store_settings')
-      .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+      .upsert({ setting_key: key, setting_value: storeValue }, { onConflict: 'setting_key' });
     if (!upsertError) return; // সফল হলে শেষ
     throw upsertError; // ব্যর্থ হলে fallback-এ যাও
   } catch (e) {
@@ -1462,7 +1464,7 @@ async function saveSettingToSupabase(key, value) {
     try {
       await supabaseClient.from('store_settings').delete().eq('setting_key', key);
       const { error } = await supabaseClient.from('store_settings')
-        .insert({ setting_key: key, setting_value: value });
+        .insert({ setting_key: key, setting_value: storeValue });
       if (error) throw error;
     } catch(e2) {
       console.warn('Supabase save failed:', e2);
