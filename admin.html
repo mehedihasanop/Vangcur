@@ -2198,7 +2198,17 @@ function editProd(id){
   document.getElementById('pRating').value=p.rating||4.5;
   document.getElementById('pDesc').value=p.desc||'';
   document.getElementById('imgMgr').innerHTML='';(p.imgs||['📦']).forEach(i=>addImgRow(i));
-  document.getElementById('specEd').innerHTML='';Object.entries(p.specs||{}).forEach(([k,v])=>addSpecRow(k,v));
+  document.getElementById('specEd').innerHTML='';
+  {
+    const sp=p.specs||{};
+    const qk=sp._quick_keys;
+    if(Array.isArray(qk)&&qk.length){
+      qk.forEach(k=>{if(sp[k]!==undefined)addSpecRow(k,sp[k]);});
+    } else {
+      Object.entries(sp).filter(([k])=>!k.startsWith('_')).forEach(([k,v])=>addSpecRow(k,v));
+    }
+    if(!document.querySelectorAll('#specEd .spec-row').length){addSpecRow('','');}
+  }
   // Load extended fields
   if(document.getElementById('pDesc'))document.getElementById('pDesc').value=p.desc||p.longDesc||'';
   if(document.getElementById('pLongDesc'))document.getElementById('pLongDesc').value=p.longDesc||p.desc||'';
@@ -2442,13 +2452,16 @@ async function saveProd(){
   const imgs=[...document.querySelectorAll('#imgMgr .img-url-input')].map(i=>i.value.trim()).filter(Boolean);
   if(!imgs.length)imgs.push('📦');
   const specs={};
-  document.querySelectorAll('#specEd .spec-row').forEach(r=>{const k=r.querySelector('.sk')?.value.trim();const v=r.querySelector('.sv')?.value.trim();if(k&&v)specs[k]=v;});
-  // Parse quick specs (Key: Value, comma separated)
+  const _quick_keys=[];
+  document.querySelectorAll('#specEd .spec-row').forEach(r=>{const k=r.querySelector('.sk')?.value.trim();const v=r.querySelector('.sv')?.value.trim();if(k&&v){specs[k]=v;_quick_keys.push(k);}});
+  // Save _quick_keys so product card & page show ONLY these keys (not tech specs)
+  if(_quick_keys.length) specs._quick_keys=_quick_keys;
+  // Parse quick specs (Key: Value, comma separated) — also treated as quick keys
   const qsRaw=document.getElementById('pQuickSpecs')?.value||'';
   if(qsRaw.trim()){
-    qsRaw.split(',').forEach(pair=>{const [k,...vs]=pair.split(':');if(k&&vs.length)specs[k.trim()]=vs.join(':').trim();});
+    qsRaw.split(',').forEach(pair=>{const [k,...vs]=pair.split(':');if(k&&vs.length){const key=k.trim();if(!specs._quick_keys) specs._quick_keys=[];if(!specs._quick_keys.includes(key)) specs._quick_keys.push(key);specs[key]=vs.join(':').trim();}});
   }
-  // Parse technical specs from layout tab (Key: Value, newline separated)
+  // Parse technical specs from layout tab — stored in specs but NOT in _quick_keys
   const techRaw=document.getElementById('pTechSpecs')?.value||'';
   if(techRaw.trim()){
     techRaw.split('\n').forEach(line=>{const [k,...vs]=line.split(':');if(k&&vs.length)specs[k.trim()]=vs.join(':').trim();});
