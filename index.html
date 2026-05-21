@@ -2532,6 +2532,17 @@ function resetHeroAuto(){}
 
 
 // INIT
+// ✅ UTILITY: Supabase থেকে আসা value robust parse করো (string/object/double-encoded সব handle)
+function _parseSupabaseVal(val){
+  if(val === null || val === undefined) return val;
+  if(typeof val !== 'string') return val; // already parsed object
+  const t = val.trim();
+  if((t.startsWith('[') || t.startsWith('{')) || t.startsWith('"')){
+    try{ return JSON.parse(t); }catch(e){}
+  }
+  return val;
+}
+
 document.addEventListener('DOMContentLoaded',async ()=>{
   // ✅ SUPABASE-FIRST: সব settings ও products সরাসরি Supabase থেকে লোড করো
   // localStorage ব্যবহার করা হচ্ছে না — সব ডিভাইসে একই data দেখাবে
@@ -2542,12 +2553,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     if (settings) {
       // Ascending — শেষ match = latest। Duplicate হলে newest row জিতবে।
       settings.forEach(item => {
-        let val = item.setting_value;
-        // Supabase কখনো JSON string হিসেবে ফেরত দিতে পারে — safely parse করো
-        if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) {
-          try { val = JSON.parse(val); } catch(e) { /* parse ব্যর্থ হলে string-ই রাখো */ }
-        }
-        _settings[item.setting_key] = val;
+        _settings[item.setting_key] = _parseSupabaseVal(item.setting_value);
       });
     }
   } catch (e) { console.warn('Supabase settings load failed:', e); }
@@ -2620,7 +2626,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       .on('postgres_changes',{event:'*',schema:'public',table:'store_settings'},async(payload)=>{
         if(!payload.new||!payload.new.setting_key)return;
         const key=payload.new.setting_key;
-        const val=payload.new.setting_value;
+        let val=payload.new.setting_value;
+        // ✅ FIX: Supabase Realtime থেকে JSON string আসতে পারে — parse করো
+        val = _parseSupabaseVal(val);
         // In-memory settings update (no localStorage)
         _settings[key] = val;
         // ✅ যেকোনো settings change হলে live apply
@@ -2748,8 +2756,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             // বরং store_settings সরাসরি re-fetch করি
             (async()=>{try{
               const {data:s}=await supabaseClient.from('store_settings').select('*');
-              if(s){s.forEach(item=>{_settings[item.setting_key]=item.setting_value;});}
+              if(s){s.forEach(item=>{_settings[item.setting_key]=_parseSupabaseVal(item.setting_value);});}
               loadStock(_settings['vc_stock']||{});
+              if(typeof loadCathCardData==='function') loadCathCardData();
               renderCatBar();
               const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
               renderProds(cur);
@@ -5158,9 +5167,7 @@ document.addEventListener('visibilitychange',()=>{
       const {data:freshSettings}=await supabaseClient.from('store_settings').select('setting_key,setting_value').in('setting_key',['vc_stock','vc_categories','vc_cath_cards']);
       if(freshSettings&&freshSettings.length){
         freshSettings.forEach(item=>{
-          let val=item.setting_value;
-          if(typeof val==='string'&&(val.startsWith('[')||val.startsWith('{'))){try{val=JSON.parse(val);}catch(e){}}
-          _settings[item.setting_key]=val;
+          _settings[item.setting_key] = _parseSupabaseVal(item.setting_value);
         });
         // vc_stock দিয়ে default products এর stock আপডেট করো
         const freshStock=_settings['vc_stock']||{};
@@ -6187,7 +6194,12 @@ function renderRelated(prod){
 
 // HERO CATH-CARD DATA LOADER — Admin থেকে customize করা ডেটা লোড করে
 function loadCathCardData(){
-  const saved = _settings['vc_cath_cards'] || null;
+  let saved = _settings['vc_cath_cards'] || null;
+
+  // ✅ FIX: double-encoded JSON string হলে parse করো
+  if(typeof saved === 'string'){
+    try{ saved = JSON.parse(saved); }catch(e){ saved = null; }
+  }
 
   const track = document.getElementById('cathDuoTrack');
   if(!track) return;
@@ -6197,7 +6209,8 @@ function loadCathCardData(){
   allCards.forEach(card => { card.style.display = ''; });
 
   // যদি saved data থাকে, সেটা দিয়ে কার্ড আপডেট করো
-  if(saved && saved.length) {
+  if(saved && Array.isArray(saved) && saved.length) {
+    _settings['vc_cath_cards'] = saved; // parsed version store করো
     _syncCathCardsToDOM(saved);
   }
   // saved না থাকলে HTML-এর default কার্ডই দেখাবে
