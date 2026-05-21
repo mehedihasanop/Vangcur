@@ -2771,6 +2771,10 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateWishDot();
   updateNavAuth();
   initCathSlider();
+  // ✅ RACE-CONDITION FIX: Supabase settings fetch সম্পূর্ণ হওয়ার পরে _settings populated।
+  // loadCathCardData() এখানে call করা হয় যাতে কার্ড DOM-এ apply হয়
+  // initDuoSlider() এর আগে — slider শুধু একবারই clone করে।
+  loadCathCardData();
   initDuoSlider();
   // FIX8: Page load এ layout শেষ হওয়ার পরে position আবার set করো
   setTimeout(()=>{ try{ duoSetPosition(false); }catch(e){} }, 300);
@@ -6193,6 +6197,26 @@ function renderRelated(prod){
 }
 
 // HERO CATH-CARD DATA LOADER — Admin থেকে customize করা ডেটা লোড করে
+// ✅ RACE-CONDITION FIX: এই function টি async DOMContentLoaded এ Supabase fetch
+// সম্পূর্ণ হওয়ার পরে call হয়, তাই _settings['vc_cath_cards'] সবসময় available থাকবে।
+// Default card objects (13টি) — Supabase থেকে আসা array ছোট হলে padding এর জন্য ব্যবহার হয়।
+// এই array টি HTML-এর hardcoded card গুলোর সাথে ঠিক মিলে যায় (index 0–12)।
+const _CATH_CARD_DEFAULTS = [
+  { label:'Shop Now',          catId:'all',         emoji:'',   img:'', bg:'linear-gradient(155deg,#0a1628,#0f2a5e,#1a3a8f)' },
+  { label:'Explore',           catId:'smartwatch',  emoji:'',   img:'', bg:'linear-gradient(155deg,#0d0520,#1a0a45,#2a1060)' },
+  { label:'RGB Lights',        catId:'rgb',         emoji:'💡', img:'', bg:'linear-gradient(155deg,#0d1b0d,#1a3a1a,#0d2d1a)' },
+  { label:'Power Bank',        catId:'powerbank',   emoji:'🔋', img:'', bg:'linear-gradient(155deg,#1a0a00,#3d1f00,#5c2d00)' },
+  { label:'TWS Earbuds',       catId:'tws',         emoji:'🎧', img:'', bg:'linear-gradient(155deg,#1a0020,#3d0050,#2d0070)' },
+  { label:'Headphones',        catId:'headphone',   emoji:'🎵', img:'', bg:'linear-gradient(155deg,#00101a,#001f3d,#003366)' },
+  { label:'Acrylic Lamp',      catId:'lamp',        emoji:'🪔', img:'', bg:'linear-gradient(155deg,#1a0010,#3d0030,#1a0040)' },
+  { label:'Recharge. Fan',     catId:'fan',         emoji:'💨', img:'', bg:'linear-gradient(155deg,#001a1a,#003d3d,#005252)' },
+  { label:'Unique Collection', catId:'unique',      emoji:'🌟', img:'', bg:'linear-gradient(155deg,#1a0a1a,#3d0050,#5c007a)' },
+  { label:'Mini Printer',      catId:'miniprinter', emoji:'🖨️', img:'', bg:'linear-gradient(155deg,#0a1a0a,#1a3d1a,#0a2a0a)' },
+  { label:'Crystal Ball',      catId:'crystalball', emoji:'🔮', img:'', bg:'linear-gradient(155deg,#0a0a2a,#1a1a5c,#0a0a3d)' },
+  { label:'Moon Lamp',         catId:'moonlamp',    emoji:'🌙', img:'', bg:'linear-gradient(155deg,#1a1a0a,#3d3d00,#2a2a00)' },
+  { label:'Water Bottle',      catId:'waterbottle', emoji:'🍶', img:'', bg:'linear-gradient(155deg,#001a3d,#00285c,#003d7a)' },
+];
+
 function loadCathCardData(){
   let saved = _settings['vc_cath_cards'] || null;
 
@@ -6210,8 +6234,17 @@ function loadCathCardData(){
 
   // যদি saved data থাকে, সেটা দিয়ে কার্ড আপডেট করো
   if(saved && Array.isArray(saved) && saved.length) {
-    _settings['vc_cath_cards'] = saved; // parsed version store করো
-    _syncCathCardsToDOM(saved);
+    // ✅ RACE-CONDITION FIX (Requirement 2):
+    // Supabase থেকে আসা array টি DUO_TOTAL (13) এর চেয়ে ছোট হলে
+    // default card objects দিয়ে pad করো।
+    // এটা নিশ্চিত করে যে infinite carousel math সবসময় 13টি card এর উপর কাজ করে।
+    let paddedCards = saved.slice(); // shallow copy
+    while(paddedCards.length < DUO_TOTAL){
+      const idx = paddedCards.length;
+      paddedCards.push(_CATH_CARD_DEFAULTS[idx] || _CATH_CARD_DEFAULTS[0]);
+    }
+    _settings['vc_cath_cards'] = paddedCards; // parsed+padded version store করো
+    _syncCathCardsToDOM(paddedCards);
   }
   // saved না থাকলে HTML-এর default কার্ডই দেখাবে
 }
