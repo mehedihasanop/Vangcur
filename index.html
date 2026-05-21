@@ -1503,8 +1503,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <div class="acc-page" id="accPage">
   <div class="acc-nav">
     <div class="acc-nav-left">
-      <button class="pp-back" onclick="closeAcc()">← ফিরুন</button>
-      <span style="font-size:13px;font-weight:600">আমার অ্যাকাউন্ট</span>
+      <button class="pp-back" onclick="closeAcc()" aria-label="ফিরে যান">‹</button>
     </div>
   </div>
   <div class="acc-inner">
@@ -3183,7 +3182,7 @@ async function renderMyOrders(){
     }).join('')}</td>
     <td>৳${(o.total||0).toLocaleString()}</td>
     <td><span class="s-pill ${sm[o.status]||'s-pending'}">${lm[o.status]||'⏳ পেন্ডিং'}</span></td>
-    <td><button onclick="dlInvoiceById('${escHtml(o.id)}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">📄 ডাউনলোড</button></td>
+    <td><button onclick="dlInvoiceById('${escHtml(o.id)}')" style="background:var(--dark);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ডাউনলোড</button></td>
   </tr>`).join('');
 }
 
@@ -5613,7 +5612,7 @@ function openTrackOrder(){
               <div style="margin-bottom:12px">${items}</div>
               <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
                 <div style="font-size:13.5px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
-                ${['confirmed','shipped','delivered'].includes(st)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>`:''}
+                <button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>
               </div>
             </div>
           </div>
@@ -5748,7 +5747,7 @@ function renderTrackResults(found, resultEl, isSearch){
       <div style="font-size:12px;margin-bottom:10px">${(o.items||[]).map(i=>`<span style="display:inline-flex;align-items:center;gap:4px">${emojiHtml(i.emoji||'📦',18,'square')} ${escHtml(i.name)} × ${i.qty}</span>`).join('<br>')}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
         <div style="font-size:13px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
-        ${['confirmed','shipped','delivered'].includes(o.status)?`<button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>`:''}
+        <button onclick="dlInvoiceById('${o.id}')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>
       </div>
     </div>
   `).join('');
