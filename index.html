@@ -6181,8 +6181,6 @@ function renderRelated(prod){
 function loadCathCardData(){
   const saved = _settings['vc_cath_cards'] || null;
 
-  // ✅ Fix: Supabase-এ কম কার্ড থাকলেও সব HTML কার্ড দেখানো হবে
-  // HTML-এ ১৩টি কার্ড আছে — Supabase-এ যতটা থাকুক, বাকিগুলো নিজেই দেখাবে
   const track = document.getElementById('cathDuoTrack');
   if(!track) return;
 
@@ -6190,51 +6188,62 @@ function loadCathCardData(){
   const allCards = track.querySelectorAll('.cath-card');
   allCards.forEach(card => { card.style.display = ''; });
 
-  // যদি saved data থাকে, শুধু সেটুকু আপডেট করো
+  // যদি saved data থাকে, সেটা দিয়ে কার্ড আপডেট করো
   if(saved && saved.length) {
-    if(track.dataset.infinite === '1') {
-      _syncCathCardsToDOM(saved); return;
-    }
     _syncCathCardsToDOM(saved);
   }
-  // saved না থাকলে HTML-এর default কার্ডই দেখাবে — কিছু করতে হবে না
+  // saved না থাকলে HTML-এর default কার্ডই দেখাবে
 }
 
 function _syncCathCardsToDOM(cards){
-  // Update the real card nodes inside cathDuoTrack
-  // Real cards start at index DUO_TOTAL (after head clones) when infinite is built,
-  // or at 0 if not yet built
+  // Admin থেকে আসা সব data দিয়ে কার্ড আপডেট করে:
+  // label, catId, img, emoji, bg (background) — সবকিছু
   const track = document.getElementById('cathDuoTrack');
   if(!track) return;
   const allCardEls = Array.from(track.querySelectorAll('.cath-card'));
   const isInfinite = track.dataset.infinite === '1';
-  // ✅ Fix: offset সবসময় DUO_TOTAL (১৩) — cards.length নয়
-  // কারণ head clone count = HTML-এর মোট কার্ড সংখ্যা = DUO_TOTAL
   const offset = isInfinite ? DUO_TOTAL : 0;
 
   cards.forEach((card, i) => {
-    // Update real card (offset + i) and both clone copies
-    const indices = isInfinite ? [i + offset, i + DUO_TOTAL + offset, i + DUO_TOTAL * 2] : [i];
+    // Real card এবং infinite clone গুলো সব আপডেট করো
+    // isInfinite mode: head clones (0..DUO_TOTAL-1), real (DUO_TOTAL..2*DUO_TOTAL-1), tail (2*DUO_TOTAL..3*DUO_TOTAL-1)
+    const indices = isInfinite ? [i, i + DUO_TOTAL, i + DUO_TOTAL * 2] : [i];
     indices.forEach(domIdx => {
       const el = allCardEls[domIdx];
       if(!el) return;
-      // Update CTA label
+
+      // ✅ Background color আপডেট (admin থেকে bg field)
+      if(card.bg) el.style.background = card.bg;
+
+      // ✅ onclick category আপডেট
+      if(card.catId !== undefined) el.setAttribute('onclick', `cathGoCategory('${card.catId}')`);
+
+      // ✅ Label আপডেট
       const lb = el.querySelector('.cath-cat-label');
       if(lb && card.label) lb.innerHTML = escHtml(card.label) + ' <span class="cath-arrow">→</span>';
-      // Update onclick category
-      if(card.catId) el.setAttribute('onclick', `cathGoCategory('${card.catId}')`);
-      // Update image
-      if(card.img){
-        let imgEl = el.querySelector('.cath-bg-img');
-        let emojiEl = el.querySelector('.cath-emoji-bg');
+
+      // ✅ Image অথবা Emoji আপডেট
+      let imgEl = el.querySelector('.cath-bg-img');
+      let emojiEl = el.querySelector('.cath-emoji-bg');
+
+      if(card.img && card.img.length > 0){
+        // Image আছে — img element তৈরি বা আপডেট করো, emoji লুকাও
         if(!imgEl){
           imgEl = document.createElement('img');
           imgEl.className = 'cath-bg-img';
-          imgEl.alt = card.label || '';
           el.insertBefore(imgEl, el.firstChild);
-          if(emojiEl) emojiEl.style.display = 'none';
         }
         imgEl.src = card.img;
+        imgEl.alt = card.label || '';
+        imgEl.style.display = '';
+        if(emojiEl) emojiEl.style.display = 'none';
+      } else {
+        // Image নেই — emoji দেখাও, img লুকাও
+        if(imgEl) imgEl.style.display = 'none';
+        if(emojiEl){
+          emojiEl.style.display = '';
+          if(card.emoji) emojiEl.textContent = card.emoji;
+        }
       }
     });
   });
