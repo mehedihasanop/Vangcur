@@ -414,7 +414,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .pp-nav{background:var(--white);border-bottom:1px solid var(--border);padding:13px 20px;padding-top:calc(13px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
-.pp-back{background:var(--light);border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.pp-back{background:var(--light);border:none;border-radius:50%;width:38px;height:38px;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:var(--tr);flex-shrink:0;color:var(--dark)}
 .pp-back:hover{background:var(--border)}
 .pp-bread{font-size:12px;color:var(--gray)}
 .pp-bread span{color:var(--dark);font-weight:600}
@@ -785,6 +785,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .mobile-search-wrap{position:relative}
 .mobile-search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 /* MOB-05 FIX: Mobile search clear (✕) button */
+#mobileSearchInput::-webkit-search-cancel-button{display:none}#mobileSearchInput::-webkit-search-decoration{display:none}
 .mobile-search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray);border:none;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#fff;font-weight:700;line-height:1;padding:0;transition:var(--tr)}
 .mobile-search-clear.visible{display:flex}
 .mobile-search-clear:hover{background:var(--dark)}
@@ -911,7 +912,7 @@ body.dark .hero-slider{background:#0A0A0B}
 
 /* ── Product page nav ── */
 body.dark .pp-nav{background:#1C1C1E;border-bottom-color:#3A3A3C}
-body.dark .pp-back{background:#2C2C2E;color:#E5E5EA;border:1.5px solid #3A3A3C}
+body.dark .pp-back{background:#2C2C2E;color:#E5E5EA;border:none}
 body.dark .pp-back:hover{background:#3A3A3C;color:#fff}
 body.dark .pp-bread{color:#8E8E93}
 body.dark .pp-bread span{color:#E5E5EA}
@@ -1404,7 +1405,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <!-- PRODUCT FULL PAGE -->
 <div class="pp-overlay" id="ppOverlay">
   <div class="pp-nav">
-    <button class="pp-back" onclick="closePP()">← ফিরে যান</button>
+    <button class="pp-back" onclick="closePP()" aria-label="ফিরে যান">‹</button>
     <div class="pp-bread">হোম / <span id="ppBread">প্রোডাক্ট</span></div>
   </div>
   <!-- TOP: Image + Info + Actions -->
@@ -2631,6 +2632,10 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           PRODS.forEach(p=>{if(!_defaultIds.has(p.id)&&val[p.id]!==undefined)p.stock=val[p.id];});
           const cur=activeCat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,activeCat));
           renderProds(cur);
+        } else if(key==='vc_cath_cards'){
+          // ✅ SYNC: Admin থেকে হিরো কার্ড বদলালে তাৎক্ষণিক DOM আপডেট
+          _settings['vc_cath_cards'] = val;
+          if(typeof loadCathCardData === 'function') loadCathCardData();
         } else if(key==='vc_hero_slides'){
           heroSlides = val;
           initCathSlider(); // hero slide বদলালে তাৎক্ষণিক update
