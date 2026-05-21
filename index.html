@@ -5750,7 +5750,10 @@ function renderTrackResults(found, resultEl, isSearch){
   }
   const statusLabel={pending:'⏳ পেন্ডিং',confirmed:'✅ কনফার্ম',shipped:'🚚 শিপড',delivered:'📦 ডেলিভার্ড',cancelled:'❌ বাতিল',rejected:'❌ বাতিল'};
   const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',cancelled:'#E63946',rejected:'#E63946'};
-  resultEl.innerHTML=found.map(o=>{
+  const heading = !isSearch
+    ? `<div style="font-size:12px;font-weight:700;color:var(--gray);letter-spacing:.3px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">📋 এখন পর্যন্ত আপনার করা অর্ডার সমূহ</div>`
+    : '';
+  resultEl.innerHTML= heading + found.map(o=>{
     const itemsHtml=(o.items||[]).map(i=>`
       <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6">
         ${emojiHtml(i.emoji||'📦',36,'square')}
