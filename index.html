@@ -5155,14 +5155,20 @@ document.addEventListener('visibilitychange',()=>{
     // ✅ SYNC-01 + SYNC-03 FIX: page visible হলে store_settings (vc_stock, vc_categories) + custom_products একসাথে refresh
     (async()=>{try{
       // ১. store_settings থেকে vc_stock ও vc_categories আনো (default product stock এখানে থাকে)
-      const {data:freshSettings}=await supabaseClient.from('store_settings').select('setting_key,setting_value').in('setting_key',['vc_stock','vc_categories']);
+      const {data:freshSettings}=await supabaseClient.from('store_settings').select('setting_key,setting_value').in('setting_key',['vc_stock','vc_categories','vc_cath_cards']);
       if(freshSettings&&freshSettings.length){
-        freshSettings.forEach(item=>{ _settings[item.setting_key]=item.setting_value; });
+        freshSettings.forEach(item=>{
+          let val=item.setting_value;
+          if(typeof val==='string'&&(val.startsWith('[')||val.startsWith('{'))){try{val=JSON.parse(val);}catch(e){}}
+          _settings[item.setting_key]=val;
+        });
         // vc_stock দিয়ে default products এর stock আপডেট করো
         const freshStock=_settings['vc_stock']||{};
         loadStock(freshStock);
         // vc_categories পরিবর্তন হলে category bar re-render করো
         if(_settings['vc_categories']) renderCatBar();
+        // ✅ FIX-1: vc_cath_cards আপডেট হলে hero cards re-render করো
+        if(typeof loadCathCardData==='function') loadCathCardData();
       }
       // ২. custom_products refresh করো
       const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
@@ -5199,6 +5205,8 @@ document.addEventListener('visibilitychange',()=>{
     // FIX: Tab ফিরে আসলে slider re-initialize (hidden থাকলে clientWidth=0 হয়)
     requestAnimationFrame(()=>{
       setTimeout(()=>{
+        // ✅ FIX-2: Tab ফিরে আসলে hero cards data re-apply করো (blank হওয়া ঠেকাবে)
+        try{ if(typeof loadCathCardData==='function') loadCathCardData(); }catch(e){}
         try{ updateCathSlider(); }catch(e){}
         // duoSetPosition আগে run করি তারপর আরেকটু পরে আবার (DOM fully painted নিশ্চিত করতে)
         try{ duoSetPosition(false); }catch(e){}
