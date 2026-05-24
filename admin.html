@@ -2959,29 +2959,29 @@ function loadInfoPageEditor(){
 
 // ======= CATEGORY MANAGEMENT =======
 const DEFAULT_CATS=[
-  {id:'all',          name:'সকল পণ্য',          icon:'🛍️', locked:true},
-  {id:'unique',       name:'Unique Collection',  icon:'✨', locked:true},
-  {id:'tws',          name:'TWS',                icon:'🎧', locked:true},
-  {id:'headphone',    name:'Headphone',          icon:'🎵', locked:true},
-  {id:'acrylic-clamp',name:'Acrylic Clamp',      icon:'🗜️', locked:true},
-  {id:'crystal-ball', name:'Crystal Ball',       icon:'🔮', locked:true},
-  {id:'water-bottle', name:'Water Bottle',       icon:'🍶', locked:true},
-  {id:'humidifier',   name:'Humidifier',         icon:'💧', locked:true},
-  {id:'fan',          name:'Rechargeable Fan',   icon:'💨', locked:true},
-  {id:'gimbal',       name:'Gimbal',             icon:'📷', locked:true},
-  {id:'powerbank',    name:'Power Bank',         icon:'🔋', locked:true},
-  {id:'rgb',          name:'RGB Light',          icon:'💡', locked:true},
-  {id:'wgp',          name:'WGP',                icon:'🎮', locked:true},
-  {id:'smartwatch',   name:'Smart Watch',        icon:'⌚', locked:true},
-  {id:'light',        name:'Light',              icon:'🕯️', locked:true},
-  {id:'keyboard',     name:'Keyboard',           icon:'⌨️', locked:true},
-  {id:'mouse',        name:'Mouse',              icon:'🖱️', locked:true},
-  {id:'cable',        name:'Cable And Charges',  icon:'🔌', locked:true},
-  {id:'unique-tools', name:'Unique Tools',       icon:'🔧', locked:true},
-  {id:'hair-dryer',   name:'Hair Dryer',         icon:'💇', locked:true},
-  {id:'lamp',         name:'Lamp',               icon:'🪔', locked:true},
-  {id:'toys',         name:'Toys',               icon:'🧸', locked:false},
-  {id:'alarm-clock',  name:'Alarm Clock',        icon:'⏰', locked:false},
+  {id:'all',          name:'সকল পণ্য',          icon:'🛍️'},
+  {id:'unique',       name:'Unique Collection',  icon:'✨'},
+  {id:'tws',          name:'TWS',                icon:'🎧'},
+  {id:'acrylic-clamp',name:'Acrylic Clamp',      icon:'🗜️'},
+  {id:'crystal-ball', name:'Crystal Ball',       icon:'🔮'},
+  {id:'water-bottle', name:'Water Bottle',       icon:'🍶'},
+  {id:'humidifier',   name:'Humidifier',         icon:'💧'},
+  {id:'fan',          name:'Rechargeable Fan',   icon:'💨'},
+  {id:'gimbal',       name:'Gimbal',             icon:'📷'},
+  {id:'powerbank',    name:'Power Bank',         icon:'🔋'},
+  {id:'rgb',          name:'RGB Light',          icon:'💡'},
+  {id:'wgp',          name:'WGP',                icon:'🎮'},
+  {id:'smartwatch',   name:'Smart Watch',        icon:'⌚'},
+  {id:'light',        name:'Light',              icon:'🕯️'},
+  {id:'keyboard',     name:'Keyboard',           icon:'⌨️'},
+  {id:'mouse',        name:'Mouse',              icon:'🖱️'},
+  {id:'cable',        name:'Cable And Charges',  icon:'🔌'},
+  {id:'unique-tools', name:'Unique Tools',       icon:'🔧'},
+  {id:'hair-dryer',   name:'Hair Dryer',         icon:'💇'},
+  {id:'lamp',         name:'Lamp',               icon:'🪔'},
+  {id:'toys',         name:'Toys',               icon:'🧸'},
+  {id:'headphone',    name:'Headphone',          icon:'🎧'},
+  {id:'alarm-clock',  name:'Alarm Clock',        icon:'⏰'},
 ];
 let editCatIdx=-1;
 function getCats(){
@@ -3000,14 +3000,27 @@ function getCats(){
 function saveCats(cats){
   _adminSettings['vc_categories'] = cats;
   saveSettingToSupabase('vc_categories', cats);
-  // ✅ সব জায়গায় realtime refresh
+  // ✅ Universal real-time refresh across ALL dropdowns
   populateCatFilter();           // product page filter dropdown
   renderCatCountBadges();        // product page cat badges
-  populateCatDropdown('pCat');   // product add/edit modal
-  populateCatDropdown('r_cat');  // other dropdowns
-  populateCathCatDropdown('');   // hero card editor dropdown
+  populateCatDropdown('pCat');   // product add/edit modal (legacy single-cat)
+  populateCatDropdown('r_cat');  // AI Product Planner category selector
+  populateCathCatDropdown('');   // hero card editor (#cathCardCatId)
   renderCategoryList();          // category management list
-  initCatRows([]);               // reset multi-cat rows in modal
+  // ✅ Task 3: Refresh all existing rows in #catRowsContainer (multi-cat rows)
+  refreshCatRowsContainer();
+}
+// ✅ Task 3: Refresh every <select> inside #catRowsContainer with updated cats
+function refreshCatRowsContainer(){
+  const container = document.getElementById('catRowsContainer');
+  if(!container) return;
+  const rows = container.querySelectorAll('.cat-row');
+  if(!rows.length) return;
+  rows.forEach((row, i) => {
+    const sel = row.querySelector('.pCatMulti');
+    const curVal = sel ? sel.value : '';
+    row.innerHTML = buildCatSelectRow(curVal, i);
+  });
 }
 function getCatProdCount(catId){
   if(catId==='all') return getAllProds().length;
@@ -3035,11 +3048,11 @@ function renderCategoryList(){
       <span style="font-size:22px;min-width:32px;text-align:center">${escHtml(c.icon)}</span>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700">${escHtml(c.name)}</div>
-        <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)}${c.locked?' · Built-in':''} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
+        <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
       </div>
       <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${escHtml(c.id)}','${escHtml(c.name)}')">+ প্রোডাক্ট</button>
-      <button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️ এডিট</button>
-      ${!c.locked?`<button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:''}
+      <button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️</button>
+      <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>
     </div>`;
     // ── Drag events ──
     row.addEventListener('dragstart',e=>{
@@ -3095,15 +3108,11 @@ function editCategory(i){
   document.getElementById('catIcon').value=c.icon;
   document.getElementById('catPreviewIcon').textContent=c.icon;
   document.getElementById('catPreviewName').textContent=c.name;
-  // Locked categories: ID field disable করো
-  const idInput=document.getElementById('catId');
-  if(idInput){idInput.disabled=!!c.locked;idInput.style.opacity=c.locked?'0.5':'1';}
   document.getElementById('catEditor').style.display='block';
 }
 function saveCategoryEdit(){
   const name=document.getElementById('catName').value.trim();
-  const idInput=document.getElementById('catId');
-  const id=idInput?idInput.value.trim().toLowerCase().replace(/\s/g,''):'';
+  const id=document.getElementById('catId').value.trim().toLowerCase().replace(/\s/g,'');
   const icon=document.getElementById('catIcon').value.trim()||'📦';
   if(!name){showAdminToast('ক্যাটাগরির নাম দিন');return;}
   if(!id){showAdminToast('ক্যাটাগরির ID দিন');return;}
@@ -3111,23 +3120,14 @@ function saveCategoryEdit(){
   if(editCatIdx===-1){
     // Check ID uniqueness
     if(cats.find(c=>c.id===id)){showAdminToast('এই ID ইতিমধ্যে আছে!');return;}
-    cats.push({id,name,icon,locked:false});
+    cats.push({id,name,icon});
     showAdminToast('✅ নতুন ক্যাটাগরি যোগ হয়েছে!');
   } else {
-    const existing=cats[editCatIdx];
-    // Locked category: শুধু name ও icon আপডেট হবে, id ঠিক থাকবে
-    if(existing.locked){
-      cats[editCatIdx]={...existing,name,icon};
-    } else {
-      cats[editCatIdx]={...existing,name,icon,id};
-    }
+    cats[editCatIdx]={...cats[editCatIdx],name,icon};
     showAdminToast('✅ ক্যাটাগরি আপডেট হয়েছে!');
   }
   saveCats(cats);
-  // ✅ index.html এও sync হবে Realtime দিয়ে
   document.getElementById('catEditor').style.display='none';
-  // ID field re-enable করো
-  if(idInput) idInput.disabled=false;
 }
 function deleteCategory(i){
   if(!confirm('এই ক্যাটাগরি মুছে দিবেন?'))return;
