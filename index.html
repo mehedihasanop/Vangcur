@@ -1569,7 +1569,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       <div class="fg2"><label>ফোন নম্বর * <span class="f-opt">(বাংলাদেশের নম্বর: 01X-XXXXXXXX)</span></label><input class="fctrl" id="cPhone" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eP">সঠিক বাংলাদেশী নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)</div></div>
       <div class="fg2"><label>জেলা *</label><select class="fctrl" id="cDist" onchange="onDist()"><option value="">জেলা সিলেক্ট করুন</option></select><div class="ferr" id="eD">জেলা সিলেক্ট করুন</div></div>
       <div class="fg2"><label>সম্পূর্ণ ডেলিভারি ঠিকানা *</label><textarea class="fctrl" id="cAddr" rows="3" placeholder="গ্রাম/মহল্লা, রোড, বাসা নম্বর সহ বিস্তারিত লিখুন"></textarea><div class="ferr" id="eA">ঠিকানা দিন</div></div>
-      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@email.com"></div>
+      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@gmail.com"><div class="ferr" id="eEmail">সঠিক ইমেইল লিখুন (যেমন: name@gmail.com)</div></div>
       <div class="fg2"><label>শিপিং *</label><div class="ship-opts" id="shipOpts"></div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-next" onclick="goS2()">পরবর্তী → পেমেন্ট</button></div>
     </div>
@@ -3935,11 +3935,6 @@ function openPP(id){
   } else if(stickyBar){
     stickyBar.classList.remove('show');
   }
-
-  // ✅ TAB RESET: নতুন প্রোডাক্ট খোলার সময় সবসময় প্রথম ট্যাব "বিবরণ"-এ ফিরে আসো
-  document.querySelectorAll('.pp-tab').forEach((t,i)=>{
-    t.classList.toggle('on', i===0);
-  });
 }
 
 function togglePpFaq(i){
@@ -4082,7 +4077,7 @@ function orderNow(){
   } else {
     // কার্ট খালি — সরাসরি অর্ডার পেজে যাও
     // closePP() ব্যবহার না করে directly বন্ধ করো (history.go(-1) avoid করতে)
-    orderItems=[{...curProd,qty:curQty}];
+    orderItems=[{...curProd,qty:curQty,emoji:(curProd.imgs||['📦'])[0]}];
     const overlay=document.getElementById('ppOverlay');
     overlay.classList.remove('show');
     unlockBody();
@@ -4145,7 +4140,7 @@ function quickOrder(id){
     showQuickOrderModal();
   } else {
     // কার্ট খালি — সরাসরি অর্ডার পেজে যাও
-    orderItems=[{...p,qty:1}];
+    orderItems=[{...p,qty:1,emoji:(p.imgs||['📦'])[0]}];
     openOrder(false);
   }
 }
@@ -4454,6 +4449,10 @@ function goS2(){
   if(!phoneRegex.test(ph)){showFerr('eP',true);ok=false;}else showFerr('eP',false);
   if(!dist){showFerr('eD',true);ok=false;}else showFerr('eD',false);
   if(!addr){showFerr('eA',true);ok=false;}else showFerr('eA',false);
+  // Email ঐচ্ছিক — কিন্তু কিছু লিখলে valid হতে হবে (name@domain.ext)
+  const em=document.getElementById('cEmail').value.trim();
+  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if(em && !emailRegex.test(em)){showFerr('eEmail',true);ok=false;}else showFerr('eEmail',false);
   if(!selectedShip){
     // UX-1: inline error instead of alert()
     const shipEl=document.getElementById('shipOpts');
@@ -6107,7 +6106,7 @@ function renderWishlist(){
     </div>
     <div class="wl-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
       <button class="wl-btn" style="background:#F3F4F6;color:#1A1A1A;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="addToCart(${item.id},1);showToast('✅ কার্টে যোগ হয়েছে')">🛒 কার্টে যোগ</button>
-      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();orderItems=[{...PRODS.find(p=>p.id===${item.id}),qty:1}];openOrder(false)">⚡ অর্ডার করুন</button>
+      <button class="wl-btn" style="background:#1A1A1A;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap" onclick="closeWishlist();(function(){const _p=PRODS.find(p=>p.id===${item.id});if(_p)orderItems=[{..._p,qty:1,emoji:(_p.imgs||['📦'])[0]}];openOrder(false);})()">⚡ অর্ডার করুন</button>
     </div>
   </div>`).join('');
 }
