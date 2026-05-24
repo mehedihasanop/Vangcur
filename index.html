@@ -134,12 +134,6 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
   overflow:hidden;
   position:relative;
   touch-action:pan-y;
-  /* CLS Fix: hide until slider has cloned & positioned — avoids jump-flash on load */
-  opacity:0;
-  transition:opacity .18s ease;
-}
-.cath-hero-duo.ready{
-  opacity:1;
 }
 
 /* Sliding track: all 8 cards in a row, 2 visible at a time */
@@ -2279,8 +2273,6 @@ function initDuoSlider() {
 
   buildDuoInfiniteTrack();
   duoSetPosition(false); // instant jump to real start
-  // CLS Fix: reveal slider now that cloning & positioning are done — no jump visible
-  if (wrap) wrap.classList.add('ready');
 
   // ── Mobile touch: pause while finger on screen ──
   let tsx = 0, tsy = 0;
@@ -2410,16 +2402,13 @@ function startDuoAuto() {
   }, 3500);
 }
 
-// Reinit on resize — only when WIDTH changes (ignores mobile address-bar height resizes)
+// Reinit on resize — rebuild clones & reset position
 let _duoResizeTimer = null;
-let _duoLastWidth = window.innerWidth;
 window.addEventListener('resize', () => {
-  const newWidth = window.innerWidth;
-  if (newWidth === _duoLastWidth) return; // height-only resize (mobile scroll) — skip
-  _duoLastWidth = newWidth;
   clearTimeout(_duoResizeTimer);
   _duoResizeTimer = setTimeout(() => {
-    // Recalculate card widths & reposition — no re-cloning needed
+    // Reset to real start without re-cloning
+    duoIdx = DUO_TOTAL;
     duoSetPosition(false);
   }, 250);
 });
@@ -3946,6 +3935,11 @@ function openPP(id){
   } else if(stickyBar){
     stickyBar.classList.remove('show');
   }
+
+  // ✅ TAB RESET: নতুন প্রোডাক্ট খোলার সময় সবসময় প্রথম ট্যাব "বিবরণ"-এ ফিরে আসো
+  document.querySelectorAll('.pp-tab').forEach((t,i)=>{
+    t.classList.toggle('on', i===0);
+  });
 }
 
 function togglePpFaq(i){
