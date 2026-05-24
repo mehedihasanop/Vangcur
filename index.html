@@ -2438,6 +2438,20 @@ function _parseSupabaseVal(val){
 }
 
 document.addEventListener('DOMContentLoaded',async ()=>{
+  // ✅ PERF: localStorage থেকে hero card cache তাৎক্ষণিক দেখাও (Supabase আসার আগেই)
+  try{
+    const cachedCards = localStorage.getItem('vc_cath_cache');
+    if(cachedCards){
+      const parsed = JSON.parse(cachedCards);
+      if(Array.isArray(parsed) && parsed.length){
+        _settings['vc_cath_cards'] = parsed;
+        if(typeof loadCathCardData==='function') loadCathCardData();
+        // Cloudinary images preload করো
+        parsed.forEach(c=>{if(c.img&&c.img.startsWith('http')){const i=new Image();i.src=c.img;}});
+      }
+    }
+  }catch(e){}
+
   // ✅ SUPABASE-FIRST: সব settings ও products সরাসরি Supabase থেকে লোড করো
   // localStorage ব্যবহার করা হচ্ছে না — সব ডিভাইসে একই data দেখাবে
 
@@ -2450,6 +2464,13 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         _settings[item.setting_key] = _parseSupabaseVal(item.setting_value);
       });
     }
+    // ✅ PERF: vc_cath_cards localStorage এ cache করো (পরের visit এ instant দেখাবে)
+    try{
+      const freshCards = _settings['vc_cath_cards'];
+      if(freshCards && Array.isArray(freshCards) && freshCards.length){
+        localStorage.setItem('vc_cath_cache', JSON.stringify(freshCards));
+      }
+    }catch(e){}
   } catch (e) { console.warn('Supabase settings load failed:', e); }
 
   // Step 2: stock apply করো (Supabase data থেকে)
@@ -2537,6 +2558,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         } else if(key==='vc_cath_cards'){
           // ✅ SYNC: Admin থেকে হিরো কার্ড বদলালে তাৎক্ষণিক DOM আপডেট
           _settings['vc_cath_cards'] = val;
+          // ✅ Cache আপডেট করো
+          try{if(Array.isArray(val))localStorage.setItem('vc_cath_cache',JSON.stringify(val));}catch(e){}
           if(typeof loadCathCardData === 'function') loadCathCardData();
         } else if(key==='vc_hero_slides'){
           heroSlides = val;
@@ -6435,6 +6458,8 @@ function loadCustomCategories(){
     {id:'unique-tools',name:'Unique Tools',icon:'🔧'},
     {id:'hair-dryer',name:'Hair Dryer',icon:'💇'},
     {id:'lamp',name:'Lamp',icon:'🪔'},
+    {id:'toys',name:'Toys',icon:'🧸'},
+    {id:'alarm-clock',name:'Alarm Clock',icon:'⏰'},
   ];
   // ✅ FIX: saved cats এ missing defaultCats merge করো (Supabase এ পুরানো কম cats থাকলেও সব দেখাবে)
   let cats;

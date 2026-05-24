@@ -2980,6 +2980,8 @@ const DEFAULT_CATS=[
   {id:'unique-tools', name:'Unique Tools',       icon:'🔧', locked:true},
   {id:'hair-dryer',   name:'Hair Dryer',         icon:'💇', locked:true},
   {id:'lamp',         name:'Lamp',               icon:'🪔', locked:true},
+  {id:'toys',         name:'Toys',               icon:'🧸', locked:false},
+  {id:'alarm-clock',  name:'Alarm Clock',        icon:'⏰', locked:false},
 ];
 let editCatIdx=-1;
 function getCats(){
@@ -3036,8 +3038,8 @@ function renderCategoryList(){
         <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)}${c.locked?' · Built-in':''} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
       </div>
       <button class="btn btn-blue btn-sm" onclick="openAddProdForCat('${escHtml(c.id)}','${escHtml(c.name)}')">+ প্রোডাক্ট</button>
-      ${!c.locked?`<button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️</button>
-      <button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:'<span style="font-size:11px;color:var(--gray);background:var(--light);padding:3px 8px;border-radius:6px">Built-in</span>'}
+      <button class="btn btn-outline btn-sm" onclick="editCategory(${i})">✏️ এডিট</button>
+      ${!c.locked?`<button class="btn btn-red btn-sm" onclick="deleteCategory(${i})">🗑️</button>`:''}
     </div>`;
     // ── Drag events ──
     row.addEventListener('dragstart',e=>{
@@ -3093,11 +3095,15 @@ function editCategory(i){
   document.getElementById('catIcon').value=c.icon;
   document.getElementById('catPreviewIcon').textContent=c.icon;
   document.getElementById('catPreviewName').textContent=c.name;
+  // Locked categories: ID field disable করো
+  const idInput=document.getElementById('catId');
+  if(idInput){idInput.disabled=!!c.locked;idInput.style.opacity=c.locked?'0.5':'1';}
   document.getElementById('catEditor').style.display='block';
 }
 function saveCategoryEdit(){
   const name=document.getElementById('catName').value.trim();
-  const id=document.getElementById('catId').value.trim().toLowerCase().replace(/\s/g,'');
+  const idInput=document.getElementById('catId');
+  const id=idInput?idInput.value.trim().toLowerCase().replace(/\s/g,''):'';
   const icon=document.getElementById('catIcon').value.trim()||'📦';
   if(!name){showAdminToast('ক্যাটাগরির নাম দিন');return;}
   if(!id){showAdminToast('ক্যাটাগরির ID দিন');return;}
@@ -3108,11 +3114,20 @@ function saveCategoryEdit(){
     cats.push({id,name,icon,locked:false});
     showAdminToast('✅ নতুন ক্যাটাগরি যোগ হয়েছে!');
   } else {
-    cats[editCatIdx]={...cats[editCatIdx],name,icon};
+    const existing=cats[editCatIdx];
+    // Locked category: শুধু name ও icon আপডেট হবে, id ঠিক থাকবে
+    if(existing.locked){
+      cats[editCatIdx]={...existing,name,icon};
+    } else {
+      cats[editCatIdx]={...existing,name,icon,id};
+    }
     showAdminToast('✅ ক্যাটাগরি আপডেট হয়েছে!');
   }
   saveCats(cats);
+  // ✅ index.html এও sync হবে Realtime দিয়ে
   document.getElementById('catEditor').style.display='none';
+  // ID field re-enable করো
+  if(idInput) idInput.disabled=false;
 }
 function deleteCategory(i){
   if(!confirm('এই ক্যাটাগরি মুছে দিবেন?'))return;
