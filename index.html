@@ -199,17 +199,19 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 }
 
 /* Hero cards: 2 visible on mobile, 6 on desktop */
+/* FIX: width 50% parent এ নয়, সরাসরি viewport থেকে calculate করা */
 .cath-hero-duo .cath-card{
-  width:calc(50% - 6px);
+  width:calc((100vw - 56px) / 2);
   flex-shrink:0;
   height:350px;
 }
-@media(min-width:480px){
+/* 56px = cath-wrap padding (14px × 2 sides) + track padding (2px × 2) + gap(12px)/2 × 2 cards */
+@media(min-width:480px) and (max-width:768px){
   .cath-hero-duo .cath-card{ height:370px; }
 }
 @media(min-width:769px){
-  /* Desktop: 6 cards visible */
-  .cath-hero-duo .cath-card{ height:360px; }
+  /* Desktop: 6 cards visible at a time */
+  .cath-hero-duo .cath-card{ width:calc((100% - 60px) / 6); height:360px; }
 }
 
 .cath-card:hover{
@@ -364,6 +366,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* TRUST */
 .trust-wrap{max-width:1300px;margin:16px auto 26px;padding:0 20px}
 .trust-strip{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px 28px;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:14px}
+
 .t-item{display:flex;align-items:center;gap:10px}
 .t-icon{width:33px;height:33px;background:var(--light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .t-label{font-size:12.5px;font-weight:600}
@@ -1231,7 +1234,11 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 
   /* Hero promo cards */
   .cath-wrap{ padding: clamp(8px, 2.5vw, 14px) clamp(10px, 3vw, 14px) 0; }
-  .cath-hero-duo .cath-card{ height: clamp(185px, 55vw, 310px); }
+  /* FIX: ছোট ফোনে card width viewport থেকে নেওয়া */
+  .cath-hero-duo .cath-card{
+    width: calc((100vw - 36px) / 2);
+    height: clamp(185px, 55vw, 310px);
+  }
   .cath-duo-track{ gap: clamp(7px, 2vw, 12px); }
 }
 
@@ -1318,8 +1325,9 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   }
   .trust-strip{
     padding: clamp(10px, 3vw, 15px) clamp(10px, 3vw, 24px);
-    gap: clamp(7px, 2vw, 13px);
+    gap: clamp(14px, 4vw, 20px);
     border-radius: clamp(10px, 2.8vw, 14px);
+    justify-content: space-evenly;
   }
   .t-label{ font-size: clamp(10.5px, 3vw, 12.5px); }
   .t-sub{ font-size: clamp(9px, 2.5vw, 11px); }
@@ -1410,7 +1418,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   .hero-sub{ font-size: 10.5px; }
   .h-btn{ padding: 8px 14px; font-size: 11px; }
   .hero-stats{ display: none; }
-  .cath-hero-duo .cath-card{ height: 175px; }
+  .cath-hero-duo .cath-card{ width:calc((100vw - 28px)/2); height: 175px; }
 
   /* Product cards */
   .prod-grid{ gap: 7px; }
@@ -1638,7 +1646,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 </div>
 
 <!-- WISHLIST OVERLAY -->
-<div class="wishlist-overlay" id="wishlistOverlay" onclick="if(event.target===this)closeWishlist()">
+<div class="wishlist-overlay" id="wishlistOverlay">
   <div class="wishlist-box">
     <div class="wishlist-head">
       <h3>❤️ আমার Wishlist</h3>
@@ -1652,7 +1660,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <div class="pp-overlay" id="ppOverlay">
   <div class="pp-nav">
     <button class="pp-back" onclick="closePP()" aria-label="ফিরে যান">‹</button>
-    <div class="pp-bread">হোম / <span id="ppBread">প্রোডাক্ট</span></div>
+    <div class="pp-bread">হোম / <span id="ppBreadWishlist" style="display:none;color:var(--gray);font-weight:400">Wishlist / </span><span id="ppBread">প্রোডাক্ট</span></div>
   </div>
   <!-- TOP: Image + Info + Actions -->
   <div class="pp-inner">
@@ -2261,12 +2269,17 @@ function lockBody() {
 }
 function unlockBody() {
   if(!document.body.dataset.locked) return;
+  // position:fixed এর top value থেকে scroll position নেওয়া — সবচেয়ে reliable
+  const scrollY = _bodyScrollY || parseInt(document.body.style.top || '0') * -1;
   document.body.style.overflow = '';
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.width = '';
   delete document.body.dataset.locked;
-  window.scrollTo(0, _bodyScrollY);
+  // instant scroll — smooth animation আটকানো
+  document.documentElement.style.scrollBehavior='auto';
+  window.scrollTo(0, scrollY);
+  requestAnimationFrame(()=>{ document.documentElement.style.scrollBehavior=''; });
 }
 
 // Fallback array — add image URLs here if not using admin panel
@@ -3714,7 +3727,7 @@ function renderProds(list) {
   if(countEl){
     const catTitles={};
     (_settings['vc_categories']||[]).forEach(c=>{if(c.id&&c.name)catTitles[c.id]=c.name;});
-    if(activeCat&&activeCat!=='all') countEl.textContent=`${list.length}টি প্রোডাক্ট (${catTitles[activeCat]||activeCat})`;
+    if(activeCat&&activeCat!=='all') countEl.textContent=`${list.length}টি প্রোডাক্ট`;
     else countEl.textContent=`${list.length}টি প্রোডাক্ট`;
   }
 
@@ -4103,6 +4116,9 @@ function openPP(id){
   if(qtyTotalEl)qtyTotalEl.style.display='none';
   const nameShort=curProd.name.length>60?curProd.name.slice(0,60)+'...':curProd.name;
   document.getElementById('ppBread').textContent=curProd.name.length>32?curProd.name.slice(0,32)+'...':curProd.name;
+  // Wishlist breadcrumb default hide — openPPFromWishlist এ দেখাবে
+  const wlBread=document.getElementById('ppBreadWishlist');
+  if(wlBread) wlBread.style.display='none';
   document.getElementById('ppName').textContent=curProd.name;
   document.getElementById('ppPrice').textContent=`৳${curProd.price.toLocaleString()}`;
   document.getElementById('ppOld').textContent=`৳${curProd.old.toLocaleString()}`;
@@ -4340,16 +4356,22 @@ function ppScrollTo(sectionId,tabBtn){
 function closePP(){
   const overlay=document.getElementById('ppOverlay');
   if(!overlay.classList.contains('show'))return;
-  overlay.classList.remove('show');unlockBody();
-  // B-4: restore scroll position
-  const pos=overlay._scrollPos||0;
-  window.scrollTo(0,pos);
+  overlay.classList.remove('show');
+  unlockBody(); // এটাই scroll restore করে — instant, _bodyScrollY দিয়ে
   // F-7: cleanup sticky bar
   const stickyBar=document.getElementById('ppStickyBar');
   if(stickyBar)stickyBar.classList.remove('show');
   if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
   // U-10: show float btns again
   const fb=document.querySelector('.float-btns');if(fb)fb.style.display='flex';
+  // wishlist থেকে এসে থাকলে আবার দেখাও
+  if(overlay._fromWishlist){
+    overlay._fromWishlist=false;
+    document.getElementById('wishlistOverlay').classList.add('show');
+    lockBody();
+    _panelStack=_panelStack.filter(p=>p!=='pp');
+    return; // _popPanel() call করব না — history তে wishlist এর entry আছে
+  }
   _popPanel();
 }
 function galleryArrow(dir){
@@ -5421,6 +5443,12 @@ function _handleBack(state) {
     if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
     const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
     _panelStack = _panelStack.filter(p => p !== 'pp');
+    // wishlist থেকে এসে থাকলে আবার দেখাও
+    if(overlay._fromWishlist){
+      overlay._fromWishlist = false;
+      document.getElementById('wishlistOverlay').classList.add('show');
+      lockBody();
+    }
     return true;
   }
 
@@ -6491,6 +6519,23 @@ function updateWishDot(){
   const dot=document.getElementById('wishDot');
   if(dot){dot.textContent=w.length;dot.classList.toggle('on',w.length>0);}
 }
+function openPPFromWishlist(id){
+  // wishlist hide করো (overlay তে থাকবে, stack এ থাকবে)
+  document.getElementById('wishlistOverlay').classList.remove('show');
+  // PP খোলো
+  openPP(id);
+  // flag সেট করো — closePP ও handleBack এ wishlist আবার দেখাবে
+  document.getElementById('ppOverlay')._fromWishlist = true;
+  // Wishlist breadcrumb দেখাও
+  const wlBread = document.getElementById('ppBreadWishlist');
+  if(wlBread) wlBread.style.display = 'inline';
+  // transitionend cleanup
+  const ppOverlay = document.getElementById('ppOverlay');
+  if(ppOverlay._wlObserver){
+    ppOverlay.removeEventListener('transitionend', ppOverlay._wlObserver);
+    ppOverlay._wlObserver = null;
+  }
+}
 function openWishlist(){
   renderWishlist();
   document.getElementById('wishlistOverlay').classList.add('show');
@@ -6503,9 +6548,9 @@ function renderWishlist(){
   const body=document.getElementById('wishlistBody');
   if(!w.length){body.innerHTML='<div class="wl-empty"><div style="font-size:44px;margin-bottom:10px">🤍</div><p>আপনার Wishlist খালি</p></div>';return;}
   body.innerHTML=w.map(item=>`<div class="wl-item" id="wli_${item.id}">
-    <div class="wl-img" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;display:flex;align-items:center;justify-content:center">${emojiHtml(item.emoji, 48, 'square')}</div>
+    <div class="wl-img" onclick="openPPFromWishlist(${item.id})" style="cursor:pointer;display:flex;align-items:center;justify-content:center">${emojiHtml(item.emoji, 48, 'square')}</div>
     <div class="wl-info" style="flex:1;min-width:0">
-      <div class="wl-name" onclick="closeWishlist();openPP(${item.id})" style="cursor:pointer;text-decoration:none" title="প্রোডাক্ট দেখুন">${escHtml(item.name)}</div>
+      <div class="wl-name" onclick="openPPFromWishlist(${item.id})" style="cursor:pointer;text-decoration:none" title="প্রোডাক্ট দেখুন">${escHtml(item.name)}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
         <div class="wl-price">৳${item.price.toLocaleString()}</div>
         <button onclick="removeFromWishlistInModal(${item.id})" title="Wishlist থেকে সরান" style="background:none;border:none;cursor:pointer;color:#9CA3AF;padding:2px;display:flex;align-items:center;border-radius:5px;transition:color .18s,background .18s" onmouseover="this.style.color='#E63946';this.style.background='#FEF2F2'" onmouseout="this.style.color='#9CA3AF';this.style.background='none'">
@@ -6844,7 +6889,7 @@ function clearMobileSearch(){
   if(btn) btn.classList.remove('visible');
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart();closeOrder();closeInfo();closeWait();closePost();closeLogin();closeAcc();closeWishlist();closeBgConfirmPopup();closePreConfirmModal();const mb=document.getElementById('mobileSearchBar');if(mb)mb.classList.remove('show');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart();closeOrder();closeInfo();closeWait();closePost();closeLogin();closeAcc();closeBgConfirmPopup();closePreConfirmModal();const mb=document.getElementById('mobileSearchBar');if(mb)mb.classList.remove('show');}});
 
 // CATEGORY CAROUSEL
 let catPage=0;
