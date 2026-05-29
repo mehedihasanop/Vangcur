@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 <meta name="color-scheme" content="light">
 <title>Vangcur - ভাঙচুর | Your First Choice for Gadgets</title>
 <!-- ✅ SEO: meta description, Open Graph, Twitter Card -->
@@ -396,7 +396,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 
 /* PRODUCT GRID */
 /* DESK-02 FIX: 1440px+ screen-এ max-width বাড়িয়ে white space কমানো */
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+/* MOB-GRID FIX: mobile-এ সবসময় 2 column — auto-fill বড় ফোনে 3 column বানায় */
+.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .prod-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--tr);position:relative;display:flex;flex-direction:column}
 .prod-card:hover{transform:translateY(-4px);box-shadow:var(--sh3);border-color:transparent}
 .prod-img-wrap{position:relative;overflow:hidden}
@@ -431,8 +432,18 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .prod-old{font-size:11px;color:var(--gray);text-decoration:line-through}
 .prod-cta-row{display:flex;gap:6px;align-items:center;width:100%}
 .prod-cta{background:var(--dark);color:#fff;border:none;border-radius:9px;padding:0 10px;height:40px;font-size:12.5px;font-weight:700;cursor:pointer;transition:var(--tr);flex:1;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:flex;align-items:center;justify-content:center}
-@media(max-width:390px){.prod-cta{font-size:11px;padding:0 6px}}
-@media(max-width:340px){.prod-cta{font-size:10px;padding:0 4px}}
+/* Desktop: 3-4 col grid */
+@media(min-width:769px){.prod-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}}
+@media(min-width:1200px){.prod-grid{grid-template-columns:repeat(4,1fr);gap:18px}}
+/* Mobile prod card sizing fix */
+@media(max-width:768px){
+  .prod-name{font-size:12px}
+  .prod-price{font-size:14px}
+  .prod-spec{font-size:10.5px}
+  .prod-info{padding:10px 10px 11px}
+  .prod-cta{height:38px;font-size:12px}
+  .prod-cart-icon-btn{width:38px;height:38px}
+}
 .prod-cta:hover{background:var(--hover)}
 .prod-cta:disabled{background:var(--gray);cursor:not-allowed}
 .prod-cart-icon-btn{background:var(--light);color:var(--dark);border:1.5px solid var(--border);border-radius:9px;padding:0;width:40px;height:40px;font-size:14px;cursor:pointer;transition:var(--tr);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;box-sizing:border-box}
@@ -1136,6 +1147,305 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 .float-wish-btn{position:fixed;bottom:196px;right:22px;z-index:802;display:none;animation:floatCartIn .35s cubic-bezier(.34,1.56,.64,1)}
 .float-wish-inner{position:relative;width:50px;height:50px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:22px;transition:transform .2s;border:2px solid #FFD6D6}
 .float-wish-inner:hover{transform:scale(1.1)}
+
+/* ================================================================
+   FLUID RESPONSIVE SYSTEM — 320px → 411px
+   Samsung A72  = 412px  →  কোনো পরিবর্তন নেই, পারফেক্ট থাকবে
+   Samsung M14  = 360px  →  এই block দিয়ে fix হবে
+   320px phones = 320px  →  সবচেয়ে ছোট range handle করা হয়েছে
+
+   পদ্ধতি: clamp() + fluid units দিয়ে সব কিছু
+   viewport এর সাথে proportionally scale করবে।
+   ================================================================ */
+
+/* ── ১. NAVIGATION BAR ── */
+@media(max-width:411px){
+
+  /* Nav container */
+  .nav-inner{
+    height: clamp(50px, 13.5vw, 58px);
+    padding: 0 clamp(10px, 3vw, 16px);
+    gap: clamp(6px, 1.8vw, 12px);
+  }
+
+  /* Logo */
+  .logo{ gap: clamp(5px, 1.5vw, 8px); }
+  .logo-mark{ font-size: clamp(17px, 5vw, 22px); }
+  .logo-sub{
+    font-size: clamp(7px, 1.9vw, 9px);
+    letter-spacing: clamp(0.8px, 0.5vw, 2px);
+  }
+
+  /* Icon buttons — একটু tight করা */
+  .nav-icon-btn{ padding: clamp(5px, 1.5vw, 8px); }
+  .nav-actions{ gap: clamp(2px, 1vw, 6px); }
+
+  /* Login / User button */
+  .nav-login-btn{
+    padding: clamp(6px, 1.6vw, 8px) clamp(10px, 3.2vw, 16px);
+    font-size: clamp(11px, 3vw, 13px);
+    white-space: nowrap;
+  }
+  .nav-user-btn{
+    padding: clamp(5px, 1.4vw, 7px) clamp(8px, 2.8vw, 14px);
+    font-size: clamp(11px, 3vw, 13px);
+    gap: clamp(4px, 1.5vw, 8px);
+  }
+  .u-avatar{
+    width: clamp(22px, 6vw, 26px);
+    height: clamp(22px, 6vw, 26px);
+    font-size: clamp(8px, 2.2vw, 10px);
+  }
+
+  /* Cat bar pill */
+  .cat-inner{
+    height: clamp(38px, 10.5vw, 43px);
+    padding: 0 clamp(8px, 2.5vw, 16px);
+  }
+  .cat-pill{
+    padding: clamp(4px, 1.1vw, 6px) clamp(10px, 3.3vw, 16px);
+    font-size: clamp(11px, 3vw, 12.5px);
+  }
+}
+
+/* ── ২. HERO SLIDER ── */
+@media(max-width:411px){
+  .hero-wrap{
+    padding: 0 clamp(10px, 3vw, 18px);
+    margin: clamp(10px, 2.8vw, 20px) auto;
+  }
+  .hero-slider{ border-radius: clamp(12px, 3.5vw, 18px); }
+  .hero-slide-fallback{ padding: clamp(20px, 6vw, 40px) clamp(16px, 5vw, 48px); }
+  .hero-title{ font-size: clamp(19px, 5.8vw, 28px); }
+  .hero-sub{
+    font-size: clamp(11px, 3vw, 14px);
+    margin-bottom: clamp(12px, 3.5vw, 22px);
+  }
+  .h-btn{
+    padding: clamp(9px, 2.5vw, 12px) clamp(16px, 5vw, 24px);
+    font-size: clamp(11.5px, 3.2vw, 13px);
+  }
+  .hero-stats{ gap: clamp(12px, 4vw, 26px); margin-top: clamp(14px, 4vw, 22px); }
+  .h-stat-num{ font-size: clamp(15px, 4.5vw, 20px); }
+  .h-stat-label{ font-size: clamp(9px, 2.5vw, 11px); }
+
+  /* Hero promo cards */
+  .cath-wrap{ padding: clamp(8px, 2.5vw, 14px) clamp(10px, 3vw, 14px) 0; }
+  .cath-hero-duo .cath-card{ height: clamp(185px, 55vw, 310px); }
+  .cath-duo-track{ gap: clamp(7px, 2vw, 12px); }
+}
+
+/* ── ৩. CATEGORY CARDS ── */
+@media(max-width:411px){
+  .cat-carousel-wrap{ padding: 0 clamp(30px, 9vw, 42px); }
+  .cat-carousel-arrow{
+    width: clamp(26px, 7.5vw, 34px);
+    height: clamp(26px, 7.5vw, 34px);
+    font-size: clamp(13px, 3.8vw, 18px);
+  }
+  .cat-cards{ gap: clamp(7px, 2vw, 12px); }
+  .cat-card{
+    padding: clamp(9px, 2.8vw, 14px) clamp(8px, 2.5vw, 13px);
+    gap: clamp(7px, 2vw, 12px);
+    border-radius: clamp(12px, 3.5vw, 16px);
+  }
+  .cat-card-icon-wrap{
+    width: clamp(36px, 10.5vw, 48px);
+    height: clamp(36px, 10.5vw, 48px);
+    font-size: clamp(18px, 5.2vw, 24px);
+    flex-shrink: 0;
+  }
+  .cat-card-name{
+    font-size: clamp(10.5px, 3vw, 12.5px);
+    line-height: 1.25;
+  }
+}
+
+/* ── ৪. PRODUCT CARDS (2-col grid) ── */
+@media(max-width:411px){
+  .prod-grid{
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: clamp(8px, 2.3vw, 13px);
+  }
+  .prod-info{
+    padding: clamp(8px, 2.4vw, 12px) clamp(8px, 2.4vw, 12px) clamp(9px, 2.5vw, 13px);
+  }
+  .prod-name{
+    font-size: clamp(10.5px, 3vw, 12px);
+    margin-bottom: clamp(2px, 0.7vw, 4px);
+    line-height: 1.35;
+  }
+  .prod-spec{
+    font-size: clamp(9.5px, 2.6vw, 11px);
+    -webkit-line-clamp: 2;
+    margin-bottom: clamp(6px, 1.8vw, 10px);
+  }
+  .prod-price{ font-size: clamp(12.5px, 3.6vw, 15px); }
+  .prod-old{ font-size: clamp(9.5px, 2.5vw, 11px); }
+  .prod-price-row{ gap: clamp(4px, 1.2vw, 6px); margin-bottom: clamp(7px, 2vw, 10px); }
+
+  /* CTA row — অর্ডার করুন + cart icon একই লাইনে */
+  .prod-cta-row{
+    gap: clamp(4px, 1.2vw, 6px);
+    flex-wrap: nowrap;
+  }
+  .prod-cta{
+    height: clamp(33px, 9.5vw, 38px);
+    font-size: clamp(10.5px, 3vw, 12px);
+    padding: 0 clamp(5px, 1.5vw, 9px);
+    border-radius: clamp(7px, 2vw, 9px);
+  }
+  .prod-cart-icon-btn{
+    width: clamp(33px, 9.5vw, 38px);
+    height: clamp(33px, 9.5vw, 38px);
+    font-size: clamp(12px, 3.3vw, 14px);
+    border-radius: clamp(7px, 2vw, 9px);
+    flex-shrink: 0;
+  }
+
+  /* Section padding */
+  .section{
+    padding: 0 clamp(10px, 3vw, 18px);
+    margin-bottom: clamp(28px, 8vw, 42px);
+  }
+  .sec-title{ font-size: clamp(15px, 4.5vw, 19px); }
+  .sec-head{ margin-bottom: clamp(12px, 3.5vw, 18px); }
+
+  /* Trust strip */
+  .trust-wrap{
+    padding: 0 clamp(10px, 3vw, 18px);
+    margin: clamp(8px, 2.5vw, 14px) auto clamp(14px, 4vw, 24px);
+  }
+  .trust-strip{
+    padding: clamp(10px, 3vw, 15px) clamp(10px, 3vw, 24px);
+    gap: clamp(7px, 2vw, 13px);
+    border-radius: clamp(10px, 2.8vw, 14px);
+  }
+  .t-label{ font-size: clamp(10.5px, 3vw, 12.5px); }
+  .t-sub{ font-size: clamp(9px, 2.5vw, 11px); }
+  .t-icon{
+    width: clamp(26px, 7.5vw, 33px);
+    height: clamp(26px, 7.5vw, 33px);
+    font-size: clamp(12px, 3.3vw, 15px);
+  }
+}
+
+/* ── ৫. PRODUCT DETAIL PAGE ── */
+@media(max-width:411px){
+  .pp-inner{
+    padding: clamp(14px, 4vw, 20px) clamp(12px, 3.5vw, 18px);
+    gap: clamp(18px, 5vw, 26px);
+    grid-template-columns: 1fr !important;
+  }
+  .pp-nav{ padding: clamp(10px, 2.8vw, 14px) clamp(12px, 3.5vw, 20px); }
+  .pp-name{ font-size: clamp(14px, 4.2vw, 19px); }
+  .pp-price{ font-size: clamp(22px, 6.5vw, 28px); }
+  .pp-detail-wrap{ padding: 0 clamp(12px, 3.5vw, 20px) 100px; }
+  .pp-section-title{ font-size: clamp(14px, 4vw, 17px); }
+  .pp-why-grid{ grid-template-columns: 1fr 1fr; }
+  .pp-desc{ font-size: clamp(12px, 3.2vw, 13.5px); padding: clamp(10px, 3vw, 14px); }
+  .pp-spec-row{ font-size: clamp(11.5px, 3.2vw, 13px); }
+  .pp-spec-key{ min-width: clamp(90px, 26vw, 110px); }
+}
+
+/* ── ৬. STICKY BOTTOM BAR (Product page) ── */
+@media(max-width:411px){
+  .pp-sticky-bar{
+    padding: clamp(8px, 2.3vw, 11px) clamp(10px, 3vw, 18px);
+  }
+  .pp-sticky-inner{
+    gap: clamp(6px, 1.8vw, 10px);
+  }
+  .pp-sticky-name{
+    font-size: clamp(10.5px, 3vw, 13px);
+    min-width: 0;
+  }
+  .pp-sticky-price{
+    font-size: clamp(13px, 3.8vw, 16px);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Sticky bar এর ভেতরের অর্ডার ও কার্ট বাটন */
+  .pp-sticky-bar .pp-btn{
+    padding: clamp(10px, 2.8vw, 13px) clamp(8px, 2.5vw, 14px);
+    font-size: clamp(11px, 3.1vw, 13.5px);
+    border-radius: clamp(9px, 2.5vw, 12px);
+    white-space: nowrap;
+  }
+  /* Cart bottom button hide করা ছোট স্ক্রিনে */
+  .pp-btn-cart-bottom{
+    display: clamp-hide; /* নিচের media দিয়ে handle */
+  }
+}
+
+/* ── ৭. খুব ছোট ফোন (320px – 359px) — আরো tight ── */
+@media(max-width:359px){
+
+  /* Nav */
+  .nav-inner{
+    height: 50px;
+    padding: 0 9px;
+    gap: 5px;
+  }
+  .logo-mark{ font-size: 16px; }
+  .logo-sub{ display: none; } /* 320px এ logo subtitle hide */
+  .nav-icon-btn{ padding: 5px; }
+  .nav-login-btn{
+    padding: 5px 9px;
+    font-size: 10.5px;
+  }
+  .nav-user-btn{
+    padding: 5px 9px;
+    font-size: 10.5px;
+    gap: 4px;
+  }
+  .u-avatar{ width: 20px; height: 20px; font-size: 7.5px; }
+
+  /* Cat pills */
+  .cat-pill{ padding: 3px 9px; font-size: 10.5px; }
+
+  /* Hero */
+  .hero-title{ font-size: 18px; }
+  .hero-sub{ font-size: 10.5px; }
+  .h-btn{ padding: 8px 14px; font-size: 11px; }
+  .hero-stats{ display: none; }
+  .cath-hero-duo .cath-card{ height: 175px; }
+
+  /* Product cards */
+  .prod-grid{ gap: 7px; }
+  .prod-info{ padding: 7px 7px 8px; }
+  .prod-name{ font-size: 10px; }
+  .prod-spec{ font-size: 9px; }
+  .prod-price{ font-size: 12px; }
+  .prod-cta{
+    height: 30px;
+    font-size: 10px;
+    padding: 0 4px;
+  }
+  .prod-cart-icon-btn{
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+
+  /* Cat cards */
+  .cat-card-icon-wrap{ width: 32px; height: 32px; font-size: 16px; }
+  .cat-card-name{ font-size: 10px; }
+  .cat-card{ padding: 8px 7px; gap: 6px; }
+
+  /* Sticky bar */
+  .pp-sticky-bar{ padding: 7px 9px; }
+  .pp-sticky-inner{ gap: 5px; }
+  .pp-sticky-name{ font-size: 10px; }
+  .pp-sticky-price{ font-size: 12px; }
+  .pp-sticky-bar .pp-btn{ padding: 9px 7px; font-size: 10px; }
+  .pp-btn-cart-bottom{ display: none; }
+
+  /* Section */
+  .section{ padding: 0 9px; }
+  .trust-strip{ padding: 8px 9px; }
+}
 </style>
 
 </head>
@@ -2274,13 +2584,14 @@ function cathGoCategory(cat) {
 }
 
 // Reinit on resize (mobile ↔ desktop switch)
+// ✅ FIX: requestAnimationFrame দিয়ে layout settle হওয়ার পরে init করো
 let _cathResizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(_cathResizeTimer);
   _cathResizeTimer = setTimeout(() => {
     cathIdx = 0;
-    initCathSlider();
-  }, 300);
+    requestAnimationFrame(() => { requestAnimationFrame(() => { initCathSlider(); }); });
+  }, 200);
 });
 // ============ END CATH SLIDER ============
 
@@ -2466,8 +2777,9 @@ window.addEventListener('resize', () => {
   _duoResizeTimer = setTimeout(() => {
     // Reset to real start without re-cloning
     duoIdx = DUO_TOTAL;
-    duoSetPosition(false);
-  }, 250);
+    // ✅ FIX: layout settle হওয়ার পরে position set করো
+    requestAnimationFrame(() => { requestAnimationFrame(() => { duoSetPosition(false); }); });
+  }, 200);
 });
 // ============ END DUO SLIDER ============
 
@@ -2744,7 +3056,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateCartUI();
   updateWishDot();
   updateNavAuth();
-  initCathSlider();
+  // ✅ FIX: rAF দিয়ে layout settle হওয়ার পরে slider init করো
+  requestAnimationFrame(() => { requestAnimationFrame(() => { initCathSlider(); }); });
   // ✅ RACE-CONDITION FIX: Supabase settings fetch সম্পূর্ণ হওয়ার পরে _settings populated।
   // loadCathCardData() এখানে call করা হয় যাতে কার্ড DOM-এ apply হয়
   // initDuoSlider() এর আগে — slider শুধু একবারই clone করে।
@@ -6419,7 +6732,8 @@ document.addEventListener('DOMContentLoaded', function _earlyHeroRender() {
   const track = document.getElementById('cathDuoTrack');
   if (!track || track.childElementCount > 0) return;
   renderDuoCardsHtml(_CATH_CARD_DEFAULTS.slice());
-  if (!track.dataset.infinite) initDuoSlider();
+  // ✅ FIX: layout settle হওয়ার পরে init করো
+  if (!track.dataset.infinite) requestAnimationFrame(() => { requestAnimationFrame(() => { initDuoSlider(); }); });
 }, { once: true });
 
 function loadCathCardData(){
