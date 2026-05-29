@@ -347,6 +347,26 @@ tr:hover td{background:#FAFAFA}
         </div>
       </div>
     </div>
+    <!-- ✅ P3: Revenue Chart -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <span class="card-title">📈 রেভিনিউ ট্রেন্ড</span>
+        <select id="chartPeriod" onchange="renderRevenueChart()" style="padding:5px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer">
+          <option value="7">গত ৭ দিন</option>
+          <option value="14">গত ১৪ দিন</option>
+          <option value="30">গত ৩০ দিন</option>
+        </select>
+      </div>
+      <div id="revenueChartWrap" style="overflow-x:auto;padding:8px 0">
+        <canvas id="revenueChart" height="160" style="width:100%;max-width:100%;display:block"></canvas>
+      </div>
+      <div id="revenueChartLegend" style="display:flex;gap:16px;font-size:11px;color:var(--gray);padding:6px 4px 0;flex-wrap:wrap"></div>
+    </div>
+    <!-- ✅ P3: Low Stock Alert -->
+    <div class="card" id="lowStockCard" style="margin-top:16px;display:none">
+      <div class="card-head"><span class="card-title">⚠️ কম স্টক সতর্কতা (৫ বা কম)</span><button class="btn btn-outline btn-sm" onclick="showPage('products',null)">স্টক আপডেট →</button></div>
+      <div id="lowStockList" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0"></div>
+    </div>
   </div>
 
   <!-- ===== ORDERS ===== -->
@@ -1698,10 +1718,10 @@ async function getOrdersAsync(){
   try{
     const sessionRes = await supabaseClient.auth.getSession();
     const session = sessionRes?.data?.session;
-    console.log('[Orders] Auth:', session ? 'logged in: '+session.user.email : 'NO SESSION (anon)');
+    console.log('[Orders] Auth:', session ? 'logged in' : 'NO SESSION (anon)');
 
     const {data, error}=await supabaseClient.from('orders').select('*').order('created_at',{ascending:false});
-    console.log('[Orders] count:', data ? data.length : 'null', '| error:', error ? error.message : 'none');
+    if(error) console.log('[Orders] fetch error:', error ? error.message : 'none');
 
     if(!error && Array.isArray(data)){
       return data.map(o=>({
@@ -1738,8 +1758,7 @@ async function loadAndRenderOrders(){
   _cachedOrders = orders;
   renderOrders();
 
-  // Debug info
-  console.log('[loadAndRenderOrders] Loaded', orders.length, 'orders');
+  // orders loaded successfully
 }
 
 async function initDash(){
@@ -1770,6 +1789,96 @@ async function initDash(){
     <td>৳${(o.total||0).toLocaleString()}</td><td>${sPill(o.status)}</td>
     <td><button class="btn btn-outline btn-xs" onclick="viewOrder('${escHtml(o.id)}')">দেখুন</button></td>
   </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:18px">কোনো অর্ডার নেই</td></tr>';
+  // ✅ P3: Revenue chart ও Low Stock Alert আপডেট করো
+  renderRevenueChart(orders);
+  renderLowStockAlert();
+}
+
+// ✅ P3 FIX: Revenue Chart — Canvas দিয়ে pure JS bar chart
+function renderRevenueChart(ordersArg){
+  const canvas=document.getElementById('revenueChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const days=parseInt(document.getElementById('chartPeriod')?.value||'7');
+  const orders=ordersArg||_cachedOrders||[];
+  // গত N দিনের date labels তৈরি করো
+  const labels=[];const dataMap={};
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    const label=d.toLocaleDateString('bn-BD',{month:'short',day:'numeric'});
+    labels.push(label);dataMap[key]=0;
+  }
+  // confirmed/shipped/delivered orders count করো
+  orders.filter(o=>['confirmed','shipped','delivered'].includes(o.status)).forEach(o=>{
+    const key=(o.date||o.created_at||'').slice(0,10);
+    if(key in dataMap)dataMap[key]+=(o.total||0);
+  });
+  const values=Object.values(dataMap);
+  const maxVal=Math.max(...values,1);
+  // Canvas size
+  const W=canvas.parentElement?.offsetWidth||600;
+  const H=160;
+  canvas.width=W;canvas.height=H;
+  const pad={t:16,r:16,b:36,l:60};
+  const chartW=W-pad.l-pad.r;
+  const chartH=H-pad.t-pad.b;
+  const barW=Math.max(8,Math.floor(chartW/labels.length*0.6));
+  const gap=(chartW-barW*labels.length)/(labels.length+1);
+  ctx.clearRect(0,0,W,H);
+  // Grid lines
+  ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+chartH*(1-i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    ctx.fillStyle='#9ca3af';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText('৳'+(maxVal*(i/4)/1000).toFixed(maxVal>=10000?1:0)+(maxVal>=1000?'k':''),pad.l-4,y+3);
+  }
+  // Bars
+  labels.forEach((lbl,i)=>{
+    const x=pad.l+gap+(barW+gap)*i;
+    const bh=Math.max(2,(values[i]/maxVal)*chartH);
+    const y=pad.t+chartH-bh;
+    const grad=ctx.createLinearGradient(0,y,0,y+bh);
+    grad.addColorStop(0,'#6366f1');grad.addColorStop(1,'#a5b4fc');
+    ctx.fillStyle=values[i]>0?grad:'#e5e7eb';
+    ctx.beginPath();
+    const r=Math.min(4,barW/2);
+    ctx.moveTo(x+r,y);ctx.lineTo(x+barW-r,y);ctx.arcTo(x+barW,y,x+barW,y+r,r);
+    ctx.lineTo(x+barW,y+bh);ctx.lineTo(x,y+bh);ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();ctx.fill();
+    // Labels
+    ctx.fillStyle='#6b7280';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(lbl,x+barW/2,H-pad.b+12);
+    // Value on top if > 0
+    if(values[i]>0){
+      ctx.fillStyle='#4f46e5';ctx.font='bold 9px sans-serif';
+      ctx.fillText('৳'+(values[i]>=1000?(values[i]/1000).toFixed(1)+'k':values[i]),x+barW/2,y-3);
+    }
+  });
+  // Legend
+  const leg=document.getElementById('revenueChartLegend');
+  if(leg){
+    const total=values.reduce((s,v)=>s+v,0);
+    const nonZero=values.filter(v=>v>0).length;
+    leg.innerHTML=`<span style="color:#6366f1;font-weight:600">● নিশ্চিত রেভিনিউ</span><span>মোট: ৳${total.toLocaleString()}</span><span>${nonZero}টি দিনে অর্ডার</span>`;
+  }
+}
+
+// ✅ P3 FIX: Low Stock Alert — স্টক ৫ বা কম হলে dashboard-এ দেখাও
+function renderLowStockAlert(){
+  const card=document.getElementById('lowStockCard');
+  const list=document.getElementById('lowStockList');
+  if(!card||!list)return;
+  const allProds=[...(DEFAULT_PRODS||[]),...(adminProds||[])];
+  const lowStock=allProds.filter(p=>(p.stock??0)<=5);
+  if(!lowStock.length){card.style.display='none';return;}
+  card.style.display='block';
+  list.innerHTML=lowStock.map(p=>`<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:${p.stock<=0?'#FEE2E2':'#FEF3C7'};border-radius:8px;font-size:12px">
+    <span>${(p.imgs||['📦'])[0]}</span>
+    <span style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.name)}</span>
+    <span style="color:${p.stock<=0?'#DC2626':'#92400E'};font-weight:700">${p.stock<=0?'শেষ':''+p.stock+' বাকি'}</span>
+  </div>`).join('');
 }
 
 // ======= ORDERS =======
@@ -3874,10 +3983,10 @@ function alertNewOrder(orderNum){
 }
 
 // --- localStorage storage event (same device, different tab) ---
-window.addEventListener('storage', function(e){
+window.addEventListener('storage', async function(e){
   if(e.key!=='vc_orders' && e.key!=='vc_last_order_time') return;
-  const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-  if(!isLoggedIn) return;
+  const { data: { session: _storageSession } } = await supabaseClient.auth.getSession();
+  if(!_storageSession) return;
   const activePage=document.querySelector('.page.show');
   if(activePage){
     if(activePage.id==='page-orders') renderOrders();
@@ -3895,8 +4004,8 @@ try{
   supabaseClient
     .channel('admin-orders-watch')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},async (payload)=>{
-      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-      if(!isLoggedIn) return;
+      const { data: { session: _insertSession } } = await supabaseClient.auth.getSession();
+      if(!_insertSession) return;
       await loadAndRenderOrders();
       await initDash();
       // Pending badge আপডেট
@@ -3904,8 +4013,8 @@ try{
       alertNewOrder(payload.new?.order_num||payload.new?.id||'');
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},async ()=>{
-      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-      if(!isLoggedIn) return;
+      const { data: { session: _updateSession } } = await supabaseClient.auth.getSession();
+      if(!_updateSession) return;
       await loadAndRenderOrders();
       await initDash();
       // Pending badge আপডেট
@@ -3919,8 +4028,8 @@ try{
   supabaseClient
     .channel('admin-stock-watch')
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'store_settings',filter:'setting_key=eq.vc_stock'},async(payload)=>{
-      const isLoggedIn=document.getElementById('sidebar').classList.contains('show');
-      if(!isLoggedIn)return;
+      const { data: { session: _stockSession } } = await supabaseClient.auth.getSession();
+      if(!_stockSession)return;
       const stockMap=payload.new?.setting_value||{};
       // adminProds এবং DEFAULT_PRODS এর stock আপডেট
       [...DEFAULT_PRODS,...adminProds].forEach(p=>{
