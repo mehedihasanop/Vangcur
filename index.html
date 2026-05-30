@@ -203,7 +203,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* FIX: width 50% parent এ নয়, সরাসরি viewport থেকে calculate করা */
 .cath-hero-duo .cath-card{
   width:calc((100vw - 56px) / 2);
-  max-width:calc(50vw - 14px);
+  max-width:calc(50vw - 8px);
+  min-width:0;
   flex-shrink:0;
   height:350px;
 }
@@ -1242,10 +1243,10 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   .cath-wrap{ padding: clamp(8px, 2.5vw, 14px) clamp(10px, 3vw, 14px) 0; }
   /* FIX: ছোট ফোনে card width viewport থেকে নেওয়া */
   .cath-hero-duo .cath-card{
-    width: calc((100vw - 36px) / 2);
+    width: calc((100vw - 2 * clamp(10px, 3vw, 14px) - 12px) / 2);
     height: clamp(185px, 55vw, 310px);
   }
-  .cath-duo-track{ gap: clamp(7px, 2vw, 12px); }
+  .cath-duo-track{ gap: 12px; }
 }
 
 /* ── ৩. CATEGORY CARDS ── */
@@ -1424,7 +1425,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   .hero-sub{ font-size: 10.5px; }
   .h-btn{ padding: 8px 14px; font-size: 11px; }
   .hero-stats{ display: none; }
-  .cath-hero-duo .cath-card{ width:calc((100vw - 28px)/2); height: 175px; }
+  .cath-hero-duo .cath-card{ width:calc((100vw - 28px)/2); height: 175px; min-width:0; }
 
   /* Product cards */
   .prod-grid{ gap: 7px; }
@@ -2757,8 +2758,14 @@ function duoSetPosition(animate) {
   const allCards = track.querySelectorAll('.cath-card');
   const gap = 12;
   const perPage = getDuoPerPage();
-  // ✅ FIX: wrapWidth=0 হলে (initial load) window.innerWidth থেকে calculate করো
-  const wrapWidth = wrap.clientWidth || (window.innerWidth - 28); // 28 = 14px*2 side padding
+  // ✅ FIX: getBoundingClientRect() সবসময় actual rendered width দেয় (clientWidth=0 হওয়ার সমস্যা নেই)
+  let wrapWidth = wrap.getBoundingClientRect().width;
+  if (!wrapWidth || wrapWidth < 10) {
+    // Deep fallback: viewport width থেকে cath-wrap এর দুই পাশের padding বাদ দাও
+    const cathWrap = document.getElementById('cathWrap');
+    const cathPad = cathWrap ? parseFloat(getComputedStyle(cathWrap).paddingLeft) + parseFloat(getComputedStyle(cathWrap).paddingRight) : 28;
+    wrapWidth = window.innerWidth - cathPad;
+  }
   const cardWidth = Math.floor((wrapWidth - gap * (perPage - 1)) / perPage);
 
   // Apply width to every card in DOM (including clones)
@@ -3118,7 +3125,18 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     }
   })();
   // FIX8: Page load এ layout শেষ হওয়ার পরে position আবার set করো
-  setTimeout(()=>{ try{ duoSetPosition(false); }catch(e){} }, 300);
+  // ✅ ResizeObserver দিয়ে hero wrap visible হলেই correct width apply করো
+  const _heroWrap = document.getElementById('cathHeroDuo');
+  if (_heroWrap && window.ResizeObserver) {
+    const _heroRO = new ResizeObserver(() => {
+      try { duoSetPosition(false); } catch(e) {}
+    });
+    _heroRO.observe(_heroWrap);
+    // ৫ সেকেন্ড পরে observer disconnect করো (layout settled থাকবে)
+    setTimeout(() => { try { _heroRO.disconnect(); } catch(e) {} }, 5000);
+  }
+  setTimeout(()=>{ try{ duoSetPosition(false); }catch(e){} }, 100);
+  setTimeout(()=>{ try{ duoSetPosition(false); }catch(e){} }, 500);
   // ✅ FIX: pid — sessionStorage (same-tab) অথবা localStorage (page replace/reload) থেকে নাও
   const pid = (()=>{
     try{
@@ -3915,7 +3933,7 @@ function showSearchDropdown(q, source) {
   const disc = p => (p.old > 0 && p.old > p.price) ? Math.round((1 - p.price/p.old)*100) : 0; // MATH-02 FIX: p.old=0 হলে division by zero ছিল
 
   // ✅ Category suggestions: _settings['vc_categories'] বা defaultCats থেকে নাও
-  const _defaultCatIcons = {all:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M22 9h-4.79l-4.38-6.56a1 1 0 0 0-1.66 0L6.79 9H2a1 1 0 0 0-1 1.11l1.93 11A1 1 0 0 0 4 22h16a1 1 0 0 0 1-.89l1.93-11A1 1 0 0 0 22 9zm-10-3.94L14.14 9H9.86L12 5.06zM4.08 11h15.84l-1.68 9H5.76L4.08 11zm5.92 3a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1zm4 0a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/></svg>',unique:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 2.5L19.5 9H4.5L12 4.5zM5.2 11h13.6L12 20.2 5.2 11z"/></svg>',tws:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor' style='color:currentColor'><path d='M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z'/></svg>",headphone:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor' style='color:currentColor'><path d='M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3H5v-1a7 7 0 0 1 14 0v1h-2a3 3 0 0 0-3 3v3a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z'/></svg>",'acrylic-clamp':'🗜️','crystal-ball':'🔮','water-bottle':'🍶',humidifier:'💧',fan:'💨',gimbal:'📷',powerbank:'🔋',rgb:'💡',wgp:'🎮',smartwatch:'⌚',light:'🕯️',keyboard:'⌨️',mouse:'🖱️',cable:'🔌','unique-tools':'🔧','hair-dryer':'💇',lamp:'🪔',moonlamp:'🌙'};
+  const _defaultCatIcons = {all:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M2 3h1.5l.5 1h16l-2 8H6L4.5 4H3L2 3zm5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z\"/></svg>',unique:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M6 2l-4 6 10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5l2.5-4zM4.5 10h15l-7.5 9.5L4.5 10z\"/></svg>',tws:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor' style='color:currentColor'><path d='M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z'/></svg>",'acrylic-clamp':'🗜️','crystal-ball':'🔮','water-bottle':'🍶',humidifier:'💧',fan:'💨',gimbal:'📷',powerbank:'🔋',rgb:'💡',wgp:'🎮',smartwatch:'⌚',light:'🕯️',keyboard:'⌨️',mouse:'🖱️',cable:'🔌','unique-tools':'🔧','hair-dryer':'💇',lamp:'🪔',toys:'🧸',headphone:'🎧','alarm-clock':'⏰',gaming:'✈️'};
   const _catList = (_settings && _settings['vc_categories'] && _settings['vc_categories'].length)
     ? _settings['vc_categories'].map(c=>({...c, icon: c.icon || _defaultCatIcons[c.id] || '📂'}))
     : (document.querySelectorAll('.cat-pill').length
@@ -5102,14 +5120,22 @@ async function confirmOrder(){
         p_items: rpcItems,
         p_shipping: order.shipping,
         p_shipping_cost: order.shippingCost,
+        p_subtotal: order.subtotal,
+        p_total: order.total,
         p_payment_txn: order.payment.txnId||'',
-        p_payment_last4: order.payment.last4||''
+        p_payment_last4: order.payment.last4||'',
+        p_status: 'pending',
+        p_user_id: order.userId||null
       });
       if(!rpcErr && rpcRes && rpcRes.success){
         savedId = rpcRes.id;
         order.subtotal = rpcRes.subtotal;
         order.total = rpcRes.total;
+      } else if(!rpcErr && rpcRes && rpcRes.id){
+        // Some RPC versions return {id} directly without success flag
+        savedId = rpcRes.id;
       } else {
+        console.error('[Order RPC] Error:', rpcErr?.message, '| Response:', JSON.stringify(rpcRes));
         throw rpcErr || new Error('RPC no success');
       }
     }catch(e){
@@ -5124,7 +5150,8 @@ async function confirmOrder(){
           customer_district: order.customer.district,
           customer_address: order.customer.address,
           customer_email: order.customer.email||'',
-          items: JSON.stringify(order.items),
+          customer: {name:order.customer.name,phone:order.customer.phone,district:order.customer.district,address:order.customer.address,email:order.customer.email||''},
+          items: order.items,
           shipping: order.shipping,
           shipping_cost: order.shippingCost,
           subtotal: order.subtotal,
@@ -5138,7 +5165,9 @@ async function confirmOrder(){
         if(!insErr && insData && insData.id){
           savedId = insData.id;
         } else {
-          console.warn('Direct insert also failed:', insErr);
+          console.error('[Order Insert] FAILED — Code:', insErr?.code, '| Message:', insErr?.message, '| Details:', insErr?.details);
+          // ⚠️ RLS হয়তো block করছে। Supabase Dashboard > Table Editor > orders > RLS Policies চেক করুন।
+          // anon role-এ INSERT policy থাকতে হবে অথবা place_order RPC SECURITY DEFINER থাকতে হবে।
         }
       }catch(e2){console.warn('Direct insert exception:', e2);}
     }
@@ -7013,38 +7042,46 @@ function loadCustomCategories(){
   const saved=_settings['vc_categories']||null;
   const catBar=document.querySelector('.cat-inner');
   const defaultCats=[
-    {id:'all',name:'সকল পণ্য',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M22 9h-4.79l-4.38-6.56a1 1 0 0 0-1.66 0L6.79 9H2a1 1 0 0 0-1 1.11l1.93 11A1 1 0 0 0 4 22h16a1 1 0 0 0 1-.89l1.93-11A1 1 0 0 0 22 9zm-10-3.94L14.14 9H9.86L12 5.06zM4.08 11h15.84l-1.68 9H5.76L4.08 11zm5.92 3a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1zm4 0a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/></svg>'},
-    {id:'unique',name:'Unique Collection',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 2.5L19.5 9H4.5L12 4.5zM5.2 11h13.6L12 20.2 5.2 11z"/></svg>'},
-    {id:'tws',name:'TWS',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z"/></svg>'},
-    {id:'headphone',name:'Headphone',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3H5v-1a7 7 0 0 1 14 0v1h-2a3 3 0 0 0-3 3v3a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z"/></svg>'},
-    {id:'acrylic-clamp',name:'Acrylic Clamp',icon:'🗜️'},
-    {id:'crystal-ball',name:'Crystal Ball',icon:'🔮'},
-    {id:'water-bottle',name:'Water Bottle',icon:'🍶'},
-    {id:'humidifier',name:'Humidifier',icon:'💧'},
-    {id:'fan',name:'Rechargeable Fan',icon:'💨'},
-    {id:'gimbal',name:'Gimbal',icon:'📷'},
-    {id:'powerbank',name:'Power Bank',icon:'🔋'},
-    {id:'rgb',name:'RGB Light',icon:'💡'},
-    {id:'wgp',name:'WGP',icon:'🎮'},
-    {id:'smartwatch',name:'Smart Watch',icon:'⌚'},
-    {id:'light',name:'Light',icon:'🕯️'},
-    {id:'keyboard',name:'Keyboard',icon:'⌨️'},
-    {id:'mouse',name:'Mouse',icon:'🖱️'},
-    {id:'cable',name:'Cable And Charges',icon:'🔌'},
-    {id:'unique-tools',name:'Unique Tools',icon:'🔧'},
-    {id:'hair-dryer',name:'Hair Dryer',icon:'💇'},
-    {id:'lamp',name:'Lamp',icon:'🪔'},
-    {id:'toys',name:'Toys',icon:'🧸'},
-    {id:'alarm-clock',name:'Alarm Clock',icon:'⏰'},
+    {id:'all',         name:'All Products',       icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M2 3h1.5l.5 1h16l-2 8H6L4.5 4H3L2 3zm5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z\"/></svg>'},
+    {id:'rgb',         name:'RGB Lights',         icon:'💡'},
+    {id:'smartwatch',  name:'Smartwatches',       icon:'⌚'},
+    {id:'powerbank',   name:'Power Bank',         icon:'🔋'},
+    {id:'tws',         name:'TWS Earbuds',        icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="color:currentColor"><path d="M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z"/></svg>'},
+    {id:'headphone',   name:'Headphone',           icon:'🎧'},
+    {id:'lamp',        name:'Acrylic Lamp',       icon:'🪔'},
+    {id:'fan',         name:'Rechargeable Fan',   icon:'💨'},
+    {id:'unique',      name:'Unique Collection',  icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M6 2l-4 6 10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5l2.5-4zM4.5 10h15l-7.5 9.5L4.5 10z\"/></svg>'},
+    {id:'acrylic-clamp',name:'Acrylic Clamp',    icon:'🗜️'},
+    {id:'crystal-ball',name:'Crystal Ball',       icon:'🔮'},
+    {id:'water-bottle',name:'Water Bottle',       icon:'🍶'},
+    {id:'humidifier',  name:'Humidifier',         icon:'💧'},
+    {id:'gimbal',      name:'Gimbal',             icon:'📷'},
+    {id:'wgp',         name:'WGP',                icon:'🎮'},
+    {id:'light',       name:'Light',              icon:'🕯️'},
+    {id:'keyboard',    name:'Keyboard',           icon:'⌨️'},
+    {id:'mouse',       name:'Mouse',              icon:'🖱️'},
+    {id:'cable',       name:'Cable And Charges',  icon:'🔌'},
+    {id:'unique-tools',name:'Unique Tools',       icon:'🔧'},
+    {id:'hair-dryer',  name:'Hair Dryer',         icon:'💇'},
+    {id:'toys',        name:'Toys',               icon:'🧸'},
+    {id:'alarm-clock', name:'Alarm Clock',        icon:'⏰'},
   ];
-  // ✅ FIX: saved cats এ missing defaultCats merge করো (Supabase এ পুরানো কম cats থাকলেও সব দেখাবে)
+  // ✅ FIX: defaultCats সবসময় base হিসেবে রাখো, তারপর saved-এর extra cats যোগ করো
+  // এতে order সবসময় consistent থাকবে এবং নতুন default cats সবসময় দেখাবে
   let cats;
   if(saved&&saved.length){
-    const merged=[...saved];
-    defaultCats.forEach(def=>{if(!merged.find(c=>c.id===def.id))merged.push(def);});
-    cats=merged;
+    // defaultCats-এর প্রতিটি item saved-এ থাকলে saved-এর data use করো (icon/name admin-এ customized হতে পারে)
+    const merged = defaultCats.map(def => {
+      const savedItem = saved.find(c => c.id === def.id);
+      return savedItem ? {...def, ...savedItem} : def;
+    });
+    // saved-এ extra cats থাকলে (default-এ নেই এমন) শেষে যোগ করো
+    saved.forEach(s => {
+      if(!merged.find(c => c.id === s.id)) merged.push(s);
+    });
+    cats = merged;
   } else {
-    cats=defaultCats;
+    cats = defaultCats;
   }
   if(catBar){
     catBar.innerHTML='';

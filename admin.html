@@ -1745,6 +1745,10 @@ async function getOrdersAsync(){
       console.error('[Orders] ERROR code:', error.code, '| message:', error.message);
       if(error.code==='42501'||error.message?.includes('permission')||error.message?.includes('policy')){
         showAdminToast('⚠️ Supabase RLS error: ' + error.message);
+      } else if(error.code==='PGRST301'||error.message?.includes('JWT')){
+        showAdminToast('⚠️ Session expired — আবার লগইন করুন');
+      } else {
+        showAdminToast('⚠️ Orders লোড হয়নি: ' + (error.message||'Unknown error'));
       }
     }
   }catch(e){console.error('[Orders] Exception:',e);}
@@ -3075,8 +3079,8 @@ function loadInfoPageEditor(){
 
 // ======= CATEGORY MANAGEMENT =======
 const DEFAULT_CATS=[
-  {id:'all',          name:'সকল পণ্য',          icon:'🛍️'},
-  {id:'unique',       name:'Unique Collection',  icon:'✨'},
+  {id:'all',          name:'All Products',       icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M2 3h1.5l.5 1h16l-2 8H6L4.5 4H3L2 3zm5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z\"/></svg>'},
+  {id:'unique',       name:'Unique Collection',  icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"currentColor\"><path d=\"M6 2l-4 6 10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5l2.5-4zM4.5 10h15l-7.5 9.5L4.5 10z\"/></svg>'},
   {id:'tws',          name:'TWS',                icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="color:currentColor"><path d="M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z"/></svg>'},
   {id:'acrylic-clamp',name:'Acrylic Clamp',      icon:'🗜️'},
   {id:'crystal-ball', name:'Crystal Ball',       icon:'🔮'},
@@ -3189,8 +3193,48 @@ function renderCategoryList(){
       const moved=cats2.splice(from,1)[0];
       cats2.splice(to,0,moved);
       saveCats(cats2);
-      showAdminToast('✅ ক্যাটাগরি সাজানো হয়েছে ও সেভ হয়েছে!');
+      showAdminToast('\u2705 ক্যাটাগরি সাজানো হয়েছে ও সেভ হয়েছে!');
     });
+    // ── Mobile Touch Support ──
+    (function(){
+      let _touchStartY=0, _touchFromIdx=null;
+      row.addEventListener('touchstart',function(e){
+        _touchFromIdx=i;
+        _touchStartY=e.touches[0].clientY;
+        row.style.opacity='.5';
+        window._catDragIdx=i;
+      },{passive:true});
+      row.addEventListener('touchmove',function(e){
+        e.preventDefault();
+        const touch=e.touches[0];
+        const allRows=Array.from(list.querySelectorAll('.cat-drag-row'));
+        let target=null;
+        for(const r of allRows){
+          const rect=r.getBoundingClientRect();
+          if(touch.clientY>=rect.top && touch.clientY<=rect.bottom){target=r;break;}
+        }
+        allRows.forEach(r=>r.style.boxShadow='');
+        if(target && target!==row) target.style.boxShadow='0 0 0 2px var(--blue)';
+      },{passive:false});
+      row.addEventListener('touchend',function(e){
+        row.style.opacity='1';
+        const touch=e.changedTouches[0];
+        const allRows=Array.from(list.querySelectorAll('.cat-drag-row'));
+        allRows.forEach(r=>r.style.boxShadow='');
+        let toIdx=null;
+        for(let j=0;j<allRows.length;j++){
+          const rect=allRows[j].getBoundingClientRect();
+          if(touch.clientY>=rect.top && touch.clientY<=rect.bottom){toIdx=parseInt(allRows[j].dataset.idx);break;}
+        }
+        if(toIdx!==null && toIdx!==i){
+          const cats2=getCats();
+          const moved=cats2.splice(i,1)[0];
+          cats2.splice(toIdx,0,moved);
+          saveCats(cats2);
+          showAdminToast('\u2705 ক্যাটাগরি সাজানো হয়েছে!');
+        }
+      });
+    })();
     list.appendChild(row);
   });
 }
@@ -4011,8 +4055,6 @@ try{
   supabaseClient
     .channel('admin-orders-watch')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},async (payload)=>{
-      const { data: { session: _insertSession } } = await supabaseClient.auth.getSession();
-      if(!_insertSession) return;
       await loadAndRenderOrders();
       await initDash();
       // Pending badge আপডেট
@@ -4020,8 +4062,6 @@ try{
       alertNewOrder(payload.new?.order_num||payload.new?.id||'');
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},async ()=>{
-      const { data: { session: _updateSession } } = await supabaseClient.auth.getSession();
-      if(!_updateSession) return;
       await loadAndRenderOrders();
       await initDash();
       // Pending badge আপডেট
