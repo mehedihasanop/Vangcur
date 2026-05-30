@@ -92,10 +92,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1A1A1A;min-hei
 /* TABLE */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:600px}
-th{text-align:left;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:9px 11px;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:10px 11px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle}
+th{text-align:left;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:9px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 8px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis}
 tr:last-child td{border:none}
 tr:hover td{background:#FAFAFA}
+/* Product table compact */
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+.tbl-wrap table{min-width:unset;table-layout:fixed}
+.prod-tbl-wrap table{min-width:unset !important;table-layout:fixed}
 .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700}
 .p-pending{background:#FEF3C7;color:#92400E}
 .p-confirmed{background:#DBEAFE;color:#1E40AF}
@@ -529,9 +533,9 @@ A: App ও Remote দিয়ে..."></textarea>
         <span style="font-size:11.5px;color:var(--gray)">≡ ধরে টেনে যেকোনো প্রোডাক্ট সাজান — ওয়েবসাইটে সাথে সাথে দেখাবে</span>
         <span id="allProdCount" style="font-size:12px;font-weight:700;color:var(--blue);background:#EFF6FF;padding:3px 10px;border-radius:20px"></span>
       </div>
-      <div class="tbl-wrap">
-        <table id="allProdTable">
-          <thead><tr><th style="width:32px"></th><th>ছবি</th><th>নাম</th><th>ক্যাট</th><th>মূল্য</th><th>স্টক</th><th>ওয়ারেন্টি</th><th>অ্যাকশন</th></tr></thead>
+      <div class="tbl-wrap prod-tbl-wrap">
+        <table id="allProdTable" style="table-layout:fixed;min-width:unset;width:100%">
+          <thead><tr><th style="width:32px"></th><th style="width:52px">ছবি</th><th>নাম</th><th style="width:15%">ক্যাট</th><th style="width:12%">মূল্য</th><th style="width:13%">স্টক</th><th style="width:12%">ওয়ারেন্টি</th><th style="width:10%">অ্যাকশন</th></tr></thead>
           <tbody id="pTbl"></tbody>
         </table>
       </div>
@@ -2161,30 +2165,30 @@ function renderProdTbl(scrollToLast = false) {
          <button class="btn btn-red btn-xs" onclick="delProd(${p.id})">🗑️</button>`;
 
     return `<tr data-prod-id="${p.id}" style="${rowStyle}cursor:default">
-      <td style="cursor:grab;color:#9CA3AF;font-size:18px;text-align:center;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
-      <td style="width:48px;padding:4px">${(()=>{
+      <td style="width:32px;cursor:grab;color:#9CA3AF;font-size:18px;text-align:center;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
+      <td style="width:52px;padding:4px">${(()=>{
         const imgVal=(p.imgs||['📦'])[0];
         const isUrl=typeof imgVal==='string'&&(imgVal.startsWith('http')||imgVal.startsWith('/'));
         return isUrl
           ? `<img src="${imgVal}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span style="display:none;font-size:22px">📦</span>`
           : `<span style="font-size:22px">${imgVal}</span>`;
       })()}</td>
-      <td style="max-width:200px">
-        <div style="font-size:12px;font-weight:600;line-height:1.4">${escHtml(p.name)}${defaultTag}</div>
+      <td style="width:28%">
+        <div style="font-size:12px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(p.name)}${defaultTag}</div>
         ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px">${escHtml(p.badge)}</span>` : ''}
       </td>
-      <td style="min-width:90px">${
-        (p.cats&&p.cats.length>0?p.cats:[p.cat||'?']).map(c=>`<span class="pill" style="background:#DBEAFE;color:#1E40AF;margin:1px 2px 1px 0;display:inline-block">${escHtml(catNames[c]||c)}</span>`).join('')
+      <td style="width:15%">${
+        (p.cats&&p.cats.length>0?p.cats:[p.cat||'?']).map(c=>`<span class="pill" style="background:#DBEAFE;color:#1E40AF;margin:1px 2px 1px 0;display:inline-block;font-size:10px">${escHtml(catNames[c]||c)}</span>`).join('')
       }</td>
-      <td>৳${(p.price || 0).toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${(p.old || 0).toLocaleString()}</span></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:4px">
+      <td style="width:12%">৳${(p.price || 0).toLocaleString()}<br><span style="font-size:10.5px;color:var(--gray);text-decoration:line-through">৳${(p.old || 0).toLocaleString()}</span></td>
+      <td style="width:13%">
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
           ${stockPill}
           <button onclick="openStockEdit(${p.id},event)" title="স্টক সম্পাদনা" style="background:none;border:1px solid #e5e7eb;border-radius:5px;padding:2px 5px;cursor:pointer;font-size:11px">✏️</button>
         </div>
       </td>
-      <td style="font-size:11px;max-width:110px">${p.warranty || '-'}</td>
-      <td style="white-space:nowrap">${actionBtns}</td>
+      <td style="width:12%;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.warranty || '-'}</td>
+      <td style="width:10%;white-space:nowrap">${actionBtns}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>`;
 
