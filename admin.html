@@ -1725,12 +1725,19 @@ async function getOrdersAsync(){
 
     if(!error && Array.isArray(data)){
       return data.map(o=>({
-        id:o.id, orderNum:o.order_num, date:o.created_at,
-        customer:{name:o.customer_name,phone:o.customer_phone,district:o.customer_district,address:o.customer_address,email:o.customer_email},
-        items:typeof o.items==='string'?JSON.parse(o.items):o.items||[],
-        shipping:o.shipping, shippingCost:o.shipping_cost,
-        subtotal:o.subtotal, total:o.total,
-        payment:{txnId:o.payment_txn,last4:o.payment_last4},
+        id:o.id, orderNum:o.order_num||o.orderNum||'', date:o.created_at||o.date||'',
+        // ✅ FIX: customer_name/phone (flat columns) এবং customer (object) দুটো format support
+        customer:{
+          name:o.customer_name||(o.customer&&o.customer.name)||'',
+          phone:o.customer_phone||(o.customer&&o.customer.phone)||'',
+          district:o.customer_district||(o.customer&&o.customer.district)||'',
+          address:o.customer_address||(o.customer&&o.customer.address)||'',
+          email:o.customer_email||(o.customer&&o.customer.email)||''
+        },
+        items:typeof o.items==='string'?JSON.parse(o.items):(Array.isArray(o.items)?o.items:[]),
+        shipping:o.shipping||'', shippingCost:o.shipping_cost||o.shippingCost||0,
+        subtotal:o.subtotal||0, total:o.total||0,
+        payment:{txnId:o.payment_txn||(o.payment&&o.payment.txnId)||'',last4:o.payment_last4||(o.payment&&o.payment.last4)||''},
         status:o.status||'pending', ip:o.ip||''
       }));
     }
@@ -3070,7 +3077,7 @@ function loadInfoPageEditor(){
 const DEFAULT_CATS=[
   {id:'all',          name:'সকল পণ্য',          icon:'🛍️'},
   {id:'unique',       name:'Unique Collection',  icon:'✨'},
-  {id:'tws',          name:'TWS',                icon:'🎧'},
+  {id:'tws',          name:'TWS',                icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="color:currentColor"><path d="M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z"/></svg>'},
   {id:'acrylic-clamp',name:'Acrylic Clamp',      icon:'🗜️'},
   {id:'crystal-ball', name:'Crystal Ball',       icon:'🔮'},
   {id:'water-bottle', name:'Water Bottle',       icon:'🍶'},
@@ -3154,7 +3161,7 @@ function renderCategoryList(){
     row.style.cssText='background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:4px;transition:opacity .15s,box-shadow .15s';
     row.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px">
       <span class="cat-drag-handle" title="ড্র্যাগ করে সাজান" style="cursor:grab;color:var(--gray);font-size:18px;user-select:none;flex-shrink:0">⠿</span>
-      <span style="font-size:22px;min-width:32px;text-align:center">${escHtml(c.icon)}</span>
+      <span style="font-size:22px;min-width:32px;text-align:center">${c.icon && c.icon.startsWith('<svg') ? c.icon : escHtml(c.icon)}</span>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700">${escHtml(c.name)}</div>
         <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>

@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
 <meta name="color-scheme" content="light">
 <title>Vangcur - ভাঙচুর | Your First Choice for Gadgets</title>
 <!-- ✅ SEO: meta description, Open Graph, Twitter Card -->
@@ -82,7 +82,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .logo-mark{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);line-height:1}
 .logo-sub{font-size:9px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .nav-search{flex:1;max-width:460px;position:relative}
-.nav-search input{width:100%;padding:9px 14px 9px 40px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;background:var(--light);font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.nav-search input{width:100%;padding:9px 14px 9px 40px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif;transition:var(--tr)}
 .nav-search input:focus{outline:none;border-color:var(--dark);background:#fff}
 .nav-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 .nav-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
@@ -163,6 +163,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
   overflow:hidden;
   position:relative;
   touch-action:pan-y;
+  width:100%;
 }
 
 /* Sliding track: all 8 cards in a row, 2 visible at a time */
@@ -202,6 +203,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* FIX: width 50% parent এ নয়, সরাসরি viewport থেকে calculate করা */
 .cath-hero-duo .cath-card{
   width:calc((100vw - 56px) / 2);
+  max-width:calc(50vw - 14px);
   flex-shrink:0;
   height:350px;
 }
@@ -390,7 +392,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* Reference image style: horizontal card, icon circle + bold text */
 .cat-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:16px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--tr);box-shadow:0 2px 6px rgba(0,0,0,.04)}
 .cat-card:hover{border-color:var(--dark);transform:translateY(-2px);box-shadow:var(--sh2)}
-.cat-card-icon-wrap{width:52px;height:52px;border-radius:50%;background:var(--cream);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px}
+.cat-card-icon-wrap{width:52px;height:52px;border-radius:50%;background:var(--cream);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px}.cat-card-icon-wrap svg{width:26px;height:26px;flex-shrink:0}
 .cat-card-icon{font-size:26px}
 .cat-card-name{font-size:13px;font-weight:700;color:var(--dark);line-height:1.3}
 /* Dot indicators */
@@ -689,7 +691,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .fg2{margin-bottom:15px}
 .fg2 label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
 .f-opt{font-weight:400;color:var(--gray);font-size:11px}
-.fctrl{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'DM Sans',sans-serif;transition:var(--tr);color:var(--dark);background:#fff}
+.fctrl{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:16px;font-family:'DM Sans',sans-serif;transition:var(--tr);color:var(--dark);background:#fff}
 .fctrl:focus{outline:none;border-color:var(--dark);background:#fff}
 .fctrl.err{border-color:var(--red)}
 .fctrl:-webkit-autofill,
@@ -726,8 +728,12 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .qr-toggle-btn:hover{background:#F9FAFB}
 .qr-chev{display:inline-block;transition:transform .3s;font-size:12px}
 .qr-panel{overflow:hidden;max-height:0;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0;margin-top:0}
-.qr-panel.open{max-height:320px;opacity:1;margin-top:10px}
-.qr-inner{display:flex;align-items:flex-start;gap:12px;background:#fff;border-radius:10px;padding:12px;border:1px solid #E5E7EB}
+.qr-panel.open{max-height:400px;opacity:1;margin-top:10px}
+.qr-inner{display:flex;align-items:flex-start;gap:clamp(8px,3vw,14px);background:#fff;border-radius:10px;padding:clamp(10px,3vw,14px);border:1px solid #E5E7EB}
+.qr-inner img[alt="bKash QR"]{width:clamp(95px,28vw,145px)!important;height:clamp(95px,28vw,145px)!important;flex-shrink:0}
+.qr-inner>div{min-width:0;flex:1}
+.qr-inner>div>div:first-child{font-size:clamp(11px,3.2vw,13px)!important}
+.qr-inner>div>div:last-child{font-size:clamp(10px,2.8vw,11.5px)!important;line-height:clamp(1.6,0.4vw + 1.5,1.9)!important}
 .pay-warn{background:#FEF2F2;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 13px;font-size:12px;color:#7F1D1D;margin-top:14px;line-height:1.6}
 .or-div{text-align:center;font-size:12px;font-weight:600;color:var(--gray);margin:5px 0}
 .pay-hint{background:var(--light);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--dark);line-height:1.65}
@@ -822,7 +828,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 
 /* RESPONSIVE */
 @media(max-width:1024px){.cat-cards{grid-template-columns:repeat(3,1fr)}.footer-top{grid-template-columns:1fr 1fr}.pp-inner{grid-template-columns:1fr}.pp-gallery{position:static}}
-@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}.cat-card{padding:13px 12px;gap:10px}.cat-card-icon-wrap{width:44px;height:44px;font-size:22px}.cat-card-name{font-size:12px}}
+@media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}.cat-card{padding:13px 12px;gap:10px}.cat-card-icon-wrap{width:44px;height:44px;font-size:22px}.cat-card-icon-wrap svg{width:22px;height:22px}.cat-card-name{font-size:12px}}
 @media(max-width:480px){.prod-grid{grid-template-columns:repeat(2,1fr)}.cat-cards{grid-template-columns:repeat(2,1fr)}.hero-stats{display:none}.hero-slide-fallback{padding:32px 22px}
   @keyframes slideUpSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
 }
@@ -835,7 +841,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .nav-search-icon:hover{background:var(--light)}
 .mobile-search-bar{display:none;padding:8px 16px;background:var(--white);border-bottom:1px solid var(--border)}
 .mobile-search-bar.show{display:block}
-.mobile-search-bar input{width:100%;padding:9px 38px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;background:var(--light);font-family:'DM Sans',sans-serif}
+.mobile-search-bar input{width:100%;padding:9px 38px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif}
 .mobile-search-bar input:focus{outline:none;border-color:var(--dark);background:#fff}
 .mobile-search-wrap{position:relative}
 .mobile-search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
@@ -1438,7 +1444,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   }
 
   /* Cat cards */
-  .cat-card-icon-wrap{ width: 32px; height: 32px; font-size: 16px; }
+  .cat-card-icon-wrap{ width: 32px; height: 32px; font-size: 16px; }.cat-card-icon-wrap svg{width:16px;height:16px}
   .cat-card-name{ font-size: 10px; }
   .cat-card{ padding: 8px 7px; gap: 6px; }
 
@@ -1880,7 +1886,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       <div id="nameEditForm" style="display:none;margin-top:12px;background:rgba(255,255,255,.1);border-radius:10px;padding:12px;">
         <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:7px;font-weight:600;">নতুন নাম লিখুন</div>
         <div style="display:flex;gap:8px;">
-          <input id="nameEditInput" type="text" placeholder="আপনার নাম" style="flex:1;padding:9px 13px;border-radius:8px;border:none;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;color:#1a1a1a;outline:none;">
+          <input id="nameEditInput" type="text" placeholder="আপনার নাম" style="flex:1;padding:9px 13px;border-radius:8px;border:none;font-size:16px;font-family:'DM Sans',sans-serif;background:#fff;color:#1a1a1a;outline:none;">
           <button onclick="saveNameEdit()" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;">সেভ</button>
           <button onclick="closeNameEdit()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:9px 11px;font-size:12.5px;cursor:pointer;">✕</button>
         </div>
@@ -1969,10 +1975,10 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
         <p class="pay-note">Personal নম্বরে Send Money করুন (Merchant নয়)</p>
         <div class="pay-warn">⚠️ ভুল তথ্য দিলে পেমেন্ট যাচাই সম্ভব হবে না এবং অর্ডার বাতিল হবে।</div>
       </div>
-      <div class="pay-hint"><strong>নিচের যেকোনো একটি দেওয়া বাধ্যতামূলক</strong><br><span style="color:var(--gray)">Transaction ID অথবা bKash নম্বরের শেষ ৪ ডিজিট</span></div>
+      <div class="pay-hint"><strong>নিচের যেকোনো একটি দেওয়া বাধ্যতামূলক</strong><br><span style="color:var(--gray)">Transaction ID অথবা Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</span></div>
       <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
       <div class="or-div">— অথবা —</div>
-      <div class="fg2"><label>bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
+      <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(1)">← পেছনে</button><button class="btn-next" onclick="goS3()">পরবর্তী → নিশ্চিত করুন</button></div>
     </div>
     <!-- Step 3 -->
@@ -2127,7 +2133,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
     </div>
     <p style="font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.7">আপনার অর্ডার নম্বর বা ফোন নম্বর দিয়ে অর্ডার খুঁজুন।</p>
     <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input id="trackInput" class="fctrl" placeholder="অর্ডার নম্বর (যেমন: #VC-...) অথবা ফোন নম্বর" style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif" onkeydown="if(event.key==='Enter')doTrackOrder()">
+      <input id="trackInput" class="fctrl" placeholder="অর্ডার নম্বর (যেমন: #VC-...) অথবা ফোন নম্বর" style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:'DM Sans',sans-serif" onkeydown="if(event.key==='Enter')doTrackOrder()">
       <button onclick="doTrackOrder()" style="background:var(--dark);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">খুঁজুন</button>
     </div>
     <div id="trackResult"></div>
@@ -2751,7 +2757,8 @@ function duoSetPosition(animate) {
   const allCards = track.querySelectorAll('.cath-card');
   const gap = 12;
   const perPage = getDuoPerPage();
-  const wrapWidth = wrap.clientWidth;
+  // ✅ FIX: wrapWidth=0 হলে (initial load) window.innerWidth থেকে calculate করো
+  const wrapWidth = wrap.clientWidth || (window.innerWidth - 28); // 28 = 14px*2 side padding
   const cardWidth = Math.floor((wrapWidth - gap * (perPage - 1)) / perPage);
 
   // Apply width to every card in DOM (including clones)
@@ -3908,7 +3915,7 @@ function showSearchDropdown(q, source) {
   const disc = p => (p.old > 0 && p.old > p.price) ? Math.round((1 - p.price/p.old)*100) : 0; // MATH-02 FIX: p.old=0 হলে division by zero ছিল
 
   // ✅ Category suggestions: _settings['vc_categories'] বা defaultCats থেকে নাও
-  const _defaultCatIcons = {all:'🛍️',unique:'✨',tws:'🎧',headphone:'🎵','acrylic-clamp':'🗜️','crystal-ball':'🔮','water-bottle':'🍶',humidifier:'💧',fan:'💨',gimbal:'📷',powerbank:'🔋',rgb:'💡',wgp:'🎮',smartwatch:'⌚',light:'🕯️',keyboard:'⌨️',mouse:'🖱️',cable:'🔌','unique-tools':'🔧','hair-dryer':'💇',lamp:'🪔',moonlamp:'🌙'};
+  const _defaultCatIcons = {all:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M22 9h-4.79l-4.38-6.56a1 1 0 0 0-1.66 0L6.79 9H2a1 1 0 0 0-1 1.11l1.93 11A1 1 0 0 0 4 22h16a1 1 0 0 0 1-.89l1.93-11A1 1 0 0 0 22 9zm-10-3.94L14.14 9H9.86L12 5.06zM4.08 11h15.84l-1.68 9H5.76L4.08 11zm5.92 3a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1zm4 0a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/></svg>',unique:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 2.5L19.5 9H4.5L12 4.5zM5.2 11h13.6L12 20.2 5.2 11z"/></svg>',tws:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor' style='color:currentColor'><path d='M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z'/></svg>",headphone:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor' style='color:currentColor'><path d='M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3H5v-1a7 7 0 0 1 14 0v1h-2a3 3 0 0 0-3 3v3a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z'/></svg>",'acrylic-clamp':'🗜️','crystal-ball':'🔮','water-bottle':'🍶',humidifier:'💧',fan:'💨',gimbal:'📷',powerbank:'🔋',rgb:'💡',wgp:'🎮',smartwatch:'⌚',light:'🕯️',keyboard:'⌨️',mouse:'🖱️',cable:'🔌','unique-tools':'🔧','hair-dryer':'💇',lamp:'🪔',moonlamp:'🌙'};
   const _catList = (_settings && _settings['vc_categories'] && _settings['vc_categories'].length)
     ? _settings['vc_categories'].map(c=>({...c, icon: c.icon || _defaultCatIcons[c.id] || '📂'}))
     : (document.querySelectorAll('.cat-pill').length
@@ -5508,6 +5515,10 @@ function _handleBack(state) {
 }
 
 window.addEventListener('popstate', function(e){
+  // ✅ FIX: Safari back button — state থেকে panelStack restore করো
+  if(e.state && Array.isArray(e.state.vcStack)){
+    _panelStack = [...e.state.vcStack];
+  }
   const handled = _handleBack(e.state);
   if(handled){
     if(_panelStack.length === 0){
@@ -7002,10 +7013,10 @@ function loadCustomCategories(){
   const saved=_settings['vc_categories']||null;
   const catBar=document.querySelector('.cat-inner');
   const defaultCats=[
-    {id:'all',name:'সকল পণ্য',icon:'🛍️'},
-    {id:'unique',name:'Unique Collection',icon:'✨'},
-    {id:'tws',name:'TWS',icon:'🎧'},
-    {id:'headphone',name:'Headphone',icon:'🎧'},
+    {id:'all',name:'সকল পণ্য',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M22 9h-4.79l-4.38-6.56a1 1 0 0 0-1.66 0L6.79 9H2a1 1 0 0 0-1 1.11l1.93 11A1 1 0 0 0 4 22h16a1 1 0 0 0 1-.89l1.93-11A1 1 0 0 0 22 9zm-10-3.94L14.14 9H9.86L12 5.06zM4.08 11h15.84l-1.68 9H5.76L4.08 11zm5.92 3a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1zm4 0a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/></svg>'},
+    {id:'unique',name:'Unique Collection',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 2.5L19.5 9H4.5L12 4.5zM5.2 11h13.6L12 20.2 5.2 11z"/></svg>'},
+    {id:'tws',name:'TWS',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M5.5 13a3.5 3.5 0 0 1-3.5-3.5v-1A3.5 3.5 0 0 1 5.5 5H6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-.5zm0 2H6a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-.5A5.5 5.5 0 0 0 0 9.5v1A5.5 5.5 0 0 0 5.5 16zM6 16v2a2 2 0 0 0 4 0v-1.268A5.5 5.5 0 0 1 5.5 16H6zm12.5-3a3.5 3.5 0 0 0 3.5-3.5v-1A3.5 3.5 0 0 0 18.5 5H18a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5zm0 2H18a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h.5A5.5 5.5 0 0 1 24 9.5v1A5.5 5.5 0 0 1 18.5 16zM18 16v2a2 2 0 0 1-4 0v-1.268A5.5 5.5 0 0 0 18.5 16H18z"/></svg>'},
+    {id:'headphone',name:'Headphone',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3H5v-1a7 7 0 0 1 14 0v1h-2a3 3 0 0 0-3 3v3a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z"/></svg>'},
     {id:'acrylic-clamp',name:'Acrylic Clamp',icon:'🗜️'},
     {id:'crystal-ball',name:'Crystal Ball',icon:'🔮'},
     {id:'water-bottle',name:'Water Bottle',icon:'🍶'},
@@ -7053,7 +7064,9 @@ function loadCustomCategories(){
     cats.forEach(cat=>{
       const card=document.createElement('div');
       card.className='cat-card';
-      card.innerHTML='<div class="cat-card-icon-wrap">'+escHtml(cat.icon||'📦')+'</div><div class="cat-card-name">'+escHtml(cat.name)+'</div>';
+      // ✅ FIX: TWS category te custom SVG earbuds icon support
+      const iconHtml = (cat.icon && cat.icon.startsWith('<svg')) ? cat.icon : escHtml(cat.icon||'📦');
+      card.innerHTML='<div class="cat-card-icon-wrap">'+iconHtml+'</div><div class="cat-card-name">'+escHtml(cat.name)+'</div>';
       card.onclick=()=>filterCat(cat.id,null);
       grid.appendChild(card);
     });
