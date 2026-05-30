@@ -2871,6 +2871,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         localStorage.setItem('vc_cath_cache', JSON.stringify(freshCards));
       }
     }catch(e){}
+    // ✅ CAT-FIX: Supabase থেকে settings লোড হওয়ার পরে category bar render করো
+    // এতে admin-saved category order সঠিকভাবে প্রথম থেকেই দেখাবে
+    if(typeof loadCustomCategories === 'function') loadCustomCategories();
   } catch (e) { console.warn('Supabase settings load failed:', e); }
 
   // Step 2: stock apply করো (Supabase data থেকে)
@@ -5117,7 +5120,7 @@ async function confirmOrder(){
         customer_district: order.customer.district,
         customer_address: order.customer.address,
         customer_email: order.customer.email||'',
-        items: order.items,
+        items: Array.isArray(order.items) ? order.items : [],
         shipping: order.shipping,
         shipping_cost: order.shippingCost,
         subtotal: order.subtotal,
@@ -7005,7 +7008,8 @@ document.addEventListener('DOMContentLoaded',function(){
     if(dsi&&dsi.value){dsi.value='';}
     if(msi&&msi.value){msi.value='';}
   },100);
-  loadCustomCategories();
+  // ✅ CAT-FIX: loadCustomCategories() এখন Supabase block-এই call হয় (সঠিক order পাওয়ার পরে)
+  // এখানে আর call করার দরকার নেই, নইলে Supabase data আসার আগে default order দেখাবে
   loadCathCardData();
 });
 
