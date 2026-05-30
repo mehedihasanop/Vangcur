@@ -3107,15 +3107,18 @@ let editCatIdx=-1;
 function getCats(){
   const saved=_adminSettings['vc_categories']||null;
   if(!saved||!saved.length) return [...DEFAULT_CATS];
-  // ✅ FIX: saved cats এ missing DEFAULT_CATS merge করো
-  // এতে Supabase এ পুরানো/কম cats থাকলেও সব ২১টি দেখাবে
-  const merged=[...saved];
-  DEFAULT_CATS.forEach(def=>{
-    if(!merged.find(c=>c.id===def.id)){
-      merged.push(def); // missing default cat যোগ করো শেষে
-    }
+  // ✅ FIX: saved order respect করো কিন্তু DEFAULT_CATS-ই authority
+  // gaming বা non-default cats কখনো ফিরে আসবে না
+  const ordered=[];
+  saved.forEach(s=>{
+    const def=DEFAULT_CATS.find(c=>c.id===s.id);
+    if(def) ordered.push(def); // DEFAULT_CATS-এ নেই এমন বাদ
   });
-  return merged;
+  // DEFAULT_CATS-এ আছে কিন্তু saved-এ নেই এমন শেষে যোগ করো
+  DEFAULT_CATS.forEach(def=>{
+    if(!ordered.find(c=>c.id===def.id)) ordered.push(def);
+  });
+  return ordered;
 }
 function saveCats(cats){
   _adminSettings['vc_categories'] = cats;

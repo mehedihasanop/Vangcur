@@ -206,15 +206,17 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
   max-width:calc(50vw - 8px);
   min-width:0;
   flex-shrink:0;
-  height:350px;
+  /* ✅ FIX: aspect-ratio 9:16 দিয়ে সব ফোনে একই proportion রাখো */
+  aspect-ratio: 9 / 16;
+  height:auto;
+  min-height:220px;
 }
-/* 56px = cath-wrap padding (14px × 2 sides) + track padding (2px × 2) + gap(12px)/2 × 2 cards */
 @media(min-width:480px) and (max-width:768px){
-  .cath-hero-duo .cath-card{ height:370px; }
+  .cath-hero-duo .cath-card{ min-height:300px; }
 }
 @media(min-width:769px){
   /* Desktop: 6 cards visible at a time */
-  .cath-hero-duo .cath-card{ width:calc((100% - 60px) / 6); height:360px; }
+  .cath-hero-duo .cath-card{ width:calc((100% - 60px) / 6); aspect-ratio:9/16; min-height:280px; }
 }
 
 .cath-card:hover{
@@ -1244,7 +1246,9 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   /* FIX: ছোট ফোনে card width viewport থেকে নেওয়া */
   .cath-hero-duo .cath-card{
     width: calc((100vw - 2 * clamp(10px, 3vw, 14px) - 12px) / 2);
-    height: clamp(185px, 55vw, 310px);
+    aspect-ratio: 9 / 16;
+    height: auto;
+    min-height: 210px;
   }
   .cath-duo-track{ gap: 12px; }
 }
@@ -1425,7 +1429,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   .hero-sub{ font-size: 10.5px; }
   .h-btn{ padding: 8px 14px; font-size: 11px; }
   .hero-stats{ display: none; }
-  .cath-hero-duo .cath-card{ width:calc((100vw - 28px)/2); height: 175px; min-width:0; }
+  .cath-hero-duo .cath-card{ width:calc((100vw - 28px)/2); aspect-ratio:9/16; height:auto; min-height:200px; min-width:0; }
 
   /* Product cards */
   .prod-grid{ gap: 7px; }
@@ -3821,9 +3825,7 @@ function updateCatPillCounts(){
 }
 
 function renderCatBar(){
-  const saved=_settings['vc_categories']||null;
-  if(!saved||!saved.length)return;
-  // loadCustomCategories দিয়ে পুরো rebuild করো — এটাই সঠিক পথ
+  // ✅ FIX: saved থাকুক বা না থাকুক, সবসময় rebuild করো
   loadCustomCategories();
   updateCatPillCounts();
 }
@@ -5103,74 +5105,35 @@ async function confirmOrder(){
     status:'pending',ip:'client-ip'};
   const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
   orders.push(order);localStorage.setItem('vc_orders',JSON.stringify(orders));
-  // ✅ Supabase এ order save করো — RPC প্রথমে, fail হলে direct insert
+  // ✅ Supabase এ order save করো — সরাসরি insert (RPC বাদ)
   (async()=>{
     let savedId = null;
     try{
-      // Method 1: place_order RPC
-      const rpcItems = order.items.map(i=>({id:i.id, qty:i.qty}));
-      const {data:rpcRes, error:rpcErr} = await supabaseClient.rpc('place_order',{
-        p_order_num: order.orderNum,
-        p_date: order.date,
-        p_customer_name: order.customer.name,
-        p_customer_phone: order.customer.phone,
-        p_customer_district: order.customer.district,
-        p_customer_address: order.customer.address,
-        p_customer_email: order.customer.email||'',
-        p_items: rpcItems,
-        p_shipping: order.shipping,
-        p_shipping_cost: order.shippingCost,
-        p_subtotal: order.subtotal,
-        p_total: order.total,
-        p_payment_txn: order.payment.txnId||'',
-        p_payment_last4: order.payment.last4||'',
-        p_status: 'pending',
-        p_user_id: order.userId||null
-      });
-      if(!rpcErr && rpcRes && rpcRes.success){
-        savedId = rpcRes.id;
-        order.subtotal = rpcRes.subtotal;
-        order.total = rpcRes.total;
-      } else if(!rpcErr && rpcRes && rpcRes.id){
-        // Some RPC versions return {id} directly without success flag
-        savedId = rpcRes.id;
+      const insertPayload = {
+        order_num: order.orderNum,
+        created_at: order.date,
+        customer_name: order.customer.name,
+        customer_phone: order.customer.phone,
+        customer_district: order.customer.district,
+        customer_address: order.customer.address,
+        customer_email: order.customer.email||'',
+        items: order.items,
+        shipping: order.shipping,
+        shipping_cost: order.shippingCost,
+        subtotal: order.subtotal,
+        total: order.total,
+        payment_txn: order.payment.txnId||'',
+        payment_last4: order.payment.last4||'',
+        status: 'pending'
+      };
+      if(order.userId) insertPayload.user_id = order.userId;
+      const {data:insData, error:insErr} = await supabaseClient.from('orders').insert([insertPayload]).select('id').single();
+      if(!insErr && insData && insData.id){
+        savedId = insData.id;
       } else {
-        console.error('[Order RPC] Error:', rpcErr?.message, '| Response:', JSON.stringify(rpcRes));
-        throw rpcErr || new Error('RPC no success');
+        console.error('[Order Insert] FAILED — Code:', insErr?.code, '| Message:', insErr?.message, '| Details:', insErr?.details);
       }
-    }catch(e){
-      console.warn('place_order RPC failed, trying direct insert:', e);
-      // ✅ Method 2: Direct insert fallback — RPC fail হলেও Supabase এ order যাবে
-      try{
-        const insertPayload = {
-          order_num: order.orderNum,
-          created_at: order.date,
-          customer_name: order.customer.name,
-          customer_phone: order.customer.phone,
-          customer_district: order.customer.district,
-          customer_address: order.customer.address,
-          customer_email: order.customer.email||'',
-          customer: {name:order.customer.name,phone:order.customer.phone,district:order.customer.district,address:order.customer.address,email:order.customer.email||''},
-          items: order.items,
-          shipping: order.shipping,
-          shipping_cost: order.shippingCost,
-          subtotal: order.subtotal,
-          total: order.total,
-          payment_txn: order.payment.txnId||'',
-          payment_last4: order.payment.last4||'',
-          status: 'pending'
-        };
-        if(order.userId) insertPayload.user_id = order.userId;
-        const {data:insData, error:insErr} = await supabaseClient.from('orders').insert([insertPayload]).select('id').single();
-        if(!insErr && insData && insData.id){
-          savedId = insData.id;
-        } else {
-          console.error('[Order Insert] FAILED — Code:', insErr?.code, '| Message:', insErr?.message, '| Details:', insErr?.details);
-          // ⚠️ RLS হয়তো block করছে। Supabase Dashboard > Table Editor > orders > RLS Policies চেক করুন।
-          // anon role-এ INSERT policy থাকতে হবে অথবা place_order RPC SECURITY DEFINER থাকতে হবে।
-        }
-      }catch(e2){console.warn('Direct insert exception:', e2);}
-    }
+    }catch(e2){console.warn('Direct insert exception:', e2);}
     // ✅ Supabase থেকে real ID পাওয়া গেলে সব জায়গায় আপডেট করো
     if(savedId){
       order.id = savedId;
@@ -5580,7 +5543,7 @@ document.addEventListener('visibilitychange',()=>{
         const freshStock=_settings['vc_stock']||{};
         loadStock(freshStock);
         // vc_categories পরিবর্তন হলে category bar re-render করো
-        if(_settings['vc_categories']) renderCatBar();
+        renderCatBar(); // ✅ FIX: always re-render cat bar on visibility restore
       }
       // ✅ FIX: vc_cath_cards সবসময় reload করো — Supabase এ row না থাকলেও default দেখাবে
       if(typeof loadCathCardData==='function') loadCathCardData();
@@ -5620,7 +5583,15 @@ document.addEventListener('visibilitychange',()=>{
     requestAnimationFrame(()=>{
       setTimeout(()=>{
         // ✅ FIX-2: Tab ফিরে আসলে hero cards data re-apply করো (blank হওয়া ঠেকাবে)
-        try{ if(typeof loadCathCardData==='function') loadCathCardData(); }catch(e){}
+        // ✅ FIX: Hero cards fully re-render করো (blank হওয়া ঠেকাবে)
+        try{
+          const track = document.getElementById('cathDuoTrack');
+          if(track && track.childElementCount === 0){
+            renderDuoCardsHtml(_CATH_CARD_DEFAULTS.slice());
+            initDuoSlider();
+          }
+          if(typeof loadCathCardData==='function') loadCathCardData();
+        }catch(e){}
         try{ updateCathSlider(); }catch(e){}
         // duoSetPosition আগে run করি তারপর আরেকটু পরে আবার (DOM fully painted নিশ্চিত করতে)
         try{ duoSetPosition(false); }catch(e){}
@@ -7066,20 +7037,22 @@ function loadCustomCategories(){
     {id:'toys',        name:'Toys',               icon:'🧸'},
     {id:'alarm-clock', name:'Alarm Clock',        icon:'⏰'},
   ];
-  // ✅ FIX: defaultCats সবসময় base হিসেবে রাখো, তারপর saved-এর extra cats যোগ করো
-  // এতে order সবসময় consistent থাকবে এবং নতুন default cats সবসময় দেখাবে
+  // ✅ FIX: Saved order কে respect করো কিন্তু DEFAULT_CATS-ই authority
+  // Supabase-এ saved data থাকলে সেই ORDER অনুযায়ী DEFAULT_CATS সাজাও
+  // gaming বা অন্য non-default cats কখনো ফিরে আসবে না
   let cats;
   if(saved&&saved.length){
-    // defaultCats-এর প্রতিটি item saved-এ থাকলে saved-এর data use করো (icon/name admin-এ customized হতে পারে)
-    const merged = defaultCats.map(def => {
-      const savedItem = saved.find(c => c.id === def.id);
-      return savedItem ? {...def, ...savedItem} : def;
-    });
-    // saved-এ extra cats থাকলে (default-এ নেই এমন) শেষে যোগ করো
+    // saved-এর order অনুযায়ী DEFAULT_CATS থেকে categories নাও
+    const ordered = [];
     saved.forEach(s => {
-      if(!merged.find(c => c.id === s.id)) merged.push(s);
+      const def = defaultCats.find(c => c.id === s.id);
+      if(def) ordered.push(def); // DEFAULT_CATS-এ নেই এমন কিছু বাদ
     });
-    cats = merged;
+    // DEFAULT_CATS-এ আছে কিন্তু saved-এ নেই এমন cats শেষে যোগ করো
+    defaultCats.forEach(def => {
+      if(!ordered.find(c => c.id === def.id)) ordered.push(def);
+    });
+    cats = ordered;
   } else {
     cats = defaultCats;
   }
