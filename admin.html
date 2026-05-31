@@ -101,10 +101,10 @@ tr:hover td{background:#FAFAFA}
 #allProdTable th,#allProdTable td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 6px}
 #allProdTable th:nth-child(1),#allProdTable td:nth-child(1){width:34px;text-align:center}
 #allProdTable th:nth-child(2),#allProdTable td:nth-child(2){width:50px}
-#allProdTable th:nth-child(3),#allProdTable td:nth-child(3){width:auto}
+#allProdTable th:nth-child(3),#allProdTable td:nth-child(3){width:30%}
 #allProdTable th:nth-child(4),#allProdTable td:nth-child(4){width:12%}
 #allProdTable th:nth-child(5),#allProdTable td:nth-child(5){width:10%}
-#allProdTable th:nth-child(6),#allProdTable td:nth-child(6){width:12%}
+#allProdTable th:nth-child(6),#allProdTable td:nth-child(6){width:10%}
 #allProdTable th:nth-child(7),#allProdTable td:nth-child(7){width:10%}
 #allProdTable th:nth-child(8),#allProdTable td:nth-child(8){width:88px}
 .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700}
@@ -224,7 +224,8 @@ tr:hover td{background:#FAFAFA}
 
   /* ── Tables — horizontal scroll with indicator ── */
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
-  .tbl-wrap table{min-width:540px}
+  .tbl-wrap table{min-width:700px}
+  .tbl-wrap table td,.tbl-wrap table th{white-space:nowrap !important;word-break:normal !important}
   .tbl-wrap::after{content:'← scroll →';display:block;text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0}
 
   /* ── Modal full width ── */
@@ -250,7 +251,8 @@ tr:hover td{background:#FAFAFA}
   .o-det td,.o-det th{font-size:11px;padding:7px 8px}
 
   /* ── Overflow prevention ── */
-  *{max-width:100%;word-break:break-word;box-sizing:border-box}
+  *{max-width:100%;box-sizing:border-box}
+  .tbl-wrap *{max-width:none}
   img,svg{max-width:100%;height:auto}
   pre,code{white-space:pre-wrap;word-break:break-all}
 }
@@ -1425,6 +1427,12 @@ A: App ও Remote দিয়ে..."></textarea>
         </div>
         <div class="fg3c">
           <div class="fg"><label>Badge</label><input class="finp" id="pBadge" placeholder="HOT / NEW / SALE"></div>
+          <div class="fg"><label>ছাড়ের ব্যাজ রং</label>
+            <select class="finp" id="pDiscountColor">
+              <option value="">ডিফল্ট (কমলা)</option>
+              <option value="green">সবুজ (স্পেশাল ডিসকাউন্ট)</option>
+            </select>
+          </div>
           <div class="fg"><label>ওয়ারেন্টি</label><input class="finp" id="pWarranty" placeholder="৬ মাস রিপ্লেসমেন্ট"></div>
           <div class="fg"><label>রেটিং (1-5)</label><input class="finp" id="pRating" type="number" min="1" max="5" step="0.1" placeholder="4.5"></div>
         </div>
@@ -1805,7 +1813,10 @@ async function initDash(){
   }
   document.getElementById('stCust').textContent=users.length;
   const pb=document.getElementById('pendBadge');pb.style.display=pend>0?'inline':'none';pb.textContent=pend;
-  const rec=orders.slice(-5).reverse();
+  // সর্বশেষ ৫টি অর্ডার — date অনুযায়ী sort করে latest নাও
+  const rec = [...orders]
+    .sort((a,b) => new Date(b.date||b.created_at||0) - new Date(a.date||a.created_at||0))
+    .slice(0, 5);
   document.getElementById('recentOrd').innerHTML=rec.length?rec.map(o=>`<tr>
     <td><strong>${escHtml(o.orderNum)}</strong></td><td>${escHtml(o.customer?.name||'-')}</td>
     <td>৳${(o.total||0).toLocaleString()}</td><td>${sPill(o.status)}</td>
@@ -1892,6 +1903,8 @@ function renderLowStockAlert(){
   const card=document.getElementById('lowStockCard');
   const list=document.getElementById('lowStockList');
   if(!card||!list)return;
+  // সর্বশেষ stock load করো
+  loadAdminStock();
   const allProds=[...(DEFAULT_PRODS||[]),...(adminProds||[])];
   const lowStock=allProds.filter(p=>(p.stock??0)<=5);
   if(!lowStock.length){card.style.display='none';return;}
@@ -2324,6 +2337,7 @@ function openAddProd(){
   document.getElementById('prodModalTitle').textContent='প্রোডাক্ট যোগ করুন';
   document.getElementById('editId').value='';
   ['pName','pPrice','pOld','pBadge','pWarranty','pDesc','pQuickSpecs','pLongDesc','pFeatures','pClosing','pFaqs','pTechSpecs'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  const dcEl=document.getElementById('pDiscountColor');if(dcEl)dcEl.value='';
   document.getElementById('pStock').value=0;
   document.getElementById('pRating').value=4.5;
   document.getElementById('pWarranty').value='৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি';
@@ -2344,6 +2358,7 @@ function editProd(id){
   document.getElementById('pOld').value=p.old||'';
   document.getElementById('pStock').value=p.stock??0;
   document.getElementById('pBadge').value=p.badge||'';
+  const dcEl2=document.getElementById('pDiscountColor');if(dcEl2)dcEl2.value=p.discountColor||'';
   document.getElementById('pWarranty').value=p.warranty||'';
   document.getElementById('pRating').value=p.rating||4.5;
   document.getElementById('pDesc').value=p.desc||'';
@@ -2627,6 +2642,7 @@ async function saveProd(){
     old:parseInt(document.getElementById('pOld').value)||price,
     stock:(v=>isNaN(v)?0:v)(parseInt(document.getElementById('pStock').value)),
     badge:(document.getElementById('pBadge').value||'').toUpperCase(),
+    discountColor:document.getElementById('pDiscountColor')?.value||'',
     warranty:document.getElementById('pWarranty').value||'১ সপ্তাহ রিপ্লেসমেন্ট ওয়ারেন্টি',
     rating:parseFloat(document.getElementById('pRating').value)||4.5,
     desc:document.getElementById('pDesc').value||'',
@@ -2658,6 +2674,7 @@ async function saveProd(){
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
+        discount_color:data_obj.discountColor||'',
         rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
         faqs:data_obj.faqs||[], closing:data_obj.closing||''
       }).eq('id',eidNum).select().single();
@@ -2673,6 +2690,7 @@ async function saveProd(){
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
+        discount_color:data_obj.discountColor||'',
         rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
         faqs:data_obj.faqs||[], closing:data_obj.closing||''
       }]).select().single();
@@ -2760,12 +2778,12 @@ function renderCustomers(){
   const users=Object.values(usersFromOrders);
   document.getElementById('custTbl').innerHTML=users.length?users.map(u=>{
     return`<tr>
-      <td>${escHtml(u.name||'-')}</td>
-      <td>${escHtml(u.phone||'-')}</td>
-      <td>${escHtml(u.email||'-')}</td>
-      <td style="font-size:11px;color:var(--gray)">${u.lastDate?new Date(u.lastDate).toLocaleDateString('en-GB'):'-'}</td>
-      <td><span class="pill p-confirmed">${u.orders}টি</span></td>
-      <td>৳${(u.total||0).toLocaleString()}</td></tr>`;
+      <td style="white-space:nowrap">${escHtml(u.name||'-')}</td>
+      <td style="white-space:nowrap">${escHtml(u.phone||'-')}</td>
+      <td style="white-space:nowrap">${escHtml(u.email||'-')}</td>
+      <td style="font-size:11px;color:var(--gray);white-space:nowrap">${u.lastDate?new Date(u.lastDate).toLocaleDateString('en-GB'):'-'}</td>
+      <td style="white-space:nowrap"><span class="pill p-confirmed">${u.orders}টি</span></td>
+      <td style="white-space:nowrap">৳${(u.total||0).toLocaleString()}</td></tr>`;
   }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:24px">কোনো কাস্টমার নেই — অর্ডার আসলে এখানে দেখাবে</td></tr>';
 }
 
@@ -3209,16 +3227,20 @@ function renderCategoryList(){
       saveCats(cats2);
       showAdminToast('\u2705 ক্যাটাগরি সাজানো হয়েছে ও সেভ হয়েছে!');
     });
-    // ── Mobile Touch Support ──
+    // ── Mobile Touch Support (শুধু handle-এ চেপে ধরলেই drag হবে) ──
     (function(){
-      let _touchStartY=0, _touchFromIdx=null;
-      row.addEventListener('touchstart',function(e){
-        _touchFromIdx=i;
-        _touchStartY=e.touches[0].clientY;
-        row.style.opacity='.5';
-        window._catDragIdx=i;
-      },{passive:true});
+      let _isDragging=false;
+      const handle=row.querySelector('.cat-drag-handle');
+      if(handle){
+        handle.addEventListener('touchstart',function(e){
+          _isDragging=true;
+          row.style.opacity='.5';
+          window._catDragIdx=i;
+          e.stopPropagation();
+        },{passive:true});
+      }
       row.addEventListener('touchmove',function(e){
+        if(!_isDragging) return;
         e.preventDefault();
         const touch=e.touches[0];
         const allRows=Array.from(list.querySelectorAll('.cat-drag-row'));
@@ -3231,6 +3253,8 @@ function renderCategoryList(){
         if(target && target!==row) target.style.boxShadow='0 0 0 2px var(--blue)';
       },{passive:false});
       row.addEventListener('touchend',function(e){
+        if(!_isDragging) return;
+        _isDragging=false;
         row.style.opacity='1';
         const touch=e.changedTouches[0];
         const allRows=Array.from(list.querySelectorAll('.cat-drag-row'));
@@ -4100,6 +4124,9 @@ try{
       // Products page খোলা থাকলে re-render করো
       const prodPage=document.getElementById('page-products');
       if(prodPage&&prodPage.classList.contains('active'))renderProdTbl();
+      // Dashboard খোলা থাকলে low stock alert re-render করো
+      const dashPage=document.getElementById('page-dashboard');
+      if(dashPage&&dashPage.classList.contains('active'))renderLowStockAlert();
     })
     .subscribe();
 }catch(e){console.warn('Admin stock realtime failed:',e);}

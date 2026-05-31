@@ -1140,7 +1140,8 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 .sd-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:background .15s}
 .sd-item:hover{background:var(--light)}
 .sd-item:last-child{border:none}
-.sd-emoji{width:42px;height:42px;background:var(--light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sd-emoji{width:42px;height:42px;background:var(--light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden}
+.sd-emoji svg{width:22px;height:22px;max-width:22px;max-height:22px}
 .sd-info{flex:1;min-width:0}
 .sd-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sd-meta{font-size:11px;color:var(--gray);margin-top:2px}
@@ -2809,7 +2810,14 @@ function duoSetPosition(animate) {
     const cathPad = cathWrap ? parseFloat(getComputedStyle(cathWrap).paddingLeft) + parseFloat(getComputedStyle(cathWrap).paddingRight) : 28;
     wrapWidth = window.innerWidth - cathPad;
   }
+  // ✅ BUG-FIX: wrapWidth এখনও 0 বা খুব ছোট হলে (tab hidden ছিল) — apply করবো না, পরে retry করব
+  if (!wrapWidth || wrapWidth < 50) {
+    setTimeout(() => { try { duoSetPosition(animate); } catch(e) {} }, 150);
+    return;
+  }
   const cardWidth = Math.floor((wrapWidth - gap * (perPage - 1)) / perPage);
+  // ✅ BUG-FIX: cardWidth শূন্য বা অস্বাভাবিক হলে skip — layout ভাঙবে না
+  if (!cardWidth || cardWidth < 10) return;
 
   // Apply width to every card in DOM (including clones)
   allCards.forEach(c => {
@@ -2938,6 +2946,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           old: p.old || p.price || 0,
           stock: p.stock !== undefined ? p.stock : 0,
           badge: p.badge || '',
+          discountColor: p.discount_color || p.discountColor || '',
           warranty: p.warranty || '৭ দিন',
           rating: p.rating || 4.5,
           imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
@@ -3047,6 +3056,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
+            discountColor:p.discount_color||p.discountColor||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -3069,6 +3079,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
+            discountColor:p.discount_color||p.discountColor||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -3726,8 +3737,9 @@ function _buildProdCard(p, isFirst) {
     ? `<div class="prod-badge badge-sold">Sold Out</div>`
     : p.badge ? `<div class="prod-badge ${bc}">${p.badge}</div>` : '';
   const discPct = p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
+  const discBgColor = p.discountColor === 'green' ? '#16A34A' : '#FF6B00';
   const discBadge = discPct >= 5 && !sold
-    ? `<div class="discount-badge" style="top:${p.badge ? '32px' : '10px'}">${discPct}% ছাড়</div>` : '';
+    ? `<div class="discount-badge" style="top:${p.badge ? '32px' : '10px'};background:${discBgColor}">${discPct}% ছাড়</div>` : '';
 
   // প্রথম ব্যাচ (isFirst=true) → lazy নয়, বাকিগুলো → lazy
   const imgHTML = _prodImgHTML((p.imgs || ['📦'])[0], p.name, !isFirst);
@@ -4039,7 +4051,6 @@ function showSearchDropdown(q, source) {
         </div>
         <div>
           <div class="sd-price">৳${p.price.toLocaleString()}</div>
-          ${disc(p)>=5?`<div style="font-size:10px;color:var(--green);font-weight:700;text-align:right">${disc(p)}% ছাড়</div>`:''}
         </div>
       </div>
     `).join('')}
@@ -5659,24 +5670,35 @@ document.addEventListener('visibilitychange',()=>{
       setTimeout(()=>{
         try{
           const track = document.getElementById('cathDuoTrack');
-          if(track && track.childElementCount === 0){
-            // Track সম্পূর্ণ blank — full re-init
-            const cards = (_settings['vc_cath_cards'] && Array.isArray(_settings['vc_cath_cards']) && _settings['vc_cath_cards'].length)
+          const wrap = document.getElementById('cathHeroDuo');
+          // সব কার্ডের width চেক করো — যদি কোনোটার width শূন্য হয় তাহলে re-init
+          const cards = track ? track.querySelectorAll('.cath-card') : [];
+          const anyZeroWidth = cards.length === 0 || [...cards].some(c => !c.offsetWidth || c.offsetWidth < 10);
+          if(!track || track.childElementCount === 0 || anyZeroWidth){
+            // Track blank বা কার্ড width শূন্য — full re-init
+            const cardsData = (_settings['vc_cath_cards'] && Array.isArray(_settings['vc_cath_cards']) && _settings['vc_cath_cards'].length)
               ? _settings['vc_cath_cards'].slice() : _CATH_CARD_DEFAULTS.slice();
-            renderDuoCardsHtml(cards);
+            renderDuoCardsHtml(cardsData);
             initDuoSlider();
           } else {
-            // Track আছে — content + position reset করো
-            if(typeof loadCathCardData==='function') loadCathCardData();
+            // Track আছে — শুধু position reset করো
+            requestAnimationFrame(()=>{ try{ duoSetPosition(false); }catch(e){} });
           }
         }catch(e){}
         // position আরেকবার ২৫০ms পরে (layout settle এর পরে)
         setTimeout(()=>{
           try{
             const wrap = document.getElementById('cathHeroDuo');
-            if(wrap && wrap.clientWidth > 0) duoSetPosition(false);
+            if(wrap && wrap.getBoundingClientRect().width > 50) duoSetPosition(false);
           }catch(e){}
         }, 250);
+        // আরেকবার ৬০০ms পরে — যদি এখনো width না পাওয়া যায়
+        setTimeout(()=>{
+          try{
+            const wrap = document.getElementById('cathHeroDuo');
+            if(wrap && wrap.getBoundingClientRect().width > 50) duoSetPosition(false);
+          }catch(e){}
+        }, 600);
       }, 80);
     });
     // ✅ FIX: pendingOrdId না থাকলে localStorage থেকে restore করো
