@@ -92,21 +92,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1A1A1A;min-hei
 /* TABLE */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:600px}
-/* ✅ Product table — desktop এ scroll ছাড়া দেখার জন্য fixed layout */
-#allProdTable{table-layout:fixed;min-width:unset;width:100%}
-#allProdTable th, #allProdTable td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#allProdTable th:nth-child(1){width:36px}
-#allProdTable th:nth-child(2){width:52px}
-#allProdTable th:nth-child(3){width:auto}   /* নাম — বাকি জায়গা নেবে */
-#allProdTable th:nth-child(4){width:13%}
-#allProdTable th:nth-child(5){width:11%}
-#allProdTable th:nth-child(6){width:13%}
-#allProdTable th:nth-child(7){width:11%}
-#allProdTable th:nth-child(8){width:90px}
-th{text-align:left;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:9px 11px;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:10px 11px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle}
+th{text-align:left;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:9px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 8px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 tr:last-child td{border:none}
 tr:hover td{background:#FAFAFA}
+/* ✅ Product table — desktop এ scroll ছাড়া সব column দেখানোর জন্য */
+#allProdTable{table-layout:fixed;min-width:unset;width:100%}
+#allProdTable th,#allProdTable td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 6px}
+#allProdTable th:nth-child(1),#allProdTable td:nth-child(1){width:34px;text-align:center}
+#allProdTable th:nth-child(2),#allProdTable td:nth-child(2){width:50px}
+#allProdTable th:nth-child(3),#allProdTable td:nth-child(3){width:auto}
+#allProdTable th:nth-child(4),#allProdTable td:nth-child(4){width:12%}
+#allProdTable th:nth-child(5),#allProdTable td:nth-child(5){width:10%}
+#allProdTable th:nth-child(6),#allProdTable td:nth-child(6){width:12%}
+#allProdTable th:nth-child(7),#allProdTable td:nth-child(7){width:10%}
+#allProdTable th:nth-child(8),#allProdTable td:nth-child(8){width:88px}
 .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700}
 .p-pending{background:#FEF3C7;color:#92400E}
 .p-confirmed{background:#DBEAFE;color:#1E40AF}
@@ -225,7 +225,6 @@ tr:hover td{background:#FAFAFA}
   /* ── Tables — horizontal scroll with indicator ── */
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
   .tbl-wrap table{min-width:540px}
-  #allProdTable{min-width:unset}  /* product table mobile এও scroll করতে হবে না */
   .tbl-wrap::after{content:'← scroll →';display:block;text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0}
 
   /* ── Modal full width ── */
@@ -543,7 +542,7 @@ A: App ও Remote দিয়ে..."></textarea>
       </div>
       <div class="tbl-wrap">
         <table id="allProdTable">
-          <thead><tr><th></th><th>ছবি</th><th>নাম</th><th>ক্যাট</th><th>মূল্য</th><th>স্টক</th><th>ওয়ারেন্টি</th><th>অ্যাকশন</th></tr></thead>
+          <thead><tr><th style="width:32px"></th><th style="width:52px">ছবি</th><th>নাম</th><th style="width:15%">ক্যাট</th><th style="width:12%">মূল্য</th><th style="width:13%">স্টক</th><th style="width:12%">ওয়ারেন্টি</th><th style="width:10%">অ্যাকশন</th></tr></thead>
           <tbody id="pTbl"></tbody>
         </table>
       </div>
@@ -2173,17 +2172,17 @@ function renderProdTbl(scrollToLast = false) {
          <button class="btn btn-red btn-xs" onclick="delProd(${p.id})">🗑️</button>`;
 
     return `<tr data-prod-id="${p.id}" style="${rowStyle}cursor:default">
-      <td style="text-align:center;cursor:grab;color:#9CA3AF;font-size:18px;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
-      <td style="padding:4px 6px">${(()=>{
+      <td style="cursor:grab;color:#9CA3AF;font-size:18px;user-select:none" class="drag-handle" title="ধরে টানুন">≡</td>
+      <td style="padding:3px 6px">${(()=>{
         const imgVal=(p.imgs||['📦'])[0];
         const isUrl=typeof imgVal==='string'&&(imgVal.startsWith('http')||imgVal.startsWith('/'));
         return isUrl
-          ? `<img src="${imgVal}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;display:block" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span style="display:none;font-size:22px">📦</span>`
-          : `<span style="font-size:22px">${imgVal}</span>`;
+          ? `<img src="${imgVal}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;display:block" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span style="display:none;font-size:20px">📦</span>`
+          : `<span style="font-size:20px">${imgVal}</span>`;
       })()}</td>
       <td>
-        <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p.name)}${defaultTag}</div>
-        ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;margin-top:3px;font-size:10px">${escHtml(p.badge)}</span>` : ''}
+        <div style="font-size:12px;font-weight:600">${escHtml(p.name)}${defaultTag}</div>
+        ${p.badge ? `<span class="pill" style="background:#FEF3C7;color:#92400E;font-size:10px">${escHtml(p.badge)}</span>` : ''}
       </td>
       <td>${
         (p.cats&&p.cats.length>0?p.cats:[p.cat||'?']).map(c=>`<span class="pill" style="background:#DBEAFE;color:#1E40AF;font-size:10px">${escHtml(catNames[c]||c)}</span>`).join(' ')
@@ -2196,7 +2195,7 @@ function renderProdTbl(scrollToLast = false) {
         </div>
       </td>
       <td style="font-size:11px">${p.warranty||'-'}</td>
-      <td style="white-space:nowrap">${actionBtns}</td>
+      <td>${actionBtns}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>`;
 
