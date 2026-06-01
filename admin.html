@@ -2358,7 +2358,7 @@ function editProd(id){
   document.getElementById('pOld').value=p.old||'';
   document.getElementById('pStock').value=p.stock??0;
   document.getElementById('pBadge').value=p.badge||'';
-  const dcEl2=document.getElementById('pDiscountColor');if(dcEl2)dcEl2.value=p.discountColor||'';
+  const dcEl2=document.getElementById('pDiscountColor');if(dcEl2)dcEl2.value=p.discountColor||p.specs?._discount_color||'';
   document.getElementById('pWarranty').value=p.warranty||'';
   document.getElementById('pRating').value=p.rating||4.5;
   document.getElementById('pDesc').value=p.desc||'';
@@ -2633,6 +2633,10 @@ async function saveProd(){
   }
   const eid=document.getElementById('editId').value;
   const eidNum=eid?parseInt(eid):null;
+  // discountColor → specs._discount_color এ store করো (Supabase এ আলাদা column নেই)
+  const _dc = document.getElementById('pDiscountColor')?.value||'';
+  if(_dc) specs._discount_color = _dc;
+  else delete specs._discount_color;
   // Build full product object
   const data_obj={
     name,
@@ -2674,7 +2678,6 @@ async function saveProd(){
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
-        discount_color:data_obj.discountColor||'',
         rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
         faqs:data_obj.faqs||[], closing:data_obj.closing||''
       }).eq('id',eidNum).select().single();
@@ -2690,7 +2693,6 @@ async function saveProd(){
         imgs:data_obj.imgs, specs:data_obj.specs,
         desc_text:data_obj.desc||data_obj.longDesc||'',
         features:data_obj.features||[], badge:data_obj.badge||'',
-        discount_color:data_obj.discountColor||'',
         rating:data_obj.rating||4.5, long_desc:data_obj.longDesc||data_obj.desc||'',
         faqs:data_obj.faqs||[], closing:data_obj.closing||''
       }]).select().single();

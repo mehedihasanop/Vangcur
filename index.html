@@ -103,7 +103,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-bar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--white));pointer-events:none;z-index:2;transition:opacity .3s}
 .cat-bar.at-end::after{opacity:0}
 /* UX-7: Back to top */
-.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:803;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:var(--tr);flex-direction:column;gap:1px}
+.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:1199;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:var(--tr);flex-direction:column;gap:1px}
 .back-to-top.show{display:flex}
 .back-to-top:hover{background:var(--hover);transform:translateY(-3px);box-shadow:0 6px 22px rgba(92,184,92,.35)}
 .back-to-top svg{width:20px;height:20px}
@@ -841,7 +841,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .f-copy{font-size:13px;color:#E63946;font-weight:500}
 
 /* FLOAT BTNS */
-.float-btns{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:800}
+.float-btns{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:1300}
 .f-btn{width:47px;height:47px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh3);transition:var(--tr)}
 .f-btn:hover{transform:scale(1.1)}
 .fb-wa{background:#25D366}
@@ -1152,6 +1152,30 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 .sd-view-all-btn:hover{background:var(--hover)}
 .search-highlight{color:var(--red);font-weight:700}
 .mobile-search-bar{position:relative}
+
+/* ── SEARCH RESULT PAGE OVERLAY ── */
+.srp-overlay{position:fixed;inset:0;background:var(--bg,#F5F5F5);z-index:1200;display:none;flex-direction:column;overflow:hidden}
+.srp-overlay.show{display:flex;animation:fadeIn .2s ease}
+.srp-header{background:var(--white);border-bottom:1.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.srp-back{background:none;border:none;cursor:pointer;padding:8px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--dark);transition:var(--tr);flex-shrink:0}
+.srp-back:hover{background:var(--light)}
+.srp-query-wrap{flex:1;position:relative}
+.srp-query-inp{width:100%;padding:9px 36px 9px 14px;border:1.5px solid var(--border);border-radius:50px;font-size:15px;background:var(--light);font-family:'DM Sans',sans-serif;transition:var(--tr);box-sizing:border-box}
+.srp-query-inp:focus{outline:none;border-color:var(--dark);background:#fff}
+.srp-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--gray);border:none;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#fff;font-weight:700;line-height:1;padding:0}
+.srp-clear.visible{display:flex}
+.srp-body{flex:1;overflow-y:auto;padding:16px}
+.srp-info{font-size:12.5px;color:var(--gray);margin-bottom:14px;font-weight:500}
+.srp-cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.srp-cat-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;transition:var(--tr)}
+.srp-cat-chip:hover{border-color:var(--dark);background:var(--light)}
+.srp-cat-chip-icon{font-size:16px;display:flex;align-items:center}
+.srp-cat-chip-icon svg{width:16px;height:16px}
+.srp-query-inp::-webkit-search-cancel-button{display:none}
+.srp-query-inp::-webkit-search-decoration{display:none}
+.srp-empty{text-align:center;padding:60px 20px;color:var(--gray)}
+.srp-empty-icon{font-size:48px;margin-bottom:12px}
+.srp-section-title{font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
 
 /* Image gallery arrows */
 .pp-gallery-wrap{position:relative}
@@ -1683,6 +1707,25 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   <button class="f-btn fb-msg" onclick="window.open('https://m.me/vangcurbdofficial','_blank')"><svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.9 1.19 5.44 3.14 7.17.16.14.26.35.27.57l.05 1.78c.02.57.61.94 1.13.7l1.98-.87c.17-.08.36-.09.54-.04.9.25 1.87.38 2.89.38C17.64 21.4 22 17.27 22 11.7 22 6.13 17.64 2 12 2zm6.11 7.37l-2.96 4.7c-.47.74-1.47.93-2.17.41l-2.36-1.76c-.22-.16-.51-.16-.72 0l-3.18 2.41c-.42.32-.97-.16-.69-.62l2.96-4.7c.47-.74 1.47-.93 2.17-.41l2.36 1.76c.22.16.51.16.72 0l3.18-2.41c.43-.32.97.17.69.62z"/></svg></button>
 </div>
 
+<!-- SEARCH RESULT PAGE -->
+<div class="srp-overlay" id="srpOverlay">
+  <div class="srp-header">
+    <button class="pp-back" onclick="closeSRP()" aria-label="হোমে ফিরুন" title="হোমে ফিরুন" style="flex-shrink:0">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    </button>
+    <div class="srp-query-wrap">
+      <input type="search" class="srp-query-inp" id="srpQueryInp" placeholder="পুনরায় সার্চ করুন..." autocomplete="off" oninput="srpLiveSearch(this.value)" onkeydown="srpHandleKey(event)" onsearch="srpHandleSearch(this.value)" inputmode="search">
+      <button class="srp-clear" id="srpClear" onclick="srpClearSearch()">✕</button>
+    </div>
+  </div>
+  <div class="srp-body" id="srpBody"></div>
+  <!-- ✅ SRP এর ভেতরে float buttons — z-index conflict নেই, সব scroll position এ কাজ করে -->
+  <div class="float-btns" id="srpFloatBtns" style="display:none;z-index:1250">
+    <button class="f-btn fb-wa" onclick="window.open('https://wa.me/8801816365504','_blank')"><svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>
+    <button class="f-btn fb-msg" onclick="window.open('https://m.me/vangcurbdofficial','_blank')"><svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.9 1.19 5.44 3.14 7.17.16.14.26.35.27.57l.05 1.78c.02.57.61.94 1.13.7l1.98-.87c.17-.08.36-.09.54-.04.9.25 1.87.38 2.89.38C17.64 21.4 22 17.27 22 11.7 22 6.13 17.64 2 12 2zm6.11 7.37l-2.96 4.7c-.47.74-1.47.93-2.17.41l-2.36-1.76c-.22-.16-.51-.16-.72 0l-3.18 2.41c-.42.32-.97-.16-.69-.62l2.96-4.7c.47-.74 1.47-.93 2.17-.41l2.36 1.76c.22.16.51.16.72 0l3.18-2.41c.43-.32.97.17.69.62z"/></svg></button>
+  </div>
+</div>
+
 <!-- WISHLIST OVERLAY -->
 <div class="wishlist-overlay" id="wishlistOverlay">
   <div class="wishlist-box">
@@ -1697,8 +1740,12 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <!-- PRODUCT FULL PAGE -->
 <div class="pp-overlay" id="ppOverlay">
   <div class="pp-nav">
+    <!-- হোম বাটন: শুধু SRP থেকে আসলে দেখাবে (JS দ্বারা নিয়ন্ত্রিত) -->
+    <button class="pp-back" id="ppHomeBtn" onclick="closePPToHome()" aria-label="হোম" title="হোমপেজে যান" style="margin-right:0;display:none">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    </button>
     <button class="pp-back" onclick="closePP()" aria-label="ফিরে যান">‹</button>
-    <div class="pp-bread">হোম / <span id="ppBreadWishlist" style="display:none;color:var(--gray);font-weight:400">Wishlist / </span><span id="ppBread">প্রোডাক্ট</span></div>
+    <div class="pp-bread">হোম / <span id="ppBreadSearch" style="display:none;color:var(--gray);font-weight:400"></span><span id="ppBreadWishlist" style="display:none;color:var(--gray);font-weight:400">Wishlist / </span><span id="ppBread">প্রোডাক্ট</span></div>
   </div>
   <!-- TOP: Image + Info + Actions -->
   <div class="pp-inner">
@@ -2946,7 +2993,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           old: p.old || p.price || 0,
           stock: p.stock !== undefined ? p.stock : 0,
           badge: p.badge || '',
-          discountColor: p.discount_color || p.discountColor || '',
+          discountColor: p.discount_color || p.discountColor || (p.specs && p.specs._discount_color) || '',
           warranty: p.warranty || '৭ দিন',
           rating: p.rating || 4.5,
           imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
@@ -3056,7 +3103,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
-            discountColor:p.discount_color||p.discountColor||'',
+            discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -3079,7 +3126,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             id:p.id, cat:p.cat||'rgb', name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
-            discountColor:p.discount_color||p.discountColor||'',
+            discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
             specs:p.specs||{},
@@ -3941,12 +3988,8 @@ function handleSearchKey(e) {
   } else if(e.key === 'Enter') {
     const q = e.target.value.trim();
     if(q) {
-      closeSearchDropdowns();
-      filterProducts(q);
-      document.getElementById('prodSec')?.scrollIntoView({behavior:'smooth', block:'start'});
-      // Close mobile search bar
-      const mb = document.getElementById('mobileSearchBar');
-      if(mb) mb.classList.remove('show');
+      // Desktop ও Mobile উভয়েই Enter → SRP page খুলবে
+      viewAllSearch(q);
     }
   }
 }
@@ -4013,7 +4056,8 @@ function showSearchDropdown(q, source) {
         : []);
   const allCats = _catList.filter(c => c.id !== 'all');
   const catMatches = allCats.filter(c => {
-    const haystack = ((c.name||'') + ' ' + (c.icon||'') + ' ' + (c.id||'')).toLowerCase();
+    // ✅ FIX: icon (SVG/emoji) কে haystack থেকে বাদ দাও — SVG path এর অক্ষর ভুলভাবে match করছিল
+    const haystack = ((c.name||'') + ' ' + (c.id||'')).toLowerCase();
     return words.some(w => haystack.includes(w));
   }).slice(0, 3);
 
@@ -4022,7 +4066,7 @@ function showSearchDropdown(q, source) {
     <div style="padding:8px 14px 4px;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px">ক্যাটাগরি</div>
     ${catMatches.map(c => `
       <div class="sd-item" onclick="goToCat('${c.id}')" style="padding:9px 14px">
-        <div class="sd-emoji" style="font-size:20px">${c.icon||'📂'}</div>
+        <div class="sd-emoji" style="${(c.icon&&c.icon.startsWith('<svg'))?'font-size:0':'font-size:20px'}">${c.icon||'📂'}</div>
         <div class="sd-info">
           <div class="sd-name" style="font-size:13px">${escHtml(c.name)}</div>
           <div class="sd-meta">ক্যাটাগরি দেখুন →</div>
@@ -4070,14 +4114,420 @@ function openPPFromSearch(id) {
 
 function viewAllSearch(q) {
   closeSearchDropdowns();
-  filterProducts(q);
-  const inp1 = document.getElementById('desktopSearchInput');
-  const inp2 = document.getElementById('mobileSearchInput');
-  if(inp1) inp1.value = q;
-  if(inp2) inp2.value = q;
-  document.getElementById('prodSec')?.scrollIntoView({behavior:'smooth', block:'start'});
+  // Mobile search bar বন্ধ করো
   const mb = document.getElementById('mobileSearchBar');
   if(mb) mb.classList.remove('show');
+  // Search inputs clear করো
+  const i1 = document.getElementById('desktopSearchInput');
+  const i2 = document.getElementById('mobileSearchInput');
+  if(i1) i1.value = '';
+  if(i2) i2.value = '';
+  // SRP overlay খোলো
+  openSRP(q);
+}
+
+// ══════════════════════════════════════
+// SEARCH RESULT PAGE (SRP) FUNCTIONS
+// ══════════════════════════════════════
+let _srpCurrentQuery = '';
+
+function openSRP(q) {
+  _srpCurrentQuery = q;
+  const overlay = document.getElementById('srpOverlay');
+  const inp = document.getElementById('srpQueryInp');
+  if(inp){ inp.value = q; _srpUpdateClear(inp); }
+  overlay.classList.add('show');
+  overlay.scrollTop = 0;
+  lockBody();
+  // ✅ FIX: SRP খোলার আগে 'search' entry সরাও — নাহলে back দুইবার চাপতে হয়
+  // (desktop search box এ type করলে 'search' push হয়, তারপর SRP খুললে দুটো entry জমে)
+  _panelStack = _panelStack.filter(p => p !== 'search');
+  _pushPanel('srp');
+  _renderSRP(q);
+  // float-btns (WhatsApp/Messenger) SRP এ লুকাও — z-index conflict এ click block হয়
+  const fb = document.querySelector('.float-btns');
+  if(fb) fb.style.display = 'none';
+  // float cart, wish, back-to-top SRP এ দেখাও
+  _srpSyncFloatBtns();
+  // SRP body scroll এ back-to-top control
+  const srpBody = document.getElementById('srpBody');
+  if(srpBody){
+    srpBody.onscroll = function(){ _srpScrollHandler(this); };
+  }
+}
+
+function srpHandleSearch(val) {
+  // Android কীবোর্ডের সার্চ বাটন এই event fire করে
+  const q = (val || '').trim();
+  if(q) { _srpCurrentQuery = q; _renderSRP(q); }
+  // কীবোর্ড বন্ধ করো
+  const inp = document.getElementById('srpQueryInp');
+  if(inp) inp.blur();
+}
+
+function srpHandleKey(e) {
+  if(e.key === 'Enter' || e.keyCode === 13) {
+    e.preventDefault();
+    const q = e.target.value.trim();
+    if(q) { _srpCurrentQuery = q; _renderSRP(q); }
+    e.target.blur(); // কীবোর্ড বন্ধ করো
+  } else if(e.key === 'Escape') {
+    closeSRP();
+  }
+}
+
+function closeSRP() {
+  const overlay = document.getElementById('srpOverlay');
+  overlay.classList.remove('show');
+  unlockBody();
+  _panelStack = _panelStack.filter(p => p !== 'srp');
+  _srpCurrentQuery = '';
+  // float-btns restore
+  const fb = document.querySelector('.float-btns');
+  if(fb) fb.style.display = 'flex';
+  // SRP float buttons hide করো
+  const fc = document.getElementById('floatCartBtn');
+  const fw = document.getElementById('floatWishBtn');
+  const bt = document.getElementById('backToTop');
+  const srpFb = document.getElementById('srpFloatBtns');
+  if(fc) fc.style.display = 'none';
+  if(fw) fw.style.display = 'none';
+  if(bt) bt.classList.remove('show');
+  if(srpFb) srpFb.style.display = 'none';
+  // history sync: UI button দিয়ে বন্ধ করলে history.go(-1) করো
+  // Android back দিয়ে বন্ধ করলে _backButtonTriggered=true তাই skip
+  if(!_backButtonTriggered) {
+    _panelStack = [];
+    history.go(-1);
+  }
+  // হোমে scroll করো
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function srpLiveSearch(val) {
+  _srpCurrentQuery = val;
+  _srpUpdateClear(document.getElementById('srpQueryInp'));
+  clearTimeout(srpDebounce);
+  srpDebounce = setTimeout(() => _renderSRP(val), 180);
+}
+let srpDebounce;
+
+function srpClearSearch() {
+  const inp = document.getElementById('srpQueryInp');
+  if(inp){ inp.value = ''; inp.focus(); }
+  _srpUpdateClear(inp);
+  _renderSRP('');
+}
+
+function _srpUpdateClear(inp) {
+  const btn = document.getElementById('srpClear');
+  if(btn) btn.classList.toggle('visible', !!(inp && inp.value.length > 0));
+}
+
+// SRP এ float cart, wishlist, back-to-top sync করো
+function _srpSyncFloatBtns() {
+  const fc = document.getElementById('floatCartBtn');
+  const fw = document.getElementById('floatWishBtn');
+  // বাইরের floatCartBtn ও floatWishBtn লুকাও (z-index conflict এড়াতে)
+  if(fc) fc.style.display = 'none';
+  if(fw) fw.style.display = 'none';
+  // ✅ SRP এর ভেতরের WhatsApp/Messenger float buttons দেখাও
+  const srpFb = document.getElementById('srpFloatBtns');
+  if(srpFb) srpFb.style.display = 'flex';
+}
+
+// SRP card image slider — dot click or swipe
+function _srpGoSlide(uid, idx) {
+  const track = document.getElementById(uid + '_track');
+  if(!track) return;
+  const total = track.children.length;
+  if(idx < 0) idx = total - 1;
+  if(idx >= total) idx = 0;
+  track.style.transform = `translateX(-${idx * 100}%)`;
+  track.dataset.idx = idx;
+  // dots update
+  const dotsEl = track.parentElement.querySelectorAll('.srp-slide-dot');
+  dotsEl.forEach((d, i) => {
+    d.classList.toggle('srp-dot-on', i === idx);
+    d.style.background = i === idx ? '#fff' : 'rgba(255,255,255,.5)';
+  });
+}
+
+// SRP এ render হওয়ার পরে swipe support init করো
+function _srpInitSwipe() {
+  document.querySelectorAll('[id$="_track"]').forEach(track => {
+    if(track._srpSwipeInited) return;
+    track._srpSwipeInited = true;
+    const wrap = track.parentElement; // prod-img div
+    let tx = 0, ty = 0, moved = false;
+    wrap.addEventListener('touchstart', e => {
+      tx = e.touches[0].clientX;
+      ty = e.touches[0].clientY;
+      moved = false;
+    }, {passive: true});
+    wrap.addEventListener('touchmove', e => {
+      const dx = Math.abs(e.touches[0].clientX - tx);
+      const dy = Math.abs(e.touches[0].clientY - ty);
+      if(dx > dy && dx > 8) { moved = true; e.stopPropagation(); }
+    }, {passive: true});
+    wrap.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tx;
+      const dy = e.changedTouches[0].clientY - ty;
+      if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35) {
+        e.stopPropagation(); // prevent openPPFromSRP
+        const uid = track.id.replace('_track', '');
+        const cur = parseInt(track.dataset.idx || '0');
+        _srpGoSlide(uid, dx < 0 ? cur + 1 : cur - 1);
+      }
+    }, {passive: true});
+  });
+}
+
+// SRP body scroll এ back-to-top control
+function _srpScrollHandler(bodyEl) {
+  const bt = document.getElementById('backToTop');
+  if(!bt) return;
+  if(bodyEl.scrollTop > 300){
+    bt.classList.add('show');
+    bt.style.zIndex = '1199';
+    bt.onclick = function(){ bodyEl.scrollTo({top:0,behavior:'smooth'}); };
+  } else {
+    bt.classList.remove('show');
+  }
+}
+
+// ✅ FIX: SRP card DOM element হিসেবে তৈরি — innerHTML onclick এর বদলে
+// addEventListener দিয়ে, scroll করলেও click সঠিকভাবে কাজ করে
+function _srpBuildProdCard(p) {
+  const sold = p.stock <= 0;
+  const discPct = p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
+  const discBgColor = p.discountColor === 'green' ? '#16A34A' : '#FF6B00';
+  const ratingCount = Math.floor((Number(p.id)||1)*37+p.stock*13)%80+20;
+  const imgs = p.imgs && p.imgs.length ? p.imgs : ['📦'];
+  const uid = 'srpc_' + String(p.id).replace(/[^a-zA-Z0-9]/g,'_');
+
+  const card = document.createElement('div');
+  card.className = 'prod-card';
+
+  // badge html
+  let badgeHtml = '';
+  if(sold) badgeHtml = '<div class="prod-badge badge-sold">Sold Out</div>';
+  else if(p.badge) badgeHtml = `<div class="prod-badge badge-${p.badge.toLowerCase()}">${p.badge}</div>`;
+  const discBadgeHtml = discPct >= 5 && !sold
+    ? `<div class="discount-badge" style="top:${p.badge ? '32px' : '10px'};background:${discBgColor}">${discPct}% ছাড়</div>` : '';
+
+  // image slider
+  let imgSliderHTML;
+  if(imgs.length > 1) {
+    const slides = imgs.map(img => {
+      const imgH = _prodImgHTML(img, p.name, false);
+      return `<div style="min-width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">${imgH}</div>`;
+    }).join('');
+    const dotsHtml = imgs.map((_, i) => `<button data-slide-idx="${i}" style="width:6px;height:6px;border-radius:50%;border:none;background:${i===0?'#fff':'rgba(255,255,255,.5)'};padding:0;cursor:pointer;transition:.2s;flex-shrink:0"></button>`).join('');
+    imgSliderHTML = `<div id="${uid}_track" style="display:flex;transition:transform .28s ease;width:100%;will-change:transform" data-idx="0">${slides}</div>
+      <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:4">${dotsHtml}</div>`;
+  } else {
+    imgSliderHTML = _prodImgHTML(imgs[0], p.name, false);
+  }
+
+  // CTA buttons html
+  let ctaHtml;
+  if(sold) {
+    ctaHtml = `<button class="prod-cta" disabled style="width:100%;background:var(--gray);cursor:not-allowed">স্টক শেষ</button>`;
+  } else {
+    ctaHtml = `<button class="prod-cta srp-order-btn">⚡ অর্ডার করুন</button>
+               <button class="prod-cart-icon-btn srp-cart-btn" title="কার্টে যোগ করুন">🛒</button>`;
+  }
+
+  card.innerHTML = `
+  <div class="prod-img-wrap" style="position:relative">
+    ${badgeHtml}${discBadgeHtml}
+    <div class="prod-img srp-img-wrap" id="${uid}_wrap" style="overflow:hidden;touch-action:pan-y;${imgs.length>1?'cursor:pointer;padding:0;':''}">${imgSliderHTML}</div>
+    <button class="wish-btn ${isWishlisted(p.id)?'wishlisted':''}" title="Wishlist">${isWishlisted(p.id)?'❤️':'🤍'}</button>
+  </div>
+  <div class="prod-info">
+    <div class="prod-name srp-prod-name" style="cursor:pointer">${escHtml(p.name)}</div>
+    <div class="prod-spec">${getCardSpecs(p)}</div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
+      <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
+      <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${ratingCount})</span>
+    </div>
+    <div class="prod-price-row"><span class="prod-price">৳${p.price.toLocaleString()}</span><span class="prod-old">৳${p.old.toLocaleString()}</span></div>
+    <div class="prod-cta-row">${ctaHtml}</div>
+  </div>`;
+
+  // ✅ addEventListener দিয়ে events attach — inline onclick নয়
+  // এতে scroll position যাই হোক, click সঠিকভাবে কাজ করে
+  const imgWrap = card.querySelector('.srp-img-wrap');
+  const prodName = card.querySelector('.srp-prod-name');
+  const wishBtn = card.querySelector('.wish-btn');
+  const orderBtn = card.querySelector('.srp-order-btn');
+  const cartBtn = card.querySelector('.srp-cart-btn');
+
+  if(imgWrap) imgWrap.addEventListener('click', () => openPPFromSRP(p.id));
+  if(prodName) prodName.addEventListener('click', () => openPPFromSRP(p.id));
+  if(wishBtn) wishBtn.addEventListener('click', e => { e.stopPropagation(); toggleWish(p.id, wishBtn); });
+  if(orderBtn) orderBtn.addEventListener('click', e => { e.stopPropagation(); quickOrder(p.id); });
+  if(cartBtn) cartBtn.addEventListener('click', e => { e.stopPropagation(); quickCart(p.id); });
+
+  // Slide dots event listener
+  if(imgs.length > 1) {
+    const track = card.querySelector(`#${uid}_track`);
+    card.querySelectorAll('[data-slide-idx]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.slideIdx);
+        _srpGoSlide(uid, idx);
+      });
+    });
+    // Swipe support
+    if(imgWrap) {
+      let tx=0,ty=0;
+      imgWrap.addEventListener('touchstart', e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+      imgWrap.addEventListener('touchend', e=>{
+        const dx=e.changedTouches[0].clientX-tx;
+        const dy=e.changedTouches[0].clientY-ty;
+        if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>35){
+          e.stopPropagation();
+          const cur=parseInt((track&&track.dataset.idx)||'0');
+          _srpGoSlide(uid,dx<0?cur+1:cur-1);
+        }
+      },{passive:true});
+    }
+  }
+
+  return card;
+}
+
+function _renderSRP(q) {
+  const body = document.getElementById('srpBody');
+  if(!body) return;
+  const lower = (q||'').toLowerCase().trim();
+
+  if(!lower) {
+    body.innerHTML = `<div class="srp-empty">
+      <div class="srp-empty-icon">🔍</div>
+      <p style="margin-bottom:18px">কিছু লিখে সার্চ করুন</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;color:var(--gray);font-size:12px;font-weight:600">
+        <span style="flex:1;height:1px;background:var(--border);display:block"></span>
+        অথবা
+        <span style="flex:1;height:1px;background:var(--border);display:block"></span>
+      </div>
+      <button style="background:#1A1A1A;color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px" id="srpHomeBtn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+        ওয়েবসাইটের হোম পেইজে ফিরে যান
+      </button>
+    </div>`;
+    const hb = document.getElementById('srpHomeBtn');
+    if(hb) hb.addEventListener('click', () => closeSRP());
+    return;
+  }
+
+  const words = lower.split(/\s+/).filter(Boolean);
+  const compactQ = lower.replace(/\s+/g,'');
+
+  function matchProd(p) {
+    const hay = [p.name||'',p.nameBn||'',p.desc||'',p.cat||'',p.tags||'',Object.values(p.specs||{}).join(' ')].join(' ').toLowerCase();
+    if(words.every(w => hay.includes(w))) return true;
+    if(hay.replace(/\s+/g,'').includes(compactQ)) return true;
+    if(words.some(w => w.length >= 3 && hay.includes(w))) return true;
+    return false;
+  }
+
+  const results = (typeof PRODS !== 'undefined' ? PRODS : [])
+    .filter(matchProd)
+    .sort((a,b) => (a.stock<=0?1:0)-(b.stock<=0?1:0));
+
+  // ✅ body সম্পূর্ণ খালি করে DOM element যোগ করো
+  body.innerHTML = '';
+
+  // Category matches
+  const _catList = (_settings && _settings['vc_categories'] && _settings['vc_categories'].length)
+    ? _settings['vc_categories'].filter(c => c.id !== 'all')
+    : [];
+  const catMatches = _catList.filter(c => {
+    const hay = ((c.name||'') + ' ' + (c.id||'')).toLowerCase();
+    return words.some(w => hay.includes(w));
+  }).slice(0, 4);
+
+  if(catMatches.length) {
+    const titleEl = document.createElement('div');
+    titleEl.className = 'srp-section-title';
+    titleEl.textContent = 'ক্যাটাগরি';
+    body.appendChild(titleEl);
+    const catsEl = document.createElement('div');
+    catsEl.className = 'srp-cats';
+    catMatches.forEach(c => {
+      const chip = document.createElement('div');
+      chip.className = 'srp-cat-chip';
+      const iconHtml = c.icon && c.icon.startsWith('<svg')
+        ? `<span class="srp-cat-chip-icon">${c.icon}</span>`
+        : `<span class="srp-cat-chip-icon">${c.icon||'📂'}</span>`;
+      chip.innerHTML = iconHtml + escHtml(c.name);
+      chip.addEventListener('click', () => { closeSRP(); goToCat(c.id); });
+      catsEl.appendChild(chip);
+    });
+    body.appendChild(catsEl);
+  }
+
+  if(!results.length) {
+    const emptyEl = document.createElement('div');
+    emptyEl.className = 'srp-empty';
+    emptyEl.innerHTML = `<div class="srp-empty-icon">😕</div><p>"<strong>${escHtml(q)}</strong>" এর জন্য কোনো পণ্য পাওয়া যায়নি</p>`;
+    body.appendChild(emptyEl);
+    return;
+  }
+
+  const infoEl = document.createElement('div');
+  infoEl.className = 'srp-info';
+  infoEl.textContent = `${results.length}টি পণ্য পাওয়া গেছে`;
+  body.appendChild(infoEl);
+
+  // ✅ grid: DOM element, card গুলো addEventListener দিয়ে
+  const grid = document.createElement('div');
+  grid.className = 'prod-grid';
+  const frag = document.createDocumentFragment();
+  results.forEach(p => frag.appendChild(_srpBuildProdCard(p)));
+  grid.appendChild(frag);
+  body.appendChild(grid);
+}
+
+function openPPFromSRP(id) {
+  // SRP থেকে product page খুললে — back করলে SRP তে ফিরবে
+  const overlay = document.getElementById('ppOverlay');
+  overlay._fromSRP = true;
+  overlay._fromWishlist = false;
+  openPP(id);
+  // openPP এর পরে breadcrumb ও homeBtn সেট করো — openPP override করতে পারবে না
+  const breadSearch = document.getElementById('ppBreadSearch');
+  if(breadSearch && _srpCurrentQuery) {
+    breadSearch.textContent = 'সার্চ - ' + _srpCurrentQuery + ' / ';
+    breadSearch.style.display = '';
+  } else if(breadSearch) {
+    breadSearch.style.display = 'none';
+  }
+  // SRP থেকে আসলে হোম বাটন দেখাও
+  const homeBtn = document.getElementById('ppHomeBtn');
+  if(homeBtn) homeBtn.style.display = '';
+}
+
+function closePPToHome() {
+  // PP বন্ধ করে সরাসরি হোমে যাও
+  const overlay = document.getElementById('ppOverlay');
+  overlay.classList.remove('show');
+  unlockBody();
+  const stickyBar = document.getElementById('ppStickyBar');
+  if(stickyBar) stickyBar.classList.remove('show');
+  if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
+  const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
+  overlay._fromSRP = false; overlay._fromWishlist = false;
+  _panelStack = _panelStack.filter(p => p !== 'pp' && p !== 'srp');
+  // SRP বন্ধ করো
+  document.getElementById('srpOverlay').classList.remove('show');
+  _srpCurrentQuery = '';
+  // হোমে scroll
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  history.replaceState(null, '', '');
 }
 
 // ✅ Category suggestion click → go to that category
@@ -4187,7 +4637,9 @@ async function filterProducts(q){
         stock:row.stock??0,rating:row.rating||4.5,
         imgs:Array.isArray(row.images)?row.images:(row.imgs||['📦']),
         warranty:row.warranty||'৭ দিন',badge:row.badge||'',
-        desc:row.description||row.desc||''
+        desc:row.description||row.desc||'',
+        specs:row.specs||{},
+        discountColor:(row.specs&&row.specs._discount_color)||''
       }));
       const existingIds=new Set(PRODS.map(p=>p.id));
       const newSbProds=sbProds.filter(p=>!existingIds.has(p.id));
@@ -4215,6 +4667,12 @@ function openPP(id){
   // Wishlist breadcrumb default hide — openPPFromWishlist এ দেখাবে
   const wlBread=document.getElementById('ppBreadWishlist');
   if(wlBread) wlBread.style.display='none';
+  // Search breadcrumb default hide — openPPFromSRP এ দেখাবে
+  const srBread=document.getElementById('ppBreadSearch');
+  if(srBread) srBread.style.display='none';
+  // Home button default hide — openPPFromSRP এ দেখাবে
+  const homeBtn=document.getElementById('ppHomeBtn');
+  if(homeBtn) homeBtn.style.display='none';
   document.getElementById('ppName').textContent=curProd.name;
   document.getElementById('ppPrice').textContent=`৳${curProd.price.toLocaleString()}`;
   document.getElementById('ppOld').textContent=`৳${curProd.old.toLocaleString()}`;
@@ -4368,8 +4826,14 @@ function openPP(id){
     }
   }
 
-  // Related products
-  renderRelated(curProd);
+  // Related products — SRP থেকে এলে hide করো
+  const relSec = document.getElementById('relatedSec');
+  if(document.getElementById('ppOverlay')._fromSRP){
+    if(relSec) relSec.style.display = 'none';
+  } else {
+    if(relSec) relSec.style.display = '';
+    renderRelated(curProd);
+  }
   document.getElementById('ppOverlay').classList.add('show');
   lockBody();
   _pushPanel('pp');
@@ -4467,6 +4931,14 @@ function closePP(){
     lockBody();
     _panelStack=_panelStack.filter(p=>p!=='pp');
     return; // _popPanel() call করব না — history তে wishlist এর entry আছে
+  }
+  // SRP থেকে এসে থাকলে SRP দেখাও
+  if(overlay._fromSRP){
+    overlay._fromSRP=false;
+    document.getElementById('srpOverlay').classList.add('show');
+    lockBody();
+    _panelStack=_panelStack.filter(p=>p!=='pp');
+    return;
   }
   _popPanel();
 }
@@ -4748,6 +5220,9 @@ function quickCart(id){
   addToCart(id,1);
 }
 function showFloatCart(){
+  // SRP open থাকলে float cart দেখাবো না — click block করে
+  const srpEl = document.getElementById('srpOverlay');
+  if(srpEl && srpEl.classList.contains('show')) return;
   const btn=document.getElementById('floatCartBtn');
   const cnt=document.getElementById('floatCartCount');
   if(!btn||!cnt)return;
@@ -5408,12 +5883,10 @@ let _homeBackCount = 0;
 let _homeBackTimer = null;
 
 // Homepage back guard:
-// entry[0] = {vcStack:[], homeBase:true}  ← browser এর আগের page থেকে আসা রোধ করে
-// entry[1] = {vcStack:[], homeCurrent:true} ← আমরা এখানে আছি
-// প্রথম back চাপলে entry[1] → entry[0] তে যায়, popstate fires, আমরা ধরি
-// দ্বিতীয় back চাপলে exit dialog দেখাই
-history.replaceState({vcStack:[], homeBase:true}, '', '');
-history.pushState({vcStack:[], homeCurrent:true}, '', '');
+// homeBase entry তে শুধু replaceState — একটিমাত্র home entry
+// Panel খুললে pushState হয়, back চাপলে panel বন্ধ হয়
+// সব panel বন্ধ হলে home এ ফিরে থাকি, আবার back = exit
+history.replaceState({vcStack:[], homeCurrent:true}, '', '');
 
 function _pushPanel(name) {
   _panelStack.push(name);
@@ -5509,6 +5982,43 @@ function _handleBack(state) {
     return true;
   }
 
+  // SRP overlay — back button
+  if(document.getElementById('srpOverlay').classList.contains('show')){
+    const srpEl = document.getElementById('srpOverlay');
+    // PP থেকে back করে SRP তে ফিরলে — PP বন্ধ করো
+    if(document.getElementById('ppOverlay').classList.contains('show')){
+      const ppEl = document.getElementById('ppOverlay');
+      ppEl.classList.remove('show');
+      const stickyBar = document.getElementById('ppStickyBar');
+      if(stickyBar) stickyBar.classList.remove('show');
+      if(ppEl._stickyHandler){ppEl.removeEventListener('scroll',ppEl._stickyHandler);ppEl._stickyHandler=null;}
+      _panelStack = _panelStack.filter(p => p !== 'pp');
+      ppEl._fromSRP = false;
+      // SRP এ ফিরে যাও — lockBody যাতে SRP active থাকে
+      lockBody();
+      // float-btns SRP এ লুকানো থাকবে
+      const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'none';
+      return true;
+    }
+    // SRP বন্ধ করো
+    srpEl.classList.remove('show');
+    unlockBody();
+    _panelStack = _panelStack.filter(p => p !== 'srp');
+    _srpCurrentQuery = '';
+    // float-btns restore করো
+    const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
+    // SRP float buttons hide করো
+    const fc = document.getElementById('floatCartBtn');
+    const fw = document.getElementById('floatWishBtn');
+    const bt = document.getElementById('backToTop');
+    const srpFb = document.getElementById('srpFloatBtns');
+    if(fc) fc.style.display = 'none';
+    if(fw) fw.style.display = 'none';
+    if(bt) bt.classList.remove('show');
+    if(srpFb) srpFb.style.display = 'none';
+    return true;
+  }
+
   // QuickOrder modal (cart popup shown over product page)
   const qoModal = document.getElementById('quickOrderModal');
   if(qoModal && qoModal.style.display !== 'none'){
@@ -5531,6 +6041,12 @@ function _handleBack(state) {
     if(overlay._fromWishlist){
       overlay._fromWishlist = false;
       document.getElementById('wishlistOverlay').classList.add('show');
+      lockBody();
+    }
+    // SRP থেকে এসে থাকলে SRP দেখাও
+    else if(overlay._fromSRP){
+      overlay._fromSRP = false;
+      document.getElementById('srpOverlay').classList.add('show');
       lockBody();
     }
     return true;
@@ -5601,8 +6117,9 @@ window.addEventListener('popstate', function(e){
     if(_panelStack.length === 0){
       _homeBackCount = 0;
       clearTimeout(_homeBackTimer);
-      history.replaceState({vcStack:[], homeBase:true}, '', '');
-      history.pushState({vcStack:[], homeCurrent:true}, '', '');
+      // ✅ FIX: শুধু replaceState করো — pushState করলে extra entry জমে
+      // এর ফলে পরের back চাপলে browser এর আগের page এ যাবে (exit)
+      history.replaceState({vcStack:[], homeCurrent:true}, '', '');
     }
     return;
   }
@@ -6616,6 +7133,9 @@ function toggleWish(id,btn){
 // FLOAT WISH BADGE — auto-dismiss after 3s, sits above float cart badge
 let _wishBadgeTimer=null;
 function showFloatWish(){
+  // SRP open থাকলে float wish দেখাবো না — click block করে
+  const srpEl = document.getElementById('srpOverlay');
+  if(srpEl && srpEl.classList.contains('show')) return;
   const btn=document.getElementById('floatWishBtn');
   if(!btn)return;
   btn.style.display='block';
@@ -6869,7 +7389,12 @@ function renderDuoCardsHtml(cardsData) {
         : 'loading="lazy"';
       mediaHtml = `<img class="cath-bg-img" id="heroDuoEmoji-${i}" src="${optimizedSrc}" alt="${label}" ${loadAttr} decoding="async">`;
     } else if (card.emoji) {
-      mediaHtml = `<div class="cath-emoji-bg" id="heroDuoEmoji-${i}">${card.emoji}</div>`;
+      // ✅ FIX: SVG icon হলে proper sizing সহ render করো
+      if(card.emoji.trim().startsWith('<svg')){
+        mediaHtml = `<div class="cath-emoji-bg" id="heroDuoEmoji-${i}" style="font-size:0">${card.emoji.replace(/<svg/, '<svg style="width:80px;height:80px;filter:drop-shadow(0 4px 20px rgba(0,0,0,.6))"')}</div>`;
+      } else {
+        mediaHtml = `<div class="cath-emoji-bg" id="heroDuoEmoji-${i}">${card.emoji}</div>`;
+      }
     }
     html += `
     <div class="cath-card" id="heroDuoCard-${i}" onclick="cathGoCategory('${catId}')" style="background:${bg}">
@@ -6974,7 +7499,23 @@ function _syncCathCardsToDOM(cards){
         if(imgEl) imgEl.style.display = 'none';
         if(emojiEl){
           emojiEl.style.display = '';
-          if(card.emoji) emojiEl.textContent = card.emoji;
+          if(card.emoji){
+            // ✅ FIX: SVG icon হলে innerHTML ব্যবহার করো, emoji হলে textContent
+            if(card.emoji.trim().startsWith('<svg')){
+              emojiEl.innerHTML = card.emoji;
+              // SVG কে cath-emoji-bg এর মধ্যে সঠিক size দাও
+              const svgEl = emojiEl.querySelector('svg');
+              if(svgEl){
+                svgEl.style.width = '80px';
+                svgEl.style.height = '80px';
+                svgEl.style.maxWidth = '80px';
+                svgEl.style.maxHeight = '80px';
+                svgEl.style.filter = 'drop-shadow(0 4px 20px rgba(0,0,0,.6))';
+              }
+            } else {
+              emojiEl.textContent = card.emoji;
+            }
+          }
         }
       }
     });
