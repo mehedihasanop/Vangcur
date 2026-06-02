@@ -84,7 +84,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .nav-search{flex:1;max-width:460px;position:relative}
 .nav-search input{width:100%;padding:9px 14px 9px 40px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif;transition:var(--tr)}
 .nav-search input:focus{outline:none;border-color:var(--dark);background:#fff}
-.nav-search > svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
+.nav-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 .nav-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .nav-icon-btn{background:none;border:none;cursor:pointer;padding:8px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:var(--dark);position:relative}
 .nav-icon-btn:hover{background:var(--light)}
@@ -103,9 +103,9 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-bar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--white));pointer-events:none;z-index:2;transition:opacity .3s}
 .cat-bar.at-end::after{opacity:0}
 /* UX-7: Back to top */
-.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:1199;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:transform .25s,box-shadow .25s;flex-direction:column;gap:1px;-webkit-tap-highlight-color:transparent}
+.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:1199;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:opacity .25s,transform .25s,box-shadow .25s;flex-direction:column;gap:1px}
 .back-to-top.show{display:flex}
-.back-to-top:hover{background:var(--hover);transform:translateY(-3px);box-shadow:0 6px 22px rgba(92,184,92,.35)}
+.back-to-top:hover{background:var(--hover)!important;transform:translateY(-3px)!important;box-shadow:0 6px 22px rgba(92,184,92,.35)!important}
 .back-to-top:focus{outline:none}
 .back-to-top svg{width:20px;height:20px}
 .back-to-top span{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.8;line-height:1}
@@ -464,6 +464,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* PRODUCT FULL PAGE */
 .pp-overlay{position:fixed;inset:0;background:var(--cream);z-index:1800;display:none;overflow-y:auto}
 .pp-overlay.show{display:block;animation:fadeIn .2s ease}
+.pp-overlay.no-anim.show{animation:none!important}
+.order-overlay.no-anim.show{animation:none!important}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .pp-nav{background:var(--white);border-bottom:1px solid var(--border);padding:13px 20px;padding-top:calc(13px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
@@ -874,7 +876,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .mobile-search-bar input{width:100%;padding:9px 38px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif}
 .mobile-search-bar input:focus{outline:none;border-color:var(--dark);background:#fff}
 .mobile-search-wrap{position:relative}
-.mobile-search-wrap > svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
+.mobile-search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 /* MOB-05 FIX: Mobile search clear (✕) button */
 #mobileSearchInput::-webkit-search-cancel-button{display:none}#mobileSearchInput::-webkit-search-decoration{display:none}
 .mobile-search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray);border:none;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#fff;font-weight:700;line-height:1;padding:0;transition:var(--tr)}
@@ -962,7 +964,7 @@ body.dark .cat-pill:hover,body.dark .cat-pill.active{background:#FF6B6B;color:#f
 /* ── Search ── */
 body.dark .nav-search input{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
 body.dark .nav-search input:focus{border-color:#FF6B6B;background:#2C2C2E}
-body.dark .nav-search > svg{color:#8E8E93}
+body.dark .nav-search svg{color:#8E8E93}
 body.dark .search-dropdown{background:#1C1C1E;border-color:#3A3A3C}
 body.dark .sd-item:hover{background:#2C2C2E}
 body.dark .sd-emoji{background:#2C2C2E}
@@ -1519,6 +1521,15 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 }
 </style>
 
+<!-- Microsoft Clarity — User behavior analytics -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "x0me4a9xh8");
+</script>
+
 </head>
 <body>
 
@@ -2024,10 +2035,10 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
     <div id="oS1" class="order-body">
       <div class="cart-warn" id="cartWarn">⚠️ আপনার কার্ট খালি। অনুগ্রহ করে প্রথমে একটি প্রোডাক্ট কার্টে যোগ করুন অথবা প্রোডাক্টের পেজ থেকে "এখনই অর্ডার করুন" বাটনে ক্লিক করুন।</div>
       <div class="fg2"><label>পূর্ণ নাম *</label><input class="fctrl" id="cName" placeholder="আপনার পূর্ণ নাম" oninput="saveFormDraft()"><div class="ferr" id="eN">নাম দিন</div></div>
-      <div class="fg2"><label>ফোন নম্বর * <span class="f-opt">(বাংলাদেশি নম্বর)</span></label><input class="fctrl" id="cPhone" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'');saveFormDraft()"><div class="ferr" id="eP">সঠিক বাংলাদেশী নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)</div></div>
-      <div class="fg2"><label>জেলা *</label><select class="fctrl" id="cDist" onchange="onDist();saveFormDraft()"><option value="">জেলা সিলেক্ট করুন</option></select><div class="ferr" id="eD">জেলা সিলেক্ট করুন</div></div>
-      <div class="fg2"><label>সম্পূর্ণ ডেলিভারি ঠিকানা *</label><textarea class="fctrl" id="cAddr" rows="3" placeholder="গ্রাম/মহল্লা, রোড, বাসা নম্বর সহ বিস্তারিত লিখুন" oninput="saveFormDraft()"></textarea><div class="ferr" id="eA">ঠিকানা দিন</div></div>
-      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@gmail.com" oninput="saveFormDraft()"><div class="ferr" id="eEmail">সঠিক ইমেইল লিখুন (যেমন: name@gmail.com)</div></div>
+      <div class="fg2"><label>ফোন নম্বর * <span class="f-opt">(বাংলাদেশি নম্বর)</span></label><input class="fctrl" id="cPhone" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eP">সঠিক বাংলাদেশী নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)</div></div>
+      <div class="fg2"><label>জেলা *</label><select class="fctrl" id="cDist" onchange="onDist()"><option value="">জেলা সিলেক্ট করুন</option></select><div class="ferr" id="eD">জেলা সিলেক্ট করুন</div></div>
+      <div class="fg2"><label>সম্পূর্ণ ডেলিভারি ঠিকানা *</label><textarea class="fctrl" id="cAddr" rows="3" placeholder="গ্রাম/মহল্লা, রোড, বাসা নম্বর সহ বিস্তারিত লিখুন"></textarea><div class="ferr" id="eA">ঠিকানা দিন</div></div>
+      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@gmail.com"><div class="ferr" id="eEmail">সঠিক ইমেইল লিখুন (যেমন: name@gmail.com)</div></div>
       <div class="fg2"><label>শিপিং *</label><div class="ship-opts" id="shipOpts"></div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-next" onclick="goS2()">পরবর্তী → পেমেন্ট</button></div>
     </div>
@@ -2069,9 +2080,9 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
         <div class="pay-warn">⚠️ ভুল তথ্য দিলে পেমেন্ট যাচাই সম্ভব হবে না এবং অর্ডার বাতিল হবে।</div>
       </div>
       <div class="pay-hint"><strong>নিচের যেকোনো একটি দেওয়া বাধ্যতামূলক</strong><br><span style="color:var(--gray)">Transaction ID অথবা Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</span></div>
-      <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10" oninput="saveFormDraft()"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
+      <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
       <div class="or-div">— অথবা —</div>
-      <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'');saveFormDraft()"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
+      <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(1)">← পেছনে</button><button class="btn-next" onclick="goS3()">পরবর্তী → নিশ্চিত করুন</button></div>
     </div>
     <!-- Step 3 -->
@@ -4531,6 +4542,8 @@ function closePPToHome() {
   const overlay = document.getElementById('ppOverlay');
   overlay.classList.remove('show');
   unlockBody();
+  // REFRESH-FIX: PP বন্ধ হলে refresh state clear করো — না হলে homepage refresh এ PP আবার খুলবে
+  try{ sessionStorage.removeItem('vc_refresh_panel'); sessionStorage.removeItem('vc_refresh_prod_id'); }catch(e){}
   const stickyBar = document.getElementById('ppStickyBar');
   if(stickyBar) stickyBar.classList.remove('show');
   if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
@@ -4672,8 +4685,6 @@ function openPP(id){
   // BUG-03 FIX: number বা string উভয় id match করো (sb_ prefix support)
   curProd=PRODS.find(p=>p.id===id||String(p.id)===String(id));if(!curProd)return;
   curQty=1;curImgIdx=0;
-  // ✅ BUG-2 FIX: URL hash আপডেট করো যাতে refresh এ state restore হয়
-  try{ window.location.hash = 'prod-' + String(curProd.id); }catch(e){}
   // ✅ FIX: প্রতিবার নতুন product খুললে tab reset করো — বিবরণ active
   document.querySelectorAll('.pp-tab').forEach((t,i)=>{t.classList.toggle('on',i===0);});
   document.getElementById('ppQty').textContent=1;
@@ -4934,8 +4945,8 @@ function closePP(){
   const overlay=document.getElementById('ppOverlay');
   if(!overlay.classList.contains('show'))return;
   overlay.classList.remove('show');
-  // ✅ BUG-2 FIX: prod hash সরাও
-  try{ if(window.location.hash && window.location.hash.startsWith('#prod-')){ history.replaceState(null,'',window.location.pathname+window.location.search); } }catch(e){}
+  // REFRESH-FIX: pp বন্ধ হলে sessionStorage clear — না হলে back+F5 তে আবার খুলবে
+  try{ sessionStorage.removeItem('vc_refresh_panel'); sessionStorage.removeItem('vc_refresh_prod_id'); }catch(e){}
   unlockBody(); // এটাই scroll restore করে — instant, _bodyScrollY দিয়ে
   // F-7: cleanup sticky bar
   const stickyBar=document.getElementById('ppStickyBar');
@@ -5355,13 +5366,15 @@ function checkout(){
 }
 
 // ORDER FLOW
-function openOrder(warn){
+function openOrder(warn, isRefreshRestore){
   if(currentUser){document.getElementById('cName').value=currentUser.name||'';document.getElementById('cEmail').value=currentUser.email||'';}
   // B-4: restore draft if it exists
   restoreFormDraft(); 
-  // Always clear payment fields on new order open (prevent pre-fill from previous order)
-  const txnEl=document.getElementById('cTxn');const l4El=document.getElementById('cL4');
-  if(txnEl)txnEl.value='';if(l4El)l4El.value='';
+  // payment fields: refresh restore হলে clear করো না — draft থেকে ইতিমধ্যে restore হয়েছে
+  if(!isRefreshRestore){
+    const txnEl=document.getElementById('cTxn');const l4El=document.getElementById('cL4');
+    if(txnEl)txnEl.value='';if(l4El)l4El.value='';
+  }
   const wEl=document.getElementById('cartWarn');
   const isEmpty=warn||orderItems.length===0;
   if(isEmpty){wEl.classList.add('show');orderItems=[];}else{wEl.classList.remove('show');}
@@ -5390,6 +5403,8 @@ function openOrder(warn){
   document.getElementById('orderOverlay').classList.add('show');
   document.getElementById('orderOverlay').scrollTop=0;
   lockBody();
+  // REFRESH-FIX: orderItems sessionStorage এ save করো — refresh এর পরে restore হবে
+  try{ sessionStorage.setItem('vc_order_items', JSON.stringify(orderItems)); }catch(e){}
   // History managed by caller (_pushPanel already called)
   if(_panelStack[_panelStack.length-1]!=='order') _pushPanel('order');
   // Hide summary if multi-product (came from cart)
@@ -5397,7 +5412,7 @@ function openOrder(warn){
   if(summaryEl2&&orderItems.length>1){summaryEl2.style.display='none';summaryEl2.dataset.hasItems='0';}
   goS(1);
 }
-function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();_popPanel();}}
+function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');sessionStorage.removeItem('vc_form_draft');sessionStorage.removeItem('vc_ship');}catch(e){}_popPanel();}}
 function buildShipOpts(dist){
   const isDhaka=dist==='ঢাকা';
   const c=document.getElementById('shipOpts');
@@ -5437,7 +5452,7 @@ function restoreFormDraft(){
   if(!d)return;
   if(d.name&&document.getElementById('cName'))document.getElementById('cName').value=d.name;
   if(d.phone&&document.getElementById('cPhone'))document.getElementById('cPhone').value=d.phone;
-  if(d.dist&&document.getElementById('cDist'))document.getElementById('cDist').value=d.dist;
+  if(d.dist&&document.getElementById('cDist')){document.getElementById('cDist').value=d.dist;buildShipOpts(d.dist);}
   if(d.addr&&document.getElementById('cAddr'))document.getElementById('cAddr').value=d.addr;
   if(d.email&&document.getElementById('cEmail'))document.getElementById('cEmail').value=d.email;
   if(d.txn&&document.getElementById('cTxn'))document.getElementById('cTxn').value=d.txn;
@@ -5474,16 +5489,9 @@ function goS2(){
   }
   if(ok)goS(2);
 }
-function goS3(){
-  const txn=document.getElementById('cTxn').value.trim();
-  const l4=document.getElementById('cL4').value.trim();
-  // At least one must be provided
-  if(!txn&&!l4){showFerr('eTxn',true);showFerr('eL4',true);return;}
-  // If txn is provided, it must be exactly 10 chars
-  if(txn&&txn.length!==10){showFerr('eTxn',true);return;}
-  // If l4 is provided, it must be exactly 4 digits
-  if(l4&&l4.length!==4){showFerr('eL4',true);return;}
-  showFerr('eTxn',false);showFerr('eL4',false);
+// Step 3 summary DOM render — validation ছাড়া শুধু DOM populate করে
+// goS3() এবং refresh restore দুটোতেই ব্যবহার হয়
+function renderStep3Summary(){
   const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   const sub=orderItems.reduce((s,i)=>s+(i.price*i.qty),0);
@@ -5494,9 +5502,17 @@ function goS3(){
   document.getElementById('sumTotal').textContent=`৳${tot.toLocaleString()}`;
   document.getElementById('sumBal').textContent=`৳${Math.max(0,tot-200).toLocaleString()}`;
   const n=document.getElementById('cName').value,ph=document.getElementById('cPhone').value,dist=document.getElementById('cDist').value,addr=document.getElementById('cAddr').value,em=document.getElementById('cEmail').value;
-  // S-3 fix: safe render (escape user input)
   const safe=(s)=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   document.getElementById('custRecap').innerHTML='<strong>গ্রাহকের তথ্য</strong><br>নাম: '+safe(n)+'<br>ফোন: '+safe(ph)+'<br>জেলা: '+safe(dist)+'<br>ঠিকানা: '+safe(addr)+(em?'<br>ইমেইল: '+safe(em):'');
+}
+function goS3(){
+  const txn=document.getElementById('cTxn').value.trim();
+  const l4=document.getElementById('cL4').value.trim();
+  if(!txn&&!l4){showFerr('eTxn',true);showFerr('eL4',true);return;}
+  if(txn&&txn.length!==10){showFerr('eTxn',true);return;}
+  if(l4&&l4.length!==4){showFerr('eL4',true);return;}
+  showFerr('eTxn',false);showFerr('eL4',false);
+  renderStep3Summary();
   goS(3);
 }
 // ✅ Pre-confirm interceptor — guest হলে login prompt দেখাও
@@ -5993,6 +6009,7 @@ function _handleBack(state) {
     // Step 1 — close order
     document.getElementById('orderOverlay').classList.remove('show');
     unlockBody();
+    try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');}catch(e){}
     _panelStack = _panelStack.filter(p => p !== 'order');
     // If cart was open before, re-open it
     if(_panelStack.length > 0 && _panelStack[_panelStack.length-1] === 'cart'){
@@ -6072,6 +6089,8 @@ function _handleBack(state) {
   if(document.getElementById('ppOverlay').classList.contains('show')){
     const overlay = document.getElementById('ppOverlay');
     overlay.classList.remove('show'); unlockBody();
+    // REFRESH-FIX: back button দিয়ে pp বন্ধ হলেও sessionStorage clear
+    try{ sessionStorage.removeItem('vc_refresh_panel'); sessionStorage.removeItem('vc_refresh_prod_id'); }catch(e){}
     const pos = overlay._scrollPos || 0; window.scrollTo(0, pos);
     const stickyBar = document.getElementById('ppStickyBar');
     if(stickyBar) stickyBar.classList.remove('show');
@@ -6233,11 +6252,7 @@ document.addEventListener('visibilitychange',()=>{
           const cards = track ? track.querySelectorAll('.cath-card') : [];
           const anyZeroWidth = cards.length === 0 || [...cards].some(c => !c.offsetWidth || c.offsetWidth < 10);
           if(!track || track.childElementCount === 0 || anyZeroWidth){
-            // ✅ BUG-1 FIX: infinite flag রিসেট করো, track পরিষ্কার করো — তারপরেই clone করা যাবে
-            if(track){
-              track.dataset.infinite = '';
-              track.innerHTML = '';
-            }
+            // Track blank বা কার্ড width শূন্য — full re-init
             const cardsData = (_settings['vc_cath_cards'] && Array.isArray(_settings['vc_cath_cards']) && _settings['vc_cath_cards'].length)
               ? _settings['vc_cath_cards'].slice() : _CATH_CARD_DEFAULTS.slice();
             renderDuoCardsHtml(cardsData);
@@ -6261,7 +6276,7 @@ document.addEventListener('visibilitychange',()=>{
             if(wrap && wrap.getBoundingClientRect().width > 50) duoSetPosition(false);
           }catch(e){}
         }, 600);
-      }, 200);  // ✅ BUG-1 FIX: 80ms → 200ms — browser repaint করার সময় দিতে হবে
+      }, 80);
     });
     // ✅ FIX: pendingOrdId না থাকলে localStorage থেকে restore করো
     if(!pendingOrdId){
@@ -6988,21 +7003,21 @@ function closeInfo(){
 
 // UX-7: Back to top visibility
 (function(){
-  let _btShown=false;
+  let _btWasShown=false;
   window.addEventListener('scroll',()=>{
     const btn=document.getElementById('backToTop');
     if(!btn)return;
     const show=window.scrollY>400;
-    if(show&&!_btShown){
-      // show হওয়ার আগে inline style দিয়ে background কালো করো
-      btn.style.background='#1A1A1A';
+    if(show&&!_btWasShown){
+      // নতুনভাবে দেখা দিচ্ছে — inline style দিয়ে background force reset
+      btn.style.background='var(--dark)';
+      btn.style.transform='';
+      btn.style.boxShadow='0 4px 18px rgba(0,0,0,.25)';
       btn.classList.add('show');
-    } else if(!show&&_btShown){
+    } else if(!show&&_btWasShown){
       btn.classList.remove('show');
-      // hide হওয়ার সময়ও reset করো
-      btn.style.background='#1A1A1A';
     }
-    _btShown=show;
+    _btWasShown=show;
   },{passive:true});
 })();
 
@@ -7067,6 +7082,47 @@ document.addEventListener('focusin',(e)=>{
     },350); // wait for keyboard to open
   }
 });
+
+// REFRESH-FIX: PP overlay বন্ধ থাকলে vc_refresh_panel='pp' clear করো
+// এটা সব edge case cover করে — back button, close button, closePPToHome সব
+(function(){
+  // pageshow: browser cache থেকে ফিরলেও চলে (bfcache)
+  window.addEventListener('pageshow', function(){
+    try{
+      const rPanel = sessionStorage.getItem('vc_refresh_panel');
+      if(rPanel === 'pp'){
+        const ppOverlay = document.getElementById('ppOverlay');
+        // PP overlay বন্ধ থাকলে refresh state invalid — clear করো
+        if(!ppOverlay || !ppOverlay.classList.contains('show')){
+          sessionStorage.removeItem('vc_refresh_panel');
+          sessionStorage.removeItem('vc_refresh_prod_id');
+        }
+      }
+    }catch(e){}
+  });
+})();
+
+// REFRESH-FIX: Order form এর যেকোনো field পরিবর্তন হলে auto-save করো
+(function(){
+  const orderFormIds=['cName','cPhone','cDist','cAddr','cEmail','cTxn','cL4'];
+  function _attachDraftSave(){
+    orderFormIds.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&!el._draftSaveAttached){
+        el._draftSaveAttached=true;
+        el.addEventListener('input',saveFormDraft);
+        el.addEventListener('change',saveFormDraft);
+      }
+    });
+  }
+  // DOMContentLoaded এর পরে attach করো, এবং order overlay open হলেও re-attach করো
+  document.addEventListener('DOMContentLoaded',_attachDraftSave);
+  // MutationObserver দিয়ে order overlay দেখা দিলেও attach করো
+  const _orderOv=document.getElementById('orderOverlay');
+  if(_orderOv&&window.MutationObserver){
+    new MutationObserver(()=>_attachDraftSave()).observe(_orderOv,{attributes:true,attributeFilter:['class']});
+  }
+})();
 
 function showToast(m){const t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
@@ -7713,38 +7769,61 @@ document.addEventListener('DOMContentLoaded',function(){
   // ✅ REFRESH-FIX: Refresh এর পরে শুধু product page ও order page restore করো
   try{
     const rPanel = sessionStorage.getItem('vc_refresh_panel');
-    // ✅ BUG-2 FIX: URL hash থেকেও product restore করো (যখন sessionStorage-এ নেই)
-    const hashMatch = window.location.hash && window.location.hash.match(/^#prod-(.+)$/);
-    if(rPanel === 'pp' || hashMatch){
-      const rProdId = rPanel === 'pp'
-        ? sessionStorage.getItem('vc_refresh_prod_id')
-        : (hashMatch ? hashMatch[1] : null);
-      if(rPanel === 'pp'){
-        sessionStorage.removeItem('vc_refresh_panel');
-        sessionStorage.removeItem('vc_refresh_prod_id');
-      }
+    if(rPanel === 'pp'){
+      const rProdId = sessionStorage.getItem('vc_refresh_prod_id');
       if(rProdId){
-        // PRODS লোড হওয়ার পরে product page খোলো (retry করবে যতক্ষণ না পায়)
         const tryOpen = (attempts)=>{
           const prod = PRODS.find(p=>String(p.id)===rProdId);
-          if(prod){ setTimeout(()=>openPP(prod.id), 100); }
-          else if(attempts > 0){ setTimeout(()=>tryOpen(attempts-1), 500); }
+          console.log('[RESTORE] attempt='+(10-attempts)+' rProdId='+rProdId+' found='+(!!prod)+' PRODS.length='+PRODS.length);
+          if(prod){
+            // no-anim দিয়ে animation ছাড়া সরাসরি খোলো — flash দেখাবে না
+            const overlay = document.getElementById('ppOverlay');
+            if(overlay) overlay.classList.add('no-anim');
+            openPP(prod.id);
+            if(overlay) requestAnimationFrame(()=>overlay.classList.remove('no-anim'));
+          }
+          else if(attempts > 0){ setTimeout(()=>tryOpen(attempts-1), 300); }
         };
-        setTimeout(()=>tryOpen(6), 800);
+        tryOpen(10); // delay নেই — সাথে সাথে try করো
       }
     } else if(rPanel === 'order'){
       const rStep = parseInt(sessionStorage.getItem('vc_refresh_order_step')||'1', 10);
-      sessionStorage.removeItem('vc_refresh_panel');
-      sessionStorage.removeItem('vc_refresh_order_step');
-      // ✅ BUG-2 FIX: draft restore করো এবং checkout modal খোলো
-      const hasDraft = !!sessionStorage.getItem('vc_form_draft');
-      setTimeout(()=>{
-        if(hasDraft || (typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0)){
-          openOrder();
-          restoreFormDraft();
-          if(rStep > 1) setTimeout(()=>goS(rStep), 50);
+      // vc_order_items থেকে orderItems restore করো
+      try{
+        const saved = sessionStorage.getItem('vc_order_items');
+        if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed)&&parsed.length>0) orderItems=parsed; }
+      }catch(e){}
+
+      // openOrder() ব্যবহার করো — এটা YOUR ORDER section, shipping, form fields সব ঠিকমতো render করে
+      // overlay.classList.add('show') manually করলে UI অসম্পূর্ণ থাকে
+      const _doRestoreOrder = ()=>{
+        if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
+          const overlay = document.getElementById('orderOverlay');
+          if(overlay) overlay.classList.add('no-anim');
+          // openOrder(false, true) — পুরো UI setup করে (YOUR ORDER, shipping opts, form fields সব)
+          // _panelStack ও history openOrder এর ভেতরেই manage হয়
+          openOrder(false, true);
+          // step 2 বা 3 এ ছিলে — সেখানে ফিরিয়ে দাও
+          if(rStep > 1) setTimeout(()=>{
+            goS(rStep);
+            // step 3 হলে summary DOM ও populate করো
+            if(rStep===3) renderStep3Summary();
+          }, 80);
+          if(overlay) requestAnimationFrame(()=>overlay.classList.remove('no-anim'));
         }
-      }, 900);
+      };
+
+      if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
+        _doRestoreOrder();
+      } else {
+        // orderItems এখনো নেই — Supabase/PRODS load এর পরে retry
+        const tryOrder = (attempts)=>{
+          if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
+            _doRestoreOrder();
+          } else if(attempts > 0){ setTimeout(()=>tryOrder(attempts-1), 300); }
+        };
+        setTimeout(()=>tryOrder(10), 300);
+      }
     }
   }catch(e){}
 });
