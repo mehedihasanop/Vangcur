@@ -84,7 +84,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .nav-search{flex:1;max-width:460px;position:relative}
 .nav-search input{width:100%;padding:9px 14px 9px 40px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif;transition:var(--tr)}
 .nav-search input:focus{outline:none;border-color:var(--dark);background:#fff}
-.nav-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
+.nav-search > svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 .nav-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .nav-icon-btn{background:none;border:none;cursor:pointer;padding:8px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:var(--dark);position:relative}
 .nav-icon-btn:hover{background:var(--light)}
@@ -103,9 +103,10 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .cat-bar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--white));pointer-events:none;z-index:2;transition:opacity .3s}
 .cat-bar.at-end::after{opacity:0}
 /* UX-7: Back to top */
-.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:1199;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:var(--tr);flex-direction:column;gap:1px}
+.back-to-top{position:fixed;bottom:258px;right:22px;width:46px;height:46px;background:var(--dark);color:#fff;border:none;border-radius:14px;cursor:pointer;z-index:1199;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:transform .25s,box-shadow .25s;flex-direction:column;gap:1px;-webkit-tap-highlight-color:transparent}
 .back-to-top.show{display:flex}
 .back-to-top:hover{background:var(--hover);transform:translateY(-3px);box-shadow:0 6px 22px rgba(92,184,92,.35)}
+.back-to-top:focus{outline:none}
 .back-to-top svg{width:20px;height:20px}
 .back-to-top span{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.8;line-height:1}
 .cat-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;gap:4px;height:44px;align-items:center}
@@ -873,7 +874,7 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 .mobile-search-bar input{width:100%;padding:9px 38px 9px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:16px;background:var(--light);font-family:'DM Sans',sans-serif}
 .mobile-search-bar input:focus{outline:none;border-color:var(--dark);background:#fff}
 .mobile-search-wrap{position:relative}
-.mobile-search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
+.mobile-search-wrap > svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray)}
 /* MOB-05 FIX: Mobile search clear (✕) button */
 #mobileSearchInput::-webkit-search-cancel-button{display:none}#mobileSearchInput::-webkit-search-decoration{display:none}
 .mobile-search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray);border:none;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#fff;font-weight:700;line-height:1;padding:0;transition:var(--tr)}
@@ -939,7 +940,7 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 
 /* IMAGE ZOOM */
 .pp-main-img{overflow:hidden}
-.pp-main-img .zoom-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:90px;transition:transform .35s ease;transform-origin:center center}
+.pp-main-img .zoom-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:90px;transition:transform .35s ease,transform-origin 0s;transform-origin:center center}
 .pp-main-img.zoomed .zoom-inner{transform:scale(2.2);cursor:zoom-out}
 .pp-main-img:not(.zoomed){cursor:zoom-in}
 .pp-main-img.zoomed{cursor:zoom-out}
@@ -961,7 +962,7 @@ body.dark .cat-pill:hover,body.dark .cat-pill.active{background:#FF6B6B;color:#f
 /* ── Search ── */
 body.dark .nav-search input{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
 body.dark .nav-search input:focus{border-color:#FF6B6B;background:#2C2C2E}
-body.dark .nav-search svg{color:#8E8E93}
+body.dark .nav-search > svg{color:#8E8E93}
 body.dark .search-dropdown{background:#1C1C1E;border-color:#3A3A3C}
 body.dark .sd-item:hover{background:#2C2C2E}
 body.dark .sd-emoji{background:#2C2C2E}
@@ -1696,7 +1697,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 </footer>
 
 <!-- BACK TO TOP -->
-<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="উপরে যান">
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});" title="উপরে যান">
   <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
   <span>TOP</span>
 </button>
@@ -1750,7 +1751,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   <!-- TOP: Image + Info + Actions -->
   <div class="pp-inner">
     <div class="pp-gallery">
-      <div class="pp-main-img" id="ppMainImg" onclick="toggleZoom(this)"><div class="zoom-inner" id="ppMainImgInner"></div></div>
+      <div class="pp-main-img" id="ppMainImg" onclick="toggleZoom(this,event)"><div class="zoom-inner" id="ppMainImgInner"></div></div>
       <div class="pp-dots" id="ppDots"></div>
       <div class="pp-thumbs" id="ppThumbs"></div>
     </div>
@@ -2023,10 +2024,10 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
     <div id="oS1" class="order-body">
       <div class="cart-warn" id="cartWarn">⚠️ আপনার কার্ট খালি। অনুগ্রহ করে প্রথমে একটি প্রোডাক্ট কার্টে যোগ করুন অথবা প্রোডাক্টের পেজ থেকে "এখনই অর্ডার করুন" বাটনে ক্লিক করুন।</div>
       <div class="fg2"><label>পূর্ণ নাম *</label><input class="fctrl" id="cName" placeholder="আপনার পূর্ণ নাম" oninput="saveFormDraft()"><div class="ferr" id="eN">নাম দিন</div></div>
-      <div class="fg2"><label>ফোন নম্বর * <span class="f-opt">(বাংলাদেশি নম্বর)</span></label><input class="fctrl" id="cPhone" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eP">সঠিক বাংলাদেশী নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)</div></div>
-      <div class="fg2"><label>জেলা *</label><select class="fctrl" id="cDist" onchange="onDist()"><option value="">জেলা সিলেক্ট করুন</option></select><div class="ferr" id="eD">জেলা সিলেক্ট করুন</div></div>
-      <div class="fg2"><label>সম্পূর্ণ ডেলিভারি ঠিকানা *</label><textarea class="fctrl" id="cAddr" rows="3" placeholder="গ্রাম/মহল্লা, রোড, বাসা নম্বর সহ বিস্তারিত লিখুন"></textarea><div class="ferr" id="eA">ঠিকানা দিন</div></div>
-      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@gmail.com"><div class="ferr" id="eEmail">সঠিক ইমেইল লিখুন (যেমন: name@gmail.com)</div></div>
+      <div class="fg2"><label>ফোন নম্বর * <span class="f-opt">(বাংলাদেশি নম্বর)</span></label><input class="fctrl" id="cPhone" placeholder="01XXXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'');saveFormDraft()"><div class="ferr" id="eP">সঠিক বাংলাদেশী নম্বর দিন (01X দিয়ে শুরু, ১১ সংখ্যা)</div></div>
+      <div class="fg2"><label>জেলা *</label><select class="fctrl" id="cDist" onchange="onDist();saveFormDraft()"><option value="">জেলা সিলেক্ট করুন</option></select><div class="ferr" id="eD">জেলা সিলেক্ট করুন</div></div>
+      <div class="fg2"><label>সম্পূর্ণ ডেলিভারি ঠিকানা *</label><textarea class="fctrl" id="cAddr" rows="3" placeholder="গ্রাম/মহল্লা, রোড, বাসা নম্বর সহ বিস্তারিত লিখুন" oninput="saveFormDraft()"></textarea><div class="ferr" id="eA">ঠিকানা দিন</div></div>
+      <div class="fg2"><label>ইমেইল <span class="f-opt">(ঐচ্ছিক — ইনভয়েস পাঠানো হবে)</span></label><input class="fctrl" id="cEmail" type="email" placeholder="yourname@gmail.com" oninput="saveFormDraft()"><div class="ferr" id="eEmail">সঠিক ইমেইল লিখুন (যেমন: name@gmail.com)</div></div>
       <div class="fg2"><label>শিপিং *</label><div class="ship-opts" id="shipOpts"></div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-next" onclick="goS2()">পরবর্তী → পেমেন্ট</button></div>
     </div>
@@ -2068,9 +2069,9 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
         <div class="pay-warn">⚠️ ভুল তথ্য দিলে পেমেন্ট যাচাই সম্ভব হবে না এবং অর্ডার বাতিল হবে।</div>
       </div>
       <div class="pay-hint"><strong>নিচের যেকোনো একটি দেওয়া বাধ্যতামূলক</strong><br><span style="color:var(--gray)">Transaction ID অথবা Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</span></div>
-      <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
+      <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10" oninput="saveFormDraft()"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
       <div class="or-div">— অথবা —</div>
-      <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
+      <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'');saveFormDraft()"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(1)">← পেছনে</button><button class="btn-next" onclick="goS3()">পরবর্তী → নিশ্চিত করুন</button></div>
     </div>
     <!-- Step 3 -->
@@ -3977,8 +3978,6 @@ let searchDebounceTimer = null;
 
 function handleSearchInput(q, source) {
   clearTimeout(searchDebounceTimer);
-  // Also update the main filter (for background grid)
-  filterProducts(q);
   searchDebounceTimer = setTimeout(() => showSearchDropdown(q, source), 120);
 }
 
@@ -4066,7 +4065,7 @@ function showSearchDropdown(q, source) {
     <div style="padding:8px 14px 4px;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px">ক্যাটাগরি</div>
     ${catMatches.map(c => `
       <div class="sd-item" onclick="goToCat('${c.id}')" style="padding:9px 14px">
-        <div class="sd-emoji" style="${(c.icon&&c.icon.startsWith('<svg'))?'font-size:0':'font-size:20px'}">${c.icon||'📂'}</div>
+        <div class="sd-emoji" style="${(c.icon&&c.icon.startsWith('<svg'))?'font-size:0;color:var(--dark)':'font-size:20px'}">${(c.icon&&c.icon.startsWith('<svg'))?c.icon.replace(/width="\d+"/,'width="22"').replace(/height="\d+"/,'height="22"'):c.icon||'📂'}</div>
         <div class="sd-info">
           <div class="sd-name" style="font-size:13px">${escHtml(c.name)}</div>
           <div class="sd-meta">ক্যাটাগরি দেখুন →</div>
@@ -4138,6 +4137,9 @@ function openSRP(q) {
   if(inp){ inp.value = q; _srpUpdateClear(inp); }
   overlay.classList.add('show');
   overlay.scrollTop = 0;
+  // ✅ FIX 1: SRP body scroll reset — নতুন সার্চে সবসময় উপর থেকে দেখাও
+  const srpBodyEl = document.getElementById('srpBody');
+  if(srpBodyEl) srpBodyEl.scrollTop = 0;
   lockBody();
   // ✅ FIX: SRP খোলার আগে 'search' entry সরাও — নাহলে back দুইবার চাপতে হয়
   // (desktop search box এ type করলে 'search' push হয়, তারপর SRP খুললে দুটো entry জমে)
@@ -4193,6 +4195,8 @@ function closeSRP() {
   if(fc) fc.style.display = 'none';
   if(fw) fw.style.display = 'none';
   if(bt) bt.classList.remove('show');
+  // ✅ FIX 2: backToTop onclick রিসেট — SRP এর srpBody scroll থেকে window scroll এ ফিরাও
+  if(bt) bt.onclick = function(){ window.scrollTo({top:0,behavior:'smooth'}); this.blur(); };
   if(srpFb) srpFb.style.display = 'none';
   // history sync: UI button দিয়ে বন্ধ করলে history.go(-1) করো
   // Android back দিয়ে বন্ধ করলে _backButtonTriggered=true তাই skip
@@ -4290,7 +4294,7 @@ function _srpScrollHandler(bodyEl) {
   if(bodyEl.scrollTop > 300){
     bt.classList.add('show');
     bt.style.zIndex = '1199';
-    bt.onclick = function(){ bodyEl.scrollTo({top:0,behavior:'smooth'}); };
+    bt.onclick = function(){ bodyEl.scrollTo({top:0,behavior:'smooth'}); this.blur(); };
   } else {
     bt.classList.remove('show');
   }
@@ -4490,6 +4494,17 @@ function _renderSRP(q) {
   results.forEach(p => frag.appendChild(_srpBuildProdCard(p)));
   grid.appendChild(frag);
   body.appendChild(grid);
+
+  // ✅ SRP এর একদম শেষে "হোম পেইজে ফিরে যান" বাটন
+  const srpEndBtn = document.createElement('div');
+  srpEndBtn.style.cssText = 'display:flex;justify-content:center;padding:32px 16px 24px;';
+  srpEndBtn.innerHTML = `<button style="background:#1A1A1A;color:#fff;border:none;padding:13px 28px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:9px;box-shadow:0 4px 18px rgba(0,0,0,.15);transition:all .25s cubic-bezier(.4,0,.2,1)" id="srpBottomHomeBtn" onmouseover="this.style.background='#5CB85C';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#1A1A1A';this.style.transform='translateY(0)'">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    ওয়েবসাইটের হোম পেইজে ফিরে যান
+  </button>`;
+  body.appendChild(srpEndBtn);
+  const bottomBtn = document.getElementById('srpBottomHomeBtn');
+  if(bottomBtn) bottomBtn.addEventListener('click', () => closeSRP());
 }
 
 function openPPFromSRP(id) {
@@ -4641,8 +4656,8 @@ async function filterProducts(q){
         specs:row.specs||{},
         discountColor:(row.specs&&row.specs._discount_color)||''
       }));
-      const existingIds=new Set(PRODS.map(p=>p.id));
-      const newSbProds=sbProds.filter(p=>!existingIds.has(p.id));
+      const existingIds=new Set(PRODS.map(p=>String(p.id).replace('sb_','')));
+      const newSbProds=sbProds.filter(p=>!existingIds.has(String(p.id).replace('sb_','')));
       if(newSbProds.length){
         // BUG-03 FIX: PRODS এ merge করি — তাহলে openPP() খুঁজে পাবে
         newSbProds.forEach(p=>PRODS.push(p));
@@ -4657,6 +4672,8 @@ function openPP(id){
   // BUG-03 FIX: number বা string উভয় id match করো (sb_ prefix support)
   curProd=PRODS.find(p=>p.id===id||String(p.id)===String(id));if(!curProd)return;
   curQty=1;curImgIdx=0;
+  // ✅ BUG-2 FIX: URL hash আপডেট করো যাতে refresh এ state restore হয়
+  try{ window.location.hash = 'prod-' + String(curProd.id); }catch(e){}
   // ✅ FIX: প্রতিবার নতুন product খুললে tab reset করো — বিবরণ active
   document.querySelectorAll('.pp-tab').forEach((t,i)=>{t.classList.toggle('on',i===0);});
   document.getElementById('ppQty').textContent=1;
@@ -4917,6 +4934,8 @@ function closePP(){
   const overlay=document.getElementById('ppOverlay');
   if(!overlay.classList.contains('show'))return;
   overlay.classList.remove('show');
+  // ✅ BUG-2 FIX: prod hash সরাও
+  try{ if(window.location.hash && window.location.hash.startsWith('#prod-')){ history.replaceState(null,'',window.location.pathname+window.location.search); } }catch(e){}
   unlockBody(); // এটাই scroll restore করে — instant, _bodyScrollY দিয়ে
   // F-7: cleanup sticky bar
   const stickyBar=document.getElementById('ppStickyBar');
@@ -4955,6 +4974,8 @@ function initGallerySwipe(){
   el.addEventListener('touchend',e=>{
     const dx=e.changedTouches[0].clientX-tx;
     const dy=e.changedTouches[0].clientY-ty;
+    // জুম অবস্থায় swipe কাজ করবে না — শুধু zoom-out হবে click এ
+    if(el.classList.contains('zoomed')) return;
     if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
       galleryArrow(dx<0?1:-1);
     }
@@ -4980,7 +5001,21 @@ function buildGallery(imgs){
     thumbs.innerHTML=imgs.map((im,i)=>`<div class="pp-thumb ${i===0?'on':''}" onclick="goImg(${i})">${_galleryImgHTML(im, curProd?.name, true)}</div>`).join('');
   } else {dots.innerHTML='';thumbs.innerHTML='';}
 }
-function toggleZoom(el){el.classList.toggle('zoomed');}
+function toggleZoom(el, e){
+  const inner = el.querySelector('.zoom-inner');
+  if(!el.classList.contains('zoomed')){
+    if(e && inner){
+      const rect = el.getBoundingClientRect();
+      const xPct = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
+      const yPct = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
+      inner.style.transformOrigin = xPct+'% '+yPct+'%';
+    }
+    el.classList.add('zoomed');
+  } else {
+    el.classList.remove('zoomed');
+    setTimeout(function(){ if(inner) inner.style.transformOrigin='center center'; }, 380);
+  }
+}
 function goImg(i){
   if(!curProd)return;
   curImgIdx=i;
@@ -5391,7 +5426,9 @@ function saveFormDraft(){
     phone:document.getElementById('cPhone')?.value||'',
     dist:document.getElementById('cDist')?.value||'',
     addr:document.getElementById('cAddr')?.value||'',
-    email:document.getElementById('cEmail')?.value||''
+    email:document.getElementById('cEmail')?.value||'',
+    txn:document.getElementById('cTxn')?.value||'',
+    l4:document.getElementById('cL4')?.value||''
   };
   sessionStorage.setItem('vc_form_draft',JSON.stringify(draft));
 }
@@ -5403,6 +5440,8 @@ function restoreFormDraft(){
   if(d.dist&&document.getElementById('cDist'))document.getElementById('cDist').value=d.dist;
   if(d.addr&&document.getElementById('cAddr'))document.getElementById('cAddr').value=d.addr;
   if(d.email&&document.getElementById('cEmail'))document.getElementById('cEmail').value=d.email;
+  if(d.txn&&document.getElementById('cTxn'))document.getElementById('cTxn').value=d.txn;
+  if(d.l4&&document.getElementById('cL4'))document.getElementById('cL4').value=d.l4;
 }
 
 function showFerr(id,show){document.getElementById(id).classList.toggle('show',show);}
@@ -6015,6 +6054,8 @@ function _handleBack(state) {
     if(fc) fc.style.display = 'none';
     if(fw) fw.style.display = 'none';
     if(bt) bt.classList.remove('show');
+    // ✅ FIX 2: backToTop onclick রিসেট — SRP এর srpBody scroll থেকে window scroll এ ফিরাও
+    if(bt) bt.onclick = function(){ window.scrollTo({top:0,behavior:'smooth'}); this.blur(); };
     if(srpFb) srpFb.style.display = 'none';
     return true;
   }
@@ -6192,7 +6233,11 @@ document.addEventListener('visibilitychange',()=>{
           const cards = track ? track.querySelectorAll('.cath-card') : [];
           const anyZeroWidth = cards.length === 0 || [...cards].some(c => !c.offsetWidth || c.offsetWidth < 10);
           if(!track || track.childElementCount === 0 || anyZeroWidth){
-            // Track blank বা কার্ড width শূন্য — full re-init
+            // ✅ BUG-1 FIX: infinite flag রিসেট করো, track পরিষ্কার করো — তারপরেই clone করা যাবে
+            if(track){
+              track.dataset.infinite = '';
+              track.innerHTML = '';
+            }
             const cardsData = (_settings['vc_cath_cards'] && Array.isArray(_settings['vc_cath_cards']) && _settings['vc_cath_cards'].length)
               ? _settings['vc_cath_cards'].slice() : _CATH_CARD_DEFAULTS.slice();
             renderDuoCardsHtml(cardsData);
@@ -6216,7 +6261,7 @@ document.addEventListener('visibilitychange',()=>{
             if(wrap && wrap.getBoundingClientRect().width > 50) duoSetPosition(false);
           }catch(e){}
         }, 600);
-      }, 80);
+      }, 200);  // ✅ BUG-1 FIX: 80ms → 200ms — browser repaint করার সময় দিতে হবে
     });
     // ✅ FIX: pendingOrdId না থাকলে localStorage থেকে restore করো
     if(!pendingOrdId){
@@ -6942,10 +6987,24 @@ function closeInfo(){
 
 
 // UX-7: Back to top visibility
-window.addEventListener('scroll',()=>{
-  const btn=document.getElementById('backToTop');
-  if(btn)btn.classList.toggle('show',window.scrollY>400);
-},{passive:true});
+(function(){
+  let _btShown=false;
+  window.addEventListener('scroll',()=>{
+    const btn=document.getElementById('backToTop');
+    if(!btn)return;
+    const show=window.scrollY>400;
+    if(show&&!_btShown){
+      // show হওয়ার আগে inline style দিয়ে background কালো করো
+      btn.style.background='#1A1A1A';
+      btn.classList.add('show');
+    } else if(!show&&_btShown){
+      btn.classList.remove('show');
+      // hide হওয়ার সময়ও reset করো
+      btn.style.background='#1A1A1A';
+    }
+    _btShown=show;
+  },{passive:true});
+})();
 
 // UX-5: cat-bar fade indicator
 (function(){
@@ -7654,10 +7713,16 @@ document.addEventListener('DOMContentLoaded',function(){
   // ✅ REFRESH-FIX: Refresh এর পরে শুধু product page ও order page restore করো
   try{
     const rPanel = sessionStorage.getItem('vc_refresh_panel');
-    if(rPanel === 'pp'){
-      const rProdId = sessionStorage.getItem('vc_refresh_prod_id');
-      sessionStorage.removeItem('vc_refresh_panel');
-      sessionStorage.removeItem('vc_refresh_prod_id');
+    // ✅ BUG-2 FIX: URL hash থেকেও product restore করো (যখন sessionStorage-এ নেই)
+    const hashMatch = window.location.hash && window.location.hash.match(/^#prod-(.+)$/);
+    if(rPanel === 'pp' || hashMatch){
+      const rProdId = rPanel === 'pp'
+        ? sessionStorage.getItem('vc_refresh_prod_id')
+        : (hashMatch ? hashMatch[1] : null);
+      if(rPanel === 'pp'){
+        sessionStorage.removeItem('vc_refresh_panel');
+        sessionStorage.removeItem('vc_refresh_prod_id');
+      }
       if(rProdId){
         // PRODS লোড হওয়ার পরে product page খোলো (retry করবে যতক্ষণ না পায়)
         const tryOpen = (attempts)=>{
@@ -7671,14 +7736,13 @@ document.addEventListener('DOMContentLoaded',function(){
       const rStep = parseInt(sessionStorage.getItem('vc_refresh_order_step')||'1', 10);
       sessionStorage.removeItem('vc_refresh_panel');
       sessionStorage.removeItem('vc_refresh_order_step');
-      // Cart এ item থাকলে order page খোলো
+      // ✅ BUG-2 FIX: draft restore করো এবং checkout modal খোলো
+      const hasDraft = !!sessionStorage.getItem('vc_form_draft');
       setTimeout(()=>{
-        if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
-          document.getElementById('orderOverlay').classList.add('show');
-          lockBody();
-          _panelStack.push('order');
-          history.pushState({vcStack:[..._panelStack]},'','');
-          if(rStep > 1) goS(rStep);
+        if(hasDraft || (typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0)){
+          openOrder();
+          restoreFormDraft();
+          if(rStep > 1) setTimeout(()=>goS(rStep), 50);
         }
       }, 900);
     }
