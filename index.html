@@ -3051,13 +3051,25 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       const params = new URLSearchParams(window.location.search);
       const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, ''); // leading/trailing slash বাদ
 
-      // Legacy ?p= support
+      // Legacy ?p= support (SRP থেকে product খুললেও এই URL হয়)
       const legacyProdId = params.get('p');
+      // ✅ NEW: ?q= — SRP restore
+      const srpQuery = params.get('q');
       // Legacy ?cat= support
       const legacyCatId = params.get('cat');
 
-      if (legacyProdId) {
-        // পুরনো ?p= URL — redirect করো slug URL এ
+      if (srpQuery) {
+        // ✅ SRP URL: refresh করলে SRP আবার খুলবে
+        const tryOpenSRP = (attempt) => {
+          if (typeof openSRP === 'function') {
+            openSRP(decodeURIComponent(srpQuery));
+          } else if (attempt < 8) {
+            setTimeout(() => tryOpenSRP(attempt + 1), 400);
+          }
+        };
+        tryOpenSRP(0);
+      } else if (legacyProdId) {
+        // পুরনো ?p= URL — product page খোলো
         const tryOpen = (attempt) => {
           const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
           if (prod) {
@@ -3067,20 +3079,8 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           }
         };
         tryOpen(0);
-      } else if (path.startsWith('category/')) {
-        // /category/tws → TWS filter
-        const catId = path.replace('category/', '');
-        const tryFilter = (attempt) => {
-          const pill = document.querySelector(`.cat-pill[data-cat="${catId}"]`);
-          if (pill || attempt > 3) {
-            filterCat(catId, pill || null, null);
-          } else {
-            setTimeout(() => tryFilter(attempt + 1), 400);
-          }
-        };
-        tryFilter(0);
-      } else if (path && path !== 'index.html') {
-        // /gearup-gt4-smartwatch-4 → product slug
+      } else if (path && path !== 'index.html' && !path.startsWith('category/')) {
+        // /gearup-gt4-smartwatch-4 → product slug (category URL আর restore করা হয় না)
         const tryOpen = (attempt) => {
           const prod = findProdBySlug(path);
           if (prod) {
@@ -4056,10 +4056,10 @@ function filterCat(cat,btn,evt){
   // ✅ FIX: count update renderProds()-এই হয়, এখানে duplicate update সরানো হয়েছে
   renderProds(list);
   document.getElementById('prodSec').scrollIntoView({behavior:'smooth',block:'start'});
-  // ✅ URL SYSTEM: category filter করলে URL আপডেট করো
+  // ✅ URL SYSTEM: category filter করলে URL '/' রাখো
+  // Refresh করলে homepage দেখাবে — category URL দিলে refresh এ category restore হতো
   try {
-    const _newUrl = cat === 'all' ? '/' : '/category/' + makeCatSlug(cat);
-    history.replaceState({vcStack:[], homeCurrent:true, vcCat: cat}, '', _newUrl);
+    history.replaceState({vcStack:[], homeCurrent:true, vcCat: cat}, '', '/');
   } catch(e) {}
 }
 
@@ -4304,6 +4304,11 @@ function openSRP(q) {
   // ✅ FIX: SRP খোলার আগে 'search' entry সরাও — নাহলে back দুইবার চাপতে হয়
   // (desktop search box এ type করলে 'search' push হয়, তারপর SRP খুললে দুটো entry জমে)
   _panelStack = _panelStack.filter(p => p !== 'search');
+  // ✅ URL FIX: SRP খোলার সময় ?q= URL set করো — refresh করলে SRP আবার খুলবে
+  try {
+    const _srpUrl = '/?q=' + encodeURIComponent(q);
+    history.replaceState({vcStack:[], srpActive:true, srpQuery:q}, '', _srpUrl);
+  } catch(e) {}
   _pushPanel('srp');
   _renderSRP(q);
   // float-btns (WhatsApp/Messenger) SRP এ লুকাও — z-index conflict এ click block হয়
@@ -4344,6 +4349,8 @@ function closeSRP(skipHomeScroll) {
   unlockBody();
   _panelStack = _panelStack.filter(p => p !== 'srp');
   _srpCurrentQuery = '';
+  // ✅ URL FIX: SRP বন্ধ হলে URL '/' এ ফেরো
+  try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
   // float-btns restore
   const fb = document.querySelector('.float-btns');
   if(fb) fb.style.display = 'flex';
@@ -4379,6 +4386,12 @@ function closeSRPAndGoCat(catId) {
 function srpLiveSearch(val) {
   _srpCurrentQuery = val;
   _srpUpdateClear(document.getElementById('srpQueryInp'));
+  // ✅ URL FIX: SRP query পরিবর্তন হলে URL update করো
+  try {
+    if(val && val.trim()) {
+      history.replaceState({vcStack:[..._panelStack], srpActive:true, srpQuery:val}, '', '/?q=' + encodeURIComponent(val.trim()));
+    }
+  } catch(e) {}
   clearTimeout(srpDebounce);
   srpDebounce = setTimeout(() => _renderSRP(val), 180);
 }
@@ -4751,7 +4764,8 @@ function closePPToHome() {
   _srpCurrentQuery = '';
   // হোমে scroll
   window.scrollTo({top: 0, behavior: 'smooth'});
-  history.replaceState(null, '', '');
+  // ✅ URL FIX: home এ ফেরার সময় URL '/' করো — empty string নয়
+  history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
 }
 
 // ✅ Category suggestion click → go to that category
@@ -5060,11 +5074,14 @@ function openPP(id){
   document.getElementById('ppOverlay').classList.add('show');
   lockBody();
   _pushPanel('pp');
-  // ✅ URL SYSTEM: SRP থেকে এলে URL change করবে না (refresh করলে main PP হবে — সঠিক)
+  // ✅ URL SYSTEM: SRP থেকে এলে /?p=ID URL সেট করো — refresh করলে SRP+PP restore হবে
   // Main website থেকে এলে slug URL সেট করো
   try {
     const _isSRP = document.getElementById('ppOverlay')._fromSRP;
-    if (!_isSRP) {
+    if (_isSRP) {
+      // SRP থেকে এসেছে — /?p=ID দিয়ে URL সেট করো
+      history.replaceState({vcStack:[..._panelStack], vcProdId: curProd.id, fromSRP: true, srpQuery: _srpCurrentQuery}, '', '/?p=' + String(curProd.id));
+    } else {
       const _slug = makeSlug(curProd.name) + '-' + String(curProd.id);
       history.replaceState({vcStack:[..._panelStack], vcSlug: _slug}, '', '/' + _slug);
     }
@@ -5156,8 +5173,8 @@ function closePP(){
   // Main PP বন্ধ হলে → home বা category URL এ ফেরো
   try {
     if (!overlay._fromSRP) {
-      const _catParam = activeCat && activeCat !== 'all' ? '/category/' + makeCatSlug(activeCat) : '/';
-      history.replaceState({vcStack:[], homeCurrent:true}, '', _catParam);
+      // ✅ FIX: PP বন্ধ হলে সবসময় '/' URL — category URL restore করলে refresh এ category খুলত
+      history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
     }
   } catch(e) {}
   unlockBody(); // এটাই scroll restore করে — instant, _bodyScrollY দিয়ে
@@ -6154,7 +6171,7 @@ let _homeBackTimer = null;
 // homeBase entry তে শুধু replaceState — একটিমাত্র home entry
 // Panel খুললে pushState হয়, back চাপলে panel বন্ধ হয়
 // সব panel বন্ধ হলে home এ ফিরে থাকি, আবার back = exit
-history.replaceState({vcStack:[], homeCurrent:true}, '', '');
+history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
 
 function _pushPanel(name) {
   _panelStack.push(name);
@@ -6274,6 +6291,8 @@ function _handleBack(state) {
     unlockBody();
     _panelStack = _panelStack.filter(p => p !== 'srp');
     _srpCurrentQuery = '';
+    // ✅ URL FIX: SRP back বন্ধ হলে URL '/' এ ফেরো
+    try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
     // float-btns restore করো
     const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
     // SRP float buttons hide করো
@@ -6392,7 +6411,7 @@ window.addEventListener('popstate', function(e){
       clearTimeout(_homeBackTimer);
       // ✅ FIX: শুধু replaceState করো — pushState করলে extra entry জমে
       // এর ফলে পরের back চাপলে browser এর আগের page এ যাবে (exit)
-      history.replaceState({vcStack:[], homeCurrent:true}, '', '');
+      history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
     }
     return;
   }
