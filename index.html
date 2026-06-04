@@ -2269,6 +2269,11 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 // ESCAPE HTML — XSS Protection (সর্বত্র ব্যবহৃত, তাই শুরুতে define)
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 
+// ✅ URL SLUG SYSTEM
+function makeSlug(str){return String(str||"").toLowerCase().replace(/[^\w\s-]/g,"").replace(/[\s_]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");}
+function makeCatSlug(catId){return String(catId||"").toLowerCase().replace(/[^\w-]/g,"");}
+function findProdBySlug(slug){if(!slug)return null;const s=slug.toLowerCase();let p=PRODS.find(x=>String(x.id).toLowerCase()===s);if(p)return p;p=PRODS.find(x=>makeSlug(x.name)===s);if(p)return p;p=PRODS.find(x=>s.endsWith("-"+String(x.id))||s===String(x.id));return p||null;}
+
 // FIX: emoji/image helper — URL হলে <img> tag, নয়তো emoji text
 // size: px value (default 30), shape: 'round'|'square'
 function emojiHtml(val, size, shape) {
@@ -3041,16 +3046,20 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   renderFAQ();
 
   // ✅ URL SYSTEM: page load এ URL পড়ে সঠিক state restore করো
-  // এই block টা renderProds + renderCatBar এর পরে run করতে হবে
   (function _vcRestoreFromURL() {
     try {
       const params = new URLSearchParams(window.location.search);
-      const prodId = params.get('p');
-      const catId  = params.get('cat');
-      if (prodId) {
-        // Product page খোলো — PRODS তে না থাকলে wait করো (Supabase late load)
+      const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, ''); // leading/trailing slash বাদ
+
+      // Legacy ?p= support
+      const legacyProdId = params.get('p');
+      // Legacy ?cat= support
+      const legacyCatId = params.get('cat');
+
+      if (legacyProdId) {
+        // পুরনো ?p= URL — redirect করো slug URL এ
         const tryOpen = (attempt) => {
-          const prod = PRODS.find(p => String(p.id) === String(prodId));
+          const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
           if (prod) {
             openPP(prod.id);
           } else if (attempt < 8) {
@@ -3058,18 +3067,40 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           }
         };
         tryOpen(0);
-      } else if (catId) {
-        // Category filter করো
-        const pill = document.querySelector(`.cat-pill[data-cat="${catId}"]`);
-        if (pill) {
-          filterCat(catId, pill, null);
-        } else {
-          // pill এখনো render হয়নি — একটু wait করো
-          setTimeout(() => {
-            const p2 = document.querySelector(`.cat-pill[data-cat="${catId}"]`);
-            filterCat(catId, p2 || null, null);
-          }, 500);
-        }
+      } else if (path.startsWith('category/')) {
+        // /category/tws → TWS filter
+        const catId = path.replace('category/', '');
+        const tryFilter = (attempt) => {
+          const pill = document.querySelector(`.cat-pill[data-cat="${catId}"]`);
+          if (pill || attempt > 3) {
+            filterCat(catId, pill || null, null);
+          } else {
+            setTimeout(() => tryFilter(attempt + 1), 400);
+          }
+        };
+        tryFilter(0);
+      } else if (path && path !== 'index.html') {
+        // /gearup-gt4-smartwatch-4 → product slug
+        const tryOpen = (attempt) => {
+          const prod = findProdBySlug(path);
+          if (prod) {
+            openPP(prod.id);
+          } else if (attempt < 10) {
+            setTimeout(() => tryOpen(attempt + 1), 400);
+          }
+        };
+        tryOpen(0);
+      } else if (legacyCatId) {
+        // Legacy ?cat= support
+        const tryFilter = (attempt) => {
+          const pill = document.querySelector(`.cat-pill[data-cat="${legacyCatId}"]`);
+          if (pill || attempt > 3) {
+            filterCat(legacyCatId, pill || null, null);
+          } else {
+            setTimeout(() => tryFilter(attempt + 1), 400);
+          }
+        };
+        tryFilter(0);
       }
     } catch(e) {}
   })();
@@ -4025,10 +4056,9 @@ function filterCat(cat,btn,evt){
   // ✅ FIX: count update renderProds()-এই হয়, এখানে duplicate update সরানো হয়েছে
   renderProds(list);
   document.getElementById('prodSec').scrollIntoView({behavior:'smooth',block:'start'});
-  // ✅ URL SYSTEM: category filter করলে URL এ ?cat= যোগ/সরাও
+  // ✅ URL SYSTEM: category filter করলে URL আপডেট করো
   try {
-    const _urlBase = window.location.pathname;
-    const _newUrl = cat === 'all' ? _urlBase : _urlBase + '?cat=' + encodeURIComponent(cat);
+    const _newUrl = cat === 'all' ? '/' : '/category/' + makeCatSlug(cat);
     history.replaceState({vcStack:[], homeCurrent:true, vcCat: cat}, '', _newUrl);
   } catch(e) {}
 }
@@ -5030,10 +5060,14 @@ function openPP(id){
   document.getElementById('ppOverlay').classList.add('show');
   lockBody();
   _pushPanel('pp');
-  // ✅ URL SYSTEM: product page খুললে URL এ ?p=ID যোগ করো
+  // ✅ URL SYSTEM: SRP থেকে এলে URL change করবে না (refresh করলে main PP হবে — সঠিক)
+  // Main website থেকে এলে slug URL সেট করো
   try {
-    const _urlBase = window.location.pathname;
-    history.replaceState({vcStack:[..._panelStack], vcProdId: String(curProd.id)}, '', _urlBase + '?p=' + encodeURIComponent(String(curProd.id)));
+    const _isSRP = document.getElementById('ppOverlay')._fromSRP;
+    if (!_isSRP) {
+      const _slug = makeSlug(curProd.name) + '-' + String(curProd.id);
+      history.replaceState({vcStack:[..._panelStack], vcSlug: _slug}, '', '/' + _slug);
+    }
   } catch(e) {}
   // U-10: hide floating WA button
   const fb=document.querySelector('.float-btns');if(fb)fb.style.display='none';
@@ -5117,11 +5151,14 @@ function closePP(){
   overlay.classList.remove('show');
   // REFRESH-FIX: pp বন্ধ হলে sessionStorage clear — না হলে back+F5 তে আবার খুলবে
   try{ sessionStorage.removeItem('vc_refresh_panel'); sessionStorage.removeItem('vc_refresh_prod_id'); }catch(e){}
-  // ✅ URL SYSTEM: PP বন্ধ হলে URL থেকে ?p= সরিয়ে দাও
+  // ✅ URL SYSTEM: PP বন্ধ হলে URL clean করো
+  // SRP থেকে এসে থাকলে URL ছিলই না, তাই পরিবর্তন করতে হবে না
+  // Main PP বন্ধ হলে → home বা category URL এ ফেরো
   try {
-    const _urlBase = window.location.pathname;
-    const _catParam = activeCat && activeCat !== 'all' ? '?cat=' + encodeURIComponent(activeCat) : '';
-    history.replaceState({vcStack:[], homeCurrent:true}, '', _urlBase + _catParam);
+    if (!overlay._fromSRP) {
+      const _catParam = activeCat && activeCat !== 'all' ? '/category/' + makeCatSlug(activeCat) : '/';
+      history.replaceState({vcStack:[], homeCurrent:true}, '', _catParam);
+    }
   } catch(e) {}
   unlockBody(); // এটাই scroll restore করে — instant, _bodyScrollY দিয়ে
   // F-7: cleanup sticky bar
