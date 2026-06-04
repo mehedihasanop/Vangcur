@@ -3051,36 +3051,38 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       const params = new URLSearchParams(window.location.search);
       const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, ''); // leading/trailing slash বাদ
 
-      // Legacy ?p= support (SRP থেকে product খুললেও এই URL হয়)
+      // ?p= — SRP থেকে product খুললে এই URL হয়, refresh করলে সেই product দেখাবে
       const legacyProdId = params.get('p');
-      // ✅ NEW: ?q= — SRP restore
-      const srpQuery = params.get('q');
       // Legacy ?cat= support
       const legacyCatId = params.get('cat');
 
-      if (srpQuery) {
-        // ✅ SRP URL: refresh করলে SRP আবার খুলবে
+      if (path === 'srp') {
+        // /srp — sessionStorage থেকে query পড়ে SRP restore করো
         const tryOpenSRP = (attempt) => {
           if (typeof openSRP === 'function') {
-            openSRP(decodeURIComponent(srpQuery));
-          } else if (attempt < 8) {
-            setTimeout(() => tryOpenSRP(attempt + 1), 400);
+            let savedQuery = '';
+            try { savedQuery = sessionStorage.getItem('vc_srp_query') || ''; } catch(e) {}
+            openSRP(savedQuery);
+          } else if (attempt < 10) {
+            setTimeout(() => tryOpenSRP(attempt + 1), 300);
           }
         };
         tryOpenSRP(0);
       } else if (legacyProdId) {
-        // পুরনো ?p= URL — product page খোলো
+        // ?p=ID URL — product page খোলো, PRODS load হওয়ার জন্য retry করো
         const tryOpen = (attempt) => {
           const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
           if (prod) {
             openPP(prod.id);
-          } else if (attempt < 8) {
-            setTimeout(() => tryOpen(attempt + 1), 400);
+          } else if (attempt < 20) {
+            // Supabase থেকে data load হতে সময় লাগে — 20 বার try করো
+            setTimeout(() => tryOpen(attempt + 1), 300);
           }
         };
         tryOpen(0);
-      } else if (path && path !== 'index.html' && !path.startsWith('category/')) {
-        // /gearup-gt4-smartwatch-4 → product slug (category URL আর restore করা হয় না)
+      } else if (path && path !== 'index.html' && !path.startsWith('category/') && path !== 'srp') {
+        // /gearup-gt4-smartwatch-4 → product slug
+        // /srp এবং /category/ — restore করা হয় না, refresh = homepage
         const tryOpen = (attempt) => {
           const prod = findProdBySlug(path);
           if (prod) {
@@ -4056,10 +4058,11 @@ function filterCat(cat,btn,evt){
   // ✅ FIX: count update renderProds()-এই হয়, এখানে duplicate update সরানো হয়েছে
   renderProds(list);
   document.getElementById('prodSec').scrollIntoView({behavior:'smooth',block:'start'});
-  // ✅ URL SYSTEM: category filter করলে URL '/' রাখো
-  // Refresh করলে homepage দেখাবে — category URL দিলে refresh এ category restore হতো
+  // ✅ URL SYSTEM: category filter করলে URL /category/xxx দেখাও
+  // কিন্তু page load এ category restore করা হয় না, তাই refresh = homepage
   try {
-    history.replaceState({vcStack:[], homeCurrent:true, vcCat: cat}, '', '/');
+    const _catUrl = cat === 'all' ? '/' : '/category/' + makeCatSlug(cat);
+    history.replaceState({vcStack:[], homeCurrent:true, vcCat: cat}, '', _catUrl);
   } catch(e) {}
 }
 
@@ -4304,10 +4307,11 @@ function openSRP(q) {
   // ✅ FIX: SRP খোলার আগে 'search' entry সরাও — নাহলে back দুইবার চাপতে হয়
   // (desktop search box এ type করলে 'search' push হয়, তারপর SRP খুললে দুটো entry জমে)
   _panelStack = _panelStack.filter(p => p !== 'search');
-  // ✅ URL FIX: SRP খোলার সময় ?q= URL set করো — refresh করলে SRP আবার খুলবে
+  // ✅ URL: SRP খোলার সময় /srp URL set করো
+  // sessionStorage এ query save করো — refresh করলে same query restore হবে
   try {
-    const _srpUrl = '/?q=' + encodeURIComponent(q);
-    history.replaceState({vcStack:[], srpActive:true, srpQuery:q}, '', _srpUrl);
+    sessionStorage.setItem('vc_srp_query', q);
+    history.replaceState({vcStack:[], srpActive:true, srpQuery:q}, '', '/srp');
   } catch(e) {}
   _pushPanel('srp');
   _renderSRP(q);
@@ -4349,6 +4353,8 @@ function closeSRP(skipHomeScroll) {
   unlockBody();
   _panelStack = _panelStack.filter(p => p !== 'srp');
   _srpCurrentQuery = '';
+  // ✅ SRP বন্ধ হলে sessionStorage query clear করো
+  try { sessionStorage.removeItem('vc_srp_query'); } catch(e) {}
   // ✅ URL FIX: SRP বন্ধ হলে URL '/' এ ফেরো
   try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
   // float-btns restore
@@ -4386,11 +4392,10 @@ function closeSRPAndGoCat(catId) {
 function srpLiveSearch(val) {
   _srpCurrentQuery = val;
   _srpUpdateClear(document.getElementById('srpQueryInp'));
-  // ✅ URL FIX: SRP query পরিবর্তন হলে URL update করো
+  // ✅ SRP query পরিবর্তন হলে sessionStorage update করো
   try {
-    if(val && val.trim()) {
-      history.replaceState({vcStack:[..._panelStack], srpActive:true, srpQuery:val}, '', '/?q=' + encodeURIComponent(val.trim()));
-    }
+    sessionStorage.setItem('vc_srp_query', val);
+    history.replaceState({vcStack:[..._panelStack], srpActive:true, srpQuery:val}, '', '/srp');
   } catch(e) {}
   clearTimeout(srpDebounce);
   srpDebounce = setTimeout(() => _renderSRP(val), 180);
@@ -6291,6 +6296,8 @@ function _handleBack(state) {
     unlockBody();
     _panelStack = _panelStack.filter(p => p !== 'srp');
     _srpCurrentQuery = '';
+    // ✅ SRP বন্ধ হলে sessionStorage query clear করো
+    try { sessionStorage.removeItem('vc_srp_query'); } catch(e) {}
     // ✅ URL FIX: SRP back বন্ধ হলে URL '/' এ ফেরো
     try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
     // float-btns restore করো
