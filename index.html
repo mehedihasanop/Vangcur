@@ -3073,9 +3073,10 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         const tryOpen = (attempt) => {
           const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
           if (prod) {
+            // page load থেকে খুলছে — URL /?p= রাখতে হবে
+            document.getElementById('ppOverlay')._fromPageLoad = true;
             openPP(prod.id);
           } else if (attempt < 20) {
-            // Supabase থেকে data load হতে সময় লাগে — 20 বার try করো
             setTimeout(() => tryOpen(attempt + 1), 300);
           }
         };
@@ -5079,13 +5080,13 @@ function openPP(id){
   document.getElementById('ppOverlay').classList.add('show');
   lockBody();
   _pushPanel('pp');
-  // ✅ URL SYSTEM: SRP থেকে এলে /?p=ID URL সেট করো — refresh করলে SRP+PP restore হবে
-  // Main website থেকে এলে slug URL সেট করো
   try {
     const _isSRP = document.getElementById('ppOverlay')._fromSRP;
-    if (_isSRP) {
-      // SRP থেকে এসেছে — /?p=ID দিয়ে URL সেট করো
-      history.replaceState({vcStack:[..._panelStack], vcProdId: curProd.id, fromSRP: true, srpQuery: _srpCurrentQuery}, '', '/?p=' + String(curProd.id));
+    const _isPageLoad = document.getElementById('ppOverlay')._fromPageLoad;
+    if (_isSRP || _isPageLoad) {
+      // SRP বা page load থেকে এসেছে — /?p=ID URL রাখো যাতে refresh এ product দেখায়
+      history.replaceState({vcStack:[..._panelStack], vcProdId: curProd.id}, '', '/?p=' + String(curProd.id));
+      document.getElementById('ppOverlay')._fromPageLoad = false;
     } else {
       const _slug = makeSlug(curProd.name) + '-' + String(curProd.id);
       history.replaceState({vcStack:[..._panelStack], vcSlug: _slug}, '', '/' + _slug);
@@ -5197,12 +5198,14 @@ function closePP(){
     _panelStack=_panelStack.filter(p=>p!=='pp');
     return; // _popPanel() call করব না — history তে wishlist এর entry আছে
   }
-  // SRP থেকে এসে থাকলে SRP দেখাও
+  // SRP থেকে এসে থাকলে SRP দেখাও এবং URL /srp করো
   if(overlay._fromSRP){
     overlay._fromSRP=false;
     document.getElementById('srpOverlay').classList.add('show');
     lockBody();
     _panelStack=_panelStack.filter(p=>p!=='pp');
+    // ✅ SRP এ ফিরলে URL /srp করো
+    try { history.replaceState({vcStack:[..._panelStack], srpActive:true}, '', '/srp'); } catch(e) {}
     return;
   }
   _popPanel();
@@ -6342,11 +6345,13 @@ function _handleBack(state) {
       document.getElementById('wishlistOverlay').classList.add('show');
       lockBody();
     }
-    // SRP থেকে এসে থাকলে SRP দেখাও
+    // SRP থেকে এসে থাকলে SRP দেখাও এবং URL /srp করো
     else if(overlay._fromSRP){
       overlay._fromSRP = false;
       document.getElementById('srpOverlay').classList.add('show');
       lockBody();
+      // ✅ SRP এ ফিরলে URL /srp করো
+      try { history.replaceState({vcStack:[..._panelStack], srpActive:true}, '', '/srp'); } catch(e) {}
     }
     return true;
   }
