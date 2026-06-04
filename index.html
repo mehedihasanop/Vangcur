@@ -2948,6 +2948,117 @@ function _parseSupabaseVal(val){
   return val;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// initPageRestoration() — unified page-restoration entry point.
+// Must be called ONLY after PRODS is fully populated (custom Supabase products
+// included). The async DOMContentLoaded listener calls this at its very end.
+// ─────────────────────────────────────────────────────────────────────────────
+function initPageRestoration() {
+  try {
+    window._isRestored = false;
+
+    const params      = new URLSearchParams(window.location.search);
+    const rawPath     = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+    const legacyProdId = params.get('p');
+    const legacyCatId  = params.get('cat');
+
+    // ── 1. /srp — restore Search Results Page ────────────────────────────────
+    if (rawPath === 'srp') {
+      let savedQuery = '';
+      try { savedQuery = sessionStorage.getItem('vc_srp_query') || ''; } catch(e) {}
+      if (typeof openSRP === 'function') {
+        openSRP(savedQuery);
+      }
+      window._isRestored = true;
+      return;
+    }
+
+    // ── 2. vc_refresh_panel — restore panel that was open before refresh ─────
+    let rPanel = '';
+    try { rPanel = sessionStorage.getItem('vc_refresh_panel') || ''; } catch(e) {}
+
+    if (rPanel === 'pp') {
+      let rProdId = '';
+      try { rProdId = sessionStorage.getItem('vc_refresh_prod_id') || ''; } catch(e) {}
+      if (rProdId) {
+        const prod = PRODS.find(p => String(p.id) === rProdId);
+        if (prod) {
+          const overlay = document.getElementById('ppOverlay');
+          if (overlay) overlay.classList.add('no-anim');
+          openPP(prod.id);
+          if (overlay) requestAnimationFrame(() => overlay.classList.remove('no-anim'));
+          window._isRestored = true;
+          return;
+        }
+        // Product not yet in PRODS (e.g. custom Supabase product) — should not
+        // happen because we are called after Supabase fetch, but guard anyway.
+        // Fall through to URL-based restoration below.
+      }
+    } else if (rPanel === 'order') {
+      const rStep = parseInt(sessionStorage.getItem('vc_refresh_order_step') || '1', 10);
+      try {
+        const saved = sessionStorage.getItem('vc_order_items');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) orderItems = parsed;
+        }
+      } catch(e) {}
+      if (typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0) {
+        const overlay = document.getElementById('orderOverlay');
+        if (overlay) overlay.classList.add('no-anim');
+        openOrder(false, true);
+        if (rStep > 1) {
+          setTimeout(() => {
+            goS(rStep);
+            if (rStep === 3) renderStep3Summary();
+          }, 80);
+        }
+        if (overlay) requestAnimationFrame(() => overlay.classList.remove('no-anim'));
+        window._isRestored = true;
+        return;
+      }
+    }
+
+    // ── 3. ?p=ID — legacy product URL ────────────────────────────────────────
+    if (legacyProdId) {
+      const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
+      if (prod) {
+        const overlay = document.getElementById('ppOverlay');
+        if (overlay) overlay._fromPageLoad = true;
+        openPP(prod.id);
+        window._isRestored = true;
+        return;
+      }
+      // Product genuinely not found even after full PRODS load — stay on home.
+      window._isRestored = true;
+      return;
+    }
+
+    // ── 4. Slug-based product URL ─────────────────────────────────────────────
+    if (rawPath && rawPath !== 'index.html' && !rawPath.startsWith('category/')) {
+      const prod = findProdBySlug(rawPath);
+      if (prod) {
+        openPP(prod.id);
+        window._isRestored = true;
+        return;
+      }
+      // Unknown path — stay on home (do not redirect).
+      window._isRestored = true;
+      return;
+    }
+
+    // ── 5. Legacy ?cat= filter ────────────────────────────────────────────────
+    if (legacyCatId) {
+      const pill = document.querySelector(`.cat-pill[data-cat="${legacyCatId}"]`);
+      filterCat(legacyCatId, pill || null, null);
+    }
+
+    window._isRestored = true;
+  } catch(e) {
+    window._isRestored = true;
+  }
+}
+
 document.addEventListener('DOMContentLoaded',async ()=>{
   // ✅ PERF: localStorage থেকে hero card cache তাৎক্ষণিক দেখাও (Supabase আসার আগেই)
   try{
@@ -3045,68 +3156,9 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   updateCatPillCounts();
   renderFAQ();
 
-  // ✅ URL SYSTEM: page load এ URL পড়ে সঠিক state restore করো
-  (function _vcRestoreFromURL() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, ''); // leading/trailing slash বাদ
-
-      // ?p= — SRP থেকে product খুললে এই URL হয়, refresh করলে সেই product দেখাবে
-      const legacyProdId = params.get('p');
-      // Legacy ?cat= support
-      const legacyCatId = params.get('cat');
-
-      if (path === 'srp') {
-        // /srp — sessionStorage থেকে query পড়ে SRP restore করো
-        const tryOpenSRP = (attempt) => {
-          if (typeof openSRP === 'function') {
-            let savedQuery = '';
-            try { savedQuery = sessionStorage.getItem('vc_srp_query') || ''; } catch(e) {}
-            openSRP(savedQuery);
-          } else if (attempt < 10) {
-            setTimeout(() => tryOpenSRP(attempt + 1), 300);
-          }
-        };
-        tryOpenSRP(0);
-      } else if (legacyProdId) {
-        // ?p=ID URL — product page খোলো, PRODS load হওয়ার জন্য retry করো
-        const tryOpen = (attempt) => {
-          const prod = PRODS.find(p => String(p.id) === String(legacyProdId));
-          if (prod) {
-            // page load থেকে খুলছে — URL /?p= রাখতে হবে
-            document.getElementById('ppOverlay')._fromPageLoad = true;
-            openPP(prod.id);
-          } else if (attempt < 20) {
-            setTimeout(() => tryOpen(attempt + 1), 300);
-          }
-        };
-        tryOpen(0);
-      } else if (path && path !== 'index.html' && !path.startsWith('category/') && path !== 'srp') {
-        // /gearup-gt4-smartwatch-4 → product slug
-        // /srp এবং /category/ — restore করা হয় না, refresh = homepage
-        const tryOpen = (attempt) => {
-          const prod = findProdBySlug(path);
-          if (prod) {
-            openPP(prod.id);
-          } else if (attempt < 10) {
-            setTimeout(() => tryOpen(attempt + 1), 400);
-          }
-        };
-        tryOpen(0);
-      } else if (legacyCatId) {
-        // Legacy ?cat= support
-        const tryFilter = (attempt) => {
-          const pill = document.querySelector(`.cat-pill[data-cat="${legacyCatId}"]`);
-          if (pill || attempt > 3) {
-            filterCat(legacyCatId, pill || null, null);
-          } else {
-            setTimeout(() => tryFilter(attempt + 1), 400);
-          }
-        };
-        tryFilter(0);
-      }
-    } catch(e) {}
-  })();
+  // ✅ All settings, stock, default products, and custom Supabase products are now fully loaded.
+  // Run unified page restoration exactly once, here, after PRODS is complete.
+  initPageRestoration();
 
   // ✅ Fix #15: Login থাকলে Supabase থেকে wishlist load করো
   if(currentUser){
@@ -7327,11 +7379,14 @@ document.addEventListener('focusin',(e)=>{
   }
 });
 
-// REFRESH-FIX: PP overlay বন্ধ থাকলে vc_refresh_panel='pp' clear করো
-// এটা সব edge case cover করে — back button, close button, closePPToHome সব
+// REFRESH-FIX: PP overlay বন্ধ থাকলে vc_refresh_panel='pp' clear করো।
+// window._isRestored গার্ড: restoration চলার আগে session storage মুছে দিলে
+// race condition হয় — তাই initPageRestoration() শেষ হওয়ার পরেই cleanup চলে।
 (function(){
   // pageshow: browser cache থেকে ফিরলেও চলে (bfcache)
   window.addEventListener('pageshow', function(){
+    // Restoration এখনো শেষ হয়নি — cleanup করা নিরাপদ না।
+    if (!window._isRestored) return;
     try{
       const rPanel = sessionStorage.getItem('vc_refresh_panel');
       if(rPanel === 'pp'){
@@ -8010,66 +8065,10 @@ document.addEventListener('DOMContentLoaded',function(){
   // এখানে আর call করার দরকার নেই, নইলে Supabase data আসার আগে default order দেখাবে
   loadCathCardData();
 
-  // ✅ REFRESH-FIX: Refresh এর পরে শুধু product page ও order page restore করো
-  try{
-    const rPanel = sessionStorage.getItem('vc_refresh_panel');
-    if(rPanel === 'pp'){
-      const rProdId = sessionStorage.getItem('vc_refresh_prod_id');
-      if(rProdId){
-        const tryOpen = (attempts)=>{
-          const prod = PRODS.find(p=>String(p.id)===rProdId);
-          console.log('[RESTORE] attempt='+(10-attempts)+' rProdId='+rProdId+' found='+(!!prod)+' PRODS.length='+PRODS.length);
-          if(prod){
-            // no-anim দিয়ে animation ছাড়া সরাসরি খোলো — flash দেখাবে না
-            const overlay = document.getElementById('ppOverlay');
-            if(overlay) overlay.classList.add('no-anim');
-            openPP(prod.id);
-            if(overlay) requestAnimationFrame(()=>overlay.classList.remove('no-anim'));
-          }
-          else if(attempts > 0){ setTimeout(()=>tryOpen(attempts-1), 300); }
-        };
-        tryOpen(10); // delay নেই — সাথে সাথে try করো
-      }
-    } else if(rPanel === 'order'){
-      const rStep = parseInt(sessionStorage.getItem('vc_refresh_order_step')||'1', 10);
-      // vc_order_items থেকে orderItems restore করো
-      try{
-        const saved = sessionStorage.getItem('vc_order_items');
-        if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed)&&parsed.length>0) orderItems=parsed; }
-      }catch(e){}
-
-      // openOrder() ব্যবহার করো — এটা YOUR ORDER section, shipping, form fields সব ঠিকমতো render করে
-      // overlay.classList.add('show') manually করলে UI অসম্পূর্ণ থাকে
-      const _doRestoreOrder = ()=>{
-        if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
-          const overlay = document.getElementById('orderOverlay');
-          if(overlay) overlay.classList.add('no-anim');
-          // openOrder(false, true) — পুরো UI setup করে (YOUR ORDER, shipping opts, form fields সব)
-          // _panelStack ও history openOrder এর ভেতরেই manage হয়
-          openOrder(false, true);
-          // step 2 বা 3 এ ছিলে — সেখানে ফিরিয়ে দাও
-          if(rStep > 1) setTimeout(()=>{
-            goS(rStep);
-            // step 3 হলে summary DOM ও populate করো
-            if(rStep===3) renderStep3Summary();
-          }, 80);
-          if(overlay) requestAnimationFrame(()=>overlay.classList.remove('no-anim'));
-        }
-      };
-
-      if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
-        _doRestoreOrder();
-      } else {
-        // orderItems এখনো নেই — Supabase/PRODS load এর পরে retry
-        const tryOrder = (attempts)=>{
-          if(typeof orderItems !== 'undefined' && orderItems && orderItems.length > 0){
-            _doRestoreOrder();
-          } else if(attempts > 0){ setTimeout(()=>tryOrder(attempts-1), 300); }
-        };
-        setTimeout(()=>tryOrder(10), 300);
-      }
-    }
-  }catch(e){}
+  // NOTE: Page restoration (SRP, product page, order) is handled exclusively by
+  // initPageRestoration(), which runs at the end of the async DOMContentLoaded
+  // listener after all Supabase data (including custom products) is fully loaded.
+  // Do NOT add any restoration logic here — it would race with the Supabase fetch.
 });
 
 function loadCustomCategories(){
