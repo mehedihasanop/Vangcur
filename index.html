@@ -4457,11 +4457,16 @@ function closeSRP(skipHomeScroll) {
   if(srpFb) srpFb.style.display = 'none';
   // ✅ FIX: category navigate করলে history.go(-1) ও home scroll করবে না
   if(skipHomeScroll) return;
-  // history sync: UI button দিয়ে বন্ধ করলে history.go(-1) করো
-  // Android back দিয়ে বন্ধ করলে _backButtonTriggered=true তাই skip
+  // history sync: UI button দিয়ে বন্ধ করলে history.go(-1) করো।
+  // Reload করে SRP-এ এলে browser-এ back entry নেই — তাই _panelStack
+  // খালি থাকলে history.go(-1) কাজ করবে না, replaceState দিয়ে URL ঠিক করো।
   if(!_backButtonTriggered) {
     _panelStack = [];
-    history.go(-1);
+    if (history.state && history.state.vcStack && history.state.vcStack.length > 0) {
+      history.go(-1);
+    } else {
+      history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
+    }
   }
   // হোমে scroll করো
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -4853,7 +4858,8 @@ function closePPToHome() {
   _srpCurrentQuery = '';
   // হোমে scroll
   window.scrollTo({top: 0, behavior: 'smooth'});
-  // ✅ URL FIX: home এ ফেরার সময় URL '/' করো — empty string নয়
+  // URL: reload করে এসে থাকলে back entry নেই — replaceState দিয়ে URL '/' করো।
+  // Normal flow-এও এখানে replaceState safe: closePPToHome সবসময় home-এ যায়।
   history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
 }
 
@@ -5291,7 +5297,17 @@ function closePP(){
     try { history.replaceState({vcStack:[..._panelStack], srpActive:true}, '', '/srp'); } catch(e) {}
     return;
   }
-  _popPanel();
+  // PP বন্ধ হলে history sync।
+  // Reload করে /?p=ID এ এলে browser-এ back entry নেই — _panelStack ও ফাঁকা।
+  // তাই stack/history state চেক করে নিরাপদে navigate করো।
+  _panelStack = _panelStack.filter(p => p !== 'pp');
+  if (!_backButtonTriggered) {
+    if (history.state && history.state.vcStack && history.state.vcStack.length > 0) {
+      history.go(-1);
+    } else {
+      history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
+    }
+  }
 }
 function galleryArrow(dir){
   if(!curProd||!curProd.imgs||curProd.imgs.length<=1)return;
