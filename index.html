@@ -6231,7 +6231,9 @@ let _homeBackTimer = null;
 // homeBase entry তে শুধু replaceState — একটিমাত্র home entry
 // Panel খুললে pushState হয়, back চাপলে panel বন্ধ হয়
 // সব panel বন্ধ হলে home এ ফিরে থাকি, আবার back = exit
-history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
+// ✅ FIX: '/' হার্ডকোড করলে /srp বা /?p=1 রিফ্রেশে URL মুছে যায় —
+//         তাই বর্তমান pathname + search সংরক্ষণ করা হচ্ছে।
+history.replaceState({vcStack:[], homeCurrent:true}, '', window.location.pathname + window.location.search);
 
 function _pushPanel(name) {
   _panelStack.push(name);
