@@ -2985,14 +2985,45 @@ function initPageRestoration() {
         if (prod) {
           const overlay = document.getElementById('ppOverlay');
           if (overlay) overlay.classList.add('no-anim');
+
+          // Restore source context flags before calling openPP — openPP reads
+          // overlay._fromSRP to decide whether to show relatedSec and set URL.
+          const wasFromSRP      = sessionStorage.getItem('vc_refresh_from_srp')      === '1';
+          const wasFromWishlist = sessionStorage.getItem('vc_refresh_from_wishlist') === '1';
+          if (overlay) {
+            overlay._fromSRP      = wasFromSRP;
+            overlay._fromWishlist = wasFromWishlist && !wasFromSRP;
+          }
+
           openPP(prod.id);
+
+          // openPP hides ppHomeBtn, ppBreadSearch, ppBreadWishlist by default.
+          // Re-apply the conditional UI elements based on restored source context.
+          if (wasFromSRP) {
+            const homeBtn = document.getElementById('ppHomeBtn');
+            if (homeBtn) homeBtn.style.display = '';
+
+            const breadSearch = document.getElementById('ppBreadSearch');
+            if (breadSearch) {
+              let savedQuery = '';
+              try { savedQuery = sessionStorage.getItem('vc_srp_query') || ''; } catch(e) {}
+              if (savedQuery) {
+                breadSearch.textContent = 'সার্চ - ' + savedQuery + ' / ';
+                breadSearch.style.display = '';
+              } else {
+                breadSearch.style.display = 'none';
+              }
+            }
+          } else if (wasFromWishlist) {
+            const wlBread = document.getElementById('ppBreadWishlist');
+            if (wlBread) wlBread.style.display = 'inline';
+          }
+
           if (overlay) requestAnimationFrame(() => overlay.classList.remove('no-anim'));
           window._isRestored = true;
           return;
         }
-        // Product not yet in PRODS (e.g. custom Supabase product) — should not
-        // happen because we are called after Supabase fetch, but guard anyway.
-        // Fall through to URL-based restoration below.
+        // Product genuinely not found even after full PRODS load — stay on home.
       }
     } else if (rPanel === 'order') {
       const rStep = parseInt(sessionStorage.getItem('vc_refresh_order_step') || '1', 10);
@@ -6243,6 +6274,12 @@ function _pushPanel(name) {
     if(name === 'pp' && window.curProd){
       sessionStorage.setItem('vc_refresh_panel', 'pp');
       sessionStorage.setItem('vc_refresh_prod_id', String(curProd.id));
+      // Source context: SRP বা Wishlist থেকে এসেছে কিনা save করো।
+      // overlay flags openPPFromSRP/openPPFromWishlist সেট করে, তারপর _pushPanel call হয় —
+      // তাই এখানে পড়লে সবসময় সঠিক value পাওয়া যাবে।
+      const _ppOv = document.getElementById('ppOverlay');
+      sessionStorage.setItem('vc_refresh_from_srp',      (_ppOv && _ppOv._fromSRP)      ? '1' : '0');
+      sessionStorage.setItem('vc_refresh_from_wishlist', (_ppOv && _ppOv._fromWishlist) ? '1' : '0');
     } else if(name === 'order'){
       sessionStorage.setItem('vc_refresh_panel', 'order');
       sessionStorage.setItem('vc_refresh_order_step', '1');
