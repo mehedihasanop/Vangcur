@@ -6115,9 +6115,7 @@ async function confirmOrder(){
   }
   localStorage.setItem('vc_last_order_time',String(Date.now())); // S-10: rate limit timestamp
   pendingOrdId=oid;sessionStorage.setItem('vc_pending',oid);sessionStorage.setItem('vc_pending_num',num);try{localStorage.setItem('vc_pending_ls',oid);localStorage.setItem('vc_pending_num_ls',num);localStorage.setItem('vc_pending_ts',String(Date.now()));}catch(e){}
-  // Reduce stock (S-5: persist)
-  orderItems.forEach(oi=>{const p=PRODS.find(x=>x.id===oi.id);if(p)p.stock=Math.max(0,p.stock-oi.qty);});
-  saveStock();
+  // Stock reduction is now handled server-side via Supabase PostgreSQL trigger (AFTER INSERT on orders table)
   cart=[];localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();
   sessionStorage.removeItem('vc_form_draft'); // B-4: clear draft on success
   closeOrder();
