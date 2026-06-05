@@ -64,13 +64,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1A1A1A;min-hei
 .page-title{font-size:20px;font-weight:700}
 .page-sub{font-size:12.5px;color:var(--gray);margin-top:2px}
 
-/* STAT CARDS */
+/* STAT CARDS — Premium Minimal Redesign */
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
-.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px}
-.stat-icon-wrap{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
-.stat-label{font-size:11px;color:var(--gray);font-weight:500;margin-bottom:3px}
-.stat-val{font-size:21px;font-weight:700;word-break:break-all;overflow:hidden}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 1px 6px rgba(0,0,0,.04);transition:box-shadow .22s ease,transform .22s ease;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 60%);pointer-events:none}
+.stat-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.10);transform:translateY(-2px)}
+.stat-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:11px;flex-shrink:0}
+.stat-label{font-size:11px;color:var(--gray);font-weight:600;letter-spacing:.3px;margin-bottom:4px;text-transform:uppercase}
+.stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px;word-break:break-all;overflow:hidden;color:#111}
 .stat-trend{font-size:10.5px;color:var(--green);margin-top:3px}
+
+/* ── Stat icon animations ── */
+/* 1. Total Orders — heartbeat pulse */
+@keyframes heartbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.22)}60%{transform:scale(1.08)}}
+.stat-card-orders:hover .stat-icon-wrap{animation:heartbeat .7s ease infinite}
+/* 2. Pending — spin 180° */
+@keyframes spinHalf{from{transform:rotate(0deg)}to{transform:rotate(180deg)}}
+.stat-card-pending:hover .stat-icon-wrap{animation:spinHalf .5s cubic-bezier(.4,0,.2,1) forwards}
+/* 3. Revenue — gold glow pulse */
+@keyframes goldGlow{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.25);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0);transform:scale(1.1)}}
+.stat-card-revenue:hover .stat-icon-wrap{animation:goldGlow .8s ease infinite}
+/* 4. Customers — bounce */
+@keyframes custBounce{0%,100%{transform:scale(1) translateY(0)}40%{transform:scale(1.18) translateY(-3px)}70%{transform:scale(1.05) translateY(-1px)}}
+.stat-card-cust:hover .stat-icon-wrap{animation:custBounce .65s ease infinite}
+/* 5. Products — float bob */
+@keyframes bobFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.stat-card-prods:hover .stat-icon-wrap{animation:bobFloat .9s ease infinite}
+/* 6. Delivery scene package slide */
+@keyframes pkgSlide{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes custBounce2{0%,100%{transform:translateY(0) scale(1)}60%{transform:translateY(-4px) scale(1.15)}}
+.stat-card-delivered:hover .delivery-pkg{animation:pkgSlide .6s ease infinite}
+.stat-card-delivered:hover .delivery-cust{animation:custBounce2 .6s .15s ease infinite}
+/* ── Category icon wrapper — constrain SVG size ── */
+.cat-icon-wrap{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle;overflow:hidden}
+.cat-icon-wrap svg{width:18px!important;height:18px!important;max-width:18px;max-height:18px;display:block}
 
 /* CARDS */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
@@ -354,12 +381,46 @@ tr:hover td{background:#FAFAFA}
       <div><div class="page-title" id="dashTitle" style="font-size:22px;text-align:center">Hi Mehedi, Welcome To Vangcur Dashboard</div><div class="page-sub" id="dashDate" style="text-align:center;margin-top:4px"></div></div>
     </div>
     <div class="stats" style="grid-template-columns:repeat(2,1fr)">
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#FEF3C7">📦</div><div class="stat-label">মোট অর্ডার</div><div class="stat-val" id="stTotal">0</div></div>
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null);document.getElementById('ordF').value='pending';renderOrders()" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#FEE2E2">⏳</div><div class="stat-label">পেন্ডিং</div><div class="stat-val" id="stPend">0</div></div>
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="document.getElementById('revenueChartWrap').scrollIntoView({behavior:'smooth',block:'center'})" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#D1FAE5">💰</div><div class="stat-label">নিশ্চিত রেভিনিউ</div><div class="stat-val" id="stRev">৳০</div><div id="stRevNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('customers',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#DBEAFE">👥</div><div class="stat-label">কাস্টমার</div><div class="stat-val" id="stCust">0</div></div>
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('products',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#EDE9FE">🛍️</div><div class="stat-label">প্রোডাক্ট</div><div class="stat-val" id="stProds">0</div></div>
-      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null);document.getElementById('ordF').value='confirmed';renderOrders()" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#D1FAE5">✅</div><div class="stat-label">ডেলিভার্ড</div><div class="stat-val" id="stDelivered">0</div><div id="stConfirmedNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
+      <!-- 1. Total Orders — heartbeat icon -->
+      <div class="stat-card stat-card-orders" style="cursor:pointer" onclick="showPage('orders',null)">
+        <div class="stat-icon-wrap" style="background:#FEF3C7">📦</div>
+        <div class="stat-label">মোট অর্ডার</div>
+        <div class="stat-val" id="stTotal">0</div>
+      </div>
+      <!-- 2. Pending — spin icon -->
+      <div class="stat-card stat-card-pending" style="cursor:pointer" onclick="showPage('orders',null);document.getElementById('ordF').value='pending';renderOrders()">
+        <div class="stat-icon-wrap" style="background:#FEE2E2">⏳</div>
+        <div class="stat-label">পেন্ডিং</div>
+        <div class="stat-val" id="stPend">0</div>
+      </div>
+      <!-- 3. Revenue — gold glow icon -->
+      <div class="stat-card stat-card-revenue" style="cursor:pointer" onclick="document.getElementById('revenueChartWrap').scrollIntoView({behavior:'smooth',block:'center'})">
+        <div class="stat-icon-wrap" style="background:#D1FAE5">💰</div>
+        <div class="stat-label">নিশ্চিত রেভিনিউ</div>
+        <div class="stat-val" id="stRev">৳০</div>
+        <div id="stRevNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div>
+      </div>
+      <!-- 4. Customers — bounce icon -->
+      <div class="stat-card stat-card-cust" style="cursor:pointer" onclick="showPage('customers',null)">
+        <div class="stat-icon-wrap" style="background:#DBEAFE">👥</div>
+        <div class="stat-label">কাস্টমার</div>
+        <div class="stat-val" id="stCust">0</div>
+      </div>
+      <!-- 5. Products — bob float icon -->
+      <div class="stat-card stat-card-prods" style="cursor:pointer" onclick="showPage('products',null)">
+        <div class="stat-icon-wrap" style="background:#EDE9FE">🎁</div>
+        <div class="stat-label">প্রোডাক্ট</div>
+        <div class="stat-val" id="stProds">0</div>
+      </div>
+      <!-- 6. Delivered — mini delivery scene -->
+      <div class="stat-card stat-card-delivered" style="cursor:pointer" onclick="showPage('orders',null);document.getElementById('ordF').value='confirmed';renderOrders()">
+        <div class="stat-icon-wrap" style="background:#D1FAE5;gap:1px;font-size:13px">
+          <span style="flex-shrink:0">🏃‍♂️</span><span class="delivery-pkg" style="flex-shrink:0;display:inline-block">📦</span><span class="delivery-cust" style="flex-shrink:0;display:inline-block">😊</span>
+        </div>
+        <div class="stat-label">ডেলিভার্ড</div>
+        <div class="stat-val" id="stDelivered">0</div>
+        <div id="stConfirmedNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div>
+      </div>
     </div>
     <div class="dash-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
       <div class="card">
@@ -1047,7 +1108,7 @@ A: App ও Remote দিয়ে..."></textarea>
       cats.forEach(c => {
         const o = document.createElement('option');
         o.value = c.id;
-        o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+        o.textContent = getCleanIcon(c) + ' ' + c.name;
         if (c.id === selectedVal) o.selected = true;
         sel.appendChild(o);
       });
@@ -1692,7 +1753,7 @@ function populateCatDropdown(selectId, selectedVal){
   cats.filter(c => c.id !== 'all').forEach(c => {
     const o = document.createElement('option');
     o.value = c.id;
-    o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+    o.textContent = getCleanIcon(c) + ' ' + c.name;
     sel.appendChild(o);
   });
   if(curVal && sel.querySelector(`option[value="${curVal}"]`)){
@@ -1708,7 +1769,7 @@ function populateCatDropdown(selectId, selectedVal){
 function buildCatSelectRow(selectedVal, rowIndex) {
   const cats = getCats ? getCats().filter(c => c.id !== 'all') : [];
   const opts = cats.map(c =>
-    `<option value="${c.id}" ${c.id===selectedVal?'selected':''}>${(c.icon?c.icon+' ':'')+c.name}</option>`
+    `<option value="${c.id}" ${c.id===selectedVal?'selected':''}>${getCleanIcon(c)} ${c.name}</option>`
   ).join('');
   return `<div class="cat-row" style="display:flex;gap:6px;align-items:center">
     <select class="finp pCatMulti" style="flex:1">${opts}</select>
@@ -2134,6 +2195,19 @@ function getAllProds() {
 // ── Legacy catNames ──
 const catNames = {rgb:'RGB', smartwatch:'Watch', powerbank:'PwrBank', tws:'TWS', headphone:'Headphone', lamp:'Lamp', fan:'Fan'};
 
+// ── ISSUE 4 FIX: getCleanIcon — returns emoji fallback when icon is raw SVG (for <option> tags) ──
+function getCleanIcon(c) {
+  if (!c || !c.icon) return '📦';
+  if (!c.icon.startsWith('<svg')) return c.icon; // already a safe emoji/text
+  // SVG fallback map by category id
+  const svgFallbacks = {
+    acrylic: '🪔', fan: '💨', cable: '🔌', tws: '🎧', neckband: '🎧',
+    btspeaker: '🔊', projector: '📽️', lamp: '🪔', hairdryer: '💇', powerstrip: '🔌',
+    all: '🛍️'
+  };
+  return svgFallbacks[c.id] || '📦';
+}
+
 // ── Populate category filter dropdown from real categories ──
 function populateCatFilter() {
   const sel = document.getElementById('pCatF');
@@ -2144,7 +2218,7 @@ function populateCatFilter() {
   cats.filter(c => c.id !== 'all').forEach(c => {
     const o = document.createElement('option');
     o.value = c.id;
-    o.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+    o.textContent = getCleanIcon(c) + ' ' + c.name;
     sel.appendChild(o);
   });
   // ✅ FIX: পুরানো selected value ফিরিয়ে দাও
@@ -2160,8 +2234,12 @@ function renderCatCountBadges() {
   const all = getAllProds();
   const cats = getCats ? getCats().filter(c => c.id !== 'all') : [];
   const catList = cats.length ? cats : Object.entries(catNames).map(([id, name]) => ({id, name, icon: ''}));
+  // ✅ FIX: Multi-category counting — count product in EACH of its cats
   const counts = {};
-  all.forEach(p => { counts[p.cat] = (counts[p.cat] || 0) + 1; });
+  all.forEach(p => {
+    const pCats = (Array.isArray(p.cats) && p.cats.length) ? p.cats : [p.cat].filter(Boolean);
+    pCats.forEach(catId => { counts[catId] = (counts[catId] || 0) + 1; });
+  });
   // ✅ FIX: currently active cat highlight + correct filter on click
   const activeCat = document.getElementById('pCatF')?.value || 'all';
   el.innerHTML = catList.map(c => {
@@ -2173,7 +2251,10 @@ function renderCatCountBadges() {
       : n === 0
         ? 'background:#F9FAFB;color:#9CA3AF;border:1.5px solid #E5E7EB;'
         : 'background:#EFF6FF;color:#1E40AF;border:1.5px solid #BFDBFE;';
-    return `<button onclick="filterByCatBadge('${c.id}')" style="${style}border-radius:20px;padding:3px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">${c.icon ? c.icon+' ' : ''}${c.name}: ${n}টি</button>`;
+    const iconHtml = c.icon && c.icon.startsWith('<svg')
+      ? `<span class="cat-icon-wrap">${c.icon}</span>`
+      : (c.icon ? c.icon + ' ' : '');
+    return `<button onclick="filterByCatBadge('${c.id}')" style="${style}border-radius:20px;padding:3px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:4px">${iconHtml}${c.name}: ${n}টি</button>`;
   }).join('');
 }
 
@@ -3240,7 +3321,7 @@ function renderCategoryList(){
     row.style.cssText='background:var(--bg);border-radius:9px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:4px;transition:opacity .15s,box-shadow .15s';
     row.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px">
       <span class="cat-drag-handle" title="ড্র্যাগ করে সাজান" style="cursor:grab;color:var(--gray);font-size:18px;user-select:none;flex-shrink:0">⠿</span>
-      <span style="font-size:22px;min-width:32px;text-align:center">${c.icon && c.icon.startsWith('<svg') ? c.icon : escHtml(c.icon)}</span>
+      <span style="font-size:22px;min-width:32px;text-align:center;display:inline-flex;align-items:center;justify-content:center">${c.icon && c.icon.startsWith('<svg') ? `<span class="cat-icon-wrap" style="width:22px;height:22px">${c.icon}</span>` : escHtml(c.icon||'📦')}</span>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700">${escHtml(c.name)}</div>
         <div style="font-size:11px;color:var(--gray)">ID: ${escHtml(c.id)} · <span style="color:var(--blue);font-weight:600">${prodCount} টি প্রোডাক্ট</span></div>
