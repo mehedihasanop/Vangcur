@@ -39,8 +39,8 @@
 <link rel="preload" as="image" fetchpriority="high"
   href="https://res.cloudinary.com/dkjzleczw/image/upload/w_600,q_auto,f_auto/v1779535309/Enhancer-AI_UHD-Like_20260521_213052_0000_tq4ud1.png">
 
-<!-- ✅ Supabase CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ✅ Supabase CDN — unpkg primary (মোবাইল নেটওয়ার্কে stable), jsDelivr fallback -->
+<script src="https://unpkg.com/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'"></script>
 <script>
   // ============================================================
   //  Supabase Connection — Vangcur Frontend (index.html)
@@ -52,9 +52,22 @@
   // 👇 আপনার Supabase Public Key
   const SUPABASE_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6ZHVqa3dqcGxvYm9udmdoeWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzQzODUsImV4cCI6MjA5NDE1MDM4NX0.evLb7_gv5vtFrpsyCeX3h6mLxqCuOXQuY-w9ygvDqak";
 
-  // Supabase Client তৈরি করা হচ্ছে
-  const { createClient } = supabase;
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+  // ✅ SAFE INIT: CDN load হয়েছে কিনা check করে তারপর client তৈরি
+  // মোবাইল নেটওয়ার্কে CDN block হলে সাদা স্ক্রিন হবে না
+  let supabaseClient;
+  if (typeof supabase !== 'undefined') {
+    const { createClient } = supabase;
+    supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+  } else {
+    // CDN দুটোই fail হলে — dynamic fallback
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload = function() {
+      const { createClient } = supabase;
+      supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+    };
+    document.head.appendChild(s);
+  }
 
   // Supabase ready
 </script>
