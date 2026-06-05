@@ -65,7 +65,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1A1A1A;min-hei
 .page-sub{font-size:12.5px;color:var(--gray);margin-top:2px}
 
 /* STAT CARDS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px}
 .stat-icon-wrap{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
 .stat-label{font-size:11px;color:var(--gray);font-weight:500;margin-bottom:3px}
@@ -275,16 +275,25 @@ tr:hover td{background:#FAFAFA}
   .nav-item{font-size:13px;padding:10px 13px}
 }
 @media(max-width:480px){
-  .stats{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
   .main{padding:10px}
   .card{padding:10px}
   .modal-c{width:98vw;max-width:98vw;padding:12px}
   .stat-val{font-size:16px}
   .page-head h2{font-size:14px}
 }
+/* ── Confetti canvas overlay ── */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;}
+/* ── Dashboard centered header ── */
+#page-dashboard .page-head{justify-content:center;align-items:center;flex-direction:column;text-align:center}
+#page-dashboard .page-title{text-align:center;font-size:20px}
+#page-dashboard .page-sub{text-align:center}
 </style>
 </head>
 <body>
+
+<!-- CONFETTI CANVAS (triggered on dashboard load) -->
+<canvas id="confettiCanvas"></canvas>
 
 <!-- LOGIN -->
 <!-- MOBILE TOP BAR (hidden on desktop) -->
@@ -341,15 +350,16 @@ tr:hover td{background:#FAFAFA}
 
   <!-- ===== DASHBOARD ===== -->
   <div class="page active" id="page-dashboard">
-    <div class="page-head">
-      <div><div class="page-title">ড্যাশবোর্ড</div><div class="page-sub" id="dashDate"></div></div>
-      <button class="btn btn-dark btn-sm" onclick="exportCSV()">📊 CSV Export</button>
+    <div class="page-head" style="justify-content:center;flex-direction:column;align-items:center;text-align:center">
+      <div><div class="page-title" id="dashTitle" style="font-size:22px;text-align:center">Hi Mehedi, Welcome To Vangcur Dashboard</div><div class="page-sub" id="dashDate" style="text-align:center;margin-top:4px"></div></div>
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="stat-icon-wrap" style="background:#FEF3C7">📦</div><div class="stat-label">মোট অর্ডার</div><div class="stat-val" id="stTotal">0</div></div>
-      <div class="stat-card"><div class="stat-icon-wrap" style="background:#FEE2E2">⏳</div><div class="stat-label">পেন্ডিং</div><div class="stat-val" id="stPend">0</div></div>
-      <div class="stat-card"><div class="stat-icon-wrap" style="background:#D1FAE5">💰</div><div class="stat-label">নিশ্চিত রেভিনিউ</div><div class="stat-val" id="stRev">৳০</div><div id="stRevNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
-      <div class="stat-card"><div class="stat-icon-wrap" style="background:#DBEAFE">👥</div><div class="stat-label">কাস্টমার</div><div class="stat-val" id="stCust">0</div></div>
+    <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#FEF3C7">📦</div><div class="stat-label">মোট অর্ডার</div><div class="stat-val" id="stTotal">0</div></div>
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null);document.getElementById('ordF').value='pending';renderOrders()" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#FEE2E2">⏳</div><div class="stat-label">পেন্ডিং</div><div class="stat-val" id="stPend">0</div></div>
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="document.getElementById('revenueChartWrap').scrollIntoView({behavior:'smooth',block:'center'})" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#D1FAE5">💰</div><div class="stat-label">নিশ্চিত রেভিনিউ</div><div class="stat-val" id="stRev">৳০</div><div id="stRevNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('customers',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#DBEAFE">👥</div><div class="stat-label">কাস্টমার</div><div class="stat-val" id="stCust">0</div></div>
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('products',null)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#EDE9FE">🛍️</div><div class="stat-label">প্রোডাক্ট</div><div class="stat-val" id="stProds">0</div></div>
+      <div class="stat-card" style="cursor:pointer;transition:var(--tr);user-select:none" onclick="showPage('orders',null);document.getElementById('ordF').value='confirmed';renderOrders()" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><div class="stat-icon-wrap" style="background:#D1FAE5">✅</div><div class="stat-label">ডেলিভার্ড</div><div class="stat-val" id="stDelivered">0</div><div id="stConfirmedNote" style="font-size:10.5px;color:var(--warn);margin-top:3px"></div></div>
     </div>
     <div class="dash-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
       <div class="card">
@@ -1655,7 +1665,7 @@ function showPage(id,btn){
     syncAdminData().then(() => { loadAdminStock(); renderProdTbl(); });
   }
   if(id==='customers')renderCustomers();
-  if(id==='dashboard')initDash();
+  if(id==='dashboard'){initDash();launchConfetti();}
   if(id==='design-footer'){ loadFooterAdminForm(); loadInfoPageEditor(); }
   if(id==='design-cath-cards')renderCathCardGrid();
   if(id==='design-categories')renderCategoryList();
@@ -1803,7 +1813,6 @@ async function initDash(){
   const orders=await getOrdersAsync();
   // In-memory cache update
   _cachedOrders = orders;
-  const users=[];
   const pend=orders.filter(o=>o.status==='pending').length;
   document.getElementById('stTotal').textContent=orders.length;
   document.getElementById('stPend').textContent=pend;
@@ -1812,12 +1821,30 @@ async function initDash(){
   const pendingRevenue=orders.filter(o=>o.status==='pending').reduce((s,o)=>s+(o.total||0),0);
   document.getElementById('stRev').textContent='৳'+confirmedRevenue.toLocaleString();
   // Show pending revenue as note if any
-  const revEl=document.getElementById('stRev');
   if(pendingRevenue>0){
     const noteEl=document.getElementById('stRevNote');
     if(noteEl)noteEl.textContent=`+ ৳${pendingRevenue.toLocaleString()} pending`;
   }
-  document.getElementById('stCust').textContent=users.length;
+  // ── Fix: count unique customers by phone or name ──
+  const uniqueCustomers=new Set();
+  orders.forEach(o=>{
+    const phone=(o.customer?.phone||o.phone||'').trim();
+    const name=(o.customer?.name||o.name||'').trim();
+    const key=phone||name;
+    if(key)uniqueCustomers.add(key);
+  });
+  document.getElementById('stCust').textContent=uniqueCustomers.size;
+  // ── Products count: active defaults + custom products ──
+  const deletedDefs=getDeletedDefaults();
+  const activeDefaults=DEFAULT_PRODS.filter(p=>!deletedDefs.includes(p.id)).length;
+  const totalProds=activeDefaults+adminProds.length;
+  document.getElementById('stProds').textContent=totalProds;
+  // ── Delivered count + Confirmed note ──
+  const deliveredCount=orders.filter(o=>o.status==='delivered').length;
+  const confirmedCount=orders.filter(o=>o.status==='confirmed').length;
+  document.getElementById('stDelivered').textContent=deliveredCount;
+  const confirmedNoteEl=document.getElementById('stConfirmedNote');
+  if(confirmedNoteEl)confirmedNoteEl.textContent=confirmedCount>0?`+ ${confirmedCount}টি Confirmed`:'';
   const pb=document.getElementById('pendBadge');pb.style.display=pend>0?'inline':'none';pb.textContent=pend;
   // সর্বশেষ ৫টি অর্ডার — date অনুযায়ী sort করে latest নাও
   const rec = [...orders]
@@ -1833,7 +1860,7 @@ async function initDash(){
   renderLowStockAlert();
 }
 
-// ✅ P3 FIX: Revenue Chart — Canvas দিয়ে pure JS bar chart
+// ✅ P3 FIX: Revenue Chart — Canvas দিয়ে pure JS bar chart (HiDPI/Retina sharp)
 function renderRevenueChart(ordersArg){
   const canvas=document.getElementById('revenueChart');
   if(!canvas)return;
@@ -1855,10 +1882,17 @@ function renderRevenueChart(ordersArg){
   });
   const values=Object.values(dataMap);
   const maxVal=Math.max(...values,1);
-  // Canvas size
+  // ── HiDPI / Retina fix ──
+  const dpr=window.devicePixelRatio||1;
   const W=canvas.parentElement?.offsetWidth||600;
   const H=160;
-  canvas.width=W;canvas.height=H;
+  // Set CSS display size
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+  // Scale canvas backing store
+  canvas.width=Math.round(W*dpr);
+  canvas.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   const pad={t:16,r:16,b:36,l:60};
   const chartW=W-pad.l-pad.r;
   const chartH=H-pad.t-pad.b;
@@ -2043,7 +2077,6 @@ const DEFAULT_PRODS = [
   {id:24, _isDefault:true, cat:'tws',       name:'GearUP TWS ANC Pro Noise Cancelling Earbuds',                imgs:['🎧'],           price:1890, old:2500, warranty:'৬ মাস', badge:'HOT', stock:15},
   {id:34, _isDefault:true, cat:'headphone', name:'GearUP HP80 Over-Ear ANC Headphone',                         imgs:['🎵'],           price:2990, old:3800, warranty:'৬ মাস', badge:'HOT', stock:12},
   {id:44, _isDefault:true, cat:'lamp',      name:'GearUP AL-Love Heart Acrylic LED Lamp',                      imgs:['🪔','❤️'],      price:890,  old:1200, warranty:'৩ মাস', badge:'NEW', stock:25},
-  {id:54, _isDefault:true, cat:'fan',       name:'GearUP RF12 12-Inch Rechargeable Table Fan',                 imgs:['💨'],           price:1290, old:1700, warranty:'৬ মাস', badge:'HOT', stock:0},
 ];
 
 // adminProds: Supabase থেকে syncAdminData() এর মাধ্যমে লোড হবে
@@ -4154,6 +4187,114 @@ function updatePendingBadge(orders){
 
 // ESC close modals
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeOrdModal();}});
+
+// ============================================================
+// 🎊 CONFETTI ANIMATION — lightweight canvas-based
+// ============================================================
+(function(){
+  const COLORS=['#E63946','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#14B8A6','#F97316','#FACC15','#A3E635'];
+  const SHAPES=['rect','circle','strip'];
+  let _particles=[];
+  let _raf=null;
+  let _running=false;
+
+  function Particle(){
+    const canvas=document.getElementById('confettiCanvas');
+    this.x=Math.random()*canvas.width;
+    this.y=-10-Math.random()*30;
+    this.w=6+Math.random()*8;
+    this.h=this.w*(0.4+Math.random()*0.4);
+    this.color=COLORS[Math.floor(Math.random()*COLORS.length)];
+    this.shape=SHAPES[Math.floor(Math.random()*SHAPES.length)];
+    this.vx=(Math.random()-0.5)*2.5;
+    this.vy=2+Math.random()*3.5;
+    this.rot=Math.random()*Math.PI*2;
+    this.rotV=(Math.random()-0.5)*0.18;
+    this.alpha=1;
+    this.fade=0.005+Math.random()*0.005;
+  }
+  Particle.prototype.update=function(){
+    this.x+=this.vx;
+    this.y+=this.vy;
+    this.vy+=0.04; // gravity
+    this.vx*=0.99;
+    this.rot+=this.rotV;
+    const canvas=document.getElementById('confettiCanvas');
+    if(this.y>canvas.height*0.75)this.alpha-=this.fade*3;
+    else this.alpha-=this.fade*0.3;
+  };
+  Particle.prototype.draw=function(ctx){
+    ctx.save();
+    ctx.globalAlpha=Math.max(0,this.alpha);
+    ctx.translate(this.x,this.y);
+    ctx.rotate(this.rot);
+    ctx.fillStyle=this.color;
+    if(this.shape==='rect'){
+      ctx.fillRect(-this.w/2,-this.h/2,this.w,this.h);
+    } else if(this.shape==='circle'){
+      ctx.beginPath();ctx.ellipse(0,0,this.w/2,this.h/2,0,0,Math.PI*2);ctx.fill();
+    } else {
+      // strip
+      ctx.fillRect(-this.w/2,-this.h/4,this.w,this.h/2);
+    }
+    ctx.restore();
+  };
+
+  function resizeCanvas(){
+    const c=document.getElementById('confettiCanvas');
+    if(!c)return;
+    c.width=window.innerWidth;
+    c.height=window.innerHeight;
+  }
+
+  function loop(){
+    const c=document.getElementById('confettiCanvas');
+    if(!c)return;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+    _particles=_particles.filter(p=>p.alpha>0&&p.y<c.height+40);
+    _particles.forEach(p=>{p.update();p.draw(ctx);});
+    if(_particles.length>0){
+      _raf=requestAnimationFrame(loop);
+    } else {
+      _running=false;
+      ctx.clearRect(0,0,c.width,c.height);
+    }
+  }
+
+  window.launchConfetti=function(){
+    if(_running){
+      cancelAnimationFrame(_raf);
+      _particles=[];
+    }
+    resizeCanvas();
+    _running=true;
+    // Spawn particles in 3 bursts
+    const burst=function(n,delay){
+      setTimeout(()=>{
+        for(let i=0;i<n;i++) _particles.push(new Particle());
+      },delay);
+    };
+    burst(80,0);
+    burst(60,350);
+    burst(50,700);
+    _raf=requestAnimationFrame(loop);
+  };
+
+  window.addEventListener('resize',()=>{ if(_running)resizeCanvas(); });
+})();
+
+// Also trigger confetti on first dashboard load after login
+document.addEventListener('DOMContentLoaded',function(){
+  // Trigger when dashboard is first shown (page-dashboard is active by default after login)
+  // We hook into the existing afterLogin / showPage flow via a flag
+  const _origInitDash = window.initDash;
+  let _firstDash = true;
+  window.initDash = async function(){
+    if(_firstDash){ _firstDash=false; launchConfetti(); }
+    return _origInitDash.apply(this,arguments);
+  };
+});
 </script>
 </body>
 </html>
