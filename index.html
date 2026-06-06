@@ -4040,7 +4040,7 @@ function _appendNextBatch() {
         const _ap = document.querySelector('.cat-pill[data-cat="all"]');
         if(_ap) _ap.classList.add('active');
         const _st = document.getElementById('secTitle');
-        if(_st) _st.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
+        if(_st) _st.innerHTML = 'সকল <span>প্রোডাক্ট</span>';
         renderProds(PRODS);
         try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
         window.scrollTo({top: 0, behavior: 'smooth'});
@@ -4180,7 +4180,7 @@ function filterCat(cat,btn,evt){
   const list=cat==='all'?PRODS:PRODS.filter(p=>prodInCat(p,cat));
   // ✅ FIX: 'all' → "প্রোডাক্ট সমূহ", অন্যান্য ক্যাটাগরি → "[ক্যাটাগরি নাম] সমূহ"
   if(cat === 'all') {
-    document.getElementById('secTitle').innerHTML=`প্রোডাক্ট <span>সমূহ</span>`;
+    document.getElementById('secTitle').innerHTML=`সকল <span>প্রোডাক্ট</span>`;
   } else {
     document.getElementById('secTitle').innerHTML=`${titles[cat]||'প্রোডাক্ট'} <span>সমূহ</span>`;
   }
@@ -4235,17 +4235,31 @@ function showSearchDropdown(q, source) {
             Object.values(p.specs||{}).join(' ')].join(' ').toLowerCase();
   }
 
-  const matches = allProds.filter(p => {
+  // ✅ FIX: score দিয়ে sort — exact name match সবার আগে
+  function getSearchScore(p) {
+    const name = (p.name||'').toLowerCase();
     const hay = getHay(p);
     const compactHay = hay.replace(/\s+/g,'');
-    if(words.every(w => hay.includes(w))) return true;
-    if(compactHay.includes(compactQuery)) return true;
-    if(words.some(w => w.length >= 3 && hay.includes(w))) return true;
-    return false;
-  })
-  // ✅ Stock শেষ products সবার শেষে
-  .sort((a,b) => (a.stock<=0?1:0) - (b.stock<=0?1:0))
-  .slice(0, 6);
+    if(name === lower) return 100;                         // exact name match
+    if(name.startsWith(lower)) return 90;                  // name starts with query
+    if(lower.split(/\s+/).every(w => name.includes(w))) return 80; // all words in name
+    if(words.every(w => hay.includes(w))) return 60;      // all words anywhere
+    if(compactHay.includes(compactQuery)) return 50;
+    if(words.some(w => w.length >= 3 && name.includes(w))) return 40; // partial name
+    if(words.some(w => w.length >= 3 && hay.includes(w))) return 20;
+    return 0;
+  }
+  const matches = allProds
+    .map(p => ({p, score: getSearchScore(p)}))
+    .filter(x => x.score > 0)
+    // ✅ Score দিয়ে sort, তারপর stock-out সবার শেষে
+    .sort((a,b) => {
+      const stockDiff = (a.p.stock<=0?1:0) - (b.p.stock<=0?1:0);
+      if(stockDiff !== 0) return stockDiff;
+      return b.score - a.score;
+    })
+    .slice(0, 6)
+    .map(x => x.p);
 
   if(!matches.length) {
     dd.innerHTML = `<div class="sd-empty">🔍 "<strong>${q}</strong>" এর জন্য কোনো পণ্য পাওয়া যায়নি</div>`;
@@ -4492,7 +4506,7 @@ function closeSRP(skipHomeScroll) {
   const _srpAllPill = document.querySelector('.cat-pill[data-cat="all"]');
   if(_srpAllPill) _srpAllPill.classList.add('active');
   const _srpSecTitle = document.getElementById('secTitle');
-  if(_srpSecTitle) _srpSecTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
+  if(_srpSecTitle) _srpSecTitle.innerHTML = 'সকল <span>প্রোডাক্ট</span>';
   if(typeof PRODS !== 'undefined' && PRODS.length) renderProds(PRODS);
   // float-btns restore
   const fb = document.querySelector('.float-btns');
@@ -4558,7 +4572,7 @@ function closeSRPToHome() {
   const _allPill = document.querySelector('.cat-pill[data-cat="all"]');
   if(_allPill) _allPill.classList.add('active');
   const _srpToHomeTitle = document.getElementById('secTitle');
-  if(_srpToHomeTitle) _srpToHomeTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
+  if(_srpToHomeTitle) _srpToHomeTitle.innerHTML = 'সকল <span>প্রোডাক্ট</span>';
   if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ সরাসরি '/' এ replaceState — category URL মুছে যাবে
   try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
@@ -4962,7 +4976,7 @@ function closePPToHome() {
   const _allPill2 = document.querySelector('.cat-pill[data-cat="all"]');
   if(_allPill2) _allPill2.classList.add('active');
   const _ppToHomeTitle = document.getElementById('secTitle');
-  if(_ppToHomeTitle) _ppToHomeTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
+  if(_ppToHomeTitle) _ppToHomeTitle.innerHTML = 'সকল <span>প্রোডাক্ট</span>';
   if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ URL: সরাসরি '/' — category URL বা product URL কিছুই থাকবে না
   history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
