@@ -4039,6 +4039,8 @@ function _appendNextBatch() {
         document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
         const _ap = document.querySelector('.cat-pill[data-cat="all"]');
         if(_ap) _ap.classList.add('active');
+        const _st = document.getElementById('secTitle');
+        if(_st) _st.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
         renderProds(PRODS);
         try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
         window.scrollTo({top: 0, behavior: 'smooth'});
@@ -4489,6 +4491,8 @@ function closeSRP(skipHomeScroll) {
   document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   const _srpAllPill = document.querySelector('.cat-pill[data-cat="all"]');
   if(_srpAllPill) _srpAllPill.classList.add('active');
+  const _srpSecTitle = document.getElementById('secTitle');
+  if(_srpSecTitle) _srpSecTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
   if(typeof PRODS !== 'undefined' && PRODS.length) renderProds(PRODS);
   // float-btns restore
   const fb = document.querySelector('.float-btns');
@@ -4553,6 +4557,8 @@ function closeSRPToHome() {
   document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   const _allPill = document.querySelector('.cat-pill[data-cat="all"]');
   if(_allPill) _allPill.classList.add('active');
+  const _srpToHomeTitle = document.getElementById('secTitle');
+  if(_srpToHomeTitle) _srpToHomeTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
   if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ সরাসরি '/' এ replaceState — category URL মুছে যাবে
   try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
@@ -4955,6 +4961,8 @@ function closePPToHome() {
   document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   const _allPill2 = document.querySelector('.cat-pill[data-cat="all"]');
   if(_allPill2) _allPill2.classList.add('active');
+  const _ppToHomeTitle = document.getElementById('secTitle');
+  if(_ppToHomeTitle) _ppToHomeTitle.innerHTML = 'প্রোডাক্ট <span>সমূহ</span>';
   if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ URL: সরাসরি '/' — category URL বা product URL কিছুই থাকবে না
   history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
