@@ -1735,7 +1735,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <!-- SEARCH RESULT PAGE -->
 <div class="srp-overlay" id="srpOverlay">
   <div class="srp-header">
-    <button class="pp-back" onclick="closeSRP()" aria-label="হোমে ফিরুন" title="হোমে ফিরুন" style="flex-shrink:0">
+    <button class="pp-back" onclick="closeSRPToHome()" aria-label="হোমে ফিরুন" title="হোমে ফিরুন" style="flex-shrink:0">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
     </button>
     <div class="srp-query-wrap">
@@ -4491,6 +4491,32 @@ function closeSRPAndGoCat(catId) {
   setTimeout(() => { goToCat(catId); }, 80);
 }
 
+// ✅ NEW: SRP/PP home বাটন — সব ইতিহাস ভুলে সরাসরি root '/' এ যাও
+function closeSRPToHome() {
+  const overlay = document.getElementById('srpOverlay');
+  overlay.classList.remove('show');
+  unlockBody();
+  _panelStack = [];
+  _srpCurrentQuery = '';
+  try { sessionStorage.removeItem('vc_srp_query'); } catch(e) {}
+  // float-btns restore
+  const fb = document.querySelector('.float-btns');
+  if(fb) fb.style.display = 'flex';
+  // SRP float buttons hide
+  const fc = document.getElementById('floatCartBtn');
+  const fw = document.getElementById('floatWishBtn');
+  const bt = document.getElementById('backToTop');
+  const srpFb = document.getElementById('srpFloatBtns');
+  if(fc) fc.style.display = 'none';
+  if(fw) fw.style.display = 'none';
+  if(bt) bt.classList.remove('show');
+  if(bt) bt.onclick = function(){ window.scrollTo({top:0,behavior:'smooth'}); this.blur(); };
+  if(srpFb) srpFb.style.display = 'none';
+  // ✅ সরাসরি '/' এ replaceState — category URL মুছে যাবে
+  try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
 function srpLiveSearch(val) {
   _srpCurrentQuery = val;
   _srpUpdateClear(document.getElementById('srpQueryInp'));
@@ -4711,7 +4737,7 @@ function _renderSRP(q) {
       </button>
     </div>`;
     const hb = document.getElementById('srpHomeBtn');
-    if(hb) hb.addEventListener('click', () => closeSRP());
+    if(hb) hb.addEventListener('click', () => closeSRPToHome());
     return;
   }
 
@@ -4831,7 +4857,7 @@ function _renderSRP(q) {
   </button>`;
   body.appendChild(srpEndBtn);
   const bottomBtn = document.getElementById('srpBottomHomeBtn');
-  if(bottomBtn) bottomBtn.addEventListener('click', () => closeSRP());
+  if(bottomBtn) bottomBtn.addEventListener('click', () => closeSRPToHome());
 }
 
 function openPPFromSRP(id) {
@@ -4865,14 +4891,24 @@ function closePPToHome() {
   if(overlay._stickyHandler){overlay.removeEventListener('scroll',overlay._stickyHandler);overlay._stickyHandler=null;}
   const fb = document.querySelector('.float-btns'); if(fb) fb.style.display = 'flex';
   overlay._fromSRP = false; overlay._fromWishlist = false;
-  _panelStack = _panelStack.filter(p => p !== 'pp' && p !== 'srp');
+  _panelStack = [];
   // SRP বন্ধ করো
   document.getElementById('srpOverlay').classList.remove('show');
   _srpCurrentQuery = '';
+  // ✅ SRP float buttons hide করো
+  const _fc = document.getElementById('floatCartBtn');
+  const _fw = document.getElementById('floatWishBtn');
+  const _bt = document.getElementById('backToTop');
+  const _sf = document.getElementById('srpFloatBtns');
+  if(_fc) _fc.style.display = 'none';
+  if(_fw) _fw.style.display = 'none';
+  if(_bt) _bt.classList.remove('show');
+  if(_sf) _sf.style.display = 'none';
+  // ✅ sessionStorage SRP query clear করো
+  try { sessionStorage.removeItem('vc_srp_query'); } catch(e) {}
   // হোমে scroll
   window.scrollTo({top: 0, behavior: 'smooth'});
-  // URL: reload করে এসে থাকলে back entry নেই — replaceState দিয়ে URL '/' করো।
-  // Normal flow-এও এখানে replaceState safe: closePPToHome সবসময় home-এ যায়।
+  // ✅ URL: সরাসরি '/' — category URL বা product URL কিছুই থাকবে না
   history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
 }
 
@@ -5757,12 +5793,18 @@ function openOrder(warn, isRefreshRestore){
   try{ sessionStorage.setItem('vc_order_items', JSON.stringify(orderItems)); }catch(e){}
   // History managed by caller (_pushPanel already called)
   if(_panelStack[_panelStack.length-1]!=='order') _pushPanel('order');
+  // ✅ URL: Order খোলার সময় /order-process URL set করো
+  try { history.replaceState({vcStack:[..._panelStack], orderActive:true}, '', '/order-process'); } catch(e) {}
   // Hide summary if multi-product (came from cart)
   const summaryEl2=document.getElementById('orderItemsSummary');
   if(summaryEl2&&orderItems.length>1){summaryEl2.style.display='none';summaryEl2.dataset.hasItems='0';}
   goS(1);
 }
-function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');sessionStorage.removeItem('vc_form_draft');sessionStorage.removeItem('vc_ship');}catch(e){}_popPanel();}}
+function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');sessionStorage.removeItem('vc_form_draft');sessionStorage.removeItem('vc_ship');}catch(e){}// ✅ URL FIX: history.go(-1) এর বদলে সরাসরি '/' এ replaceState করো
+// _popPanel() এর history.go(-1) /order-process থেকে product URL এ ফিরিয়ে দিত
+_panelStack = _panelStack.filter(p => p !== 'order');
+if(!_backButtonTriggered){ try{history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){} }
+}}
 function buildShipOpts(dist){
   const isDhaka=dist==='ঢাকা';
   const c=document.getElementById('shipOpts');
@@ -6128,6 +6170,8 @@ async function confirmOrder(){
   if(gn)gn.style.display=currentUser?'none':'block';
   document.getElementById('waitOverlay').classList.add('show');lockBody();
   // S-11: Prevent browser back button from closing the page during wait
+  // ✅ URL FIX: waiting শুরু হলে URL '/' এ ফেরো — /order-process আর দেখাবে না
+  try{ history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); }catch(e){}
   history.pushState({waitOverlay:true},'','');
   // B-2: unlock only after order is fully saved and UI shown
   _confirmLock=false;
@@ -6360,13 +6404,15 @@ function _handleBack(state) {
     const s2 = document.getElementById('oS2');
     const isS3 = s3 && s3.style.display === 'block';
     const isS2 = s2 && s2.style.display === 'block';
-    if(isS3){ goS(2); history.pushState({vcStack:[..._panelStack], orderStep:2},'',''); return true; }
-    if(isS2){ goS(1); history.pushState({vcStack:[..._panelStack], orderStep:1},'',''); return true; }
+    if(isS3){ goS(2); history.pushState({vcStack:[..._panelStack], orderStep:2},'','/order-process'); return true; }
+    if(isS2){ goS(1); history.pushState({vcStack:[..._panelStack], orderStep:1},'','/order-process'); return true; }
     // Step 1 — close order
     document.getElementById('orderOverlay').classList.remove('show');
     unlockBody();
     try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');}catch(e){}
     _panelStack = _panelStack.filter(p => p !== 'order');
+    // ✅ URL FIX: back button দিয়ে order বন্ধ হলে URL '/' করো
+    try{history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){}
     // If cart was open before, re-open it
     if(_panelStack.length > 0 && _panelStack[_panelStack.length-1] === 'cart'){
       document.getElementById('cartSide').classList.add('open');
@@ -7511,7 +7557,7 @@ function goS(n){
   // Push a new history entry for each forward step (back button can reverse)
   // Don't push when _handleBack calls goS (backButtonTriggered is true)
   if(n>1 && !_backButtonTriggered){
-    history.pushState({vcStack:[..._panelStack], orderStep:n},'','');
+    history.pushState({vcStack:[..._panelStack], orderStep:n},'','/order-process');
   }
   // ✅ REFRESH-FIX: order step save করো
   try{ sessionStorage.setItem('vc_refresh_order_step', String(n)); }catch(e){}
