@@ -4014,6 +4014,25 @@ function _appendNextBatch() {
   if(_renderedCount >= _renderedList.length) {
     if(spinner) spinner.style.display = 'none';
     if(_prodObserver) { _prodObserver.disconnect(); _prodObserver = null; }
+    // ✅ Category শেষ হলে "সব প্রোডাক্ট দেখুন" বাটন যোগ করো — শুধু non-all category তে
+    const _existingEndBtn = document.getElementById('catEndBtn');
+    if(_existingEndBtn) _existingEndBtn.remove();
+    if(activeCat && activeCat !== 'all' && _renderedList.length > 0) {
+      const _endDiv = document.createElement('div');
+      _endDiv.id = 'catEndBtn';
+      _endDiv.style.cssText = 'grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 16px 8px;text-align:center;';
+      _endDiv.innerHTML = `
+        <p style="font-size:13.5px;color:var(--gray);font-weight:500;font-family:'DM Sans',sans-serif;">এই ক্যাটাগরিতে আর কোনো প্রোডাক্ট নেই</p>
+        <button onclick="(function(){activeCat='all';document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));const ap=document.querySelector('.cat-pill[data-cat=\"all\"]');if(ap)ap.classList.add('active');renderProds(PRODS);try{history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){}window.scrollTo({top:0,behavior:'smooth'});})()"
+          style="background:var(--dark);color:#fff;border:none;padding:13px 28px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.13);transition:all .25s cubic-bezier(.4,0,.2,1)"
+          onmouseover="this.style.background='#5CB85C';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='var(--dark)';this.style.transform='translateY(0)'">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          ওয়েবসাইটের সকল প্রোডাক্ট দেখুন
+        </button>`;
+      const g2 = document.getElementById('prodGrid');
+      if(g2) g2.appendChild(_endDiv);
+    }
   } else {
     if(spinner) spinner.style.display = 'flex';
   }
@@ -4512,6 +4531,12 @@ function closeSRPToHome() {
   if(bt) bt.classList.remove('show');
   if(bt) bt.onclick = function(){ window.scrollTo({top:0,behavior:'smooth'}); this.blur(); };
   if(srpFb) srpFb.style.display = 'none';
+  // ✅ Category filter reset — সব প্রোডাক্ট দেখাও, কোনো category selected থাকবে না
+  activeCat = 'all';
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  const _allPill = document.querySelector('.cat-pill[data-cat="all"]');
+  if(_allPill) _allPill.classList.add('active');
+  if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ সরাসরি '/' এ replaceState — category URL মুছে যাবে
   try { history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); } catch(e) {}
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -4908,6 +4933,12 @@ function closePPToHome() {
   try { sessionStorage.removeItem('vc_srp_query'); } catch(e) {}
   // হোমে scroll
   window.scrollTo({top: 0, behavior: 'smooth'});
+  // ✅ Category filter reset — সব প্রোডাক্ট দেখাও, কোনো category selected থাকবে না
+  activeCat = 'all';
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  const _allPill2 = document.querySelector('.cat-pill[data-cat="all"]');
+  if(_allPill2) _allPill2.classList.add('active');
+  if(typeof PRODS !== 'undefined') renderProds(PRODS);
   // ✅ URL: সরাসরি '/' — category URL বা product URL কিছুই থাকবে না
   history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
 }
