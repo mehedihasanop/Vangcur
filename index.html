@@ -3451,7 +3451,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     (async()=>{
       let status=null;
       try{
-        const res=await supabaseClient.from('orders').select('id,status,order_num,customer_name,customer_phone,customer_district,customer_address,items,shipping,shipping_cost,subtotal,total,payment_txn,payment_last4,created_at').eq('id',pid).setHeader('x-order-id',pid).single();
+        const res=await supabaseClient.from('orders').select('id,status,order_num,customer_name,customer_phone,customer_district,customer_address,items,shipping,shipping_cost,subtotal,total,payment_txn,payment_last4,created_at').eq('id',pid).single();
         if(res.data){
           status=res.data.status;
           // localStorage sync
@@ -6188,7 +6188,7 @@ async function confirmOrder(){
         status: 'pending'
       };
       if(order.userId) insertPayload.user_id = order.userId;
-      const {data:insData, error:insErr} = await supabaseClient.from('orders').insert([insertPayload]).select('id').single();
+      const {data:insData, error:insErr} = await supabaseClient.from('orders').insert(insertPayload).select('id').single();
       if(!insErr && insData && insData.id){
         savedId = insData.id;
       } else {
