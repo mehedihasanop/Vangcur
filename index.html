@@ -6188,7 +6188,7 @@ async function confirmOrder(){
         status: 'pending'
       };
       if(order.userId) insertPayload.user_id = order.userId;
-      const {data:insData, error:insErr} = await supabaseClient.from('orders').insert([insertPayload]).select('id').single();
+      const {data:insData, error:insErr} = await supabaseClient.from('orders').insert(insertPayload).select('id').single();
       if(!insErr && insData && insData.id){
         savedId = insData.id;
       } else {
