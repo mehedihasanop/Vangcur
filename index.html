@@ -76,12 +76,12 @@
 /* ব্রাউজার force dark mode আটকানো */
 :root{color-scheme:light}
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+html{scroll-behavior:smooth;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;overscroll-behavior-y:none}
 html::-webkit-scrollbar{width:5px}
 html::-webkit-scrollbar-track{background:transparent}
 html::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
 html::-webkit-scrollbar-thumb:hover{background:var(--gray)}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;width:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;width:100%;overscroll-behavior-y:none}
 
 /* NAV */
 nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:900;box-shadow:var(--sh1);padding-top:env(safe-area-inset-top)}
@@ -475,7 +475,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .prod-cart-icon-btn:disabled{opacity:.45;cursor:not-allowed}
 
 /* PRODUCT FULL PAGE */
-.pp-overlay{position:fixed;inset:0;background:var(--cream);z-index:1800;display:none;overflow-y:auto}
+.pp-overlay{position:fixed;inset:0;background:var(--cream);z-index:1800;display:none;overflow-y:auto;overscroll-behavior:contain}
 .pp-overlay.show{display:block;animation:fadeIn .2s ease}
 .pp-overlay.no-anim.show{animation:none!important}
 .order-overlay.no-anim.show{animation:none!important}
@@ -530,10 +530,10 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* Cart button visible on mobile too */
 
 /* PRODUCT DETAIL TABS */
-.pp-tabs-wrap{background:var(--white);position:sticky;top:62px;z-index:9;border-bottom:2px solid var(--border);max-width:100%}
-.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.pp-tabs-wrap{background:var(--white);position:sticky;top:61px;z-index:9;border-bottom:2px solid var(--border);max-width:100%;touch-action:pan-x;user-select:none;-webkit-user-select:none}
+.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .pp-tabs::-webkit-scrollbar{display:none}
-.pp-tab{white-space:nowrap;padding:12px 18px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;border-bottom:2.5px solid transparent;margin-bottom:-2px;flex-shrink:0}
+.pp-tab{white-space:nowrap;padding:12px 18px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;border-bottom:2.5px solid transparent;margin-bottom:-2px;flex-shrink:0;user-select:none;-webkit-user-select:none}
 .pp-tab:hover{color:var(--dark)}
 .pp-tab.on{color:var(--dark);border-bottom-color:var(--dark)}
 
@@ -717,7 +717,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .acc-card{display:none}
 
 /* ORDER OVERLAY */
-.order-overlay{position:fixed;inset:0;background:var(--cream);z-index:3500;display:none;overflow-y:auto}
+.order-overlay{position:fixed;inset:0;background:var(--cream);z-index:3500;display:none;overflow-y:auto;overscroll-behavior:contain}
 .order-overlay.show{display:block}
 .order-box{background:var(--white);max-width:640px;width:100%;margin:0 auto;min-height:100vh;box-shadow:none;border-radius:0}
 .order-top{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between}
@@ -3104,6 +3104,29 @@ function initPageRestoration() {
 }
 
 document.addEventListener('DOMContentLoaded',async ()=>{
+  // ✅ FIX-5: Google লগইন ক্যানসেল করলে URL-এ access_denied error code পরিষ্কার করো
+  if(window.location.search.includes('access_denied') || window.location.search.includes('error=')){
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showToast('❌ লগইন বাতিল করা হয়েছে');
+  }
+  // ✅ SEC: Page-load spam block persistence — রিফ্রেশ করলেও modal দেখাবে
+  try{
+    const spamFlag=localStorage.getItem('vc_spam_blocked');
+    const spamTs=parseInt(localStorage.getItem('vc_spam_blocked_ts')||'0',10);
+    const devFlag=localStorage.getItem('vc_dev_blocked');
+    const devTs=parseInt(localStorage.getItem('vc_dev_blocked_ts')||'0',10);
+    const _24h=24*60*60*1000;
+    if(spamFlag==='1'&&(Date.now()-spamTs)<_24h){
+      setTimeout(()=>{showSpamBlockModal('phone');},400);
+    } else if(spamFlag==='1'){
+      localStorage.removeItem('vc_spam_blocked');localStorage.removeItem('vc_spam_blocked_ts');
+    }
+    if(devFlag==='1'&&(Date.now()-devTs)<_24h){
+      setTimeout(()=>{showSpamBlockModal('device');},400);
+    } else if(devFlag==='1'){
+      localStorage.removeItem('vc_dev_blocked');localStorage.removeItem('vc_dev_blocked_ts');
+    }
+  }catch(e){}
   // ✅ PERF: localStorage থেকে hero card cache তাৎক্ষণিক দেখাও (Supabase আসার আগেই)
   try{
     const cachedCards = localStorage.getItem('vc_cath_cache');
@@ -5930,11 +5953,22 @@ function goS2(){
   const addr=document.getElementById('cAddr').value.trim();
   let ok=true;
   if(!nm){showFerr('eN',true);ok=false;}else showFerr('eN',false);
-  // B-3: proper BD phone validation
+  // B-3: proper BD phone validation + obvious fake check
   const phoneRegex=/^01[3-9]\d{8}$/;
-  if(!phoneRegex.test(ph)){showFerr('eP',true);ok=false;}else showFerr('eP',false);
+  let phoneOk=phoneRegex.test(ph);
+  if(phoneOk){
+    // শেষ ৮ ডিজিট সব একই কিনা চেক (যেমন: 01711111111)
+    const last8=ph.slice(3);
+    const allSame=last8.split('').every(c=>c===last8[0]);
+    // সম্পূর্ণ sequential কিনা চেক (যেমন: 01712345678)
+    const isSeq=last8==='12345678'||last8==='87654321';
+    if(allSame||isSeq){phoneOk=false;}
+  }
+  if(!phoneOk){document.getElementById('eP').textContent='দয়া করে সঠিক মোবাইল নম্বর দিন';showFerr('eP',true);ok=false;}else showFerr('eP',false);
   if(!dist){showFerr('eD',true);ok=false;}else showFerr('eD',false);
-  if(!addr){showFerr('eA',true);ok=false;}else showFerr('eA',false);
+  // Address validation: ৮+ char, কমপক্ষে ১টি স্পেস, ৫+ repeated char নেই
+  let addrOk=addr.length>=8&&/\s/.test(addr)&&!/(.)\1{4,}/.test(addr);
+  if(!addrOk){document.getElementById('eA').textContent='দয়া করে বিস্তারিত ঠিকানা দিন (যেমন: রোড বা বাসা নম্বর)';showFerr('eA',true);ok=false;}else showFerr('eA',false);
   // Email ঐচ্ছিক — কিন্তু কিছু লিখলে valid হতে হবে (name@domain.ext)
   const em=document.getElementById('cEmail').value.trim();
   const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -5968,10 +6002,22 @@ function renderStep3Summary(){
   document.getElementById('custRecap').innerHTML='<strong>গ্রাহকের তথ্য</strong><br>নাম: '+safe(n)+'<br>ফোন: '+safe(ph)+'<br>জেলা: '+safe(dist)+'<br>ঠিকানা: '+safe(addr)+(em?'<br>ইমেইল: '+safe(em):'');
 }
 function goS3(){
-  const txn=document.getElementById('cTxn').value.trim();
+  const txn=document.getElementById('cTxn').value.trim().toUpperCase();
   const l4=document.getElementById('cL4').value.trim();
   if(!txn&&!l4){showFerr('eTxn',true);showFerr('eL4',true);return;}
-  if(txn&&txn.length!==10){showFerr('eTxn',true);return;}
+  if(txn){
+    const txnRegex=/^[A-Z0-9]{10}$/;
+    const hasLetter=/[A-Z]/.test(txn);
+    const hasDigit=/[0-9]/.test(txn);
+    const allSame=/^(.)\1{9}$/.test(txn);
+    const txnOk=txnRegex.test(txn)&&hasLetter&&hasDigit&&!allSame;
+    if(!txnOk){
+      document.getElementById('eTxn').textContent='দয়া করে সঠিক ১০ সংখ্যার বিকাশ ট্রানজেকশন আইডি দিন';
+      showFerr('eTxn',true);return;
+    }
+    // uppercase করা value ফিরিয়ে দাও
+    document.getElementById('cTxn').value=txn;
+  }
   if(l4&&l4.length!==4){showFerr('eL4',true);return;}
   showFerr('eTxn',false);showFerr('eL4',false);
   renderStep3Summary();
@@ -6115,6 +6161,58 @@ function _closeLoginOrderMode(){
   closeLogin();
 }
 
+// ✅ SEC: Spam Block Warning Modal — center popup with bounce-in animation
+function showSpamBlockModal(type){
+  const old=document.getElementById('spamBlockModal');
+  if(old)old.remove();
+  const msUrl=(_settings&&_settings['vc_contact']&&_settings['vc_contact'].messenger)||'https://m.me/vangcurbdofficial';
+  const msgText=type==='device'
+    ?'⚠️ দুঃখিত! আপনার এই ডিভাইস/ব্রাউজার থেকে গত ২৪ ঘণ্টায় ইতিমধ্যে ৫টি অর্ডার করা হয়েছে। স্প্যামিং এড়াতে একদিনে একটি ডিভাইস থেকে ৫টির বেশি অর্ডার গ্রহণযোগ্য নয়। অনুগ্রহ করে আগামীকাল আবার চেষ্টা করুন। প্রয়োজনে WhatsApp 01816365504'
+    :'⚠️ দুঃখিত! এই মোবাইল নম্বরটি দিয়ে গত ২৪ ঘণ্টায় ইতিমধ্যে ৫টি অর্ডার করা হয়েছে। স্প্যামিং এড়াতে একদিনে একটি নম্বরে ৫টির বেশি অর্ডার গ্রহণযোগ্য নয়। অনুগ্রহ করে আগামীকাল আবার চেষ্টা করুন। প্রয়োজনে WhatsApp 01816365504';
+  const overlay=document.createElement('div');
+  overlay.id='spamBlockModal';
+  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,10,20,0.65);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML=`
+    <style>
+      @keyframes sbSlideUp{from{opacity:0;transform:translateY(40px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+      #spamBlockModal .sb-card{animation:sbSlideUp 0.3s cubic-bezier(.34,1.56,.64,1)}
+    </style>
+    <div class="sb-card" style="background:#fff;border-radius:24px;max-width:420px;width:100%;padding:34px 24px;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+      <div style="display:flex;justify-content:center;margin-bottom:4px">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#e63946);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 4px 18px rgba(230,57,70,.35)">⚠️</div>
+      </div>
+      <div style="font-size:20px;font-weight:800;color:#111;margin:16px 0 8px;text-align:center">সীমাবদ্ধতা সতর্কতা 🛑</div>
+      <div style="font-size:13.5px;line-height:1.7;color:#555;text-align:center">${msgText}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin:20px 0;color:#aaa;font-size:12px;letter-spacing:1px">
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>— অথবা —<div style="flex:1;height:1px;background:#e5e7eb"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+        <button id="sbBack" style="flex:1;height:46px;background:#111;color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">ওয়েবসাইটে ফিরে যান</button>
+        <button id="sbWa" style="width:46px;height:46px;border-radius:12px;background:#25D366;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="WhatsApp">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.1 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.444h.005c6.585 0 11.946-5.336 11.949-11.896.002-3.177-1.24-6.165-3.479-8.447zM12.045 21.785h-.004c-1.774 0-3.513-.476-5.031-1.37l-.361-.214-3.741.976.996-3.622-.235-.373C2.49 15.42 1.985 13.68 1.985 11.893c.003-5.548 4.534-10.063 10.063-10.063 2.688 0 5.213 1.043 7.113 2.937 1.9 1.894 2.944 4.41 2.941 7.086-.002 5.548-4.533 10.063-10.057 10.063zm5.518-7.538c-.302-.151-1.789-.881-2.067-.982-.278-.1-.48-.15-.682.15-.2.3-.781.982-.957 1.183-.176.2-.352.227-.653.076-.302-.151-1.274-.469-2.427-1.495-.897-.798-1.503-1.783-1.679-2.084-.176-.302-.019-.465.132-.615.136-.134.302-.352.453-.528.15-.177.2-.302.3-.504.1-.2.05-.377-.025-.528-.076-.151-.682-1.641-.934-2.247-.246-.59-.496-.51-.682-.52-.176-.009-.378-.01-.578-.01-.2 0-.528.075-.805.376-.277.3-1.057 1.028-1.057 2.518 0 1.49 1.082 2.93 1.233 3.132.15.2 2.127 3.24 5.155 4.543.72.31 1.282.496 1.72.635.723.23 1.382.197 1.903.12.58-.086 1.789-.73 2.041-1.435.251-.705.251-1.309.176-1.435-.075-.126-.276-.2-.578-.352z" fill="white"/></svg>
+        </button>
+        <button id="sbMs" style="width:46px;height:46px;border-radius:12px;background:#0084FF;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Messenger">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.975 12-11.111S18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8l3.131 3.259L19.752 8l-6.561 6.963z" fill="white"/></svg>
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  lockBody();
+  function _cleanupSpamModal(){
+    localStorage.removeItem('vc_spam_blocked');
+    localStorage.removeItem('vc_spam_blocked_ts');
+    localStorage.removeItem('vc_dev_blocked');
+    localStorage.removeItem('vc_dev_blocked_ts');
+    ['cName','cPhone','cAddr','cTxn'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    overlay.remove();
+    unlockBody();
+    try{history.replaceState({vcStack:[],homeCurrent:true},'',' /');history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){}
+  }
+  document.getElementById('sbBack').onclick=_cleanupSpamModal;
+  document.getElementById('sbWa').onclick=()=>{window.open('https://wa.me/8801816365504','_blank');_cleanupSpamModal();};
+  document.getElementById('sbMs').onclick=()=>{window.open(msUrl,'_blank');_cleanupSpamModal();};
+}
+
 let _confirmLock=false;
 
 async function confirmOrder(){
@@ -6131,6 +6229,45 @@ async function confirmOrder(){
       if(Date.now()-lastOrderTime<30000){showToast('⏳ একটু অপেক্ষা করুন, তারপর আবার চেষ্টা করুন');_confirmLock=false;return;}
     }
   }
+  // ✅ SEC: Device-level 24hr order limit check (localStorage)
+  const devBlockedFlag=localStorage.getItem('vc_dev_blocked');
+  const devBlockedTs=parseInt(localStorage.getItem('vc_dev_blocked_ts')||'0',10);
+  if(devBlockedFlag==='1' && (Date.now()-devBlockedTs)<24*60*60*1000){
+    _confirmLock=false;showSpamBlockModal('device');return;
+  }
+
+  // ✅ SEC: Phone-level 24hr spam check via Supabase RPC
+  const spamPhone=document.getElementById('cPhone')?.value?.trim();
+  if(spamPhone){
+    try{
+      const {data:count,error:spamErr}=await supabaseClient
+        .rpc('check_daily_order_limit',{p_phone:spamPhone});
+      if(!spamErr && count>=5){
+        localStorage.setItem('vc_spam_blocked','1');
+        localStorage.setItem('vc_spam_blocked_ts',String(Date.now()));
+        // Device-level block ও সেট করো
+        const devOrders=parseInt(localStorage.getItem('vc_dev_order_count')||'0',10);
+        if(devOrders>=5){
+          localStorage.setItem('vc_dev_blocked','1');
+          localStorage.setItem('vc_dev_blocked_ts',String(Date.now()));
+        }
+        _confirmLock=false;showSpamBlockModal('phone');return;
+      }
+    }catch(spamE){console.warn('Spam check RPC failed:',spamE);}
+  }
+
+  // ✅ SEC: Device order counter increment
+  const devCnt=parseInt(localStorage.getItem('vc_dev_order_count')||'0',10)+1;
+  localStorage.setItem('vc_dev_order_count',String(devCnt));
+  const devCntTs=parseInt(localStorage.getItem('vc_dev_order_count_ts')||'0',10);
+  if((Date.now()-devCntTs)>24*60*60*1000){
+    localStorage.setItem('vc_dev_order_count','1');
+    localStorage.setItem('vc_dev_order_count_ts',String(Date.now()));
+  } else if(devCnt>=5){
+    localStorage.setItem('vc_dev_blocked','1');
+    localStorage.setItem('vc_dev_blocked_ts',String(Date.now()));
+  }
+
   // B-2: Lock permanently until order completes — no timeout reset
   // ✅ SEC-04 FIX: Atomic increment via Supabase RPC — race condition দূর করা হয়েছে
   // আগে read-then-write ছিল, দুজন একসাথে order করলে একই নম্বর পেত।
@@ -7069,7 +7206,7 @@ function showInvoiceModal(html, orderNum, callerCtx){
 
   const modal=document.createElement('div');
   modal.id='invoiceModal';
-  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f6fa;display:flex;flex-direction:column;overflow:hidden;';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f6fa;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:contain;';
 
   // Top bar — শুধু Back ও PNG Download বাটন
   modal.innerHTML=`
@@ -7077,7 +7214,7 @@ function showInvoiceModal(html, orderNum, callerCtx){
       <button id="invBackBtn" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">← ফিরে যান</button>
       <button id="invDlBtn" style="display:flex;align-items:center;gap:7px;background:#E63946;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ ছবি ডাউনলোড</button>
     </div>
-    <div id="invBody" style="flex:1;overflow-y:auto;padding:20px 12px;">
+    <div id="invBody" style="flex:1;overflow-y:auto;padding:20px 12px;overscroll-behavior:contain;">
       <style>${invCss}</style>
       ${cleanBody}
     </div>`;
@@ -8340,6 +8477,20 @@ function loadCustomCategories(){
   // এখন থেকে কোনো dark mode apply হবে না
   // মোবাইল বা ডেস্কটপের সিস্টেম dark mode হলেও ওয়েবসাইট লাইটই থাকবে
 })();
+
+// ✅ SEC: Right-click disable
+document.addEventListener('contextmenu',function(e){
+  e.preventDefault();
+  if(typeof showToast==='function')showToast('⚠️ নিরাপত্তা স্বার্থে রাইট-ক্লিক নিষ্ক্রিয় করা হয়েছে');
+});
+
+// ✅ SEC: Dev Tools keyboard shortcut block (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+document.addEventListener('keydown',function(e){
+  if(e.keyCode===123){e.preventDefault();return false;}// F12
+  if(e.ctrlKey&&e.shiftKey&&e.keyCode===73){e.preventDefault();return false;}// Ctrl+Shift+I
+  if(e.ctrlKey&&e.shiftKey&&e.keyCode===74){e.preventDefault();return false;}// Ctrl+Shift+J
+  if(e.ctrlKey&&e.keyCode===85){e.preventDefault();return false;}// Ctrl+U
+});
 </script>
 
 <!-- FLOATING CART BADGE -->
