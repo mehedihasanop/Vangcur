@@ -76,12 +76,12 @@
 /* ব্রাউজার force dark mode আটকানো */
 :root{color-scheme:light}
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;overscroll-behavior-y:none}
+html{scroll-behavior:smooth;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 html::-webkit-scrollbar{width:5px}
 html::-webkit-scrollbar-track{background:transparent}
 html::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
 html::-webkit-scrollbar-thumb:hover{background:var(--gray)}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;width:100%;overscroll-behavior-y:none}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;width:100%}
 
 /* NAV */
 nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:900;box-shadow:var(--sh1);padding-top:env(safe-area-inset-top)}
@@ -531,7 +531,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 
 /* PRODUCT DETAIL TABS */
 .pp-tabs-wrap{background:var(--white);position:sticky;top:61px;z-index:9;border-bottom:2px solid var(--border);max-width:100%;touch-action:pan-x;user-select:none;-webkit-user-select:none}
-.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x}
 .pp-tabs::-webkit-scrollbar{display:none}
 .pp-tab{white-space:nowrap;padding:12px 18px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;border-bottom:2.5px solid transparent;margin-bottom:-2px;flex-shrink:0;user-select:none;-webkit-user-select:none}
 .pp-tab:hover{color:var(--dark)}
@@ -598,7 +598,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 /* CART SIDEBAR */
 .cart-back{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2900;display:none}
 .cart-back.on{display:block}
-.cart-side{position:fixed;right:-430px;top:0;bottom:0;width:420px;background:var(--white);z-index:3000;box-shadow:-8px 0 32px rgba(0,0,0,.12);transition:right .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.cart-side{position:fixed;right:-430px;top:0;bottom:0;width:420px;background:var(--white);z-index:3000;box-shadow:-8px 0 32px rgba(0,0,0,.12);transition:right .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overscroll-behavior:contain}
 .cart-side.open{right:0}
 .cart-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .cart-head h3{font-size:17px;font-weight:700}
@@ -924,7 +924,7 @@ body.dark .mobile-search-clear{background:#9ca3af;color:#121212}
 .wish-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:3;transition:var(--tr);box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .wish-btn:hover{transform:scale(1.15)}
 .wish-btn.wishlisted{background:#FFF0F0}
-.wishlist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:4100;display:none;align-items:center;justify-content:center;padding:16px}
+.wishlist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:4100;display:none;align-items:center;justify-content:center;padding:16px;overscroll-behavior:contain}
 .wishlist-overlay.show{display:flex}
 .wishlist-box{background:var(--white);border-radius:20px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;animation:slideUp .25s ease}
 .wishlist-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -3109,21 +3109,15 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     window.history.replaceState({}, document.title, window.location.pathname);
     showToast('❌ লগইন বাতিল করা হয়েছে');
   }
-  // ✅ SEC: Page-load spam block persistence — রিফ্রেশ করলেও modal দেখাবে
+  // ✅ SEC: Expired spam/device block flags পরিষ্কার করো (২৪ঘণ্টা পেরিয়ে গেলে)
   try{
-    const spamFlag=localStorage.getItem('vc_spam_blocked');
-    const spamTs=parseInt(localStorage.getItem('vc_spam_blocked_ts')||'0',10);
-    const devFlag=localStorage.getItem('vc_dev_blocked');
-    const devTs=parseInt(localStorage.getItem('vc_dev_blocked_ts')||'0',10);
     const _24h=24*60*60*1000;
-    if(spamFlag==='1'&&(Date.now()-spamTs)<_24h){
-      setTimeout(()=>{showSpamBlockModal('phone');},400);
-    } else if(spamFlag==='1'){
+    const spamTs=parseInt(localStorage.getItem('vc_spam_blocked_ts')||'0',10);
+    if(localStorage.getItem('vc_spam_blocked')==='1'&&(Date.now()-spamTs)>=_24h){
       localStorage.removeItem('vc_spam_blocked');localStorage.removeItem('vc_spam_blocked_ts');
     }
-    if(devFlag==='1'&&(Date.now()-devTs)<_24h){
-      setTimeout(()=>{showSpamBlockModal('device');},400);
-    } else if(devFlag==='1'){
+    const devTs=parseInt(localStorage.getItem('vc_dev_blocked_ts')||'0',10);
+    if(localStorage.getItem('vc_dev_blocked')==='1'&&(Date.now()-devTs)>=_24h){
       localStorage.removeItem('vc_dev_blocked');localStorage.removeItem('vc_dev_blocked_ts');
     }
   }catch(e){}
@@ -5854,6 +5848,14 @@ function openOrder(warn, isRefreshRestore){
     const txnEl=document.getElementById('cTxn');const l4El=document.getElementById('cL4');
     if(txnEl)txnEl.value='';if(l4El)l4El.value='';
   }
+  // ✅ FIX-2: #cTxn real-time uppercase + alphanumeric-only + max 10 char sanitizer
+  const _txnEl=document.getElementById('cTxn');
+  if(_txnEl&&!_txnEl._vcSanitized){
+    _txnEl._vcSanitized=true;
+    _txnEl.addEventListener('input',function(){
+      this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10);
+    });
+  }
   const wEl=document.getElementById('cartWarn');
   const isEmpty=warn||orderItems.length===0;
   if(isEmpty){wEl.classList.add('show');orderItems=[];}else{wEl.classList.remove('show');}
@@ -6199,14 +6201,12 @@ function showSpamBlockModal(type){
   document.body.appendChild(overlay);
   lockBody();
   function _cleanupSpamModal(){
-    localStorage.removeItem('vc_spam_blocked');
-    localStorage.removeItem('vc_spam_blocked_ts');
-    localStorage.removeItem('vc_dev_blocked');
-    localStorage.removeItem('vc_dev_blocked_ts');
-    ['cName','cPhone','cAddr','cTxn'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    // Block flags ইচ্ছাকৃতভাবে রাখা হচ্ছে — ২৪ঘণ্টা active থাকবে
     overlay.remove();
     unlockBody();
-    try{history.replaceState({vcStack:[],homeCurrent:true},'',' /');history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){}
+    closeOrder();
+    ['cName','cPhone','cAddr','cTxn'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    try{history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){}
   }
   document.getElementById('sbBack').onclick=_cleanupSpamModal;
   document.getElementById('sbWa').onclick=()=>{window.open('https://wa.me/8801816365504','_blank');_cleanupSpamModal();};
