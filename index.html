@@ -2493,6 +2493,7 @@ let currentUser=JSON.parse(localStorage.getItem('vc_user')||'null');
 let curProd=null, curQty=1, curImgIdx=0;
 let selectedShip='', orderItems=[], pendingOrdId=null;
 let activeCat='all'; // Global category tracker
+let catPage=0; // Declared globally to avoid TDZ issues on page load
 
 // ─── iOS Safari Body Scroll Fix ──────────────────────────────────────────────
 // lockBody() একা iOS Safari তে কাজ করে না।
@@ -3216,13 +3217,15 @@ function initPageRestoration() {
 }
 
 document.addEventListener('DOMContentLoaded',async ()=>{
-  // ✅ ANON AUTH: পেজ লোডে active session না থাকলে anonymous session চালু করো
+  // ✅ ANON AUTH: পেজ লোডে active/valid session না থাকলে anonymous session চালু করো
   if(supabaseClient){
     try{
       const {data:{session}}=await supabaseClient.auth.getSession();
-      if(!session){
+      const isExpired=session&&session.expires_at&&(session.expires_at<Date.now()/1000);
+      if(!session||isExpired){
+        if(isExpired) await supabaseClient.auth.signOut();
         await supabaseClient.auth.signInAnonymously();
-        console.log("✅ Temporary secure session activated.");
+        console.log("✅ Fresh temporary secure session activated.");
       }
     }catch(e){
       console.warn("Anonymous login failed:",e);
@@ -8648,7 +8651,6 @@ function clearMobileSearch(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePP();closeCart();closeOrder();closeInfo();closeWait();closePost();closeLogin();closeAcc();closeBgConfirmPopup();closePreConfirmModal();const mb=document.getElementById('mobileSearchBar');if(mb)mb.classList.remove('show');}});
 
 // CATEGORY CAROUSEL
-let catPage=0;
 function getCatPerPage(){return window.innerWidth<=768?4:8;}
 function getCatItems(){return document.querySelectorAll('#catCardsGrid .cat-card');}
 
