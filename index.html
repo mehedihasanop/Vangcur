@@ -1090,6 +1090,36 @@ body.dark .btn-next{background:#FF6B6B;color:#fff}
 body.dark .btn-next:hover{background:#FF4757}
 body.dark #confirmOrderBtn{background:#10B981 !important;color:#fff !important}
 body.dark #confirmOrderBtn:hover{background:#059669 !important}
+
+/* ✅ Terms Checkbox Row */
+.terms-check-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--light);border-radius:10px;margin-bottom:4px;border:1.5px solid var(--border);transition:border-color .2s}
+.terms-check-row.shake{animation:termsShake .35s cubic-bezier(.36,.07,.19,.97)}
+.terms-check-row.error{border-color:#ef4444}
+@keyframes termsShake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.terms-cb{width:20px;height:20px;min-width:20px;border-radius:5px;border:2px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;margin-top:1px}
+.terms-cb.checked{background:#111;border-color:#111}
+.terms-cb.checked::after{content:'✓';color:#fff;font-size:13px;font-weight:800;line-height:1}
+.terms-cb-label{font-size:12.5px;color:var(--dark);line-height:1.6;cursor:pointer}
+.terms-cb-label a{color:#2563eb;text-decoration:underline;font-weight:600;cursor:pointer}
+.terms-err{font-size:11.5px;color:#ef4444;margin:2px 0 8px 2px;display:none}
+.terms-err.show{display:block}
+
+/* ✅ Policy Modal */
+.policy-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9800;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:0}
+.policy-modal-overlay.show{display:flex}
+.policy-modal-card{background:var(--white);width:100%;max-width:540px;min-height:100%;display:flex;flex-direction:column}
+.policy-modal-head{position:sticky;top:0;background:var(--white);z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1.5px solid var(--border)}
+.policy-modal-head h3{font-size:16px;font-weight:800;color:var(--dark);margin:0}
+.policy-modal-close{background:var(--light);border:1.5px solid var(--border);border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--dark)}
+.policy-modal-body{flex:1;padding:20px 16px 40px}
+.policy-modal-body h2{font-size:17px;font-weight:800;color:var(--dark);margin:0 0 18px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.policy-modal-body h3{font-size:14px;font-weight:700;color:var(--dark);margin:22px 0 8px;display:flex;align-items:center;gap:6px}
+.policy-modal-body ul{margin:0 0 10px;padding-left:18px}
+.policy-modal-body ul li{font-size:13px;color:#444;line-height:1.75;margin-bottom:4px}
+.policy-modal-body p{font-size:13px;color:#444;line-height:1.75;margin:0 0 8px}
+.policy-modal-body .policy-warn{background:#fff8f0;border:1.5px solid #f97316;border-radius:8px;padding:10px 13px;font-size:12.5px;color:#b45309;line-height:1.65;margin:10px 0}
+.policy-modal-body .policy-section{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.policy-modal-body .policy-section:last-child{border-bottom:none}
 body.dark #orderItemsSummary{background:#1C1C1E !important}
 body.dark #orderItemsList{color:#E5E5EA !important}
 body.dark #orderItemsTotal{color:#E5E5EA !important}
@@ -1669,6 +1699,13 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
       লোড হচ্ছে...
     </div>
+    <!-- ৪০টা দেখানোর পরে "আরো প্রোডাক্ট দেখুন" বাটন — JS দিয়ে show/hide হয় -->
+    <button id="loadMoreBtn" onclick="_loadMoreClick()" style="display:none;background:var(--dark);color:#fff;border:none;padding:13px 32px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.13);transition:all .25s cubic-bezier(.4,0,.2,1)"
+      onmouseover="this.style.background='#5CB85C';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.background='var(--dark)';this.style.transform='translateY(0)'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      আরো প্রোডাক্ট দেখুন
+    </button>
   </div>
 </div>
 
@@ -2111,6 +2148,12 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       </div>
       <div style="background:var(--light);padding:10px 13px;border-radius:8px;margin-bottom:14px;font-size:12px;display:flex;justify-content:space-between;color:#1A1A1A"><span>Payment Method</span><span style="font-weight:700">bKash Online Payment</span></div>
       <div class="cust-recap" id="custRecap"></div>
+      <!-- ✅ Terms & Conditions Checkbox -->
+      <div class="terms-check-row" id="termsCheckRow" onclick="toggleTermsCb()" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--light);border-radius:10px;margin-bottom:4px;border:1.5px solid var(--border);cursor:pointer">
+        <div class="terms-cb" id="termsCb" style="width:20px;height:20px;min-width:20px;border-radius:5px;border:2px solid #ccc;background:#fff;display:flex;align-items:center;justify-content:center;margin-top:2px;flex-shrink:0"></div>
+        <div style="font-size:12.5px;color:var(--dark);line-height:1.6">আমি ভাঙচুরের সকল <span onclick="event.stopPropagation();openPolicyModal()" style="color:#2563eb;text-decoration:underline;font-weight:600;cursor:pointer">নীতিমালা ও শর্তাবলী</span> পড়েছি এবং মেনে নিচ্ছি।</div>
+      </div>
+      <div id="termsErr" style="font-size:11.5px;color:#ef4444;margin:2px 0 8px 2px;display:none">⚠️ অর্ডার দেওয়ার আগে নীতিমালা মেনে নেওয়া আবশ্যক।</div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(2)">← পেছনে</button><button class="btn-next" id="confirmOrderBtn" onclick="preConfirmCheck()" style="background:var(--dark)">✅ অর্ডার কনফার্ম করুন</button></div>
     </div>
   </div>
@@ -2260,6 +2303,75 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 <!-- INFO OVERLAY -->
 <div class="info-overlay" id="infoOverlay" onclick="if(event.target===this)closeInfo()">
   <div class="info-box"><button class="info-close" onclick="closeInfo()">✕ বন্ধ করুন</button><div id="infoContent"></div></div>
+</div>
+
+<!-- ✅ POLICY MODAL — নীতিমালা ও শর্তাবলী -->
+<div class="policy-modal-overlay" id="policyModalOverlay" onclick="if(event.target===this)closePolicyModal()">
+  <div class="policy-modal-card">
+    <div class="policy-modal-head">
+      <h3>📋 নীতিমালা ও শর্তাবলী</h3>
+      <button class="policy-modal-close" onclick="closePolicyModal()">✕ বন্ধ করুন</button>
+    </div>
+    <div class="policy-modal-body">
+
+      <div class="policy-section">
+
+        <h3>📦 ১. অর্ডার সংক্রান্ত</h3>
+        <ul>
+          <li>অর্ডার সম্পন্ন করার আগে অনুগ্রহ করে নিশ্চিত করুন যে আপনার দেওয়া নাম, মোবাইল নম্বর, ডেলিভারি ঠিকানা, bKash ট্রানজেকশন আইডি বা বিকাশের শেষ ৪ ডিজিট সহ সকল তথ্য সঠিক।</li>
+          <li>যেকোনো তথ্য ভুল দিলে <strong>Vangcur আপনার অর্ডারটি বাতিল করার সম্পূর্ণ অধিকার রাখে।</strong></li>
+          <li>অর্ডার কনফার্ম হওয়ার ২৪ ঘণ্টার মধ্যে ডেলিভারি প্রক্রিয়া শুরু হবে।</li>
+          <li>২৪–৪৮ ঘণ্টার মধ্যে কুরিয়ার সার্ভিস থেকে আপনার দেওয়া নম্বরে পার্সেলের ট্র্যাকিং লিংক পাঠানো হবে।</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>🚚 ২. ডেলিভারি সংক্রান্ত</h3>
+        <p>Vangcur <strong>ক্লোজড বক্স ডেলিভারি</strong> পদ্ধতিতে প্রোডাক্ট পাঠায়। তাই —</p>
+        <ul>
+          <li>ডেলিভারিম্যানকে আগে <strong>অবশিষ্ট টাকা পরিশোধ করুন</strong>, তারপর পার্সেল বুঝে নিন।</li>
+          <li>প্রোডাক্ট হাতে পাওয়ার পর পছন্দ না হলে ফেরত দেওয়ার <strong>কোনো সুযোগ নেই।</strong> অর্ডার করার আগেই প্রোডাক্টের বিবরণ ও ছবি ভালোভাবে দেখে নিন।</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>🎥 ৩. আনবক্সিং ভিডিও সংক্রান্ত (অবশ্যই করণীয়)</h3>
+        <p>প্রোডাক্ট পাওয়ার পর খোলার সময় <strong>একটানা আনবক্সিং ভিডিও</strong> ধারণ করুন —</p>
+        <ul>
+          <li>পার্সেলের বাইরে থেকে শুরু করে প্রোডাক্টের ভেতরের সব পার্টস পর্যন্ত একটানা রেকর্ড করতে হবে।</li>
+          <li>ভিডিওতে <strong>কোনো কাট বা পজ</strong> দেওয়া যাবে না।</li>
+          <li>ইলেকট্রনিক প্রোডাক্টের ক্ষেত্রে ভিডিওতে প্রোডাক্টটি <strong>চালু করে দেখাতে হবে।</strong></li>
+        </ul>
+        <div class="policy-warn">⚠️ আনবক্সিং ভিডিও ছাড়া কোনো ওয়ারেন্টি ক্লেইম করা সম্ভব নয়।</div>
+        <ul>
+          <li>প্রোডাক্ট ভাঙা, ত্রুটিপূর্ণ, মিসিং বা ভুল পেলে এই আনবক্সিং ভিডিও দিয়ে ওয়ারেন্টি ক্লেইম করতে পারবেন।</li>
+          <li>প্রোডাক্টে কোনো প্রকার সমস্যা হলে সম্পূর্ণ দায়ভার Vangcur কর্তৃপক্ষ বহন করবে এবং যত দ্রুত সম্ভব সমাধান দেওয়ার চেষ্টা করা হবে।</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>🛡️ ৪. ওয়ারেন্টি সংক্রান্ত</h3>
+        <ul>
+          <li>সাধারণ প্রোডাক্টে <strong>১ সপ্তাহের</strong> ওয়ারেন্টি থাকবে। নির্বাচিত প্রোডাক্টে ৬ মাস / ১ বছর / ২ বছর পর্যন্ত ওয়ারেন্টি থাকবে।</li>
+          <li>ওয়ারেন্টির মেয়াদ শুরু হয় <strong>অর্ডার করার তারিখ থেকে।</strong></li>
+          <li>ওয়ারেন্টি থাকাকালীন সময়ের মধ্যে প্রোডাক্টে সমস্যা হলে এবং ওয়ারেন্টি ক্লেইম করা হলে, Vangcur কর্তৃপক্ষ নিজ খরচে সেটি রিপ্লেস করে নতুন একটি প্রোডাক্ট আপনার ঠিকানায় পৌঁছে দেবে। 🤍</li>
+          <li>ওয়ারেন্টি থাকাকালীন সময়ে অবশ্যই প্রোডাক্টের বক্স ও ইনভয়েস পেপার সযত্নে সংরক্ষণ করুন।</li>
+        </ul>
+        <p><strong>ওয়ারেন্টি ক্লেইম করতে যা লাগবে —</strong></p>
+        <ul>
+          <li>মূল প্রোডাক্টের বক্স <em>(ছেঁড়া বা ফাটা বক্স অথবা বক্সের গায়ে টেপ লাগানো থাকলে গ্রহণযোগ্য হবে না। বক্স না থাকলে খবরের কাগজে মুড়িয়ে পাঠাতে হবে।)</em></li>
+          <li>ইনভয়েস পেপার <em>(প্রোডাক্টের সাথে দেওয়া)</em></li>
+          <li>আনবক্সিং ভিডিও</li>
+          <li>প্রোডাক্টের সাথে থাকা সকল আনুষঙ্গিক জিনিসপত্র <em>(প্রয়োজন অনুসারে)</em></li>
+        </ul>
+        <p>উপরের সবকিছু সহ প্রোডাক্টটি <strong>Vangcur-এর ঠিকানায় কুরিয়ার করতে হবে।</strong></p>
+      </div>
+
+      <!-- ✅ Bottom Confirm Button -->
+      <button onclick="policyAgreeAndConfirm()" style="width:100%;height:50px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px">✅ ঠিক আছে, অর্ডার কনফার্ম করুন</button>
+
+    </div>
+  </div>
 </div>
 
 <!-- STICKY ORDER BAR (F-7) -->
@@ -3104,6 +3216,18 @@ function initPageRestoration() {
 }
 
 document.addEventListener('DOMContentLoaded',async ()=>{
+  // ✅ ANON AUTH: পেজ লোডে active session না থাকলে anonymous session চালু করো
+  if(supabaseClient){
+    try{
+      const {data:{session}}=await supabaseClient.auth.getSession();
+      if(!session){
+        await supabaseClient.auth.signInAnonymously();
+        console.log("✅ Temporary secure session activated.");
+      }
+    }catch(e){
+      console.warn("Anonymous login failed:",e);
+    }
+  }
   // ✅ FIX-5: Google লগইন ক্যানসেল করলে URL-এ access_denied error code পরিষ্কার করো
   if(window.location.search.includes('access_denied') || window.location.search.includes('error=')){
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -3169,12 +3293,43 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   // Step 4: Admin settings apply করো (logo, brand, contact, FAQs)
   applyAdminSettings();
 
-  // Step 5: Supabase থেকে custom products আনো (সরাসরি — no localStorage)
+  // ============================================================
+  // Step 5: OPT — Lazy Column Fetch (lightweight grid data only)
+  // ============================================================
+  // STRATEGY:
+  //   ১. পেজ লোডের সাথে সাথে default products (PRODS এ আগে থেকেই আছে)
+  //      দিয়ে গ্রিড instant দেখাও — কোনো loading নেই।
+  //   ২. Supabase থেকে সব custom products background এ আনো।
+  //   ৩. Data আসার পরে grid silently update হয়।
+  //   long_desc, features, faqs — ভারী fields, PP খুললে তখন আনব।
+  // ============================================================
+
+  // Step 5a: Default products দিয়ে instant render (Supabase এর আগেই)
+  applyProdOrder(_settings['vc_prod_order'] || null);
+  renderProds(PRODS);
+  updateCatPillCounts();
+
+  // Detail cache: product id → full detail (একবার fetch করলে আর করতে হবে না)
+  window._prodDetailCache = window._prodDetailCache || {};
+
+  // গ্রিড columns — lightweight (ভারী fields বাদ)
+  const GRID_COLS = 'id,cat,name,price,old,stock,badge,discount_color,warranty,rating,imgs,specs';
   const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
+
+  // Step 5b: Background এ Supabase custom products আনো (একটিমাত্র query)
   try{
-    const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
-    if(sbProds&&sbProds.length){
+    const {data:sbProds, error} = await supabaseClient
+      .from('custom_products')
+      .select(GRID_COLS)
+      .order('id', {ascending: true});
+
+    if(!error && sbProds && sbProds.length){
       sbProds.forEach(p=>{
+        const specs = (()=>{
+          let s = p.specs || {};
+          if(typeof s === 'string'){ try{ s = JSON.parse(s); }catch(e){} }
+          return s;
+        })();
         const mapped = {
           id: p.id,
           cat: p.cat || 'rgb',
@@ -3183,38 +3338,74 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           old: p.old || p.price || 0,
           stock: p.stock !== undefined ? p.stock : 0,
           badge: p.badge || '',
-          discountColor: p.discount_color || p.discountColor || (p.specs && p.specs._discount_color) || '',
+          discountColor: p.discount_color || p.discountColor || (specs && specs._discount_color) || '',
           warranty: p.warranty || '৭ দিন',
           rating: p.rating || 4.5,
           imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
-          specs: (()=>{
-            let s = p.specs || {};
-            if(typeof s === 'string'){
-              try { s = JSON.parse(s); } catch(e){}
-            }
-            return s;
-          })(),
-          desc: p.desc_text || p.desc || '',
-          longDesc: p.long_desc || p.desc_text || p.desc || '',
-          features: Array.isArray(p.features) ? p.features : [],
-          faqs: Array.isArray(p.faqs) ? p.faqs : [],
-          closing: p.closing || '',
+          specs: specs,
+          desc: '', longDesc: '', features: [], faqs: [], closing: '',
+          _detailLoaded: false,
         };
-        if(!PRODS.find(x=>x.id===mapped.id)){PRODS.push(mapped);}
+        if(!PRODS.find(x=>x.id===mapped.id)){ PRODS.push(mapped); }
         else {
           const idx = PRODS.findIndex(x=>x.id===mapped.id);
-          if(idx>-1){PRODS[idx]={...PRODS[idx],...mapped};}
+          if(idx>-1){ PRODS[idx]={...PRODS[idx],...mapped}; }
         }
       });
+
+      // Custom products এলে order apply করে grid update করো
+      applyProdOrder(_settings['vc_prod_order'] || null);
+      const _curList = activeCat==='all' ? PRODS : PRODS.filter(p=>prodInCat(p,activeCat));
+      renderProds(_curList);
+      updateCatPillCounts();
     }
   }catch(e){console.warn('custom_products load failed:',e);}
 
-  // Step 6: Product order apply করো (Supabase থেকে)
-  applyProdOrder(_settings['vc_prod_order'] || null);
+  // ============================================================
+  // fetchProdDetail(id) — Product Page খুললে এই function call হবে
+  // Supabase থেকে শুধু ওই ১টি প্রোডাক্টের ভারী columns আনবে
+  // ============================================================
+  window.fetchProdDetail = async function(id){
+    // Cache হিট — আবার fetch লাগবে না
+    if(window._prodDetailCache[id]) return window._prodDetailCache[id];
 
-  DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;document.getElementById('cDist').appendChild(o);});
-  renderProds(PRODS);
-  updateCatPillCounts();
+    try{
+      const {data, error} = await supabaseClient
+        .from('custom_products')
+        .select('id,desc_text,long_desc,features,faqs,closing,specs')
+        .eq('id', id)
+        .single();
+
+      if(error || !data) return null;
+
+      const detail = {
+        desc: data.desc_text || data.long_desc || '',
+        longDesc: data.long_desc || data.desc_text || '',
+        features: Array.isArray(data.features) ? data.features : [],
+        faqs: Array.isArray(data.faqs) ? data.faqs : [],
+        closing: data.closing || '',
+        specs: (()=>{
+          let s = data.specs || {};
+          if(typeof s === 'string'){ try{ s = JSON.parse(s); }catch(e){} }
+          return s;
+        })(),
+      };
+
+      // Cache করো এবং PRODS এ merge করো
+      window._prodDetailCache[id] = detail;
+      const idx = PRODS.findIndex(x=>String(x.id)===String(id));
+      if(idx > -1){
+        PRODS[idx] = {...PRODS[idx], ...detail, _detailLoaded: true};
+      }
+      return detail;
+    }catch(e){
+      console.warn('fetchProdDetail failed:', e);
+      return null;
+    }
+  };
+
+  // Step 6: Districts populate করো (applyProdOrder + renderProds + updateCatPillCounts পেজিনেশন loop-এর ভেতরে হয়)
+  DISTRICTS.forEach(d=>{const o=document.createElement("option");o.value=d;o.textContent=d;document.getElementById("cDist").appendChild(o);});
   renderFAQ();
 
   // ✅ All settings, stock, default products, and custom Supabase products are now fully loaded.
@@ -3306,6 +3497,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             features:Array.isArray(p.features)?p.features:[],
             faqs:Array.isArray(p.faqs)?p.faqs:[],
             closing:p.closing||'',
+            _detailLoaded:!!(p.long_desc||p.features||p.faqs),
           };
           PRODS.push(mapped);
           updateCatPillCounts();
@@ -3329,6 +3521,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             features:Array.isArray(p.features)?p.features:[],
             faqs:Array.isArray(p.faqs)?p.faqs:[],
             closing:p.closing||'',
+            _detailLoaded:!!(p.long_desc||p.features||p.faqs),
           };
           // ✅ FIX: String compare, এবং UPDATE এ কখনো push করবো না — শুধু existing update
           const idx=PRODS.findIndex(x=>String(x.id)===String(mapped.id));
@@ -3939,10 +4132,14 @@ async function renderMyOrders(){
 
 // PRODUCT RENDERING
 // ─── Infinite Scroll State ───────────────────────────────────────────────────
-const PRODS_PER_PAGE = 20;
+const PRODS_PER_PAGE = 20;      // প্রতিবার কতটা করে দেখাবে
+const PRODS_AUTO_THRESHOLD = 2; // এই সংখ্যক batch পরে "আরো দেখুন" বাটন আসবে
+                                 // অর্থাৎ ২০+২০=৪০টা auto, তারপর বাটন
 let _renderedList   = [];   // বর্তমানে active filtered list
 let _renderedCount  = 0;    // কতটি card ইতিমধ্যে DOM-এ আছে
+let _batchCount     = 0;    // কতটি batch render হয়েছে (auto vs manual গণনার জন্য)
 let _prodObserver   = null; // IntersectionObserver instance
+let _loadMorePaused = false; // true হলে observer কাজ করবে না — বাটন দেখাবে
 
 // একটি প্রোডাক্টের জন্য <img> বা emoji HTML তৈরি করে
 function _prodImgHTML(imgVal, name, lazy) {
@@ -4011,27 +4208,44 @@ function _buildProdCard(p, isFirst) {
   return d;
 }
 
-// পরবর্তী batch (PRODS_PER_PAGE টি) গ্রিডে append করে
+// ════════════════════════════════════════════════════════════
+// _appendNextBatch — পরবর্তী PRODS_PER_PAGE টি card গ্রিডে যোগ করে
+//
+// FLOW:
+//  batch 1 (0-19)  → সাথে সাথে দেখাও (isFirst=true, loading=false)
+//  batch 2 (20-39) → Observer trigger করলে auto দেখাও
+//  batch 3+        → "আরো প্রোডাক্ট দেখুন" বাটন দেখাও (pause)
+//                    বাটনে ক্লিক করলে batch 3 (40-59) দেখাও
+//                    তারপর batch 4 (60-79) observer দিয়ে auto
+//                    তারপর আবার বাটন... এভাবে চলতে থাকে
+// ════════════════════════════════════════════════════════════
 function _appendNextBatch() {
   const g = document.getElementById('prodGrid');
   if(!g || _renderedCount >= _renderedList.length) return;
+
   const isFirst = _renderedCount === 0;
   const batch = _renderedList.slice(_renderedCount, _renderedCount + PRODS_PER_PAGE);
   const frag  = document.createDocumentFragment();
   batch.forEach(p => {
     const el = _buildProdCard(p, isFirst);
-    el.dataset.pid = p.id; // PERF-05: track করার জন্য
+    el.dataset.pid = p.id;
     frag.appendChild(el);
   });
   g.appendChild(frag);
   _renderedCount += batch.length;
+  _batchCount++;
 
-  // সব লোড হলে spinner লুকাও, observer disconnect করো
-  const spinner  = document.getElementById('prodLoadingSpinner');
+  const spinner     = document.getElementById('prodLoadingSpinner');
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+  // ── সব প্রোডাক্ট দেখানো শেষ ──
   if(_renderedCount >= _renderedList.length) {
     if(spinner) spinner.style.display = 'none';
+    if(loadMoreBtn) loadMoreBtn.style.display = 'none';
     if(_prodObserver) { _prodObserver.disconnect(); _prodObserver = null; }
-    // ✅ Category শেষ হলে "সব প্রোডাক্ট দেখুন" বাটন যোগ করো — শুধু non-all category তে
+    _loadMorePaused = false;
+
+    // Category শেষ হলে "সব প্রোডাক্ট দেখুন" বাটন — শুধু non-all category তে
     const _existingEndBtn = document.getElementById('catEndBtn');
     if(_existingEndBtn) _existingEndBtn.remove();
     if(activeCat && activeCat !== 'all' && _renderedList.length > 0) {
@@ -4049,7 +4263,6 @@ function _appendNextBatch() {
         </button>`;
       const g2 = document.getElementById('prodGrid');
       if(g2) g2.appendChild(_endDiv);
-      // ✅ addEventListener দিয়ে click handle করো — inline onclick quote escape সমস্যা নেই
       const _innerBtn = document.getElementById('catEndBtnInner');
       if(_innerBtn) _innerBtn.addEventListener('click', function() {
         activeCat = 'all';
@@ -4063,9 +4276,40 @@ function _appendNextBatch() {
         window.scrollTo({top: 0, behavior: 'smooth'});
       });
     }
-  } else {
-    if(spinner) spinner.style.display = 'flex';
+    return;
   }
+
+  // ── আরো প্রোডাক্ট বাকি আছে ──
+  // প্রতি PRODS_AUTO_THRESHOLD batch পরে pause করো → বাটন দেখাও
+  // অর্থাৎ batch 1,2 auto (40টা) → বাটন → batch 3,4 auto (40টা) → বাটন → ...
+  const shouldPause = (_batchCount % PRODS_AUTO_THRESHOLD === 0);
+
+  if(shouldPause) {
+    // Observer থামাও, বাটন দেখাও
+    _loadMorePaused = true;
+    if(spinner) spinner.style.display = 'none';
+    if(loadMoreBtn) {
+      loadMoreBtn.style.display = 'inline-flex';
+      // বাটনে ক্লিক করলে: ২ batch auto চলবে, তারপর আবার pause
+      loadMoreBtn.style.background = 'var(--dark)';
+      loadMoreBtn.style.transform = 'translateY(0)';
+    }
+  } else {
+    // Observer active রাখো — পরের batch অটো আসবে
+    _loadMorePaused = false;
+    if(spinner) spinner.style.display = 'flex';
+    if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+  }
+}
+
+// "আরো প্রোডাক্ট দেখুন" বাটনে ক্লিক করলে
+function _loadMoreClick() {
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+  _loadMorePaused = false;
+  _batchCount = 0; // reset করো — আবার ২ batch auto চলবে তারপর বাটন
+  _appendNextBatch(); // এই batch render করো
+  _setupProdObserver(); // observer আবার চালু করো
 }
 
 // Intersection Observer সেটআপ
@@ -4074,10 +4318,11 @@ function _setupProdObserver() {
   const sentinel = document.getElementById('prodSentinel');
   if(!sentinel) return;
   _prodObserver = new IntersectionObserver((entries) => {
-    if(entries[0].isIntersecting && _renderedCount < _renderedList.length) {
+    // _loadMorePaused=true হলে observer trigger করবে না — বাটনের জন্য অপেক্ষা
+    if(entries[0].isIntersecting && _renderedCount < _renderedList.length && !_loadMorePaused) {
       _appendNextBatch();
     }
-  }, { rootMargin: '200px' }); // ২০০px আগে থেকেই লোড শুরু
+  }, { rootMargin: '300px' }); // ৩০০px আগে থেকে detect করো
   _prodObserver.observe(sentinel);
 }
 
@@ -4141,8 +4386,13 @@ function renderProds(list) {
   }
 
   // Infinite scroll state reset
-  _renderedList  = list;
-  _renderedCount = 0;
+  _renderedList   = list;
+  _renderedCount  = 0;
+  _batchCount     = 0;    // প্রতি নতুন render এ batch গণনা শূন্য থেকে শুরু
+  _loadMorePaused = false; // pause তুলে দাও — নতুন list এ fresh start
+  // "আরো দেখুন" বাটন লুকাও
+  const _lmb = document.getElementById('loadMoreBtn');
+  if(_lmb) _lmb.style.display = 'none';
 
   // Grid পরিষ্কার করে নতুনভাবে সাজাও (card গুলো reuse হবে বলে innerHTML ব্যবহার নয়)
   // শুধু প্রথম ব্যাচ রেন্ডার করো — বাকিগুলো observer দিয়ে লোড হবে
@@ -5121,9 +5371,20 @@ async function filterProducts(q){
 }
 
 // PRODUCT FULL PAGE
-function openPP(id){
+async function openPP(id){
   // BUG-03 FIX: number বা string উভয় id match করো (sb_ prefix support)
   curProd=PRODS.find(p=>p.id===id||String(p.id)===String(id));if(!curProd)return;
+
+  // ✅ OPT: Detail lazy load — প্রথমবার PP খুললে Supabase থেকে detail আনো
+  if(!curProd._detailLoaded && typeof window.fetchProdDetail === 'function'){
+    // Loading placeholder দেখাও
+    const descEl=document.getElementById('ppFullDesc');
+    if(descEl) descEl.innerHTML='<p style="color:var(--gray);font-size:13px">লোড হচ্ছে...</p>';
+    const detail = await window.fetchProdDetail(id);
+    if(detail){
+      curProd = PRODS.find(p=>p.id===id||String(p.id)===String(id)) || curProd;
+    }
+  }
   curQty=1;curImgIdx=0;
   // ✅ FIX: প্রতিবার নতুন product খুললে tab reset করো — বিবরণ active
   document.querySelectorAll('.pp-tab').forEach((t,i)=>{t.classList.toggle('on',i===0);});
@@ -5895,7 +6156,7 @@ function openOrder(warn, isRefreshRestore){
   if(summaryEl2&&orderItems.length>1){summaryEl2.style.display='none';summaryEl2.dataset.hasItems='0';}
   goS(1);
 }
-function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');sessionStorage.removeItem('vc_form_draft');sessionStorage.removeItem('vc_ship');}catch(e){}// ✅ URL FIX: history.go(-1) এর বদলে সরাসরি '/' এ replaceState করো
+function closeOrder(){if(document.getElementById('orderOverlay').classList.contains('show')){document.getElementById('orderOverlay').classList.remove('show');unlockBody();resetTermsCb();try{sessionStorage.removeItem('vc_refresh_panel');sessionStorage.removeItem('vc_refresh_order_step');sessionStorage.removeItem('vc_order_items');sessionStorage.removeItem('vc_form_draft');sessionStorage.removeItem('vc_ship');}catch(e){}// ✅ URL FIX: history.go(-1) এর বদলে সরাসরি '/' এ replaceState করো
 // _popPanel() এর history.go(-1) /order-process থেকে product URL এ ফিরিয়ে দিত
 _panelStack = _panelStack.filter(p => p !== 'order');
 if(!_backButtonTriggered){ try{history.replaceState({vcStack:[],homeCurrent:true},'','/');}catch(e){} }
@@ -6030,12 +6291,18 @@ function goS3(){
 let _pendingOrderAfterLogin = false;
 
 function preConfirmCheck(){
+  // ✅ Terms checkbox validation — আগে চেক করো
+  if(!checkTermsCb()) return;
+  // ⚙️ GUEST LOGIN PROMPT — আপাতত disabled (প্রয়োজনে নিচের কমেন্ট সরিয়ে enable করুন)
+  confirmOrder();
+  /* 🔒 LOGIN GATE — enable করতে হলে উপরের confirmOrder() লাইনটি comment করুন এবং নিচের block টি uncomment করুন:
   if(currentUser){
     confirmOrder();
   } else {
     document.getElementById('preConfirmModal').classList.add('show');
     lockBody();
   }
+  */
 }
 function closePreConfirmModal(){
   document.getElementById('preConfirmModal').classList.remove('show');
@@ -6296,7 +6563,10 @@ async function confirmOrder(){
   const sub=verifiedItems.reduce((s,i)=>s+(i.price*i.qty),0);
   const tot=sub+sc;
   const oid='ord_'+Date.now();
-  const order={id:oid,orderNum:num,date:new Date().toISOString(),userId:currentUser?.id||null,custEmail:document.getElementById('cEmail').value||currentUser?.email||null,
+  // ✅ ANON AUTH: anonymous session থেকেও auth.uid() পাওয়ার জন্য getUser() দিয়ে ID resolve করো
+  const {data:userData}=await supabaseClient.auth.getUser();
+  const currentUserId=currentUser?.id||userData?.user?.id||null;
+  const order={id:oid,orderNum:num,date:new Date().toISOString(),userId:currentUserId,custEmail:document.getElementById('cEmail').value||currentUser?.email||null,
     customer:{name:document.getElementById('cName').value,phone:document.getElementById('cPhone').value,district:document.getElementById('cDist').value,address:document.getElementById('cAddr').value,email:document.getElementById('cEmail').value},
     items:verifiedItems,shipping:selectedShip,shippingCost:sc,subtotal:sub,total:tot,
     payment:{txnId:document.getElementById('cTxn').value,last4:document.getElementById('cL4').value},
@@ -6598,6 +6868,18 @@ function _handleBack(state) {
   const stack = (state && state.vcStack) ? state.vcStack : [];
   const topPanel = stack.length > 0 ? stack[stack.length - 1] : null;
 
+  // ✅ Policy Modal — back button দিয়ে বন্ধ করো
+  if(state && state.vcPolicy){
+    closePolicyModal();
+    return true;
+  }
+  const policyEl = document.getElementById('policyModalOverlay');
+  if(policyEl && policyEl.classList.contains('show')){
+    closePolicyModal();
+    history.pushState({vcStack:[..._panelStack]},'','');
+    return true;
+  }
+
   // waitOverlay — block back
   if(document.getElementById('waitOverlay').classList.contains('show')){
     history.pushState({vcStack: [..._panelStack]}, '', '');
@@ -6825,30 +7107,31 @@ document.addEventListener('visibilitychange',()=>{
       // ✅ FIX: vc_cath_cards সবসময় reload করো — Supabase এ row না থাকলেও default দেখাবে
       // (visibility restore এ একবারই call করা হবে — নিচের rAF block থেকেও call হয় না)
       // if(typeof loadCathCardData==='function') loadCathCardData(); // moved to rAF block below
-      // ২. custom_products refresh করো
-      const {data:sbProds}=await supabaseClient.from('custom_products').select('*');
+      // ২. custom_products refresh করো (lightweight columns — detail cache অক্ষুণ্ণ থাকবে)
+      const _GCOLS='id,cat,name,price,old,stock,badge,discount_color,warranty,rating,imgs,specs';
+      const {data:sbProds}=await supabaseClient.from('custom_products').select(_GCOLS);
       if(sbProds&&sbProds.length){
         let changed=false;
         sbProds.forEach(raw=>{
+          const specs=(()=>{let s=raw.specs||{};if(typeof s==='string'){try{s=JSON.parse(s);}catch(e){}}return s;})();
           const p = {
             id:raw.id, cat:raw.cat||'rgb', name:raw.name||'',
             price:raw.price||0, old:raw.old||raw.price||0,
             stock:raw.stock!==undefined?raw.stock:0, badge:raw.badge||'',
+            discountColor:raw.discount_color||(specs&&specs._discount_color)||'',
             warranty:raw.warranty||'৭ দিন', rating:raw.rating||4.5,
             imgs:Array.isArray(raw.imgs)?raw.imgs:(raw.imgs?[raw.imgs]:['📦']),
-            specs:raw.specs||{},
-            desc:raw.desc_text||raw.desc||'',
-            longDesc:raw.long_desc||raw.desc_text||raw.desc||'',
-            features:Array.isArray(raw.features)?raw.features:[],
-            faqs:Array.isArray(raw.faqs)?raw.faqs:[],
-            closing:raw.closing||'',
+            specs:specs,
           };
           const idx=PRODS.findIndex(x=>x.id===p.id);
           if(idx>-1){
-            if(JSON.stringify(PRODS[idx])!==JSON.stringify(p)){PRODS[idx]={...PRODS[idx],...p};changed=true;}
+            // Detail fields (longDesc, features, faqs) আগেরটাই রাখো — cache নষ্ট হবে না
+            PRODS[idx]={...PRODS[idx],...p};changed=true;
           } else {
-            // ✅ FIX: duplicate check করো push এর আগে
-            if(!PRODS.find(x=>String(x.id)===String(p.id))){PRODS.push(p);changed=true;}
+            if(!PRODS.find(x=>String(x.id)===String(p.id))){
+              PRODS.push({...p,desc:'',longDesc:'',features:[],faqs:[],closing:'',_detailLoaded:false});
+              changed=true;
+            }
           }
         });
         if(changed){updateCatPillCounts();}
@@ -7377,9 +7660,8 @@ function openTrackOrder(){
         </div>
         <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.9;color:#92400E">
           <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#78350F">⚠️ গেস্ট হিসেবে অর্ডার করা হয়েছে</div>
-          আপনি এই মুহূর্তে <strong>লগইন ছাড়া</strong> অর্ডার করেছেন। এই অর্ডারের তথ্য আপনার ডিভাইসে সাময়িকভাবে সংরক্ষিত আছে।<br><br>
-          <strong>⚠️ গুরুত্বপূর্ণ:</strong> আপনি যদি এখন ওয়েবসাইটে <strong>লগইন করেন</strong>, তাহলে এই অর্ডারটি আপনার অ্যাকাউন্টে দেখা যাবে না। আপনার ব্যক্তিগত তথ্যের সুরক্ষার জন্য গেস্ট এবং লগইন অর্ডার আলাদাভাবে সংরক্ষণ করা হয়।<br><br>
-          📋 অর্ডার নম্বর সেভ রাখুন: <strong style="color:#92400E">${escHtml(o.orderNum||o.id||'')}</strong> — WhatsApp (01816-365504) এ যোগাযোগ করলে এই নম্বর দিয়ে আপনার অর্ডার খুঁজে পাওয়া যাবে।
+          এই অর্ডারের তথ্যটি শুধুমাত্র এই ব্রাউজার ও ডিভাইসে সাময়িকভাবে সংরক্ষিত আছে। ব্রাউজারের ক্যাশ/হিস্ট্রি ক্লিয়ার করলে বা অন্য ডিভাইস থেকে লগইন করলে এই অর্ডারটি আপনার প্রোফাইলে নাও দেখাতে পারে।<br><br>
+          📋 <strong>অর্ডার নম্বর সেভ রাখুন:</strong> <strong style="color:#92400E">${escHtml(o.orderNum||o.id||'')}</strong> — ভবিষ্যতে ট্র্যাকিং বা তথ্যের জন্য এই নম্বরটি অবশ্যই সংরক্ষণ করুন। WhatsApp (01816-365504) এ যোগাযোগ করলে এই নম্বরটি প্রয়োজন হবে।
         </div>`;
     } else {
       // কোনো guest order নেই — সাধারণ notice
@@ -7537,7 +7819,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // ============ GUEST ORDER MERGE ON LOGIN ============
-function mergeGuestOrdersToUser(userEmail, userId){
+async function mergeGuestOrdersToUser(userEmail, userId){
   try{
     const guestOrders=JSON.parse(localStorage.getItem('vc_guest_orders')||'[]');
     if(!guestOrders.length)return;
@@ -7551,7 +7833,20 @@ function mergeGuestOrdersToUser(userEmail, userId){
     if(newOnes.length){
       localStorage.setItem('vc_orders',JSON.stringify([...mainOrders,...newOnes]));
       localStorage.removeItem('vc_guest_orders');
-      console.log(`✅ ${newOnes.length}টি গেস্ট অর্ডার অ্যাকাউন্টে যুক্ত হয়েছে`);
+      console.log(`✅ ${newOnes.length}টি গেস্ট অর্ডার localStorage-এ অ্যাকাউন্টে যুক্ত হয়েছে`);
+    }
+    // ✅ DB SYNC: Supabase-এ guest orders-এর user_id ও customer_email আপডেট করো
+    const orderNums=guestOrders.map(o=>o.orderNum).filter(Boolean);
+    if(orderNums.length && supabaseClient){
+      const {error}=await supabaseClient
+        .from('orders')
+        .update({user_id:userId,customer_email:userEmail})
+        .in('order_num',orderNums);
+      if(error){
+        console.error('❌ Supabase guest order merge error:',error);
+      } else {
+        console.log(`✅ ${orderNums.length}টি গেস্ট অর্ডার Supabase-এ user_id আপডেট হয়েছে`);
+      }
     }
   }catch(e){console.error('mergeGuestOrders error:',e);}
 }
@@ -7590,6 +7885,81 @@ const INFO={
   terms:`<h2>Vangcur Terms &amp; Conditions</h2><p>Vangcur - ভাঙচুর থেকে অর্ডার করার মাধ্যমে আপনি নিচের শর্তাবলীর সাথে সম্মতি প্রদান করছেন।</p><h3>১. অর্ডার কনফার্মেশন</h3><ul><li>অর্ডার নিশ্চিত করতে ন্যূনতম <strong>২০০ টাকা এডভান্স পেমেন্ট</strong> বাধ্যতামূলক।</li><li>সম্পূর্ণ COD ভিত্তিক অর্ডার গ্রহণ করা হয় না।</li><li>Advance Payment করার পর উভয় পক্ষ অর্ডার সম্পন্ন করতে বাধ্য থাকবে।</li></ul><h3>২. ভুল তথ্য প্রদান</h3><p>ভুল নাম, ফোন নম্বর, জেলা বা ঠিকানার কারণে ডেলিভারি সমস্যা বা অর্ডার বাতিল হলে Vangcur দায়ী থাকবে না। সঠিক ও সম্পূর্ণ তথ্য প্রদান করতে হবে।</p><h3>৩. ডেলিভারি পলিসি</h3><ul><li>সকল পার্সেল <strong>Closed Box Delivery</strong> সিস্টেমে পাঠানো হয়।</li><li>ডেলিভারির সময় আগে Payment Complete করে পার্সেল রিসিভ করতে হবে।</li><li>Delivery Man-এর সামনে Product Open করে পছন্দ না হলে Return-এর সুযোগ নেই।</li></ul><h3>৪. আনবক্সিং ভিডিও বাধ্যতামূলক</h3><ul><li>Product হাতে পাওয়ার পর অবশ্যই <strong>Full Unboxing Video</strong> করতে হবে।</li><li>ভিডিওতে কোনো Cut বা Pause গ্রহণযোগ্য নয়।</li><li>ভিডিও ছাড়া Missing, Damaged, Wrong Product বা Warranty Claim গ্রহণ করা হবে না।</li></ul><h3>৫. Warranty ও Replacement</h3><ul><li>অধিকাংশ প্রোডাক্টে ন্যূনতম <strong>৭ দিনের Replacement Warranty</strong> প্রদান করা হয়।</li><li>৬ মাস বা তার বেশি Warranty-র ক্ষেত্রে Product Box ও Warranty Papers সংরক্ষণ বাধ্যতামূলক।</li><li>Physical Damage, Water Damage বা User Damage Warranty-র অন্তর্ভুক্ত নয়।</li></ul><h3>৬. রিটার্ন প্রসেস</h3><ul><li>Invoice Date থেকে ৭ দিনের মধ্যে Fault প্রমাণিত হলে Return Request করা যাবে।</li><li>Product অবশ্যই Original Box, Accessories ও Proper Packaging সহ পাঠাতে হবে।</li></ul><h3>৭. প্রাইস ও স্টক</h3><p>যেকোনো সময় Product Price, Stock ও Offer পরিবর্তন করার অধিকার Vangcur সংরক্ষণ করে। Limited Stock-এর ক্ষেত্রে আগে Confirm করা Order Priority পাবে।</p><h3>৮. Fraud Prevention</h3><p>Fake Order, Fraud Activity বা Suspicious Behaviour শনাক্ত হলে Vangcur যেকোনো Order Cancel করার অধিকার রাখে।</p>`,
   about:`<h2>About Vangcur — ভাঙচুর</h2><p>Vangcur - ভাঙচুর হচ্ছে বাংলাদেশের একটি আধুনিক <strong>Gadget &amp; Accessories</strong> ভিত্তিক E-commerce Brand, যেখানে আপনি পাবেন বিভিন্ন ধরনের Official এবং Unofficial Gadget Items সম্পূর্ণ Warranty Support সহ। আমরা চেষ্টা করি ট্রেন্ডিং এবং প্রয়োজনীয় গ্যাজেটগুলো সাশ্রয়ী মূল্যে বাংলাদেশের যেকোনো প্রান্তে পৌঁছে দিতে।</p><p style="margin-top:10px">আমাদের লক্ষ্য শুধুমাত্র প্রোডাক্ট বিক্রি করা নয়, বরং কাস্টমারকে একটি নিরাপদ এবং ট্রাস্টেড অনলাইন শপিং এক্সপেরিয়েন্স দেওয়া। প্রতিটি অর্ডার প্রসেসিং থেকে শুরু করে ডেলিভারি এবং আফটার সেলস সাপোর্ট পর্যন্ত আমরা সর্বোচ্চ দায়িত্বশীলতা বজায় রাখি।</p><p style="margin-top:10px">বর্তমানে Vangcur বাংলাদেশের বিভিন্ন জেলার <strong>৩০০০+</strong> সন্তুষ্ট কাস্টমারকে সার্ভিস প্রদান করেছে এবং প্রতিদিন নতুন নতুন Gadget ও Accessories যুক্ত করা হচ্ছে। আমরা বিশ্বাস করি — <em>"Customer Satisfaction is the Main Priority."</em></p><h3>কেন Vangcur-কে বিশ্বাস করবেন?</h3><ul><li>✅ Authentic ও Quality Product</li><li>✅ Warranty &amp; Replacement Support</li><li>✅ Fast Home Delivery All Over Bangladesh</li><li>✅ Dedicated Customer Support</li><li>✅ Secure Advance Order Confirmation System</li><li>✅ Product Unboxing Proof Based Safety Policy</li></ul><h3>যোগাযোগ</h3><p>📞 01816-365504 &nbsp;|&nbsp; ✉️ vangcurbd@gmail.com<br>📘 facebook.com/vangcurbdofficial &nbsp;|&nbsp; 📍 Dhaka, Bangladesh</p>`,
 };
+// ✅ Terms Checkbox
+let _termsCbChecked = false;
+function toggleTermsCb(){
+  _termsCbChecked = !_termsCbChecked;
+  const cb = document.getElementById('termsCb');
+  const row = document.getElementById('termsCheckRow');
+  const err = document.getElementById('termsErr');
+  if(cb){
+    if(_termsCbChecked){
+      cb.style.background='#111';cb.style.borderColor='#111';cb.innerHTML='<span style="color:#fff;font-size:13px;font-weight:800;line-height:1">✓</span>';
+    } else {
+      cb.style.background='#fff';cb.style.borderColor='#ccc';cb.innerHTML='';
+    }
+  }
+  if(row){ row.style.borderColor=_termsCbChecked?'var(--border)':'var(--border)'; row.classList.remove('error','shake'); }
+  if(err && _termsCbChecked) err.style.display='none';
+}
+function checkTermsCb(){
+  if(_termsCbChecked) return true;
+  const row = document.getElementById('termsCheckRow');
+  const err = document.getElementById('termsErr');
+  if(row){
+    row.style.borderColor='#ef4444';
+    row.classList.remove('shake');
+    void row.offsetWidth;
+    row.classList.add('shake');
+    setTimeout(()=>row.classList.remove('shake'),400);
+  }
+  if(err) err.style.display='block';
+  row && row.scrollIntoView({behavior:'smooth', block:'center'});
+  return false;
+}
+function resetTermsCb(){
+  _termsCbChecked = false;
+  const cb = document.getElementById('termsCb');
+  const row = document.getElementById('termsCheckRow');
+  const err = document.getElementById('termsErr');
+  if(cb){cb.style.background='#fff';cb.style.borderColor='#ccc';cb.innerHTML='';}
+  if(row){row.style.borderColor='var(--border)';row.classList.remove('error','shake');}
+  if(err) err.style.display='none';
+}
+
+// ✅ Policy Modal
+function openPolicyModal(){
+  const el = document.getElementById('policyModalOverlay');
+  if(!el) return;
+  el.classList.add('show');
+  lockBody();
+  // Android/browser back button এর জন্য history stack এ push করো
+  history.pushState({vcPolicy:true}, '', location.href);
+}
+function closePolicyModal(){
+  const el = document.getElementById('policyModalOverlay');
+  if(!el || !el.classList.contains('show')) return;
+  el.classList.remove('show');
+  unlockBody();
+}
+// নীতিমালা পড়ে সম্মত হলে checkbox check করে modal বন্ধ করো
+function policyAgreeAndConfirm(){
+  closePolicyModal();
+  // checkbox auto-check
+  _termsCbChecked = true;
+  const cb = document.getElementById('termsCb');
+  if(cb){
+    cb.style.background='#111';cb.style.borderColor='#111';
+    cb.innerHTML='<span style="color:#fff;font-size:13px;font-weight:800;line-height:1">✓</span>';
+  }
+  const err = document.getElementById('termsErr');
+  if(err) err.style.display='none';
+  const row = document.getElementById('termsCheckRow');
+  if(row) row.style.borderColor='var(--border)';
+  // সরাসরি অর্ডার confirm করো
+  setTimeout(()=>preConfirmCheck(), 200);
+}
+
 function openInfo(p){
   // ✅ Admin থেকে সেভ করা কাস্টম কন্টেন্ট থাকলে সেটা দেখাও
   const custom = _settings && _settings['vc_info_pages'] && _settings['vc_info_pages'][p];

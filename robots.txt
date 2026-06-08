@@ -1,0 +1,53 @@
+# =====================================================================
+# robots.txt — Vangcur (vangcur.netlify.app)
+# =====================================================================
+# এই ফাইলটি Google, Bing, AI bots কে বলে কোথায় যেতে পারবে
+# এবং কোথায় যেতে পারবে না।
+# =====================================================================
+
+# ── সব Bot কে allow (default) ────────────────────────────────────────
+User-agent: *
+Allow: /
+
+# Admin panel / private paths বট থেকে আড়াল করুন
+# (যদি ভবিষ্যতে admin page আলাদা URL এ থাকে)
+Disallow: /admin/
+Disallow: /api/
+Disallow: /.netlify/
+
+# ── Google Bot ───────────────────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 2
+
+# ── Google Image Bot ─────────────────────────────────────────────────
+User-agent: Googlebot-Image
+Allow: /
+
+# ── Bing Bot ─────────────────────────────────────────────────────────
+User-agent: bingbot
+Allow: /
+Crawl-delay: 3
+
+# ── OpenAI GPTBot (ChatGPT) ──────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+
+# ── Anthropic ClaudeBot ──────────────────────────────────────────────
+User-agent: ClaudeBot
+Allow: /
+
+# ── Apple Bot ────────────────────────────────────────────────────────
+User-agent: Applebot
+Allow: /
+
+# ── Facebook / Meta ──────────────────────────────────────────────────
+User-agent: facebookexternalhit
+Allow: /
+
+# ── Twitter / X ──────────────────────────────────────────────────────
+User-agent: Twitterbot
+Allow: /
+
+# ── Sitemap Location ─────────────────────────────────────────────────
+Sitemap: https://vangcur.netlify.app/sitemap.xml

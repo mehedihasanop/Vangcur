@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  =====================================================================
+  Vangcur — sitemap.xml
+  =====================================================================
+  এই ফাইলটি Netlify এ /sitemap.xml হিসেবে serve হবে।
+
+  DEPLOY করার পদ্ধতি:
+  এই ফাইলটি আপনার Netlify project এর root এ রাখুন।
+  তারপর নিচে generate-sitemap.js script টি run করে
+  এই ফাইলটি auto-update করুন।
+
+  অথবা manually নতুন product যোগ করুন এই format এ:
+  <url>
+    <loc>https://vangcur.netlify.app/product-name-ID</loc>
+    <lastmod>YYYY-MM-DD</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  =====================================================================
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- ══════════════════════════════════════════
+       MAIN PAGES
+  ══════════════════════════════════════════ -->
+  <url>
+    <loc>https://vangcur.netlify.app/</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ══════════════════════════════════════════
+       DEFAULT PRODUCTS (সবসময় আছে)
+  ══════════════════════════════════════════ -->
+  <url>
+    <loc>https://vangcur.netlify.app/?p=1</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP NRGB50 5M RGB Neon Light with App &amp; Remote Control</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=4</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP GT4 Pro Smartwatch AMOLED Display</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=14</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP PB20K 20000mAh Fast Charge Power Bank</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=24</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP TWS ANC Pro Noise Cancelling Earbuds</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=34</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP HP80 Over-Ear ANC Headphone</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=44</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP AL-Love Heart Acrylic LED Lamp</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://vangcur.netlify.app/?p=54</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>GearUP RF12 12-Inch Rechargeable Table Fan</image:title>
+    </image:image>
+  </url>
+
+  <!--
+  ══════════════════════════════════════════════════════════════════
+  CUSTOM PRODUCTS — generate-sitemap.js script চালালে
+  এখানে automatically যোগ হয়ে যাবে।
+  এখন manually যোগ করতে হলে এই format follow করুন:
+
+  <url>
+    <loc>https://vangcur.netlify.app/?p=PRODUCT_ID</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:title>PRODUCT NAME</image:title>
+    </image:image>
+  </url>
+  ══════════════════════════════════════════════════════════════════
+  -->
+
+</urlset>
