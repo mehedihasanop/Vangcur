@@ -52,6 +52,9 @@
   // 👇 আপনার Supabase Public Key
   const SUPABASE_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6ZHVqa3dqcGxvYm9udmdoeWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzQzODUsImV4cCI6MjA5NDE1MDM4NX0.evLb7_gv5vtFrpsyCeX3h6mLxqCuOXQuY-w9ygvDqak";
 
+  // 👇 Google Sheets Web App API URL (Abandoned Leads + Order Tracking)
+  const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyQOHCmm_HnucXSwAWej6K_UCsNxeiJlWljyH2nlmd_gcC1xmbcudzy30hUaQIrOqon/exec";
+
   // ✅ SAFE INIT: CDN load হয়েছে কিনা check করে তারপর client তৈরি
   // মোবাইল নেটওয়ার্কে CDN block হলে সাদা স্ক্রিন হবে না
   let supabaseClient;
@@ -531,9 +534,9 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 
 /* PRODUCT DETAIL TABS */
 .pp-tabs-wrap{background:var(--white);position:sticky;top:61px;z-index:9;border-bottom:2px solid var(--border);max-width:100%;touch-action:pan-x;user-select:none;-webkit-user-select:none}
-.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+.pp-tabs{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x;padding-bottom:2px}
 .pp-tabs::-webkit-scrollbar{display:none}
-.pp-tab{white-space:nowrap;padding:12px 18px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;border-bottom:2.5px solid transparent;margin-bottom:-2px;flex-shrink:0;user-select:none;-webkit-user-select:none}
+.pp-tab{white-space:nowrap;padding:12px 18px 13px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:var(--tr);font-family:'DM Sans',sans-serif;border-bottom:4px solid transparent;margin-bottom:-2px;flex-shrink:0;user-select:none;-webkit-user-select:none}
 .pp-tab:hover{color:var(--dark)}
 .pp-tab.on{color:var(--dark);border-bottom-color:var(--dark)}
 
@@ -3236,6 +3239,23 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     window.history.replaceState({}, document.title, window.location.pathname);
     showToast('❌ লগইন বাতিল করা হয়েছে');
   }
+  // ✅ Visitor Tracking: প্রতিদিন একবার ইউনিক ভিজিটর Supabase এ লগ করো
+  try{
+    let visitorId = localStorage.getItem('vc_visitor_id');
+    if(!visitorId){
+      visitorId = 'vis_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      localStorage.setItem('vc_visitor_id', visitorId);
+    }
+    const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const lastVisit = localStorage.getItem('vc_last_visit_date');
+    if(lastVisit !== todayStr && supabaseClient){
+      // আজকে প্রথম ভিজিট — Supabase এ insert করো
+      supabaseClient.from('page_views').insert({visitor_id: visitorId}).then(({error})=>{
+        if(!error) localStorage.setItem('vc_last_visit_date', todayStr);
+      }).catch(()=>{});
+    }
+  }catch(_ve){}
+
   // ✅ SEC: Expired spam/device block flags পরিষ্কার করো (২৪ঘণ্টা পেরিয়ে গেলে)
   try{
     const _24h=24*60*60*1000;
@@ -3678,6 +3698,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       }
       if(status&&['confirmed','shipped','delivered'].includes(status)){
         sessionStorage.removeItem('vc_pending');
+        sessionStorage.removeItem('vc_pending_num');
+        try{
+          localStorage.removeItem('vc_pending_ls');
+          localStorage.removeItem('vc_pending_num_ls');
+          localStorage.removeItem('vc_pending_ts');
+        }catch(e){}
         pendingOrdId=null;
         const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
         const o=orders.find(x=>x.id===pid);
@@ -3685,6 +3711,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         if(o)showBgConfirmPopup(o);
       } else if(status==='cancelled'||status==='rejected'){
         sessionStorage.removeItem('vc_pending');
+        sessionStorage.removeItem('vc_pending_num');
+        try{
+          localStorage.removeItem('vc_pending_ls');
+          localStorage.removeItem('vc_pending_num_ls');
+          localStorage.removeItem('vc_pending_ts');
+        }catch(e){}
         pendingOrdId=null;
         document.getElementById('pendingState').style.display='none';
         document.getElementById('rejectedState').style.display='block';
@@ -3897,6 +3929,10 @@ function showEmailVerifyPopup(email, name, phone){
   lockBody();
   // Auto login when email confirmed in another tab
   const {data:{subscription}} = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    // ANON AUTH: Ignore anonymous sign-ins so guest users still see the "Log In" button and guest tracking modal
+    if (session && session.user && session.user.is_anonymous) {
+      return;
+    }
     if(event==='SIGNED_IN' && session){
       subscription.unsubscribe();
       const m=document.getElementById('emailVerifyModal');
@@ -4002,6 +4038,8 @@ async function loginWithGoogle(){
   const { data: { session }, error } = await supabaseClient.auth.getSession();
   if(error || !session) return;
 
+  // ANON AUTH: Ignore anonymous session
+  if (session.user && session.user.is_anonymous) return;
   const u = session.user;
   // Google থেকে আসা user data
   const safeUser = {
@@ -5502,16 +5540,31 @@ async function openPP(id){
   if(techBody){
     const specs=curProd.specs||{};
     const quickKeys=specs._quick_keys;
+    // ✅ FIX: _quick_keys গুলো tech table-এ দ্বিতীয়বার দেখাবে না (ডুপ্লিকেশন ফিল্টার)
+    const quickKeySet = Array.isArray(quickKeys) ? new Set(quickKeys) : new Set();
+    // Packaging Content আলাদা রেন্ডার হবে, তাই main entries থেকে বাদ দাও
+    const EXCLUDE_FROM_TABLE = new Set(['Packaging Content','packaging_content']);
     let specEntries=[];
     if(Array.isArray(quickKeys)){
-      quickKeys.forEach(k=>{if(specs[k]!==undefined)specEntries.push([k,specs[k]]);});
-      // Also include any keys not in _quick_keys (but not internal _ keys)
-      Object.entries(specs).forEach(([k,v])=>{if(!k.startsWith('_')&&!quickKeys.includes(k))specEntries.push([k,v]);});
+      // quickKeys গুলো skip — শুধু non-quick, non-internal, non-packaging keys দেখাও
+      Object.entries(specs).forEach(([k,v])=>{
+        if(!k.startsWith('_') && !quickKeySet.has(k) && !EXCLUDE_FROM_TABLE.has(k)) specEntries.push([k,v]);
+      });
     } else {
-      specEntries=Object.entries(specs).filter(([k])=>!k.startsWith('_'));
+      specEntries=Object.entries(specs).filter(([k])=>!k.startsWith('_') && !EXCLUDE_FROM_TABLE.has(k));
     }
-    techBody.innerHTML=specEntries.map(([k,v])=>`<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`).join('');
-    if(!specEntries.length) techBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:var(--gray);padding:16px">স্পেসিফিকেশন শীঘ্রই যোগ করা হবে।</td></tr>';
+    let techHtml = specEntries.map(([k,v])=>`<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`).join('');
+    if(!techHtml) techHtml='<tr><td colspan="2" style="text-align:center;color:var(--gray);padding:16px">স্পেসিফিকেশন শীঘ্রই যোগ করা হবে।</td></tr>';
+    // ✅ FIX: Packaging Content থাকলে টেবিলের নিচে full-width row হিসেবে রেন্ডার করো
+    const pkgContent = specs['Packaging Content'] || specs['packaging_content'] || '';
+    if(pkgContent){
+      const pkgLines = pkgContent.split('\n').filter(l=>l.trim()).map(l=>`<div style="padding:2px 0;font-size:12.5px;color:var(--dark)">${escHtml(l.trim())}</div>`).join('');
+      techHtml += `<tr><td colspan="2" style="padding:12px 14px;border-top:2px solid var(--border);background:var(--light);border-left:none;border-right:none;border-bottom:none">
+        <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">📦 প্যাকেজিং কন্টেন্ট</div>
+        ${pkgLines}
+      </td></tr>`;
+    }
+    techBody.innerHTML = techHtml;
   }
 
   // FAQs
@@ -6249,7 +6302,26 @@ function goS2(){
   } else {
     const errEl=document.getElementById('eShip');if(errEl)errEl.classList.remove('show');
   }
-  if(ok)goS(2);
+  if(ok){
+    // ✅ Abandoned Lead tracking — background fire-and-forget
+    try{
+      const _leadPayload={
+        action:'addLead',
+        leadId:'lead_'+Date.now(),
+        date:new Date().toISOString(),
+        name:document.getElementById('cName').value.trim(),
+        phone:document.getElementById('cPhone').value.trim(),
+        dist:document.getElementById('cDist').value,
+        addr:document.getElementById('cAddr').value.trim(),
+        email:document.getElementById('cEmail').value.trim(),
+        items:orderItems.map(i=>i.name+' × '+i.qty).join('; '),
+        total:orderItems.reduce((s,i)=>s+(i.price*i.qty),0),
+        ip:'client-ip'
+      };
+      fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(_leadPayload)}).catch(()=>{});
+    }catch(_e){}
+    goS(2);
+  }
 }
 // Step 3 summary DOM render — validation ছাড়া শুধু DOM populate করে
 // goS3() এবং refresh restore দুটোতেই ব্যবহার হয়
@@ -6654,6 +6726,46 @@ async function confirmOrder(){
   try{ history.replaceState({vcStack:[], homeCurrent:true}, '', '/'); }catch(e){}
   history.pushState({waitOverlay:true},'','');
   // B-2: unlock only after order is fully saved and UI shown
+  // ✅ Google Sheets — successful order tracking (background, non-blocking)
+  try{
+    const _orderPayload={
+      action:'addOrder',
+      orderNum:order.orderNum,
+      date:order.date,
+      name:order.customer.name,
+      phone:order.customer.phone,
+      dist:order.customer.district,
+      addr:order.customer.address,
+      email:order.customer.email||'',
+      items:order.items.map(i=>i.name+' × '+i.qty).join('; '),
+      total:order.total,
+      balance:Math.max(0,order.total-200),
+      paymentInfo:order.payment.txnId?'TXN: '+order.payment.txnId:'Last4: '+order.payment.last4,
+      ip:order.ip||'client-ip'
+    };
+    fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(_orderPayload)}).catch(()=>{});
+  }catch(_e){}
+  // ✅ Email: কাস্টমারের ইমেইলে অর্ডার কনফার্মেশন পাঠাও (background, non-blocking)
+  try{
+    if(order.customer.email && order.customer.email.includes('@')){
+      const _emailPayload={
+        action:'sendConfirmEmail',
+        orderNum:order.orderNum,
+        date:order.date,
+        name:order.customer.name,
+        phone:order.customer.phone,
+        dist:order.customer.district,
+        addr:order.customer.address,
+        email:order.customer.email,
+        username:currentUser?.user_metadata?.full_name||order.customer.name,
+        items:order.items.map(i=>({name:i.name,qty:i.qty,price:i.price||0})),
+        total:order.total,
+        deliveryCharge:order.shippingCost||130,
+        ip:order.ip||'client-ip'
+      };
+      fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(_emailPayload)}).catch(()=>{});
+    }
+  }catch(_emailErr){}
   _confirmLock=false;
   startPolling();
 }
@@ -6680,13 +6792,31 @@ async function checkOrderStatusFromSupabase(ordId){
 let _confirmedOrdId=null;
 
 function handleOrderStatusUpdate(status,ordId){
-  if(['confirmed','shipped','delivered'].includes(status)){
-    clearInterval(_pollInterval);_pollInterval=null;
-    if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
-    sessionStorage.removeItem('vc_pending');
-    try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}
-    // Sync localStorage status too
+  // ✅ FIX: শুধুমাত্র চূড়ান্ত স্ট্যাটাসে (delivered/cancelled/rejected) channel ও polling বন্ধ করা হবে।
+  // confirmed বা shipped এ channel বন্ধ করলে পরবর্তী স্ট্যাটাস আপডেট (shipped/delivered) আর পাওয়া যায় না।
+  const isFinalStatus = ['delivered','cancelled','rejected'].includes(status);
+  const isConfirmStatus = status === 'confirmed';
+  const isProgressStatus = ['confirmed','shipped','delivered'].includes(status);
+
+  if(isProgressStatus){
+    // ✅ Sync localStorage সবসময়
     try{const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');const o=orders.find(x=>x.id===ordId);if(o){o.status=status;localStorage.setItem('vc_orders',JSON.stringify(orders));}}catch(e){}
+
+    if(isFinalStatus){
+      // delivered — channel ও polling বন্ধ, সব pending data পরিষ্কার
+      clearInterval(_pollInterval);_pollInterval=null;
+      if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
+      sessionStorage.removeItem('vc_pending');
+      try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}
+      pendingOrdId=null;
+    } else {
+      // confirmed বা shipped — polling বন্ধ করো কিন্তু realtime channel চালু রাখো পরের update এর জন্য
+      clearInterval(_pollInterval);_pollInterval=null;
+      sessionStorage.removeItem('vc_pending');
+      try{localStorage.removeItem('vc_pending_ls');localStorage.removeItem('vc_pending_num_ls');localStorage.removeItem('vc_pending_ts');}catch(e){}
+      // pendingOrdId এবং _supabaseChannel বন্ধ করা হচ্ছে না — shipped/delivered update আসার জন্য চালু থাকবে
+    }
+
     // ✅ Supabase থেকে full order fetch → map → bgConfirmPopup (waiting & background উভয়ের জন্য)
     (async()=>{
       let rawOrder = null;
@@ -6722,7 +6852,9 @@ function handleOrderStatusUpdate(status,ordId){
         }
       }
     })();
-    pendingOrdId=null;
+
+    if(isFinalStatus) pendingOrdId=null;
+
   } else if(status==='cancelled'||status==='rejected'){
     clearInterval(_pollInterval);_pollInterval=null;
     if(_supabaseChannel){supabaseClient.removeChannel(_supabaseChannel);_supabaseChannel=null;}
@@ -7536,6 +7668,7 @@ function showInvoiceModal(html, orderNum, callerCtx){
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        try{ localStorage.removeItem('vc_pending_confirm'); }catch(e){} // Clear key here
         if(dlBtn){dlBtn.innerHTML='🖼️ ছবি ডাউনলোড';dlBtn.disabled=false;}
       }).catch(function(err){
         console.error('html2canvas error:',err);
@@ -7562,6 +7695,7 @@ function showInvoiceModal(html, orderNum, callerCtx){
   document.getElementById('invBackBtn').onclick=function(){
     modal.remove();
     unlockBody();
+    try{ localStorage.removeItem('vc_pending_confirm'); }catch(e){}
     // caller অনুযায়ী সঠিক জায়গায় ফিরে যাও
     if(callerCtx==='acc'){
       // অ্যাকাউন্ট পেজ থেকে এসেছে
@@ -7584,6 +7718,7 @@ function showInvoiceModal(html, orderNum, callerCtx){
 function closePost(){
   document.getElementById('postOverlay').classList.remove('show');
   unlockBody();
+  try{ localStorage.removeItem('vc_pending_confirm'); }catch(e){}
   // হোম পেজে নিয়ে যাও
   window.location.replace(window.location.pathname);
 }
@@ -7638,34 +7773,68 @@ function openTrackOrder(){
     }
 
     if(guestOrder){
-      // Guest এর order পাওয়া গেছে — দেখাও
-      const statusLabel={pending:'⏳ পেন্ডিং',confirmed:'✅ কনফার্ম',shipped:'🚚 শিপড',delivered:'📦 ডেলিভার্ড',cancelled:'❌ বাতিল',rejected:'❌ বাতিল'};
-      const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',cancelled:'#E63946',rejected:'#E63946'};
-      const o = guestOrder;
-      const st = o.status || 'pending';
-      const items = (o.items||[]).map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6">${emojiHtml(i.emoji||'📦',36,'square')}<div style="flex:1"><div style="font-size:12.5px;font-weight:600">${escHtml(i.name||'')}</div><div style="font-size:11.5px;color:#6B7280">× ${i.qty} — ৳${((i.price||0)*i.qty).toLocaleString()}</div></div></div>`).join('');
-      document.getElementById('trackResult').innerHTML=`
-        <div style="margin-bottom:14px">
-          <div style="border:1.5px solid var(--border);border-radius:14px;overflow:hidden">
-            <div style="background:var(--dark);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
-              <div style="color:#fff;font-size:14px;font-weight:700">${escHtml(o.orderNum||o.id||'')}</div>
-              <div style="font-size:11.5px;font-weight:700;background:${statusColor[st]||'#888'};color:#fff;padding:4px 12px;border-radius:20px">${statusLabel[st]||st}</div>
-            </div>
-            <div style="padding:14px 16px">
-              <div style="font-size:12px;color:var(--gray);margin-bottom:10px">📅 ${new Date(o.date||Date.now()).toLocaleDateString('en-GB')} &nbsp;|&nbsp; 👤 ${escHtml(o.customer?.name||'')}</div>
-              <div style="margin-bottom:12px">${items}</div>
-              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
-                <div style="font-size:13.5px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
-                <button onclick="dlInvoiceById('${o.id}','track')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>
+      // ✅ FIX: Supabase থেকে লাইভ স্ট্যাটাস ফেচ করো, তারপর রেন্ডার করো
+      const _renderGuestTrack = (o) => {
+        const statusLabel={pending:'⏳ পেন্ডিং',confirmed:'✅ কনফার্ম',shipped:'🚚 শিপড',delivered:'📦 ডেলিভার্ড',cancelled:'❌ বাতিল',rejected:'❌ বাতিল'};
+        const statusColor={pending:'#F59E0B',confirmed:'#10B981',shipped:'#3B82F6',delivered:'#10B981',cancelled:'#E63946',rejected:'#E63946'};
+        const st = o.status || 'pending';
+        const items = (o.items||[]).map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F3F4F6">${emojiHtml(i.emoji||'📦',36,'square')}<div style="flex:1"><div style="font-size:12.5px;font-weight:600">${escHtml(i.name||'')}</div><div style="font-size:11.5px;color:#6B7280">× ${i.qty} — ৳${((i.price||0)*i.qty).toLocaleString()}</div></div></div>`).join('');
+        document.getElementById('trackResult').innerHTML=`
+          <div style="margin-bottom:14px">
+            <div style="border:1.5px solid var(--border);border-radius:14px;overflow:hidden">
+              <div style="background:var(--dark);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+                <div style="color:#fff;font-size:14px;font-weight:700">${escHtml(o.orderNum||o.id||'')}</div>
+                <div style="font-size:11.5px;font-weight:700;background:${statusColor[st]||'#888'};color:#fff;padding:4px 12px;border-radius:20px">${statusLabel[st]||st}</div>
+              </div>
+              <div style="padding:14px 16px">
+                <div style="font-size:12px;color:var(--gray);margin-bottom:10px">📅 ${new Date(o.date||Date.now()).toLocaleDateString('en-GB')} &nbsp;|&nbsp; 👤 ${escHtml(o.customer?.name||'')}</div>
+                <div style="margin-bottom:12px">${items}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
+                  <div style="font-size:13.5px;font-weight:700">মোট: ৳${(o.total||0).toLocaleString()}</div>
+                  <button onclick="dlInvoiceById('${o.id}','track')" style="background:var(--dark);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 ইনভয়েস</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.9;color:#92400E">
-          <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#78350F">⚠️ গেস্ট হিসেবে অর্ডার করা হয়েছে</div>
-          এই অর্ডারের তথ্যটি শুধুমাত্র এই ব্রাউজার ও ডিভাইসে সাময়িকভাবে সংরক্ষিত আছে। ব্রাউজারের ক্যাশ/হিস্ট্রি ক্লিয়ার করলে বা অন্য ডিভাইস থেকে লগইন করলে এই অর্ডারটি আপনার প্রোফাইলে নাও দেখাতে পারে।<br><br>
-          📋 <strong>অর্ডার নম্বর সেভ রাখুন:</strong> <strong style="color:#92400E">${escHtml(o.orderNum||o.id||'')}</strong> — ভবিষ্যতে ট্র্যাকিং বা তথ্যের জন্য এই নম্বরটি অবশ্যই সংরক্ষণ করুন। WhatsApp (01816-365504) এ যোগাযোগ করলে এই নম্বরটি প্রয়োজন হবে।
-        </div>`;
+          <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.9;color:#92400E">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#78350F">⚠️ গেস্ট হিসেবে অর্ডার করা হয়েছে</div>
+            এই অর্ডারের তথ্যটি শুধুমাত্র এই ব্রাউজার ও ডিভাইসে সাময়িকভাবে সংরক্ষিত আছে। ব্রাউজারের ক্যাশ/হিস্ট্রি ক্লিয়ার করলে বা অন্য ডিভাইস থেকে লগইন করলে এই অর্ডারটি আপনার প্রোফাইলে নাও দেখাতে পারে।<br><br>
+            📋 <strong>অর্ডার নম্বর সেভ রাখুন:</strong> <strong style="color:#92400E">${escHtml(o.orderNum||o.id||'')}</strong> — ভবিষ্যতে ট্র্যাকিং বা তথ্যের জন্য এই নম্বরটি অবশ্যই সংরক্ষণ করুন। WhatsApp (01816-365504) এ যোগাযোগ করলে এই নম্বরটি প্রয়োজন হবে।
+          </div>`;
+      };
+
+      // লোডিং দেখাও প্রথমে
+      document.getElementById('trackResult').innerHTML='<p style="color:var(--gray);font-size:13px;text-align:center">⏳ স্ট্যাটাস চেক হচ্ছে...</p>';
+
+      // ✅ Supabase থেকে লাইভ স্ট্যাটাস ফেচ করো
+      (async()=>{
+        if(guestOrder.id){
+          try{
+            const {data,error} = await supabaseClient
+              .from('orders')
+              .select('id,status,updated_at')
+              .eq('id', guestOrder.id)
+              .single();
+            if(!error && data && data.status){
+              // লাইভ স্ট্যাটাস পাওয়া গেছে — localStorage ক্যাশ আপডেট করো
+              if(guestOrder.status !== data.status){
+                guestOrder.status = data.status;
+                try{
+                  // vc_orders cache আপডেট
+                  const _ords = JSON.parse(localStorage.getItem('vc_orders')||'[]');
+                  const _o = _ords.find(x=>x.id===guestOrder.id);
+                  if(_o){_o.status=data.status;localStorage.setItem('vc_orders',JSON.stringify(_ords));}
+                  // vc_pending_confirm cache আপডেট
+                  const _pc = localStorage.getItem('vc_pending_confirm');
+                  if(_pc){const _pco=JSON.parse(_pc);if(_pco.id===guestOrder.id){_pco.status=data.status;localStorage.setItem('vc_pending_confirm',JSON.stringify(_pco));}}
+                }catch(e){}
+              }
+            }
+          }catch(e){}
+        }
+        _renderGuestTrack(guestOrder);
+      })();
+
     } else {
       // কোনো guest order নেই — সাধারণ notice
       document.getElementById('trackResult').innerHTML=`
