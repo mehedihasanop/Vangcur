@@ -566,6 +566,22 @@ nav{background:var(--white);border:1px solid var(--border);position:sticky;top:1
 .pp-price{font-size:30px;font-weight:700}
 .pp-old{font-size:15px;color:var(--gray);text-decoration:line-through}
 .pp-warranty{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#166534;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.pp-warranty-help-btn{width:17px;height:17px;border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;font-size:10px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;margin-left:2px;transition:background .15s,color .15s;font-family:'DM Sans',sans-serif}
+.pp-warranty-help-btn:hover{background:#166534;color:#fff}
+/* WARRANTY MODAL */
+#warrantyModal{display:none;position:fixed;inset:0;z-index:9800;align-items:flex-end;justify-content:center}
+#warrantyModal.show{display:flex}
+.wm-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.52);backdrop-filter:blur(4px)}
+.wm-sheet{position:relative;background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:22px 18px 36px;z-index:1;animation:slideUpSheet .27s ease;max-height:82vh;overflow-y:auto}
+.wm-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px}
+.wm-badge{display:inline-flex;align-items:center;gap:5px;background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;margin-bottom:10px}
+.wm-title{font-size:15px;font-weight:800;color:var(--dark);margin-bottom:12px;line-height:1.4}
+.wm-body{font-size:12.5px;color:var(--gray);line-height:1.75;margin-bottom:16px}
+.wm-rules{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:9px}
+.wm-rules li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--dark);line-height:1.55}
+.wm-rules li .wm-rule-num{width:22px;height:22px;border-radius:50%;background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;font-size:10px;font-weight:800;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.wm-close-btn{width:100%;background:var(--dark);color:#fff;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:20px;transition:var(--tr)}
+.wm-close-btn:hover{background:var(--hover)}
 .pp-specs-title{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px}
 .pp-spec-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
 .pp-spec-row:last-child{border:none}
@@ -799,7 +815,7 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .bird svg{animation:birdFlap 0.4s ease-in-out infinite}
 
 /* Vector Hills */
-.vector-landscape{position:absolute;bottom:0;left:0;width:100%;height:62px;z-index:5;pointer-events:none}
+.vector-landscape{position:absolute;bottom:0;left:0;width:100%;height:96px;z-index:5;pointer-events:none}
 .vector-landscape path{transition:fill 1.5s cubic-bezier(0.4,0,0.2,1)}
 .acc-profile-card.state-morning .vector-landscape .back-hill{fill:#205c30}
 .acc-profile-card.state-morning .vector-landscape .front-hill{fill:#143f1f}
@@ -865,6 +881,34 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .stat-num{font-size:16px;font-weight:700;color:#1A1A1A}
 .stat-lbl{font-size:9.5px;color:#6B7280;margin-top:3px;font-weight:600}
 .stat-badge{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;display:inline-block;margin-top:3px}
+
+
+/* === MEMBERSHIP CROWN === */
+.avatar-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.avatar-crown{position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:32px;height:32px;z-index:12;pointer-events:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35))}
+/* === MEMBERSHIP MODAL === */
+#membershipModal{display:none;position:fixed;inset:0;z-index:9900;align-items:flex-end;justify-content:center}
+#membershipModal.show{display:flex}
+.ms-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px)}
+.ms-sheet{position:relative;background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:24px 18px 36px;z-index:1;animation:slideUpSheet .28s ease}
+.ms-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+.ms-title{font-size:16px;font-weight:800;color:var(--dark);text-align:center;margin-bottom:4px}
+.ms-sub{font-size:11.5px;color:var(--gray);text-align:center;margin-bottom:20px}
+.ms-tier-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;margin-bottom:8px;border:1.5px solid var(--border);transition:.2s}
+.ms-tier-row.done{border-color:#10b981;background:#f0fdf4}
+.ms-tier-row.active-tier{border-color:#f59e0b;background:#fffbeb;box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+.ms-tier-row.locked{opacity:.5}
+.ms-tier-row.legendary{border-color:#b45309;background:linear-gradient(135deg,#fffbeb,#fef3c7);box-shadow:0 0 18px rgba(245,158,11,.3),0 0 0 2px #f59e0b}
+.ms-tier-icon{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ms-tier-info{flex:1}
+.ms-tier-name{font-size:13px;font-weight:700;color:var(--dark)}
+.ms-tier-req{font-size:11px;color:var(--gray);margin-top:2px}
+.ms-tier-check{font-size:16px;font-weight:700;color:#10b981}
+.ms-tier-lock{font-size:15px}
+.ms-tier-row.legendary .ms-tier-name{background:linear-gradient(90deg,#b45309,#f59e0b,#b45309);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ms-progress-bar-wrap{height:6px;background:var(--border);border-radius:99px;margin:16px 0 4px;overflow:hidden}
+.ms-progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#f59e0b);transition:width .6s cubic-bezier(.4,0,.2,1)}
+.ms-progress-txt{font-size:11px;color:var(--gray);text-align:right;margin-bottom:16px}
 
 /* Order History (Right Side) */
 .acc-orders-section{background:#fff!important;border-radius:20px!important;border:1.5px solid #E5E7EB!important;padding:24px!important;box-shadow:0 4px 18px rgba(0,0,0,0.04)!important;margin-bottom:0!important}
@@ -1106,8 +1150,13 @@ footer{background:var(--dark);color:#fff;margin-top:52px}
 @media(max-width:1024px){.cat-cards{grid-template-columns:repeat(3,1fr)}.footer-top{grid-template-columns:1fr 1fr}.pp-inner{grid-template-columns:1fr}.pp-gallery{position:static}}
 @media(max-width:768px){.hero-title{font-size:28px}.hero-card{display:none}.hero-stats{gap:18px}.cat-cards{grid-template-columns:repeat(2,1fr)}.prod-grid{grid-template-columns:repeat(2,1fr)}.nav-search{display:none}.nav-search-icon{display:flex !important}.footer-top{grid-template-columns:1fr}.cart-side{width:100%;right:-105%}.t-item:nth-child(n+4){display:none}.cat-carousel-wrap{padding:0 38px}.cat-carousel-arrow{width:30px;height:30px;font-size:16px}.cat-card{padding:13px 12px;gap:10px}.cat-card-icon-wrap{width:44px;height:44px;font-size:22px}.cat-card-icon-wrap svg{width:22px;height:22px}.cat-card-name{font-size:12px}}
 @media(max-width:480px){.prod-grid{grid-template-columns:repeat(2,1fr)}.cat-cards{grid-template-columns:repeat(2,1fr)}.hero-stats{display:none}.hero-slide-fallback{padding:32px 22px}
+  .order-card-footer{flex-wrap:nowrap}
+  .order-total-price{font-size:11.5px;white-space:nowrap}
+  .order-card-footer .invoice-btn{padding:5px 9px;font-size:11px;margin-left:auto}
+  .intro-text{font-size:clamp(9.5px,2.9vw,12px)!important;letter-spacing:-0.3px!important}
   @keyframes slideUpSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
 }
+@media(max-width:359px){.intro-text{font-size:9px!important}}
 .prod-spec{font-size:11px;color:var(--gray);margin-bottom:10px;line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--dark);color:#fff;padding:10px 22px;border-radius:50px;font-size:12.5px;font-weight:500;z-index:8500;opacity:0;transition:all .27s ease;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -2531,7 +2580,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
     <div>
       <h1 class="pp-name" id="ppName"></h1>
       <div class="pp-price-row"><span class="pp-price" id="ppPrice"></span><span class="pp-old" id="ppOld"></span></div>
-      <div class="pp-warranty" id="ppWarranty">🛡️ <span id="ppWarrantyTxt"></span></div>
+      <div class="pp-warranty" id="ppWarranty">🛡️ <span id="ppWarrantyTxt"></span><button class="pp-warranty-help-btn" id="ppWarrantyHelpBtn" onclick="openWarrantyModal(document.getElementById('ppWarrantyTxt').textContent)" title="ওয়ারেন্টি বিস্তারিত">?</button></div>
       <!-- Quick specs overview -->
       <div class="pp-quick-specs" id="ppQuickSpecs"></div>
       <div class="pp-qty-row">
@@ -2815,15 +2864,15 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
           </div>
 
           <!-- Vector Hills -->
-          <svg class="vector-landscape" viewBox="0 0 400 62" preserveAspectRatio="none">
-            <path class="back-hill" d="M0,32 Q100,8 200,24 T400,20 L400,62 L0,62 Z" fill="#205c30" opacity="0.75"/>
-            <path class="front-hill" d="M0,45 Q120,24 240,38 T400,35 L400,62 L0,62 Z" fill="#143f1f"/>
+          <svg class="vector-landscape" viewBox="0 0 400 96" preserveAspectRatio="none">
+            <path class="back-hill" d="M0,50 Q100,18 200,36 T400,30 L400,96 L0,96 Z" fill="#205c30" opacity="0.75"/>
+            <path class="front-hill" d="M0,66 Q120,38 240,56 T400,52 L400,96 L0,96 Z" fill="#143f1f"/>
           </svg>
 
           <!-- Content Overlay -->
           <div class="profile-content">
             <div class="profile-header" style="display:flex;align-items:center;gap:10px">
-              <div class="profile-avatar" id="avatarCircle">?</div>
+              <div class="avatar-wrap"><div class="profile-avatar" id="avatarCircle">?</div></div>
               <div class="acc-profile-info">
                 <div class="acc-name-txt" id="accNameTxt">-</div>
                 <div class="acc-email-txt" id="accEmailTxt">-</div>
@@ -2867,8 +2916,8 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
             <div class="stat-num" id="statRunningOrders">0টি</div>
             <div class="stat-lbl">রানিং অর্ডার</div>
           </div>
-          <div class="stat-box" style="padding:9px 4px 6px;">
-            <div class="stat-badge">Silver Member</div>
+          <div class="stat-box" style="padding:9px 4px 6px;cursor:pointer" id="membershipCardBtn" onclick="openMembershipModal()">
+            <div class="stat-badge" id="membershipBadge">সাধারণ সদস্য</div>
             <div class="stat-lbl" style="margin-top:4px">মেম্বারশিপ</div>
           </div>
         </div>
@@ -4248,50 +4297,92 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   const GRID_COLS = 'id,cat,name,price,old,stock,badge,discount_color,warranty,rating,imgs,specs';
   const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
 
-  // Step 5b: Background এ Supabase custom products আনো (একটিমাত্র query)
-  try{
-    const {data:sbProds, error} = await supabaseClient
-      .from('custom_products')
-      .select(GRID_COLS)
-      .order('id', {ascending: true});
+  // Step 5b: Supabase থেকে custom products আনো — retry + detailed error logging সহ
+  const _fetchCustomProds = async () => {
+    // supabaseClient এখনো ready না হলে skip করো (CDN fallback scenario)
+    if(!supabaseClient){ console.warn('[Vangcur] supabaseClient not ready — skipping custom_products fetch'); return; }
 
-    if(!error && sbProds && sbProds.length){
-      sbProds.forEach(p=>{
-        const specs = (()=>{
-          let s = p.specs || {};
-          if(typeof s === 'string'){ try{ s = JSON.parse(s); }catch(e){} }
-          return s;
-        })();
-        const mapped = {
-          id: p.id,
-          cat: p.cat || 'rgb',
-          name: p.name || '',
-          price: p.price || 0,
-          old: p.old || p.price || 0,
-          stock: p.stock !== undefined ? p.stock : 0,
-          badge: p.badge || '',
-          discountColor: p.discount_color || p.discountColor || (specs && specs._discount_color) || '',
-          warranty: p.warranty || '৭ দিন',
-          rating: p.rating || 4.5,
-          imgs: Array.isArray(p.imgs) ? p.imgs : (p.imgs ? [p.imgs] : ['📦']),
-          specs: specs,
-          desc: '', longDesc: '', features: [], faqs: [], closing: '',
-          _detailLoaded: false,
-        };
-        if(!PRODS.find(x=>x.id===mapped.id)){ PRODS.push(mapped); }
-        else {
-          const idx = PRODS.findIndex(x=>x.id===mapped.id);
-          if(idx>-1){ PRODS[idx]={...PRODS[idx],...mapped}; }
+    let attempt = 0;
+    const MAX_ATTEMPTS = 3;
+
+    while(attempt < MAX_ATTEMPTS) {
+      attempt++;
+      try{
+        const {data:sbProds, error} = await supabaseClient
+          .from('custom_products')
+          .select(GRID_COLS)
+          .order('id', {ascending: true});
+
+        if(error){
+          console.warn('[Vangcur] custom_products fetch error (attempt '+attempt+'):', error.message, '| code:', error.code);
+          // RLS বা permission error হলে retry করা অর্থহীন
+          if(error.code === '42501' || error.code === 'PGRST116' || error.message?.includes('permission') || error.message?.includes('policy')){
+            console.error('[Vangcur] ❌ RLS/Permission error — custom_products table-এ anon SELECT access নেই। Supabase dashboard থেকে RLS policy চেক করুন।');
+            break;
+          }
+          // নেটওয়ার্ক error — একটু অপেক্ষা করে retry
+          if(attempt < MAX_ATTEMPTS){ await new Promise(r=>setTimeout(r, 1200 * attempt)); continue; }
+          break;
         }
-      });
 
-      // Custom products এলে order apply করে grid update করো
-      applyProdOrder(_settings['vc_prod_order'] || null);
-      const _curList = activeCat==='all' ? PRODS : PRODS.filter(p=>prodInCat(p,activeCat));
-      renderProds(_curList);
-      updateCatPillCounts();
+        if(!sbProds || !sbProds.length){
+          console.warn('[Vangcur] custom_products: query সফল কিন্তু data empty (table-এ কোনো row নেই অথবা সব row filter হয়ে গেছে)');
+          break;
+        }
+
+        console.log('[Vangcur] ✅ custom_products loaded:', sbProds.length, 'products');
+
+        sbProds.forEach(p=>{
+          const specs = (()=>{
+            let s = p.specs || {};
+            if(typeof s === 'string'){ try{ s = JSON.parse(s); }catch(e){ s={}; } }
+            return s;
+          })();
+
+          // imgs — Supabase থেকে string বা array দুটোই হতে পারে
+          let imgs = p.imgs;
+          if(typeof imgs === 'string'){
+            try{ imgs = JSON.parse(imgs); }catch(e){ imgs = imgs ? [imgs] : ['📦']; }
+          }
+          if(!Array.isArray(imgs) || !imgs.length) imgs = ['📦'];
+
+          const mapped = {
+            id: p.id,
+            cat: p.cat || 'rgb',
+            name: p.name || '',
+            price: Number(p.price) || 0,
+            old: Number(p.old) || Number(p.price) || 0,
+            stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : 0,
+            badge: p.badge || '',
+            discountColor: p.discount_color || p.discountColor || (specs && specs._discount_color) || '',
+            warranty: p.warranty || '৭ দিন',
+            rating: Number(p.rating) || 4.5,
+            imgs: imgs,
+            specs: specs,
+            desc: '', longDesc: '', features: [], faqs: [], closing: '',
+            _detailLoaded: false,
+          };
+
+          if(!PRODS.find(x=>x.id===mapped.id)){ PRODS.push(mapped); }
+          else {
+            const idx = PRODS.findIndex(x=>x.id===mapped.id);
+            if(idx>-1){ PRODS[idx]={...PRODS[idx],...mapped}; }
+          }
+        });
+
+        applyProdOrder(_settings['vc_prod_order'] || null);
+        const _curList = activeCat==='all' ? PRODS : PRODS.filter(p=>prodInCat(p,activeCat));
+        renderProds(_curList);
+        updateCatPillCounts();
+        break; // সফল — loop শেষ
+
+      }catch(e){
+        console.warn('[Vangcur] custom_products exception (attempt '+attempt+'):', e);
+        if(attempt < MAX_ATTEMPTS){ await new Promise(r=>setTimeout(r, 1200 * attempt)); }
+      }
     }
-  }catch(e){console.warn('custom_products load failed:',e);}
+  };
+  await _fetchCustomProds();
 
   // ============================================================
   // fetchProdDetail(id) — Product Page খুললে এই function call হবে
@@ -4425,7 +4516,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
-            imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
+            imgs:(()=>{let im=p.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
             specs:p.specs||{},
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
@@ -4449,7 +4540,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
             discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
-            imgs:Array.isArray(p.imgs)?p.imgs:(p.imgs?[p.imgs]:['📦']),
+            imgs:(()=>{let im=p.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
             specs:p.specs||{},
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
@@ -5123,13 +5214,31 @@ function updateCelestialPosition(hour, isForceRain) {
 
 async function fetchLocalWeather(){
   try{
+    // If previously denied, quietly use Dhaka coords — no prompt
+    if(localStorage.getItem('vc_location_denied')==='1'){
+      getWeather(23.811,90.412);return;
+    }
+    // Check 2-hour weather cache
+    const cached=localStorage.getItem('vc_weather_cache');
+    if(cached){
+      try{
+        const obj=JSON.parse(cached);
+        if(obj.ts&&(Date.now()-obj.ts)<7200000){
+          // Cache still valid — apply directly
+          const isRaining=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(obj.code);
+          if(isRaining){updateCelestialPosition(0,true);}
+          return;
+        }
+      }catch(e){}
+    }
     let lat=23.811,lon=90.412;
-    if(window.location.protocol.startsWith('http') && navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(async(pos)=>{
-        lat=pos.coords.latitude;lon=pos.coords.longitude;getWeather(lat,lon);
-      },()=>{ getWeather(lat,lon); });
+    if(window.location.protocol.startsWith('http')&&navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        async(pos)=>{ lat=pos.coords.latitude;lon=pos.coords.longitude;getWeather(lat,lon); },
+        ()=>{ localStorage.setItem('vc_location_denied','1'); getWeather(lat,lon); }
+      );
     } else {
-      getWeather(lat,lon); // Silent local fallback, no prompt
+      getWeather(lat,lon);
     }
   }catch(e){}
 }
@@ -5139,6 +5248,8 @@ async function getWeather(lat,lon){
     const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
     const data=await res.json();
     const code=data.current_weather.weathercode;
+    // Cache result for 2 hours
+    try{ localStorage.setItem('vc_weather_cache',JSON.stringify({code,lat,lon,ts:Date.now()})); }catch(e){}
     const isRaining=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code);
     if(isRaining){updateCelestialPosition(0,true);}
   }catch(e){}
@@ -5241,10 +5352,15 @@ async function renderMyOrders(){
   // Update stats
   const totOrders=mine.length;
   const runOrders=mine.filter(o=>['pending','confirmed','shipped'].includes(o.status)).length;
+  const completedOrders=mine.filter(o=>['confirmed','shipped','delivered'].includes(o.status)).length;
   const statTot=document.getElementById('statTotalOrders');
   const statRun=document.getElementById('statRunningOrders');
   if(statTot)statTot.textContent=totOrders+'টি';
   if(statRun)statRun.textContent=runOrders+'টি';
+  // Store completed count on card for modal use, then update membership UI
+  const msBtn=document.getElementById('membershipCardBtn');
+  if(msBtn)msBtn.dataset.completed=completedOrders;
+  _updateMembershipUI(completedOrders);
 
   const container=document.getElementById('myOrdersCards');
   if(!mine.length){
@@ -5282,6 +5398,156 @@ async function renderMyOrders(){
     </div>`;
   }).join('');
 }
+
+
+
+// ═══════════════════════════════════════
+// WARRANTY EXPLAINER MODAL
+// ═══════════════════════════════════════
+function openWarrantyModal(warrantyText){
+  const t=(warrantyText||'').toLowerCase();
+  let title='',body='',rules=[];
+
+  const is7d   =/৭ দিন|১ সপ্তাহ|7.?day|1.?week/i.test(warrantyText);
+  const is6m   =/৬ মাস|6.?month|6m(?!o)|180.?day/i.test(warrantyText);
+  const is1y   =/১ বছর|১২ মাস|1.?year|12.?month|1y(?:r)?(?![0-9])/i.test(warrantyText);
+  const is2y   =/২ বছর|২৪ মাস|2.?year|24.?month|2y(?:r)?(?![0-9])/i.test(warrantyText);
+
+  if(is7d){
+    title='১ সপ্তাহ (৭ দিন) রিপ্লেসমেন্ট ওয়ারেন্টি পলিসি';
+    body='প্রোডাক্টটি অর্ডার করার দিন থেকে পরবর্তী ৭ দিনের মধ্যে প্রস্তুতকারক ত্রুটি বা টেকনিক্যাল সমস্যার জন্য ফ্রিতে রিপ্লেসমেন্ট পাবেন।';
+    rules=['আন-কাট আনবক্সিং ভিডিও প্রমাণ হিসেবে প্রদর্শন করতে হবে।','মূল বক্স ও ইনভয়েস পেপার অক্ষত ফেরত দিতে হবে।','ফিজিক্যাল বা ওয়াটার ড্যামেজ গ্রহণযোগ্য নয়।'];
+  } else if(is6m){
+    title='৬ মাস রিপ্লেসমেন্ট ওয়ারেন্টি পলিসি';
+    body='প্রোডাক্টটি অর্ডার করার দিন থেকে পরবর্তী ১৮০ দিন (৬ মাস) পর্যন্ত অভ্যন্তরীণ টেকনিক্যাল সমস্যা বা প্রস্তুতকারক ত্রুটির জন্য ফ্রিতে রিপ্লেসমেন্ট পাবেন।';
+    rules=['কুরিয়ার থেকে পার্সেল বুঝে নেওয়ার সময়ের আন-কাট আনবক্সিং ভিডিও দেখাতে হবে।','ক্লেইমের সময় প্রোডাক্টের অরিজিনাল বক্স, ইনভয়েস পেপার এবং এক্সেসরিজ ফেরত দিতে হবে।','পুড়ে যাওয়া বা ওয়াটার ড্যামেজ গ্রহণযোগ্য নয়।'];
+  } else if(is1y){
+    title='১ বছর (১২ মাস) ওয়ারেন্টি পলিসি';
+    body='প্রোডাক্টটি অর্ডার করার দিন থেকে পরবর্তী ১ বছর (৩৬৫ দিন) পর্যন্ত প্রস্তুতকারক ত্রুটি বা হার্ডওয়্যারজনিত সমস্যার জন্য কাস্টমার ফ্রি রিপ্লেসমেন্ট অথবা ব্র্যান্ডের ফ্রি সার্ভিস ওয়ারেন্টি সুবিধা পাবেন।';
+    rules=['প্রথমবার বক্স খোলার সময়ের আন-কাট আনবক্সিং ভিডিও সংরক্ষণ ও প্রদর্শন করতে হবে।','ইনভয়েস পেপার ও সিরিয়াল নম্বর সহ মূল বক্স জমা দিতে হবে।','ফিজিক্যাল ড্যামেজ বা সফটওয়্যার মডিফিকেশন গ্রহণযোগ্য নয়।'];
+  } else if(is2y){
+    title='২ বছর (২৪ মাস) ওয়ারেন্টি পলিসি';
+    body='প্রোডাক্টটি অর্ডার করার দিন থেকে পরবর্তী ২ বছর (২৪ মাস) পর্যন্ত যেকোনো প্রকার হার্ডওয়্যার ত্রুটির জন্য কাস্টমার ফ্রি রিপ্লেসমেন্ট অথবা ব্র্যান্ডের অফিসিয়াল ফ্রি সার্ভিস ওয়ারেন্টি সুবিধা পাবেন।';
+    rules=['পার্সেল বুঝে নেওয়ার সময়ের আন-কাট আনবক্সিং ভিডিও প্রমাণ হিসেবে আবশ্যক।','অরিজিনাল ইনভয়েস পেপার, বক্স এবং ওয়ারেন্টি কার্ড ক্লেইমের সময় জমা দিতে হবে।','ফিজিক্যাল বা লিকুইড ড্যামেজ গ্রহণযোগ্য নয়।'];
+  } else {
+    title='Vangcur স্ট্যান্ডার্ড ওয়ারেন্টি পলিসি';
+    body='এই প্রোডাক্টটি Vangcur-এর স্ট্যান্ডার্ড মান নিয়ন্ত্রণ প্রক্রিয়ার অধীনে বিক্রয় করা হয়েছে। নির্দিষ্ট ওয়ারেন্টির মেয়াদ ও শর্তাবলির জন্য পণ্যের বক্স অথবা আমাদের কাস্টমার সাপোর্টে যোগাযোগ করুন।';
+    rules=['আনবক্সিং ভিডিও রাখার পরামর্শ দেওয়া হচ্ছে।','ইনভয়েস পেপার ও মূল বক্স সংরক্ষণ করুন।','সমস্যার জন্য আমাদের সাথে যোগাযোগ করুন।'];
+  }
+
+  document.getElementById('wmTitle').textContent=title;
+  document.getElementById('wmBody').textContent=body;
+  document.getElementById('wmRules').innerHTML=rules.map((r,i)=>`<li><span class="wm-rule-num">${i+1}</span><span>${r}</span></li>`).join('');
+  const modal=document.getElementById('warrantyModal');
+  if(modal){modal.classList.add('show');lockBody();}
+}
+function closeWarrantyModal(){
+  const modal=document.getElementById('warrantyModal');
+  if(modal)modal.classList.remove('show');
+  unlockBody();
+}
+
+// ═══════════════════════════════════════
+// MEMBERSHIP TIER SYSTEM
+// ═══════════════════════════════════════
+const _TIERS = [
+  { min:0,  max:0,  key:'regular',   bn:'সাধারণ সদস্য',  en:'Regular Member',   crown:null },
+  { min:1,  max:2,  key:'silver',    bn:'সিলভার মেম্বার', en:'Silver Member',    crown:'silver' },
+  { min:3,  max:4,  key:'gold',      bn:'গোল্ড মেম্বার',  en:'Gold Member',      crown:'gold' },
+  { min:5,  max:9,  key:'diamond',   bn:'ডায়মন্ড মেম্বার',en:'Diamond Member',  crown:'diamond' },
+  { min:10, max:Infinity, key:'legendary', bn:'লিজেন্ডারি মেম্বার', en:'Legendary Member', crown:'legendary' },
+];
+
+function _getTier(completedCount){
+  return _TIERS.find(t=>completedCount>=t.min&&completedCount<=t.max)||_TIERS[0];
+}
+
+function _crownSVG(type){
+  if(type==='silver') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,4 4,22 10,18 16,28 22,18 28,22" fill="#C0C0C0" stroke="#A8A8A8" stroke-width="1.2"/><circle cx="16" cy="4" r="2.5" fill="#E8E8E8"/><circle cx="4" cy="22" r="2" fill="#D0D0D0"/><circle cx="28" cy="22" r="2" fill="#D0D0D0"/></svg>`;
+  if(type==='gold') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,3 4,21 10,17 16,27 22,17 28,21" fill="#F59E0B" stroke="#D97706" stroke-width="1.2"/><circle cx="16" cy="3" r="2.5" fill="#FCD34D"/><circle cx="4" cy="21" r="2" fill="#F59E0B"/><circle cx="28" cy="21" r="2" fill="#F59E0B"/></svg>`;
+  if(type==='diamond') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,2 4,20 10,16 16,28 22,16 28,20" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.2"/><polygon points="16,8 12,16 16,20 20,16" fill="#BFDBFE" opacity="0.7"/><circle cx="16" cy="2" r="2.5" fill="#93C5FD"/><circle cx="4" cy="20" r="2" fill="#60A5FA"/><circle cx="28" cy="20" r="2" fill="#60A5FA"/></svg>`;
+  if(type==='legendary') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#EF4444"/><stop offset="100%" stop-color="#B45309"/></linearGradient></defs><polygon points="16,2 4,20 10,15 16,28 22,15 28,20" fill="url(#lgCrown)" stroke="#B45309" stroke-width="1.2"/><circle cx="16" cy="2" r="3" fill="#FCD34D"/><circle cx="4" cy="20" r="2.2" fill="#EF4444"/><circle cx="28" cy="20" r="2.2" fill="#EF4444"/><circle cx="16" cy="15" r="3" fill="#FEF3C7" opacity="0.8"/></svg>`;
+  return '';
+}
+
+function _tierIcon(key){
+  return {regular:'👤',silver:'🥈',gold:'🥇',diamond:'💎',legendary:'👑'}[key]||'👤';
+}
+
+function _updateMembershipUI(completedCount){
+  const tier = _getTier(completedCount);
+  // Update badge
+  const badge = document.getElementById('membershipBadge');
+  if(badge){
+    badge.textContent = tier.bn;
+    const colors = {regular:'',silver:'background:#F1F5F9;border-color:#94A3B8;color:#475569',
+      gold:'background:#FEF9C3;border-color:#F59E0B;color:#92400E',
+      diamond:'background:#EFF6FF;border-color:#3B82F6;color:#1E40AF',
+      legendary:'background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-color:#B45309;color:#78350F'};
+    badge.style.cssText = (colors[tier.key]||'') + ';font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;display:inline-block;margin-top:3px;border:1px solid;transition:.3s';
+  }
+  // Render crown on avatarCircle
+  ['avatarCircle'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const wrap=el.closest('.avatar-wrap');
+    if(!wrap)return;
+    // Remove old crown
+    wrap.querySelectorAll('.avatar-crown').forEach(c=>c.remove());
+    if(tier.crown){
+      wrap.insertAdjacentHTML('beforeend',_crownSVG(tier.crown));
+    }
+  });
+}
+
+function openMembershipModal(){
+  const modal=document.getElementById('membershipModal');
+  if(!modal)return;
+  const completedCount=parseInt(document.getElementById('membershipCardBtn')?.dataset.completed||'0',10);
+  const currentTier=_getTier(completedCount);
+  // Progress toward next tier
+  const currentIdx=_TIERS.findIndex(t=>t.key===currentTier.key);
+  const nextTier=_TIERS[currentIdx+1];
+  let pct=100,progressTxt='সর্বোচ্চ র‍্যাংকে আছেন! 🎉';
+  if(nextTier){
+    const needed=nextTier.min;
+    pct=Math.min(100,Math.round((completedCount/needed)*100));
+    progressTxt=`${nextTier.bn} পেতে আরো ${needed-completedCount}টি অর্ডার দরকার`;
+  }
+  document.getElementById('msProgressBar').style.width=pct+'%';
+  document.getElementById('msProgressTxt').textContent=progressTxt;
+  document.getElementById('msSubTxt').textContent=`সম্পন্ন অর্ডার: ${completedCount}টি • বর্তমান র‍্যাংক: ${currentTier.bn}`;
+  // Render tiers
+  const tierReqs=['নতুন সদস্য','১–২টি সম্পন্ন অর্ডার','৩–৪টি সম্পন্ন অর্ডার','৫–৯টি সম্পন্ন অর্ডার','১০+ সম্পন্ন অর্ডার'];
+  document.getElementById('msTierList').innerHTML=_TIERS.map((t,i)=>{
+    const isDone=completedCount>t.max;
+    const isActive=t.key===currentTier.key;
+    const isLegendary=t.key==='legendary';
+    let cls='ms-tier-row';
+    if(isLegendary)cls+=' legendary';
+    else if(isDone)cls+=' done';
+    else if(isActive)cls+=' active-tier';
+    else if(!isDone&&!isActive)cls+=' locked';
+    const check=isDone?`<span class="ms-tier-check">✓</span>`:isActive?`<span style="font-size:12px;background:#f59e0b;color:#fff;border-radius:50%;padding:1px 6px;font-weight:700">আপনি</span>`:`<span class="ms-tier-lock">🔒</span>`;
+    return `<div class="${cls}">
+      <div class="ms-tier-icon">${_tierIcon(t.key)}</div>
+      <div class="ms-tier-info">
+        <div class="ms-tier-name">${isLegendary?'👑 ':''} ${t.bn}</div>
+        <div class="ms-tier-req">${tierReqs[i]}</div>
+      </div>
+      ${check}
+    </div>`;
+  }).join('');
+  modal.classList.add('show');
+  lockBody();
+}
+
+function closeMembershipModal(){
+  const modal=document.getElementById('membershipModal');
+  if(modal)modal.classList.remove('show');
+  unlockBody();
+}
+
 
 // PRODUCT RENDERING
 // ─── Infinite Scroll State ───────────────────────────────────────────────────
@@ -7887,6 +8153,8 @@ async function confirmOrder(){
   pendingOrdId=oid;sessionStorage.setItem('vc_pending',oid);sessionStorage.setItem('vc_pending_num',num);try{localStorage.setItem('vc_pending_ls',oid);localStorage.setItem('vc_pending_num_ls',num);localStorage.setItem('vc_pending_ts',String(Date.now()));}catch(e){}
   // Stock reduction is now handled server-side via Supabase PostgreSQL trigger (AFTER INSERT on orders table)
   cart=[];localStorage.setItem('vc_cart',JSON.stringify(cart));updateCartUI();
+  _deleteDraftLocal();
+  if(currentUser?.id){supabaseClient.from('abandoned_checkouts').delete().eq('user_id',currentUser.id).then(()=>{}).catch(()=>{});}
   sessionStorage.removeItem('vc_form_draft'); // B-4: clear draft on success
   closeOrder();
   document.getElementById('waitNum').textContent=num;
@@ -8453,7 +8721,7 @@ document.addEventListener('visibilitychange',()=>{
             stock:raw.stock!==undefined?raw.stock:0, badge:raw.badge||'',
             discountColor:raw.discount_color||(specs&&specs._discount_color)||'',
             warranty:raw.warranty||'৭ দিন', rating:raw.rating||4.5,
-            imgs:Array.isArray(raw.imgs)?raw.imgs:(raw.imgs?[raw.imgs]:['📦']),
+            imgs:(()=>{let im=raw.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
             specs:specs,
           };
           const idx=PRODS.findIndex(x=>x.id===p.id);
@@ -8925,6 +9193,8 @@ function closePost(){
   document.getElementById('postOverlay').classList.remove('show');
   unlockBody();
   try{ localStorage.removeItem('vc_pending_confirm'); }catch(e){}
+  // Thank You animation flag — page reload এর পরে navbar-এ দেখাবে
+  localStorage.setItem('vc_show_thank_you','1');
   // হোম পেজে নিয়ে যাও
   window.location.replace(window.location.pathname);
 }
@@ -10732,8 +11002,67 @@ function triggerHeaderIntroAnimation() {
   }, 400);
 }
 
+
+function triggerThankYouAnimation(){
+  // Same session-gate logic — but keyed separately so it can run after the welcome
+  if(sessionStorage.getItem('vc_thankyou_played')==='1')return;
+  sessionStorage.setItem('vc_thankyou_played','1');
+
+  const navContent=document.getElementById('navContent');
+  const introOverlay=document.getElementById('introOverlay');
+  const introText=document.getElementById('introText');
+  const navSearch=document.querySelector('.nav-search');
+  if(!navContent||!introOverlay||!introText)return;
+
+  const line1='Order Successful. Your next-gen gear is officially locked in! ⚡';
+  const line2='Vangcur Dispatch is on it. Get ready to upgrade your setup! 📦';
+  const isMobile=window.innerWidth<=768;
+
+  if(isMobile){
+    navContent.style.opacity='0';navContent.style.transform='translateY(8px)';
+    introOverlay.style.opacity='1';introOverlay.style.background='var(--white)';
+    introOverlay.style.left='0';introOverlay.style.right='0';introOverlay.style.width='100%';
+  } else {
+    navContent.style.opacity='1';navContent.style.transform='translateY(0)';
+    if(navSearch)navSearch.style.opacity='0';
+    introOverlay.style.opacity='1';introOverlay.style.background='transparent';
+    introOverlay.style.left='200px';introOverlay.style.right='200px';
+    introOverlay.style.width='calc(100% - 400px)';
+  }
+
+  setTimeout(()=>{
+    typeWriter(line1,introText,38,()=>{
+      setTimeout(()=>{
+        introText.style.transform='translateY(-24px)';introText.style.opacity='0';
+        setTimeout(()=>{
+          introText.style.transition='none';
+          introText.style.transform='translateY(24px)';introText.style.opacity='0';
+          requestAnimationFrame(()=>{
+            introText.style.transition='transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s ease';
+            introText.style.transform='translateY(0)';introText.style.opacity='1';
+            typeWriter(line2,introText,32,()=>{
+              setTimeout(()=>{
+                introText.style.transform='translateY(-24px)';introText.style.opacity='0';
+                introOverlay.style.opacity='0';
+                setTimeout(()=>{
+                  navContent.style.opacity='1';navContent.style.transform='translateY(0)';
+                  if(navSearch)navSearch.style.opacity='1';
+                },300);
+              },1400);
+            });
+          });
+        },350);
+      },1200);
+    });
+  },400);
+}
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(triggerHeaderIntroAnimation, 100);
+  if(localStorage.getItem('vc_show_thank_you')==='1'){
+    localStorage.removeItem('vc_show_thank_you');
+    setTimeout(triggerThankYouAnimation,100);
+  } else {
+    setTimeout(triggerHeaderIntroAnimation,100);
+  }
 });
 
 // ✅ SEC: Right-click disable
@@ -11125,6 +11454,32 @@ if ('serviceWorker' in navigator) {
   <div class="toast-actions">
     <button class="toast-btn dismiss" onclick="dismissRecoveryToast(true)">এখন নয়</button>
     <button class="toast-btn continue" onclick="continueRecoveryOrder()">হ্যাঁ, চালিয়ে যান</button>
+  </div>
+</div>
+
+<!-- MEMBERSHIP PROGRESS MODAL -->
+<div id="membershipModal" onclick="if(event.target===this||event.target.classList.contains('ms-backdrop'))closeMembershipModal()">
+  <div class="ms-backdrop"></div>
+  <div class="ms-sheet">
+    <div class="ms-handle"></div>
+    <div class="ms-title">🏆 মেম্বারশিপ প্রোগ্রেস</div>
+    <div class="ms-sub" id="msSubTxt">আপনার অর্ডার সম্পন্ন করুন এবং পরবর্তী র‍্যাংকে উঠুন!</div>
+    <div class="ms-progress-bar-wrap"><div class="ms-progress-bar" id="msProgressBar" style="width:0%"></div></div>
+    <div class="ms-progress-txt" id="msProgressTxt"></div>
+    <div id="msTierList"></div>
+  </div>
+</div>
+
+<!-- WARRANTY EXPLAINER MODAL -->
+<div id="warrantyModal" onclick="if(event.target===this||event.target.classList.contains('wm-backdrop'))closeWarrantyModal()">
+  <div class="wm-backdrop"></div>
+  <div class="wm-sheet">
+    <div class="wm-handle"></div>
+    <div class="wm-badge">🛡️ ওয়ারেন্টি পলিসি</div>
+    <div class="wm-title" id="wmTitle"></div>
+    <div class="wm-body" id="wmBody"></div>
+    <ul class="wm-rules" id="wmRules"></ul>
+    <button class="wm-close-btn" onclick="closeWarrantyModal()">বুঝেছি ✓</button>
   </div>
 </div>
 </body>
