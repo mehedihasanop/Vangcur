@@ -4294,7 +4294,7 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   window._prodDetailCache = window._prodDetailCache || {};
 
   // গ্রিড columns — lightweight (ভারী fields বাদ)
-  const GRID_COLS = 'id,cat,name,price,old,stock,badge,discount_color,warranty,rating,imgs,specs';
+  const GRID_COLS = 'id,cat,cats,name,price,old,stock,badge,warranty,rating,imgs,specs';
   const defaultIds = new Set([1, 4, 14, 24, 34, 44, 54]);
 
   // Step 5b: Supabase থেকে custom products আনো — retry + detailed error logging সহ
@@ -4349,12 +4349,13 @@ document.addEventListener('DOMContentLoaded',async ()=>{
           const mapped = {
             id: p.id,
             cat: p.cat || 'rgb',
+            cats: p.cats || [p.cat || 'rgb'],
             name: p.name || '',
             price: Number(p.price) || 0,
             old: Number(p.old) || Number(p.price) || 0,
             stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : 0,
             badge: p.badge || '',
-            discountColor: p.discount_color || p.discountColor || (specs && specs._discount_color) || '',
+            discountColor: (specs && specs._discount_color) || p.discountColor || '',
             warranty: p.warranty || '৭ দিন',
             rating: Number(p.rating) || 4.5,
             imgs: imgs,
@@ -4510,14 +4511,15 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.new&&!PRODS.find(x=>String(x.id)===String(payload.new.id))){
           const p = payload.new;
+          const _insSpecs=(()=>{let s=p.specs||{};if(typeof s==='string'){try{s=JSON.parse(s);}catch(e){s={};}}return s;})();
           const mapped = {
-            id:p.id, cat:p.cat||'rgb', name:p.name||'',
+            id:p.id, cat:p.cat||'rgb', cats:p.cats||[p.cat||'rgb'], name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
-            discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
+            discountColor:(_insSpecs&&_insSpecs._discount_color)||p.discountColor||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:(()=>{let im=p.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
-            specs:p.specs||{},
+            specs:_insSpecs,
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
             features:Array.isArray(p.features)?p.features:[],
@@ -4534,14 +4536,15 @@ document.addEventListener('DOMContentLoaded',async ()=>{
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'custom_products'},async(payload)=>{
         if(payload.new&&payload.new.id){
           const p = payload.new;
+          const _updSpecs=(()=>{let s=p.specs||{};if(typeof s==='string'){try{s=JSON.parse(s);}catch(e){s={};}}return s;})();
           const mapped = {
-            id:p.id, cat:p.cat||'rgb', name:p.name||'',
+            id:p.id, cat:p.cat||'rgb', cats:p.cats||[p.cat||'rgb'], name:p.name||'',
             price:p.price||0, old:p.old||p.price||0,
             stock:p.stock!==undefined?p.stock:0, badge:p.badge||'',
-            discountColor:p.discount_color||p.discountColor||(p.specs&&p.specs._discount_color)||'',
+            discountColor:(_updSpecs&&_updSpecs._discount_color)||p.discountColor||'',
             warranty:p.warranty||'৭ দিন', rating:p.rating||4.5,
             imgs:(()=>{let im=p.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
-            specs:p.specs||{},
+            specs:_updSpecs,
             desc:p.desc_text||p.desc||'',
             longDesc:p.long_desc||p.desc_text||p.desc||'',
             features:Array.isArray(p.features)?p.features:[],
@@ -8709,17 +8712,17 @@ document.addEventListener('visibilitychange',()=>{
       // (visibility restore এ একবারই call করা হবে — নিচের rAF block থেকেও call হয় না)
       // if(typeof loadCathCardData==='function') loadCathCardData(); // moved to rAF block below
       // ২. custom_products refresh করো (lightweight columns — detail cache অক্ষুণ্ণ থাকবে)
-      const _GCOLS='id,cat,name,price,old,stock,badge,discount_color,warranty,rating,imgs,specs';
+      const _GCOLS='id,cat,cats,name,price,old,stock,badge,warranty,rating,imgs,specs';
       const {data:sbProds}=await supabaseClient.from('custom_products').select(_GCOLS);
       if(sbProds&&sbProds.length){
         let changed=false;
         sbProds.forEach(raw=>{
           const specs=(()=>{let s=raw.specs||{};if(typeof s==='string'){try{s=JSON.parse(s);}catch(e){}}return s;})();
           const p = {
-            id:raw.id, cat:raw.cat||'rgb', name:raw.name||'',
+            id:raw.id, cat:raw.cat||'rgb', cats:raw.cats||[raw.cat||'rgb'], name:raw.name||'',
             price:raw.price||0, old:raw.old||raw.price||0,
             stock:raw.stock!==undefined?raw.stock:0, badge:raw.badge||'',
-            discountColor:raw.discount_color||(specs&&specs._discount_color)||'',
+            discountColor:(specs&&specs._discount_color)||'',
             warranty:raw.warranty||'৭ দিন', rating:raw.rating||4.5,
             imgs:(()=>{let im=raw.imgs;if(typeof im==='string'){try{im=JSON.parse(im);}catch(e){im=im?[im]:['📦'];}}return Array.isArray(im)&&im.length?im:['📦'];})(),
             specs:specs,
