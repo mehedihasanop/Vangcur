@@ -858,6 +858,15 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .acc-edit-btn,.acc-logout-btn,.acc-switch-btn{flex:1;background:rgba(255,255,255,0.12)!important;border:1px solid rgba(255,255,255,0.22)!important;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:600;color:#fff!important;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px;transition:all 0.25s ease;font-family:inherit}
 .acc-edit-btn:hover,.acc-logout-btn:hover,.acc-switch-btn:hover{background:rgba(255,255,255,0.24)!important;transform:translateY(-1.5px)}
 .acc-logout-btn:hover{color:#ff9999!important;border-color:rgba(255,150,150,0.35)!important}
+.logout-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.18s ease}
+.logout-confirm-box{background:#fff;border-radius:20px;padding:28px 24px 20px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:slideUpSheet 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+.logout-confirm-icon{font-size:38px;text-align:center;margin-bottom:12px}
+.logout-confirm-msg{font-size:15px;font-weight:700;color:#1A1A1A;text-align:center;line-height:1.5;margin-bottom:22px;font-family:'Hind Siliguri',sans-serif}
+.logout-confirm-btns{display:flex;gap:10px}
+.logout-confirm-no{flex:1;background:#F3F4F6;color:#374151;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.logout-confirm-no:hover{background:#E5E7EB}
+.logout-confirm-yes{flex:1;background:#1A1A1A;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.logout-confirm-yes:hover{background:#EF4444}
 
 /* Switch Drawer */
 @keyframes slideDownPanel{from{opacity:0;max-height:0;transform:translateY(-8px)}to{opacity:1;max-height:300px;transform:translateY(0)}}
@@ -897,7 +906,7 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .ms-tier-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;margin-bottom:8px;border:1.5px solid var(--border);transition:.2s}
 .ms-tier-row.done{border-color:#10b981;background:#f0fdf4}
 .ms-tier-row.active-tier{border-color:#f59e0b;background:#fffbeb;box-shadow:0 0 0 3px rgba(245,158,11,.15)}
-.ms-tier-row.locked{opacity:.5}
+.ms-tier-row.locked{opacity:1;background:#F9FAFB;border-color:#E5E7EB;color:#9CA3AF}
 .ms-tier-row.legendary{border-color:#b45309;background:linear-gradient(135deg,#fffbeb,#fef3c7);box-shadow:0 0 18px rgba(245,158,11,.3),0 0 0 2px #f59e0b}
 .ms-tier-icon{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
 .ms-tier-info{flex:1}
@@ -905,6 +914,8 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .ms-tier-req{font-size:11px;color:var(--gray);margin-top:2px}
 .ms-tier-check{font-size:16px;font-weight:700;color:#10b981}
 .ms-tier-lock{font-size:15px}
+.ms-tier-row.locked .ms-tier-name{color:#9CA3AF}
+.ms-tier-row.locked .ms-tier-req{color:#D1D5DB}
 .ms-tier-row.legendary .ms-tier-name{background:linear-gradient(90deg,#b45309,#f59e0b,#b45309);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .ms-progress-bar-wrap{height:6px;background:var(--border);border-radius:99px;margin:16px 0 4px;overflow:hidden}
 .ms-progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#f59e0b);transition:width .6s cubic-bezier(.4,0,.2,1)}
@@ -929,6 +940,7 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .order-total-price{font-size:13px;font-weight:700;color:var(--dark)}
 .invoice-btn{background:var(--dark);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr);display:flex;align-items:center;gap:4px}
 .invoice-btn:hover{background:var(--hover)}
+.order-card-footer .invoice-btn{width:auto!important;padding:6px 14px!important;border-radius:8px!important;margin-left:auto!important;font-size:11.5px!important;box-shadow:none!important}
 .acc-no-orders{text-align:center;padding:32px 16px}
 /* Legacy compat */
 .acc-invoice-btn{background:var(--dark);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr);display:flex;align-items:center;gap:4px}
@@ -1034,8 +1046,8 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .receipt-item{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;color:#374151}
 .receipt-divider{border:none;border-top:2px dashed var(--border);margin:12px 0;height:1px}
 .receipt-total{display:flex;justify-content:space-between;font-size:14.5px;font-weight:800;color:var(--dark)}
-.receipt-row-paid{color:var(--green);font-weight:600}
-.receipt-row-balance{color:var(--red);font-weight:800;font-size:14px}
+.receipt-row-paid{color:var(--green);font-weight:600;font-size:13px}
+.receipt-row-balance{color:var(--red);font-weight:700;font-size:13px}
 /* --- Premium Shipping Parcel Label --- */
 .shipping-parcel-label{background:#FFFBEB;border:1.5px dashed #F59E0B;border-radius:16px;padding:16px;margin-bottom:20px;position:relative}
 .parcel-title{font-size:10px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:block}
@@ -1115,9 +1127,69 @@ body.dark .pp-tab::after{background-color:#FF6B6B}
 .faq-a.open{max-height:300px;padding:10px 17px 16px}
 .faq-arr.open{transform:rotate(180deg)}
 
+/* ============================================================
+   ABOUT VANGCUR SECTION — TASK 22
+   ============================================================ */
+.vc-about-sec{background:linear-gradient(135deg,#1A1A1A 0%,#2a1a1a 60%,#1A1A1A 100%);padding:52px 20px 44px;margin:0 0 0}
+.vc-about-inner{max-width:760px;margin:0 auto;text-align:center}
+.vc-about-badge{display:inline-block;background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.3);color:var(--red);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 14px;border-radius:50px;margin-bottom:14px}
+.vc-about-title{font-family:'Playfair Display',serif;font-size:30px;color:#fff;margin-bottom:16px;line-height:1.2}
+.vc-about-title span{color:var(--gold)}
+.vc-about-desc{font-size:14.5px;line-height:1.9;color:rgba(255,255,255,.7);max-width:640px;margin:0 auto;font-family:'Hind Siliguri','DM Sans',sans-serif}
+@media(max-width:768px){.vc-about-title{font-size:24px}.vc-about-desc{font-size:13.5px}}
+
+/* ============================================================
+   CUSTOMER LOVE GALLERY — TASKS 22/23/24
+   ============================================================ */
+.vc-gallery-sec{padding:48px 0 56px;background:var(--cream);overflow:hidden}
+.vc-gallery-header{text-align:center;padding:0 20px;margin-bottom:32px}
+.vc-gallery-badge{display:inline-block;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.2);color:var(--red);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:50px;margin-bottom:10px}
+.vc-gallery-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--dark);margin-bottom:6px;line-height:1.2}
+.vc-gallery-title span{color:var(--red)}
+.vc-gallery-sub{font-size:13.5px;color:var(--gray)}
+/* Stage: 3-card layout */
+.vc-gallery-stage{position:relative;width:100%;max-width:900px;margin:0 auto;padding:0 0 10px}
+.vc-gallery-track-wrap{overflow:hidden;padding:20px 0 24px}
+.vc-gallery-track{display:flex;align-items:center;justify-content:center;gap:16px;transition:none;position:relative}
+/* Cards */
+.vc-g-card{position:relative;border-radius:20px;overflow:hidden;background:#111;cursor:pointer;flex-shrink:0;transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .45s ease,box-shadow .45s ease;user-select:none;-webkit-tap-highlight-color:transparent}
+.vc-g-card.vc-g-active{transform:scale(1.15);opacity:1;box-shadow:0 16px 48px rgba(0,0,0,.28),0 4px 12px rgba(0,0,0,.12);z-index:2}
+.vc-g-card.vc-g-side{transform:scale(0.85);opacity:.6;z-index:1}
+/* Card sizes */
+.vc-g-card{width:200px;height:320px}
+@media(min-width:480px){.vc-g-card{width:220px;height:360px}}
+@media(min-width:768px){.vc-g-card{width:260px;height:400px}}
+/* Card image */
+.vc-g-img-wrap{width:100%;height:100%;position:relative;overflow:hidden}
+.vc-g-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform-origin .1s;will-change:transform}
+/* TASK 23: zoomed state */
+.vc-g-card.vc-g-active .vc-g-img.vc-g-zoomed{transform:scale(2.2);cursor:grab}
+.vc-g-card.vc-g-active .vc-g-img.vc-g-zoomed:active{cursor:grabbing}
+/* Gradient overlay */
+.vc-g-overlay{position:absolute;bottom:0;left:0;right:0;padding:48px 12px 12px;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 100%);pointer-events:none}
+.vc-g-name{color:#fff;font-size:12px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc-g-stars{color:#F59E0B;font-size:11px;letter-spacing:1px}
+/* TASK 24: Heart button */
+.vc-g-heart-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.35);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:10;backdrop-filter:blur(4px);transition:transform .2s ease;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.vc-g-heart-btn:active{transform:scale(.9)}
+.vc-g-heart-liked{animation:vc-heartbeat .35s ease}
+@keyframes vc-heartbeat{0%{transform:scale(1)}40%{transform:scale(1.55)}70%{transform:scale(.9)}100%{transform:scale(1)}}
+.vc-g-like-count{position:absolute;bottom:12px;right:44px;font-size:11px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none}
+/* Arrows */
+.vc-g-arrow{position:absolute;top:50%;transform:translateY(-50%);background:var(--dark);color:#fff;border:none;width:40px;height:40px;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:var(--tr);box-shadow:0 4px 14px rgba(0,0,0,.2);line-height:1}
+.vc-g-arrow:hover{background:var(--hover)}
+.vc-g-prev{left:8px}
+.vc-g-next{right:8px}
+@media(max-width:480px){.vc-g-arrow{display:none}}
+/* Dots */
+.vc-gallery-dots{display:flex;justify-content:center;gap:7px;margin-top:6px}
+.vc-g-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:none;cursor:pointer;padding:0;transition:var(--tr)}
+.vc-g-dot.active{background:var(--red);transform:scale(1.25)}
+.vc-gallery-empty{text-align:center;color:var(--gray);font-size:14px;padding:24px}
+
 /* FOOTER */
 footer{background:var(--dark);color:#fff;margin-top:52px}
-.footer-top{max-width:1300px;margin:0 auto;padding:42px 20px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}
+.footer-top{max-width:1300px;margin:0 auto;padding:42px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
 .f-logo{font-family:'Playfair Display',serif;font-size:22px;color:#fff}
 .f-logo-sub{font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .f-desc{color:rgba(255,255,255,.5);font-size:12.5px;margin-top:10px;line-height:1.75;max-width:280px}
@@ -1576,6 +1648,38 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 /* Floating cart badge - even gap above WA/Messenger buttons */
 .float-cart-btn{position:fixed;bottom:136px;right:22px;z-index:801;display:none;animation:floatCartIn .35s cubic-bezier(.34,1.56,.64,1)}
 @keyframes floatCartIn{from{transform:scale(0) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+/* ── TASK 25: Cart Jiggle ── */
+@keyframes cartJiggle{0%,100%{transform:rotate(0deg) scale(1)}10%{transform:rotate(-12deg) scale(1.15)}25%{transform:rotate(10deg) scale(1.12)}40%{transform:rotate(-8deg) scale(1.08)}55%{transform:rotate(6deg) scale(1.05)}70%{transform:rotate(-4deg) scale(1.02)}85%{transform:rotate(2deg) scale(1.01)}}
+.cart-jiggle{animation:cartJiggle .7s cubic-bezier(.36,.07,.19,.97) both!important}
+/* ── TASK 26: Notify Me Popup ── */
+#stockNotifyModal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9200;display:none;align-items:center;justify-content:center;padding:20px}
+#stockNotifyModal.show{display:flex}
+.sn-box{background:#fff;border-radius:18px;padding:28px 22px 22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.18);animation:ppSlideUp .35s cubic-bezier(.34,1.56,.64,1)}
+.sn-icon{font-size:40px;text-align:center;margin-bottom:8px}
+.sn-title{font-size:16px;font-weight:800;color:#1A1A1A;text-align:center;margin-bottom:4px;font-family:'DM Sans',sans-serif}
+.sn-sub{font-size:12.5px;color:#6B7280;text-align:center;margin-bottom:18px;line-height:1.5;font-family:'Hind Siliguri','DM Sans',sans-serif}
+.sn-input{width:100%;padding:11px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;transition:.2s}
+.sn-input:focus{border-color:#1A1A1A}
+.sn-btns{display:flex;gap:8px;margin-top:14px}
+.sn-btn-cancel{flex:1;padding:11px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-weight:700;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;color:#6B7280}
+.sn-btn-submit{flex:2;padding:11px;background:#1A1A1A;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.sn-btn-submit:disabled{opacity:.5;cursor:not-allowed}
+/* ── TASK 27: Back-In-Stock Toast ── */
+.bis-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:380px;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.18);z-index:5050;display:none;padding:14px 16px;animation:toastIn .38s cubic-bezier(.34,1.56,.64,1) both;border-left:4px solid #10B981}
+.bis-toast.active{display:block}
+.bis-toast.dismissing{animation:toastOut .3s ease forwards}
+.bis-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.bis-title-txt{font-size:13.5px;font-weight:700;color:#065F46;font-family:'DM Sans',sans-serif;line-height:1.4}
+.bis-close{background:none;border:none;font-size:16px;cursor:pointer;color:#9CA3AF;padding:0;flex-shrink:0;margin-left:8px;line-height:1}
+.bis-prod-row{display:flex;gap:10px;align-items:center;background:#F0FDF4;border-radius:10px;padding:9px 11px;margin-bottom:11px}
+.bis-thumb{width:44px;height:44px;flex-shrink:0;border-radius:8px;background:#E5E7EB;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.bis-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.bis-prod-info{flex:1;min-width:0}
+.bis-prod-name{font-size:12.5px;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif}
+.bis-prod-price{font-size:12px;color:#10B981;font-weight:700;font-family:'DM Sans',sans-serif}
+.bis-actions{display:flex;gap:7px}
+.bis-btn-dismiss{flex:1;padding:9px;border:1.5px solid #E5E7EB;border-radius:9px;font-size:12px;font-weight:700;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;color:#6B7280}
+.bis-btn-order{flex:2;padding:9px;background:#10B981;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
 .float-cart-inner{position:relative;width:50px;height:50px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);transition:transform .2s}
 .float-cart-inner:hover{transform:scale(1.1)}
 .float-cart-badge{position:absolute;top:-4px;right:-4px;background:#E63946;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
@@ -2313,6 +2417,39 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
 .toast-btn.continue:hover { background: #374151; }
 .toast-btn.dismiss { background: var(--light); border: 1.5px solid var(--border); color: var(--gray); }
 .toast-btn.dismiss:hover { background: var(--border); color: var(--dark); }
+
+/* ===== HEADER INTRO / SEARCH PROMO ANIMATIONS (added) ===== */
+@keyframes navIntroScaleIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+nav.nav-intro-anim{animation:navIntroScaleIn .65s ease both;transform-origin:center}
+
+.intro-text.intro-text-1{font-size:16.5px!important;font-weight:800!important;letter-spacing:-0.2px}
+.intro-text.intro-text-2{font-size:13.5px!important;font-weight:700!important;letter-spacing:-0.2px}
+
+.nav-sparkle{position:absolute;pointer-events:none;z-index:905;will-change:transform,opacity;transition:transform 1.6s ease-out,opacity 1.6s ease-out}
+
+/* nav-actions fade for mobile search promo */
+#navContent .nav-actions{transition:opacity .35s ease}
+#navContent.search-promo-active .nav-actions{opacity:0;pointer-events:none}
+
+/* Mobile search promo capsule */
+#searchPromo{position:absolute;right:14px;top:50%;width:172px;height:40px;background:#E5E7EB;border-radius:50px;display:none;align-items:center;overflow:hidden;transform:translateY(-50%) scaleX(0);transform-origin:right;transition:transform .5s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1);z-index:6}
+#searchPromo.show{display:flex}
+#searchPromo.expand{transform:translateY(-50%) scaleX(1)}
+#searchPromo.shrink{width:40px}
+#searchPromo .sp-icon{position:absolute;right:8px;top:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--gray);transform:translate(0,-50%);transition:transform .6s cubic-bezier(.4,0,.2,1)}
+#searchPromo .sp-icon.slide{transform:translate(-120px,-50%)}
+#searchPromo .sp-text{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden}
+#searchPromo.pop{animation:spPop .35s ease}
+#searchPromo .sp-icon.pop{animation:spPop .35s ease;transform-origin:center}
+@keyframes spPop{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+@media(min-width:769px){
+  .nav-search{margin-left:40px}
+  .nav-search.nsp-init input{transform:scaleX(0);transform-origin:center;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+  .nav-search.nsp-init.nsp-expanded input{transform:scaleX(1)}
+  .nav-search>svg{transition:transform .6s cubic-bezier(.4,0,.2,1)}
+  .nav-search .sp-text-d{position:absolute;left:40px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--gray);white-space:nowrap;overflow:hidden;pointer-events:none;background:var(--light);right:14px}
+}
 </style>
 
 <!-- Microsoft Clarity — User behavior analytics -->
@@ -2346,8 +2483,16 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
     <div class="nav-search">
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <input type="search" id="desktopSearchInput" placeholder="প্রোডাক্ট খুঁজুন..." oninput="handleSearchInput(this.value,'desktop')" onkeydown="handleSearchKey(event)" autocomplete="off" name="product-search" readonly onfocus="this.removeAttribute('readonly')" onblur="this.setAttribute('readonly','')" style="cursor:text">
+      <span class="sp-text-d" id="spTextD"></span>
       <div class="search-dropdown" id="desktopSearchDropdown"></div>
     </div>
+    <div id="searchPromo">
+      <span class="sp-text" id="spTextMobile"></span>
+      <span class="sp-icon" id="spIconMobile">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </span>
+    </div>
+
     <div class="nav-actions">
       <button class="nav-icon-btn" onclick="openWishlist()" title="Wishlist">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -2478,6 +2623,37 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
   <div class="faq-grid" id="faqGrid"></div>
 </div>
 
+<!-- ABOUT VANGCUR + CUSTOMER GALLERY -->
+<section class="vc-about-sec" id="vcAboutSec">
+  <div class="vc-about-inner">
+    <div class="vc-about-badge">আমাদের সম্পর্কে</div>
+    <h2 class="vc-about-title">Vangcur — <span>ভাঙচুর</span></h2>
+    <p class="vc-about-desc" id="vcAboutDesc">Vangcur (ভাঙচুর) — গ্যাজেট ও লাইফস্টাইল অ্যাক্সেসরিজের এক বিশ্বস্ত নাম। বাংলাদেশের প্রতিটি কোণে আমরা পৌঁছে দিচ্ছি সেরা মানের পণ্য, সাশ্রয়ী মূল্যে। আমাদের লক্ষ্য: শুধু পণ্য নয়, একটি নিরাপদ ও আনন্দময় শপিং অভিজ্ঞতা।</p>
+  </div>
+</section>
+
+<!-- CUSTOMER LOVE GALLERY -->
+<section class="vc-gallery-sec" id="vcGallerySec">
+  <div class="vc-gallery-header">
+    <div class="vc-gallery-badge">❤️ Customer Love</div>
+    <h2 class="vc-gallery-title">Unboxing <span>গ্যালারি</span></h2>
+    <p class="vc-gallery-sub">আমাদের কাস্টমারদের আনন্দময় মুহূর্ত</p>
+  </div>
+  <div class="vc-gallery-stage" id="vcGalleryStage">
+    <div class="vc-gallery-track-wrap">
+      <div class="vc-gallery-track" id="vcGalleryTrack">
+        <!-- cards injected by JS -->
+      </div>
+    </div>
+    <button class="vc-g-arrow vc-g-prev" id="vcGPrev" onclick="vcGallerySlide(-1)" aria-label="আগের">‹</button>
+    <button class="vc-g-arrow vc-g-next" id="vcGNext" onclick="vcGallerySlide(1)" aria-label="পরের">›</button>
+  </div>
+  <div class="vc-gallery-dots" id="vcGalleryDots"></div>
+  <div class="vc-gallery-empty" id="vcGalleryEmpty" style="display:none">
+    <p>এখনো কোনো রিভিউ নেই।</p>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-top">
@@ -2497,6 +2673,14 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
         <a class="soc-btn" id="socialYt" href="https://youtube.com/@vangcur" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
       </div>
     </div>
+    <div class="f-col" id="footerQuickLinksCol">
+      <h4>কুইক লিঙ্কস</h4>
+      <button onclick="openAcc()" >মাই প্রোফাইল</button>
+      <button onclick="openTrackOrder()">ট্র্যাক অর্ডার</button>
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})">হোম</button>
+      <button onclick="document.getElementById('catCardsGrid').scrollIntoView({behavior:'smooth'})">ক্যাটাগরি</button>
+      <button onclick="openOfferPage()" style="color:#D4A853">📢 চলতি অফারসমূহ</button>
+    </div>
     <div class="f-col" id="footerServiceCol">
       <h4>Customer Service</h4>
       <button onclick="document.getElementById('faqSec').scrollIntoView({behavior:'smooth'})">FAQ</button>
@@ -2504,7 +2688,6 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       <button onclick="openInfo('returns')">Returns &amp; Refunds</button>
       <button onclick="openInfo('privacy')">Privacy Policy</button>
       <button onclick="openInfo('terms')">Terms &amp; Conditions</button>
-      <button onclick="openOfferPage()" style="color:#D4A853">📢 চলতি অফারসমূহ</button>
     </div>
     <div class="f-col" id="footerContactCol">
       <h4>CONTACT</h4>
@@ -2883,7 +3066,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
             <div class="acc-profile-actions">
               <button onclick="openNameEdit()" class="acc-edit-btn">✏️ এডিট</button>
               <button onclick="toggleSwitchPanel()" class="acc-switch-btn">🔄 সুইচ</button>
-              <button class="acc-logout-btn" onclick="doLogout()">↩ লগআউট</button>
+              <button class="acc-logout-btn" onclick="showLogoutConfirm()">↩ লগআউট</button>
             </div>
 
             <!-- Name Editor -->
@@ -2917,8 +3100,11 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
             <div class="stat-lbl">রানিং অর্ডার</div>
           </div>
           <div class="stat-box" style="padding:9px 4px 6px;cursor:pointer" id="membershipCardBtn" onclick="openMembershipModal()">
-            <div class="stat-badge" id="membershipBadge">সাধারণ সদস্য</div>
-            <div class="stat-lbl" style="margin-top:4px">মেম্বারশিপ</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px 0">
+              <div style="font-size:18px">👤</div>
+              <div style="font-size:10px;font-weight:700;color:#78350F;font-family:'DM Sans',sans-serif">সাধারণ</div>
+              <div class="stat-lbl" style="margin-top:0;font-size:8.5px">মেম্বারশিপ</div>
+            </div>
           </div>
         </div>
 
@@ -2929,6 +3115,15 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
             <button class="clear-all-btn" onclick="clearAllDrafts()">🗑️ সব মুছুন</button>
           </div>
           <div id="draftCardsList"></div>
+        </div>
+
+        <!-- TASK 27: Stock Notification List in Profile -->
+        <div id="snProfileSection" style="margin-top:14px;display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:700;color:var(--dark);font-family:'DM Sans',sans-serif">🔔 স্টকে আসলে জানানো</div>
+            <button onclick="clearAllStockNotifications()" style="font-size:11px;color:var(--gray);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">সব মুছুন</button>
+          </div>
+          <div id="snProfileList"></div>
         </div>
 
       </div>
@@ -3025,7 +3220,7 @@ body.dark .rel-card-name,.dark .rel-card-price{color:#E5E5EA}
       </div>
       <div style="text-align:center;font-weight:700;font-size:13px;color:var(--dark);margin-bottom:12px;font-family:inherit;">নিচের যেকোনো একটি দেওয়া বাধ্যতামূলক</div>
       <div class="fg2"><label>ট্রানজেকশন আইডি <span class="f-opt">(১০ ক্যারেক্টার, যেমন: 8N5O2A3BDE)</span></label><input class="fctrl" id="cTxn" placeholder="bKash Transaction ID" maxlength="10"><div class="ferr" id="eTxn">ট্রানজেকশন আইডি অবশ্যই ১০ ক্যারেক্টার হতে হবে</div></div>
-      <div class="or-div">— অথবা —</div>
+      <div class="or-div">অথবা</div>
       <div class="fg2"><label>Send Money করা bKash নম্বরের শেষ ৪ ডিজিট</label><input class="fctrl" id="cL4" placeholder="যেমন: 5504" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"><div class="ferr" id="eL4">Transaction ID অথবা শেষ ৪ ডিজিট দিন</div></div>
       <div class="o-foot" style="border:none;padding:14px 0 0"><button class="btn-back" onclick="goS(1)">← পেছনে</button><button class="btn-next" onclick="goS3()">পরবর্তী → নিশ্চিত করুন</button></div>
     </div>
@@ -3823,6 +4018,10 @@ const DUO_TOTAL = 13;
 let duoIdx = 0;          // "virtual" index — counts cards, not pages
 let duoAutoTimer = null;
 let duoPaused = false;
+// Header-intro autoplay gate: on the very first load of the session, hero
+// autoplay stays paused until the full header-intro sequence finishes.
+window._heroIntroGate = (function(){ try { return sessionStorage.getItem('vc_header_intro_played') !== '1'; } catch(e){ return false; } })();
+window._heroIntroSeqDone = false;
 let _duoInfiniteJump = false; // blocks double-fire during silent jump
 
 function getDuoPerPage() {
@@ -3994,6 +4193,7 @@ function duoSetPosition(animate) {
 
 function startDuoAuto() {
   clearInterval(duoAutoTimer);
+  if (window._heroIntroGate && !window._heroIntroSeqDone) return;
   duoAutoTimer = setInterval(() => {
     if (!duoPaused) duoStep(1);
   }, 3500);
@@ -4021,6 +4221,22 @@ function goHeroSlide(n){}
 function heroSlide(dir){}
 function startHeroAuto(){}
 function resetHeroAuto(){}
+
+// TASK 20: Hero slider pause/resume for overlay battery saving
+function _pauseHeroSlider(){
+  if(typeof cathAutoTimer !== 'undefined'){clearInterval(cathAutoTimer);clearTimeout(cathAutoTimer);}
+  if(typeof duoAutoTimer !== 'undefined'){clearInterval(duoAutoTimer);clearTimeout(duoAutoTimer);}
+}
+function _resumeHeroSlider(){
+  if(typeof startCathAuto === 'function') startCathAuto();
+  if(typeof startDuoAuto === 'function') startDuoAuto();
+}
+function _anyOverlayOpen(){
+  const ppOpen = document.getElementById('ppOverlay')?.classList.contains('show');
+  const cartOpen = document.getElementById('cartSide')?.classList.contains('open');
+  const accOpen = document.getElementById('accPage')?.classList.contains('show');
+  return !!(ppOpen || cartOpen || accOpen);
+}
 
 
 // INIT
@@ -4827,6 +5043,7 @@ async function doLogin(){
   const safeUser = { id: data.user.id, email: data.user.email, name: data.user.user_metadata?.name || 'Customer', phone: data.user.user_metadata?.phone || '' };
   currentUser=safeUser;
   localStorage.setItem('vc_user',JSON.stringify(safeUser));
+  _saveLinkedAccount(safeUser, data.session);
   mergeGuestOrdersToUser(safeUser.email, safeUser.id);
   syncWishlistFromSupabase();
   _closeLoginOrderMode(); // order mode cleanup
@@ -4947,6 +5164,7 @@ function showEmailVerifyPopup(email, name, phone){
       const safeUser={id:u.id,email:u.email,name:name||u.user_metadata?.name||'Customer',phone:phone||u.user_metadata?.phone||'',createdAt:new Date().toISOString()};
       currentUser=safeUser;
       localStorage.setItem('vc_user',JSON.stringify(safeUser));
+      _saveLinkedAccount(safeUser, session);
       mergeGuestOrdersToUser(safeUser.email,safeUser.id);
       updateNavAuth();
       showToast('✅ ইমেইল কনফার্ম হয়েছে! স্বাগতম 🎉');
@@ -5001,6 +5219,24 @@ async function saveNameEdit(){
   updateNavAuth();
   closeNameEdit();
   showToast('✅ নাম পরিবর্তন হয়েছে');
+}
+
+function showLogoutConfirm(){
+  const existing = document.getElementById('logoutConfirmOverlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'logoutConfirmOverlay';
+  overlay.className = 'logout-confirm-overlay';
+  overlay.innerHTML = `<div class="logout-confirm-box">
+    <div class="logout-confirm-icon">👋</div>
+    <div class="logout-confirm-msg">আপনি কি নিশ্চিতভাবে লগআউট করতে চান?</div>
+    <div class="logout-confirm-btns">
+      <button class="logout-confirm-no" onclick="document.getElementById('logoutConfirmOverlay').remove()">না</button>
+      <button class="logout-confirm-yes" onclick="document.getElementById('logoutConfirmOverlay').remove();doLogout()">লগআউট</button>
+    </div>
+  </div>`;
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
 }
 
 async function doLogout(){
@@ -5066,6 +5302,7 @@ async function loginWithGoogle(){
 
   currentUser = safeUser;
   localStorage.setItem('vc_user', JSON.stringify(safeUser));
+  if(typeof _saveLinkedAccount === 'function') _saveLinkedAccount(safeUser, session);
 
   // Wishlist ও orders sync করো
   if(typeof syncWishlistFromSupabase === 'function') syncWishlistFromSupabase();
@@ -5217,32 +5454,83 @@ function updateCelestialPosition(hour, isForceRain) {
 
 async function fetchLocalWeather(){
   try{
-    // If previously denied, quietly use Dhaka coords — no prompt
-    if(localStorage.getItem('vc_location_denied')==='1'){
-      getWeather(23.811,90.412);return;
-    }
     // Check 2-hour weather cache
     const cached=localStorage.getItem('vc_weather_cache');
     if(cached){
       try{
         const obj=JSON.parse(cached);
         if(obj.ts&&(Date.now()-obj.ts)<7200000){
-          // Cache still valid — apply directly
           const isRaining=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(obj.code);
           if(isRaining){updateCelestialPosition(0,true);}
           return;
         }
       }catch(e){}
     }
+    // District → lat/lon mapping for Bangladesh
+    const districtCoords={
+      'ঢাকা':{lat:23.811,lon:90.412},'ঢাকা সিটি':{lat:23.811,lon:90.412},
+      'চট্টগ্রাম':{lat:22.356,lon:91.784},'চট্টগ্রাম সিটি':{lat:22.356,lon:91.784},
+      'সিলেট':{lat:24.897,lon:91.872},'খুলনা':{lat:22.845,lon:89.540},
+      'রাজশাহী':{lat:24.374,lon:88.601},'ময়মনসিংহ':{lat:24.746,lon:90.407},
+      'বরিশাল':{lat:22.701,lon:90.353},'রংপুর':{lat:25.745,lon:89.275},
+      'কুমিল্লা':{lat:23.461,lon:91.188},'নারায়ণগঞ্জ':{lat:23.623,lon:90.500},
+      'গাজীপুর':{lat:24.002,lon:90.412},'টাঙ্গাইল':{lat:24.252,lon:89.917},
+      'ফরিদপুর':{lat:23.599,lon:89.842},'মাদারীপুর':{lat:23.164,lon:90.200},
+      'যশোর':{lat:23.167,lon:89.217},'বগুড়া':{lat:24.851,lon:89.371},
+      'নোয়াখালী':{lat:22.869,lon:91.100},'কক্সবাজার':{lat:21.453,lon:92.010},
+      'পটুয়াখালী':{lat:22.357,lon:90.330},'ঝিনাইদহ':{lat:23.100,lon:89.153},
+      'নেত্রকোনা':{lat:24.876,lon:90.724},'কিশোরগঞ্জ':{lat:24.444,lon:90.778},
+      'মুন্সিগঞ্জ':{lat:23.552,lon:90.531},'শরীয়তপুর':{lat:23.199,lon:90.373},
+      'ফেনী':{lat:23.023,lon:91.398},'ব্রাহ্মণবাড়িয়া':{lat:23.960,lon:91.111},
+      'চাঁদপুর':{lat:23.234,lon:90.669},'লক্ষ্মীপুর':{lat:22.942,lon:90.841},
+      'নীলফামারী':{lat:25.931,lon:88.856},'ঠাকুরগাঁও':{lat:26.032,lon:88.459},
+      'পঞ্চগড়':{lat:26.338,lon:88.558},'দিনাজপুর':{lat:25.627,lon:88.636},
+      'জয়পুরহাট':{lat:25.097,lon:89.037},'নওগাঁ':{lat:24.802,lon:88.938},
+      'চাঁপাইনবাবগঞ্জ':{lat:24.597,lon:88.281},'নাটোর':{lat:24.420,lon:88.989},
+      'পাবনা':{lat:24.006,lon:89.246},'সিরাজগঞ্জ':{lat:24.454,lon:89.699},
+      'কুষ্টিয়া':{lat:23.901,lon:89.121},'মেহেরপুর':{lat:23.759,lon:88.632},
+      'চুয়াডাঙ্গা':{lat:23.648,lon:88.841},'মাগুরা':{lat:23.487,lon:89.419},
+      'নড়াইল':{lat:23.172,lon:89.500},'বাগেরহাট':{lat:22.660,lon:89.785},
+      'সাতক্ষীরা':{lat:22.718,lon:89.071},'পিরোজপুর':{lat:22.579,lon:89.972},
+      'ঝালকাঠি':{lat:22.643,lon:90.197},'বরগুনা':{lat:22.152,lon:90.122},
+      'ভোলা':{lat:22.688,lon:90.651},'সুনামগঞ্জ':{lat:24.881,lon:91.395},
+      'হবিগঞ্জ':{lat:24.375,lon:91.415},'মৌলভীবাজার':{lat:24.483,lon:91.777},
+      'খাগড়াছড়ি':{lat:23.119,lon:91.984},'রাঙামাটি':{lat:22.732,lon:92.294},
+      'বান্দরবান':{lat:22.190,lon:92.218},'শেরপুর':{lat:25.018,lon:90.017},
+      'জামালপুর':{lat:24.934,lon:89.944},'গোপালগঞ্জ':{lat:23.004,lon:89.826},
+      'রাজবাড়ী':{lat:23.757,lon:89.644},'মানিকগঞ্জ':{lat:23.864,lon:90.006},
+      'নরসিংদী':{lat:23.921,lon:90.716},'গাজীপুর সিটি':{lat:24.002,lon:90.412},
+    };
+    // Default: Dhaka
     let lat=23.811,lon=90.412;
-    if(window.location.protocol.startsWith('http')&&navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        async(pos)=>{ lat=pos.coords.latitude;lon=pos.coords.longitude;getWeather(lat,lon); },
-        ()=>{ localStorage.setItem('vc_location_denied','1'); getWeather(lat,lon); }
-      );
-    } else {
-      getWeather(lat,lon);
-    }
+    // Try to get district from user's latest order
+    try{
+      let userDistrict=null;
+      // From localStorage orders (guest or logged-in)
+      const orders=JSON.parse(localStorage.getItem('vc_orders')||'[]');
+      if(orders.length){
+        const latest=orders[orders.length-1];
+        userDistrict=latest.district||latest.customer_district||(latest.customer&&latest.customer.district)||null;
+      }
+      // From Supabase if logged in
+      if(!userDistrict&&currentUser&&supabaseClient){
+        try{
+          const {data}=await supabaseClient.from('orders').select('customer_district').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(1);
+          if(data&&data.length&&data[0].customer_district) userDistrict=data[0].customer_district;
+        }catch(e2){}
+      }
+      if(userDistrict){
+        // Normalize: trim and check
+        const dn=userDistrict.trim();
+        if(districtCoords[dn]){lat=districtCoords[dn].lat;lon=districtCoords[dn].lon;}
+        else{
+          // Partial match
+          const found=Object.keys(districtCoords).find(k=>dn.includes(k)||k.includes(dn));
+          if(found){lat=districtCoords[found].lat;lon=districtCoords[found].lon;}
+        }
+      }
+    }catch(e){}
+    getWeather(lat,lon);
   }catch(e){}
 }
 
@@ -5297,25 +5585,79 @@ function toggleSwitchPanel(){
   }
 }
 
+function _getLinkedAccounts(){
+  try{ return JSON.parse(localStorage.getItem('vc_linked_accounts')||'[]'); }catch(e){ return []; }
+}
+function _saveLinkedAccounts(list){
+  try{ localStorage.setItem('vc_linked_accounts', JSON.stringify(list)); }catch(e){}
+}
+function _saveLinkedAccount(user, session){
+  if(!user || !user.email) return;
+  const initials = (user.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const accounts = _getLinkedAccounts().filter(a => a.email !== user.email);
+  accounts.unshift({
+    email: user.email,
+    name: user.name || 'Customer',
+    initials,
+    access_token: session && session.access_token ? session.access_token : '',
+    refresh_token: session && session.refresh_token ? session.refresh_token : ''
+  });
+  // keep max 5 accounts
+  _saveLinkedAccounts(accounts.slice(0,5));
+}
+async function switchToAccount(email){
+  const accounts = _getLinkedAccounts();
+  const acct = accounts.find(a => a.email === email);
+  if(!acct || !acct.refresh_token){ showToast('সেশন মেয়াদ শেষ, আবার লগইন করুন'); return; }
+  showToast('⏳ সুইচ হচ্ছে...');
+  try {
+    const { data, error } = await supabaseClient.auth.setSession({
+      access_token: acct.access_token,
+      refresh_token: acct.refresh_token
+    });
+    if(error || !data.session){ showToast('❌ সেশন মেয়াদ শেষ, আবার লগইন করুন'); return; }
+    const u = data.session.user;
+    const safeUser = { id: u.id, email: u.email, name: u.user_metadata?.name || acct.name || 'Customer', phone: u.user_metadata?.phone || '' };
+    currentUser = safeUser;
+    localStorage.setItem('vc_user', JSON.stringify(safeUser));
+    _saveLinkedAccount(safeUser, data.session);
+    updateNavAuth();
+    const panel = document.getElementById('switchPanel');
+    if(panel) panel.style.display = 'none';
+    setTimeout(()=>{ updateAccountSwitcher(); showToast('✅ অ্যাকাউন্ট পরিবর্তন হয়েছে'); }, 100);
+  } catch(e){ showToast('❌ সুইচ করতে সমস্যা হয়েছে'); }
+}
+
 function updateAccountSwitcher(){
   const container=document.getElementById('switchAccountsContainer');
   if(!container)return;
-  const activeUser=currentUser||{name:'Guest',email:'guest@example.com'};
-  const initials=(activeUser.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  container.innerHTML=`
-    <div class="switch-row active">
-      <div class="switch-av">${initials}</div>
+  const activeUser=currentUser||{name:'Guest',email:''};
+  const activeInitials=(activeUser.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const accounts = _getLinkedAccounts().filter(a => a.email !== activeUser.email);
+  let html = `<div class="switch-row active">
+      <div class="switch-av">${activeInitials}</div>
       <div class="switch-info">
         <div class="switch-name">${escHtml(activeUser.name||'Guest')}</div>
         <div class="switch-email">${escHtml(activeUser.email||'')}</div>
       </div>
       <div class="switch-tick">✓</div>
-    </div>
-  `;
+    </div>`;
+  accounts.forEach(a => {
+    html += `<div class="switch-row" style="cursor:pointer" onclick="switchToAccount('${escHtml(a.email)}')">
+      <div class="switch-av" style="background:#6366F1">${escHtml(a.initials||'?')}</div>
+      <div class="switch-info">
+        <div class="switch-name">${escHtml(a.name||'')}</div>
+        <div class="switch-email">${escHtml(a.email||'')}</div>
+      </div>
+      <div style="font-size:11px;color:#6366F1;font-weight:700">সুইচ</div>
+    </div>`;
+  });
+  container.innerHTML = html;
 }
 
 function openAcc(){
   if(!currentUser){openLogin();return;}
+  _pauseHeroSlider();
   document.getElementById('accPage').classList.add('show');lockBody();
   _pushPanel('acc');
   const ini=(currentUser.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
@@ -5335,8 +5677,57 @@ function openAcc(){
   _startAccClock();
   fetchLocalWeather();
   renderMyOrders();
+  _renderSNProfileSection();
 }
-function closeAcc(){_closePanel('accPage','show');}
+function closeAcc(){_closePanel('accPage','show');if(!_anyOverlayOpen())_resumeHeroSlider();}
+
+function _renderSNProfileSection(){
+  const sec = document.getElementById('snProfileSection');
+  const list = document.getElementById('snProfileList');
+  if(!sec||!list) return;
+  const items = [];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith('vc_sn_')){
+        const d = JSON.parse(localStorage.getItem(k)||'{}');
+        if(d.prodId) items.push({...d, key:k});
+      }
+    }
+  }catch(e){}
+  if(!items.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  list.innerHTML = items.map(item=>{
+    const prod = PRODS.find(p=>String(p.id)===String(item.prodId));
+    const inStock = prod && prod.stock>0;
+    const dateStr = item.ts ? new Date(item.ts).toLocaleDateString('bn-BD',{month:'short',day:'numeric'}) : '';
+    return `<div style="display:flex;align-items:center;gap:9px;padding:9px 11px;background:${inStock?'#F0FDF4':'#F9FAFB'};border-radius:10px;margin-bottom:6px;border:1px solid ${inStock?'#86EFAC':'#E5E7EB'}">
+      <div style="font-size:20px;flex-shrink:0">${(prod?.imgs||['📦'])[0]?.startsWith?.('http')?'📦':(prod?.imgs||['📦'])[0]||'📦'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif">${escHtml(item.prodName||'প্রোডাক্ট')}</div>
+        <div style="font-size:11px;color:${inStock?'#10B981':'#6B7280'};font-family:'DM Sans',sans-serif">${inStock?'✅ এখন স্টকে আছে':'⏳ স্টক নেই · '+dateStr}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        ${inStock?`<button onclick="closeAcc();setTimeout(()=>openPP('${String(item.prodId)}'),200)" style="background:#10B981;color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">অর্ডার</button>`:''}
+        <button onclick="_removeSNItem('${item.key}')" style="background:none;border:none;font-size:12px;color:#9CA3AF;cursor:pointer">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function _removeSNItem(key){
+  try{ localStorage.removeItem(key); }catch(e){}
+  _renderSNProfileSection();
+}
+
+function clearAllStockNotifications(){
+  try{
+    const toRemove=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('vc_sn_'))toRemove.push(k);}
+    toRemove.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+  _renderSNProfileSection();
+}
 async function renderMyOrders(){
   if(!currentUser)return;
   let mine=[];
@@ -5454,11 +5845,11 @@ function closeWarrantyModal(){
 // MEMBERSHIP TIER SYSTEM
 // ═══════════════════════════════════════
 const _TIERS = [
-  { min:0,  max:0,  key:'regular',   bn:'সাধারণ সদস্য',  en:'Regular Member',   crown:null },
-  { min:1,  max:2,  key:'silver',    bn:'সিলভার মেম্বার', en:'Silver Member',    crown:'silver' },
-  { min:3,  max:4,  key:'gold',      bn:'গোল্ড মেম্বার',  en:'Gold Member',      crown:'gold' },
-  { min:5,  max:9,  key:'diamond',   bn:'ডায়মন্ড মেম্বার',en:'Diamond Member',  crown:'diamond' },
-  { min:10, max:Infinity, key:'legendary', bn:'লিজেন্ডারি মেম্বার', en:'Legendary Member', crown:'legendary' },
+  { min:0,  max:0,  key:'regular',   bn:'সাধারণ',  en:'Regular Member',   crown:'regular' },
+  { min:1,  max:2,  key:'silver',    bn:'সিলভার', en:'Silver Member',    crown:'silver' },
+  { min:3,  max:4,  key:'gold',      bn:'গোল্ড',  en:'Gold Member',      crown:'gold' },
+  { min:5,  max:9,  key:'diamond',   bn:'ডায়মন্ড',en:'Diamond Member',  crown:'diamond' },
+  { min:10, max:Infinity, key:'legendary', bn:'লিজেন্ডারি', en:'Legendary Member', crown:'legendary' },
 ];
 
 function _getTier(completedCount){
@@ -5466,28 +5857,53 @@ function _getTier(completedCount){
 }
 
 function _crownSVG(type){
-  if(type==='silver') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,4 4,22 10,18 16,28 22,18 28,22" fill="#C0C0C0" stroke="#A8A8A8" stroke-width="1.2"/><circle cx="16" cy="4" r="2.5" fill="#E8E8E8"/><circle cx="4" cy="22" r="2" fill="#D0D0D0"/><circle cx="28" cy="22" r="2" fill="#D0D0D0"/></svg>`;
-  if(type==='gold') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,3 4,21 10,17 16,27 22,17 28,21" fill="#F59E0B" stroke="#D97706" stroke-width="1.2"/><circle cx="16" cy="3" r="2.5" fill="#FCD34D"/><circle cx="4" cy="21" r="2" fill="#F59E0B"/><circle cx="28" cy="21" r="2" fill="#F59E0B"/></svg>`;
-  if(type==='diamond') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,2 4,20 10,16 16,28 22,16 28,20" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.2"/><polygon points="16,8 12,16 16,20 20,16" fill="#BFDBFE" opacity="0.7"/><circle cx="16" cy="2" r="2.5" fill="#93C5FD"/><circle cx="4" cy="20" r="2" fill="#60A5FA"/><circle cx="28" cy="20" r="2" fill="#60A5FA"/></svg>`;
-  if(type==='legendary') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#EF4444"/><stop offset="100%" stop-color="#B45309"/></linearGradient></defs><polygon points="16,2 4,20 10,15 16,28 22,15 28,20" fill="url(#lgCrown)" stroke="#B45309" stroke-width="1.2"/><circle cx="16" cy="2" r="3" fill="#FCD34D"/><circle cx="4" cy="20" r="2.2" fill="#EF4444"/><circle cx="28" cy="20" r="2.2" fill="#EF4444"/><circle cx="16" cy="15" r="3" fill="#FEF3C7" opacity="0.8"/></svg>`;
+  if(type==='bronze'||type==='regular') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bronzeCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#CD7F32"/><stop offset="50%" stop-color="#E8A060"/><stop offset="100%" stop-color="#A0522D"/></linearGradient></defs><polygon points="16,4 5,22 10,18 16,28 22,18 27,22" fill="url(#bronzeCrown)" stroke="#A0522D" stroke-width="1.2"/><circle cx="16" cy="4" r="2.5" fill="#F4C17A"/><circle cx="5" cy="22" r="2" fill="#CD7F32"/><circle cx="27" cy="22" r="2" fill="#CD7F32"/><polygon points="13,16 16,10 19,16" fill="rgba(255,255,255,0.25)"/></svg>`;
+  if(type==='silver') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="silverCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8D6E2"/><stop offset="50%" stop-color="#E8EEF2"/><stop offset="100%" stop-color="#94A3B8"/></linearGradient></defs><polygon points="16,3 4,21 10,17 16,27 22,17 28,21" fill="url(#silverCrown)" stroke="#94A3B8" stroke-width="1.3"/><circle cx="16" cy="3" r="2.6" fill="#F1F5F9"/><circle cx="4" cy="21" r="2" fill="#CBD5E1"/><circle cx="28" cy="21" r="2" fill="#CBD5E1"/><polygon points="12,16 16,9 20,16" fill="rgba(255,255,255,0.35)"/><line x1="16" y1="10" x2="16" y2="27" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/></svg>`;
+  if(type==='gold') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="goldCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FBBF24"/><stop offset="50%" stop-color="#FDE68A"/><stop offset="100%" stop-color="#D97706"/></linearGradient></defs><polygon points="16,2 3,21 10,16 16,27 22,16 29,21" fill="url(#goldCrown)" stroke="#D97706" stroke-width="1.3"/><circle cx="16" cy="2" r="2.8" fill="#FEF3C7"/><circle cx="3" cy="21" r="2.2" fill="#F59E0B"/><circle cx="29" cy="21" r="2.2" fill="#F59E0B"/><polygon points="12,15 16,7 20,15" fill="rgba(255,255,255,0.3)"/><circle cx="16" cy="15" r="1.5" fill="#FEF3C7" opacity="0.7"/></svg>`;
+  if(type==='diamond') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="diamondCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#60A5FA"/><stop offset="40%" stop-color="#BFDBFE"/><stop offset="100%" stop-color="#2563EB"/></linearGradient></defs><polygon points="16,2 3,20 10,15 16,28 22,15 29,20" fill="url(#diamondCrown)" stroke="#3B82F6" stroke-width="1.3"/><polygon points="16,7 12,15 16,20 20,15" fill="#DBEAFE" opacity="0.8"/><polygon points="10,15 16,7 22,15 16,20" fill="rgba(255,255,255,0.25)"/><circle cx="16" cy="2" r="2.8" fill="#BAE6FD"/><circle cx="3" cy="20" r="2" fill="#60A5FA"/><circle cx="29" cy="20" r="2" fill="#60A5FA"/><circle cx="16" cy="14" r="1.8" fill="#EFF6FF" opacity="0.9"/></svg>`;
+  if(type==='legendary') return `<svg class="avatar-crown" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgCrown" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#EF4444"/><stop offset="100%" stop-color="#B45309"/></linearGradient><radialGradient id="lgGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FEF3C7" stop-opacity="0.8"/><stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/></radialGradient></defs><circle cx="16" cy="15" r="10" fill="url(#lgGlow)"/><polygon points="16,2 4,20 10,15 16,28 22,15 28,20" fill="url(#lgCrown)" stroke="#B45309" stroke-width="1.2"/><circle cx="16" cy="2" r="3" fill="#FCD34D"/><circle cx="4" cy="20" r="2.2" fill="#EF4444"/><circle cx="28" cy="20" r="2.2" fill="#EF4444"/><circle cx="16" cy="15" r="3" fill="#FEF3C7" opacity="0.8"/><polygon points="12,12 16,6 20,12 16,16" fill="rgba(255,255,255,0.3)"/></svg>`;
   return '';
 }
 
 function _tierIcon(key){
-  return {regular:'👤',silver:'🥈',gold:'🥇',diamond:'💎',legendary:'👑'}[key]||'👤';
+  const svgs={
+    regular:`<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><defs><linearGradient id="bronzeI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#A0522D"/></linearGradient></defs><polygon points="16,4 5,22 10,18 16,28 22,18 27,22" fill="url(#bronzeI)" stroke="#A0522D" stroke-width="1.2"/><circle cx="16" cy="4" r="2.2" fill="#F4C17A"/><circle cx="5" cy="22" r="1.8" fill="#CD7F32"/><circle cx="27" cy="22" r="1.8" fill="#CD7F32"/></svg>`,
+    silver:`<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><defs><linearGradient id="silverI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8D6E2"/><stop offset="100%" stop-color="#94A3B8"/></linearGradient></defs><polygon points="16,3 4,21 10,17 16,27 22,17 28,21" fill="url(#silverI)" stroke="#94A3B8" stroke-width="1.3"/><circle cx="16" cy="3" r="2.2" fill="#F1F5F9"/><circle cx="4" cy="21" r="1.8" fill="#CBD5E1"/><circle cx="28" cy="21" r="1.8" fill="#CBD5E1"/></svg>`,
+    gold:`<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><defs><linearGradient id="goldI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FBBF24"/><stop offset="100%" stop-color="#D97706"/></linearGradient></defs><polygon points="16,2 3,21 10,16 16,27 22,16 29,21" fill="url(#goldI)" stroke="#D97706" stroke-width="1.3"/><circle cx="16" cy="2" r="2.5" fill="#FEF3C7"/><circle cx="3" cy="21" r="2" fill="#F59E0B"/><circle cx="29" cy="21" r="2" fill="#F59E0B"/><circle cx="16" cy="14" r="1.5" fill="#FEF3C7" opacity="0.7"/></svg>`,
+    diamond:`<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><defs><linearGradient id="diamondI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#2563EB"/></linearGradient></defs><polygon points="16,2 3,20 10,15 16,28 22,15 29,20" fill="url(#diamondI)" stroke="#3B82F6" stroke-width="1.3"/><polygon points="16,7 12,15 16,20 20,15" fill="#DBEAFE" opacity="0.8"/><circle cx="16" cy="2" r="2.4" fill="#BAE6FD"/><circle cx="3" cy="20" r="1.8" fill="#60A5FA"/><circle cx="29" cy="20" r="1.8" fill="#60A5FA"/></svg>`,
+    legendary:`<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><defs><linearGradient id="lgI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#EF4444"/><stop offset="100%" stop-color="#B45309"/></linearGradient></defs><polygon points="16,2 4,20 10,15 16,28 22,15 28,20" fill="url(#lgI)" stroke="#B45309" stroke-width="1.2"/><circle cx="16" cy="2" r="2.8" fill="#FCD34D"/><circle cx="4" cy="20" r="2" fill="#EF4444"/><circle cx="28" cy="20" r="2" fill="#EF4444"/><circle cx="16" cy="14" r="2.5" fill="#FEF3C7" opacity="0.8"/></svg>`
+  };
+  return svgs[key]||svgs.regular;
 }
 
 function _updateMembershipUI(completedCount){
   const tier = _getTier(completedCount);
-  // Update badge
+  // Update badge in stat box — show crown SVG + tier name elegantly
   const badge = document.getElementById('membershipBadge');
   if(badge){
-    badge.textContent = tier.bn;
-    const colors = {regular:'',silver:'background:#F1F5F9;border-color:#94A3B8;color:#475569',
-      gold:'background:#FEF9C3;border-color:#F59E0B;color:#92400E',
-      diamond:'background:#EFF6FF;border-color:#3B82F6;color:#1E40AF',
-      legendary:'background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-color:#B45309;color:#78350F'};
-    badge.style.cssText = (colors[tier.key]||'') + ';font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;display:inline-block;margin-top:3px;border:1px solid;transition:.3s';
+    badge.innerHTML = '';
+    badge.style.cssText = '';
+    badge.textContent = '';
+  }
+  // Update the membership stat box entirely
+  const msBtn = document.getElementById('membershipCardBtn');
+  if(msBtn){
+    const colors = {
+      regular:'color:#78350F',
+      silver:'color:#475569',
+      gold:'color:#92400E',
+      diamond:'color:#1E40AF',
+      legendary:'color:#78350F'
+    };
+    msBtn.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px 0">
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${_tierIcon(tier.key)}</div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:-0.2px;font-family:'DM Sans',sans-serif;${colors[tier.key]||''}">${tier.bn}</div>
+        <div class="stat-lbl" style="margin-top:0;font-size:8.5px">মেম্বারশিপ</div>
+      </div>`;
+    // Restore onclick and data attribute
+    msBtn.onclick = openMembershipModal;
+    msBtn.dataset.completed = completedCount;
   }
   // Render crown on avatarCircle
   ['avatarCircle'].forEach(id=>{
@@ -5515,13 +5931,14 @@ function openMembershipModal(){
   if(nextTier){
     const needed=nextTier.min;
     pct=Math.min(100,Math.round((completedCount/needed)*100));
-    progressTxt=`${nextTier.bn} পেতে আরো ${needed-completedCount}টি অর্ডার দরকার`;
+    progressTxt=`${nextTier.en} পেতে আরো ${needed-completedCount}টি অর্ডার দরকার`;
   }
   document.getElementById('msProgressBar').style.width=pct+'%';
   document.getElementById('msProgressTxt').textContent=progressTxt;
-  document.getElementById('msSubTxt').textContent=`সম্পন্ন অর্ডার: ${completedCount}টি • বর্তমান র‍্যাংক: ${currentTier.bn}`;
+  document.getElementById('msSubTxt').textContent=`সম্পন্ন অর্ডার: ${completedCount}টি • বর্তমান র‍্যাংক: ${currentTier.en}`;
   // Render tiers
   const tierReqs=['নতুন সদস্য','১–২টি সম্পন্ন অর্ডার','৩–৪টি সম্পন্ন অর্ডার','৫–৯টি সম্পন্ন অর্ডার','১০+ সম্পন্ন অর্ডার'];
+  const tierFullNames=['সাধারণ সদস্য','সিলভার মেম্বার','গোল্ড মেম্বার','ডায়মন্ড মেম্বার','লিজেন্ডারি মেম্বার'];
   document.getElementById('msTierList').innerHTML=_TIERS.map((t,i)=>{
     const isDone=completedCount>t.max;
     const isActive=t.key===currentTier.key;
@@ -5531,11 +5948,11 @@ function openMembershipModal(){
     else if(isDone)cls+=' done';
     else if(isActive)cls+=' active-tier';
     else if(!isDone&&!isActive)cls+=' locked';
-    const check=isDone?`<span class="ms-tier-check">✓</span>`:isActive?`<span style="font-size:12px;background:#f59e0b;color:#fff;border-radius:50%;padding:1px 6px;font-weight:700">আপনি</span>`:`<span class="ms-tier-lock">🔒</span>`;
+    const check=isDone?`<span class="ms-tier-check">✓</span>`:isActive?`<span style="font-size:12px;background:#f59e0b;color:#fff;border-radius:50%;padding:1px 6px;font-weight:700">আপনি</span>`:`<span class="ms-tier-lock" title="লক"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>`;
     return `<div class="${cls}">
       <div class="ms-tier-icon">${_tierIcon(t.key)}</div>
       <div class="ms-tier-info">
-        <div class="ms-tier-name">${isLegendary?'👑 ':''} ${t.bn}</div>
+        <div class="ms-tier-name">${isLegendary?'✨ ':''}${tierFullNames[i]}</div>
         <div class="ms-tier-req">${tierReqs[i]}</div>
       </div>
       ${check}
@@ -5615,13 +6032,13 @@ function _buildProdCard(p, isFirst) {
     <div class="prod-name" onclick="openPP(${JSON.stringify(p.id)})">${escHtml(p.name)}</div>
     <div class="prod-spec">${getCardSpecs(p)}</div>
     <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
-      <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
+      <span style="color:#F59E0B">${_renderDynamicStars(p.rating||4.5)}</span>
       <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${Math.floor((Number(p.id)||1)*37+p.stock*13)%80+20})</span>
     </div>
     <div class="prod-price-row"><span class="prod-price">৳${p.price.toLocaleString()}</span><span class="prod-old">৳${p.old.toLocaleString()}</span></div>
     <div class="prod-cta-row">
       ${sold
-        ? `<button class="prod-cta" disabled style="width:100%;background:var(--gray);cursor:not-allowed">স্টক শেষ</button>`
+        ? `<button class="prod-cta" style="width:100%;background:#F59E0B;color:#fff;border:none" onclick="openStockNotifyPopup(${JSON.stringify(p.id)},${JSON.stringify(p.name)})">🔔 স্টকে আসলে জানান</button>`
         : `<button class="prod-cta" onclick="quickOrder(${JSON.stringify(p.id)})">⚡ অর্ডার করুন</button>
            <button class="prod-cart-icon-btn" onclick="quickCart(${JSON.stringify(p.id)})" title="কার্টে যোগ করুন">🛒</button>`
       }
@@ -6402,7 +6819,7 @@ function _srpBuildProdCard(p) {
   // CTA buttons html
   let ctaHtml;
   if(sold) {
-    ctaHtml = `<button class="prod-cta" disabled style="width:100%;background:var(--gray);cursor:not-allowed">স্টক শেষ</button>`;
+    ctaHtml = `<button class="prod-cta srp-notify-btn" style="width:100%;background:#F59E0B;color:#fff;border:none">🔔 স্টকে আসলে জানান</button>`;
   } else {
     ctaHtml = `<button class="prod-cta srp-order-btn">⚡ অর্ডার করুন</button>
                <button class="prod-cart-icon-btn srp-cart-btn" title="কার্টে যোগ করুন">🛒</button>`;
@@ -6418,7 +6835,7 @@ function _srpBuildProdCard(p) {
     <div class="prod-name srp-prod-name" style="cursor:pointer">${escHtml(p.name)}</div>
     <div class="prod-spec">${getCardSpecs(p)}</div>
     <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;font-size:11px">
-      <span style="color:#F59E0B">★★★★</span><span style="color:#D4A853">★</span>
+      <span style="color:#F59E0B">${_renderDynamicStars(p.rating||4.5)}</span>
       <span style="color:var(--gray)">${(p.rating||4.5).toFixed(1)} (${ratingCount})</span>
     </div>
     <div class="prod-price-row"><span class="prod-price">৳${p.price.toLocaleString()}</span><span class="prod-old">৳${p.old.toLocaleString()}</span></div>
@@ -6438,6 +6855,8 @@ function _srpBuildProdCard(p) {
   if(wishBtn) wishBtn.addEventListener('click', e => { e.stopPropagation(); toggleWish(p.id, wishBtn); });
   if(orderBtn) orderBtn.addEventListener('click', e => { e.stopPropagation(); quickOrder(p.id); });
   if(cartBtn) cartBtn.addEventListener('click', e => { e.stopPropagation(); quickCart(p.id); });
+  const notifyBtn = card.querySelector('.srp-notify-btn');
+  if(notifyBtn) notifyBtn.addEventListener('click', e => { e.stopPropagation(); openStockNotifyPopup(p.id, p.name); });
 
   // Slide dots event listener
   if(imgs.length > 1) {
@@ -6820,6 +7239,7 @@ async function filterProducts(q){
 
 // PRODUCT FULL PAGE
 async function openPP(id){
+  _pauseHeroSlider();
   // BUG-03 FIX: number বা string উভয় id match করো (sb_ prefix support)
   curProd=PRODS.find(p=>p.id===id||String(p.id)===String(id));if(!curProd)return;
 
@@ -6875,23 +7295,21 @@ async function openPP(id){
   initGallerySwipe();
   const sold=curProd.stock<=0;
   if(sold){
-    // আউট অফ স্টক — শুধু একটা "স্টক শেষ" বাটন দেখাও
+    // আউট অফ স্টক — "স্টকে আসলে আমাকে জানান" বাটন দেখাও
     ['ppBtnOrder','ppBtnOrder2'].forEach(bid=>{
       const b=document.getElementById(bid);
-      if(b){b.disabled=true;b.textContent='স্টক শেষ';b.style.width='100%';}
+      if(b){b.disabled=false;b.textContent='🔔 স্টকে আসলে আমাকে জানান';b.style.width='100%';b.style.background='#F59E0B';b.style.color='#fff';b.style.border='none';b.onclick=()=>openStockNotifyPopup(curProd.id,curProd.name);}
     });
-    // Cart ও WA বাটন লুকাও
     ['ppBtnCart','ppBtnCart2'].forEach(bid=>{
       const b=document.getElementById(bid);
       if(b) b.style.display='none';
     });
     const wa=document.getElementById('ppBtnWa');
     if(wa) wa.style.display='none';
-    // Sticky bar — আউট অফ স্টকে সম্পূর্ণ hide (openProdPage এ handle হয়)
   } else {
     ['ppBtnOrder','ppBtnOrder2'].forEach(bid=>{
       const b=document.getElementById(bid);
-      if(b){b.disabled=false;b.textContent='⚡ এখনই অর্ডার করুন';b.style.width='';}
+      if(b){b.disabled=false;b.textContent='⚡ এখনই অর্ডার করুন';b.style.width='';b.style.background='';b.style.color='';b.style.border='';b.onclick=null;}
     });
     ['ppBtnCart','ppBtnCart2'].forEach(bid=>{
       const b=document.getElementById(bid);
@@ -7165,6 +7583,7 @@ function closePP(){
       history.replaceState({vcStack:[], homeCurrent:true}, '', '/');
     }
   }
+  if(!_anyOverlayOpen())_resumeHeroSlider();
 }
 function galleryArrow(dir){
   if(!curProd||!curProd.imgs||curProd.imgs.length<=1)return;
@@ -7483,19 +7902,20 @@ function addToCart(id,qty){
   const availableStock=p.stock-currentCartQty;
   if(availableStock<=0){showToast('❌ স্টক শেষ!');return;}
   const addQty=Math.min(qty,availableStock);
-  // ✅ Add to Cart ক্লিকের সাথেই stock কমানো (race condition ঠেকাতে)
-  p.stock=Math.max(0,p.stock-addQty);
-  saveStock(); // Supabase এ realtime sync
+  // ✅ FIX: Cart এ যোগ করার সময় database stock কমাবে না।
+  // Stock শুধুমাত্র "Confirm Order" (Step 3) সফলভাবে হলে কমবে।
   const ex=cart.find(x=>x.id===id);
   if(ex)ex.qty+=addQty; else cart.push({id:p.id,name:p.name,emoji:p.imgs[0],price:p.price,qty:addQty,cat:p.cat});
   localStorage.setItem('vc_cart',JSON.stringify(cart));
   updateCartUI();showToast('✅ কার্টে যোগ হয়েছে');
   showFloatCart();
-  // স্টক শূন্য হলে UI আপডেট করো
-  if(p.stock<=0){
-    const cur=activeCat==='all'?PRODS:PRODS.filter(x=>prodInCat(x,activeCat));
-    renderProds(cur);
-  }
+  _triggerCartJiggle();
+}
+function _triggerCartJiggle(){
+  const fc=document.getElementById('floatCartBtn');
+  if(fc){fc.classList.remove('cart-jiggle');void fc.offsetWidth;fc.classList.add('cart-jiggle');setTimeout(()=>fc.classList.remove('cart-jiggle'),750);}
+  const cd=document.getElementById('cartDot');
+  if(cd){const p=cd.closest('button')||cd.parentElement;if(p){p.classList.remove('cart-jiggle');void p.offsetWidth;p.classList.add('cart-jiggle');setTimeout(()=>p.classList.remove('cart-jiggle'),750);}}
 }
 function updateCartUI(){
   const total=cart.reduce((s,i)=>s+i.qty,0);
@@ -7548,8 +7968,8 @@ function updQty(id,d){
   _saveCartDebounced();updateCartUI();
 }
 function remItem(id){cart=cart.filter(x=>x.id!==id);_saveCartDebounced();updateCartUI();}
-function openCart(){document.getElementById('cartSide').classList.add('open');document.getElementById('cartBack').classList.add('on');lockBody();_pushPanel('cart');}
-function closeCart(){if(document.getElementById('cartSide').classList.contains('open')){document.getElementById('cartSide').classList.remove('open');document.getElementById('cartBack').classList.remove('on');unlockBody();_popPanel();}}
+function openCart(){_pauseHeroSlider();document.getElementById('cartSide').classList.add('open');document.getElementById('cartBack').classList.add('on');lockBody();_pushPanel('cart');}
+function closeCart(){if(document.getElementById('cartSide').classList.contains('open')){document.getElementById('cartSide').classList.remove('open');document.getElementById('cartBack').classList.remove('on');unlockBody();_popPanel();if(!_anyOverlayOpen())_resumeHeroSlider();}}
 function checkout(){
   if(!cart.length){showToast('কার্ট খালি!');return;}
   orderItems=cart.map(i=>({...i}));
@@ -8074,6 +8494,8 @@ async function confirmOrder(){
     num = '#VC-' + Date.now().toString(36).toUpperCase();
   }
   const shipCfg=_settings['vc_shipping']||{"dhaka":90,"out":130,"bd":130};
+  // TASK 21: outer try-catch so any network/DB error gracefully releases the button lock
+  try{
   const sc=selectedShip==='dhaka'?shipCfg.dhaka:selectedShip==='outside'?shipCfg.out:shipCfg.bd;
   // S-5+S-6: Verify prices from PRODS (authoritative), ignore any tampered cart prices
   const verifiedItems=orderItems.map(i=>{
@@ -8215,6 +8637,17 @@ async function confirmOrder(){
   }catch(_emailErr){}
   _confirmLock=false;
   startPolling();
+  }catch(_outerErr){
+    console.error('[confirmOrder] Unexpected error:', _outerErr);
+    _releaseConfirmBtn('❌ নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+  }
+}
+// TASK 21: Helper to gracefully unlock confirm button on error
+function _releaseConfirmBtn(msg){
+  _confirmLock=false;
+  const btn=document.getElementById('confirmOrderBtn');
+  if(btn){btn.disabled=false;btn.textContent='✅ অর্ডার কনফার্ম করুন';}
+  if(msg)showToast(msg);
 }
 let _pollInterval=null;
 let _supabaseChannel=null;
@@ -8610,6 +9043,15 @@ function _handleBack(state) {
       // ✅ SRP এ ফিরলে URL /srp করো
       try { history.replaceState({vcStack:[..._panelStack], srpActive:true}, '', '/srp'); } catch(e) {}
     }
+    return true;
+  }
+
+  // Offer Page overlay
+  const offerPageEl = document.getElementById('offerPageOverlay');
+  if(offerPageEl && offerPageEl.classList.contains('show')){
+    offerPageEl.classList.remove('show');
+    unlockBody();
+    _panelStack = _panelStack.filter(p => p !== 'offer-page');
     return true;
   }
 
@@ -9533,6 +9975,287 @@ function togFAQ(i,el){
   FAQS.forEach((_,j)=>{document.getElementById(`fa${j}`).classList.remove('open');document.getElementById(`farr${j}`).classList.remove('open');});
   if(!isOpen){a.classList.add('open');arr.classList.add('open');}
 }
+
+// ============================================================
+//  CUSTOMER LOVE GALLERY — TASKS 22 / 23 / 24
+// ============================================================
+let _vcGReviews = [];
+let _vcGIdx = 0;        // active center index
+let _vcGTimer = null;   // autoplay timer
+let _vcGPaused = false;
+
+// Fetch About desc + reviews from Supabase
+async function initVcGallery(){
+  // --- About Vangcur: load vc_about_desc from store_settings ---
+  const DEFAULT_ABOUT = 'Vangcur (ভাঙচুর) — গ্যাজেট ও লাইফস্টাইল অ্যাক্সেসরিজের এক বিশ্বস্ত নাম। বাংলাদেশের প্রতিটি কোণে আমরা পৌঁছে দিচ্ছি সেরা মানের পণ্য, সাশ্রয়ী মূল্যে। আমাদের লক্ষ্য: শুধু পণ্য নয়, একটি নিরাপদ ও আনন্দময় শপিং অভিজ্ঞতা।';
+  try {
+    // Check _settings cache first (already loaded by applySettings)
+    if(_settings && _settings['vc_about_desc']){
+      const el = document.getElementById('vcAboutDesc');
+      if(el) el.textContent = _settings['vc_about_desc'];
+    } else if(supabaseClient){
+      const {data, error} = await supabaseClient.from('store_settings').select('value').eq('key','vc_about_desc').single();
+      if(!error && data && data.value){
+        const el = document.getElementById('vcAboutDesc');
+        if(el) el.textContent = data.value;
+      }
+    }
+  } catch(e){ /* fallback already set in HTML */ }
+
+  // --- Customer Reviews: fetch from customer_reviews table ---
+  if(!supabaseClient){ _renderVcGallery([]); return; }
+  try {
+    const {data, error} = await supabaseClient
+      .from('customer_reviews_view')
+      .select('id,name,img_url,rating,like_count,created_at')
+      .order('created_at',{ascending:false})
+      .limit(30);
+    if(!error && data && data.length > 0){
+      _vcGReviews = data.map(r=>({...r, _liked: false}));
+      _vcGIdx = 0;
+      _renderVcGallery(_vcGReviews);
+    } else {
+      _renderVcGallery([]);
+    }
+  } catch(e){
+    _renderVcGallery([]);
+  }
+}
+
+function _starsHTML(n){
+  const s = Math.round(Math.max(0,Math.min(5, n||5)));
+  return '★'.repeat(s) + '☆'.repeat(5-s);
+}
+
+// TASK 28: Dynamic partial-fill star rendering using SVG clip
+function _renderDynamicStars(rating){
+  const r = Math.max(0, Math.min(5, parseFloat(rating)||4.5));
+  const full = Math.floor(r);
+  const partial = r - full; // 0.0–0.99
+  const empty = 5 - full - (partial > 0 ? 1 : 0);
+  const uid = 'sc_' + Math.random().toString(36).slice(2,7);
+  let html = '';
+  // Full stars
+  for(let i=0;i<full;i++) html += '<span style="color:#F59E0B">★</span>';
+  // Partial star via linear-gradient trick
+  if(partial > 0){
+    const pct = Math.round(partial * 100);
+    html += `<span style="position:relative;display:inline-block;color:#E5E7EB">★<span style="position:absolute;left:0;top:0;width:${pct}%;overflow:hidden;color:#F59E0B">★</span></span>`;
+  }
+  // Empty stars
+  for(let i=0;i<empty;i++) html += '<span style="color:#E5E7EB">★</span>';
+  return html;
+}
+
+function _renderVcGallery(reviews){
+  const track  = document.getElementById('vcGalleryTrack');
+  const dotsEl = document.getElementById('vcGalleryDots');
+  const empty  = document.getElementById('vcGalleryEmpty');
+  const stage  = document.getElementById('vcGalleryStage');
+  if(!track) return;
+
+  if(!reviews || reviews.length === 0){
+    if(track) track.innerHTML = '';
+    if(dotsEl) dotsEl.innerHTML = '';
+    if(empty) empty.style.display = '';
+    if(stage) stage.style.display = 'none';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  if(stage) stage.style.display = '';
+
+  // Build cards
+  track.innerHTML = reviews.map((r,i)=>{
+    const imgUrl = r.img_url && (r.img_url.startsWith('http')||r.img_url.startsWith('//'))
+      ? r.img_url : null;
+    const imgEl = imgUrl
+      ? `<img class="vc-g-img" id="vcgImg${i}" src="${escHtml(imgUrl)}" alt="${escHtml(r.name||'Review')}" loading="lazy" draggable="false" onerror="this.style.opacity='.3'">`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;background:#222">📦</div>`;
+    const likeCount = parseInt(r.like_count)||0;
+    const isActive = i === _vcGIdx;
+    const cls = isActive ? 'vc-g-active' : 'vc-g-side';
+    return `<div class="vc-g-card ${cls}" id="vcgCard${i}" data-idx="${i}" onclick="_vcGCardClick(${i})">
+      <div class="vc-g-img-wrap" id="vcgImgWrap${i}">
+        ${imgEl}
+        <div class="vc-g-overlay">
+          <div class="vc-g-name">${escHtml(r.name||'Customer')}</div>
+          <div class="vc-g-stars">${_starsHTML(r.rating)}</div>
+        </div>
+        <span class="vc-g-like-count" id="vcgLikeCount${i}">${likeCount > 0 ? likeCount : ''}</span>
+        <button class="vc-g-heart-btn" id="vcgHeartBtn${i}" onclick="_vcGHeart(event,${i})" aria-label="লাইক">🤍</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Dots — one per review
+  dotsEl.innerHTML = reviews.map((_,i)=>`<button class="vc-g-dot${i===_vcGIdx?' active':''}" onclick="_vcGGoTo(${i})" aria-label="রিভিউ ${i+1}"></button>`).join('');
+
+  // Touch / hover pause events
+  _vcGAttachEvents();
+  // Start autoplay
+  _vcGStartAuto();
+}
+
+function _vcGAttachEvents(){
+  const stage = document.getElementById('vcGalleryStage');
+  if(!stage || stage._vcGEventsAttached) return;
+  stage._vcGEventsAttached = true;
+  stage.addEventListener('mouseenter', ()=>{ _vcGPaused = true; });
+  stage.addEventListener('mouseleave', ()=>{ _vcGPaused = false; });
+  // Touch pause
+  stage.addEventListener('touchstart', ()=>{ _vcGPaused = true; clearTimeout(_vcGTimer); }, {passive:true});
+  stage.addEventListener('touchend', ()=>{
+    _vcGPaused = false;
+    clearTimeout(_vcGTimer);
+    _vcGTimer = setTimeout(_vcGAutoTick, 2800);
+  }, {passive:true});
+}
+
+function _vcGStartAuto(){
+  clearInterval(_vcGTimer);
+  _vcGTimer = setInterval(_vcGAutoTick, 3200);
+}
+
+function _vcGAutoTick(){
+  if(_vcGPaused) return;
+  if(!_vcGReviews.length) return;
+  const next = (_vcGIdx + 1) % _vcGReviews.length;
+  _vcGGoTo(next);
+}
+
+function vcGallerySlide(dir){
+  if(!_vcGReviews.length) return;
+  const next = (_vcGIdx + dir + _vcGReviews.length) % _vcGReviews.length;
+  _vcGGoTo(next);
+}
+
+function _vcGGoTo(idx){
+  if(!_vcGReviews.length) return;
+  _vcGIdx = idx;
+  // Reorder track: show [prev, active, next]
+  _vcGUpdateLayout();
+  // Reset autoplay
+  clearInterval(_vcGTimer);
+  _vcGTimer = setInterval(_vcGAutoTick, 3200);
+}
+
+function _vcGUpdateLayout(){
+  const n = _vcGReviews.length;
+  if(!n) return;
+  const track = document.getElementById('vcGalleryTrack');
+  if(!track) return;
+
+  // Determine which 3 cards to show (prev, active, next) — or fewer if n < 3
+  let toShow = [];
+  if(n === 1){
+    toShow = [_vcGIdx];
+  } else if(n === 2){
+    toShow = [(_vcGIdx+n-1)%n, _vcGIdx];
+  } else {
+    toShow = [(_vcGIdx+n-1)%n, _vcGIdx, (_vcGIdx+1)%n];
+  }
+
+  // Hide all cards, then reorder DOM
+  const allCards = track.querySelectorAll('.vc-g-card');
+  allCards.forEach(c => { c.style.display = 'none'; c.classList.remove('vc-g-active','vc-g-side'); });
+
+  toShow.forEach((dataIdx, pos)=>{
+    const card = document.getElementById('vcgCard'+dataIdx);
+    if(!card) return;
+    card.style.display = '';
+    card.classList.add(pos === Math.floor(toShow.length/2) ? 'vc-g-active' : 'vc-g-side');
+    track.appendChild(card); // reorder to end so visual is correct
+  });
+
+  // Update dots
+  const dots = document.querySelectorAll('.vc-g-dot');
+  dots.forEach((d,i) => d.classList.toggle('active', i === _vcGIdx));
+}
+
+function _vcGCardClick(idx){
+  if(idx !== _vcGIdx){
+    // Side card tapped — navigate to it
+    _vcGGoTo(idx);
+    return;
+  }
+  // Active card: TASK 23 — toggle zoom
+  const img = document.getElementById('vcgImg'+idx);
+  if(!img || !img.src) return;
+  img.classList.toggle('vc-g-zoomed');
+  if(img.classList.contains('vc-g-zoomed')){
+    _vcGPaused = true;
+    clearInterval(_vcGTimer);
+    _vcGAttachPanZoom(img);
+  } else {
+    img.style.transformOrigin = 'center center';
+    _vcGPaused = false;
+    _vcGStartAuto();
+  }
+}
+
+function _vcGAttachPanZoom(img){
+  if(img._panAttached) return;
+  img._panAttached = true;
+  const wrap = img.parentElement;
+
+  function _pan(clientX, clientY){
+    const rect = wrap.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    const ox = (x * 100).toFixed(1) + '%';
+    const oy = (y * 100).toFixed(1) + '%';
+    img.style.transformOrigin = ox + ' ' + oy;
+  }
+
+  // Mouse
+  wrap.addEventListener('mousemove', e => {
+    if(img.classList.contains('vc-g-zoomed')) _pan(e.clientX, e.clientY);
+  });
+  // Touch
+  wrap.addEventListener('touchmove', e => {
+    if(img.classList.contains('vc-g-zoomed') && e.touches.length===1){
+      e.preventDefault();
+      _pan(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, {passive:false});
+}
+
+// TASK 24: Heart / Like reaction
+async function _vcGHeart(e, idx){
+  e.stopPropagation();
+  const review = _vcGReviews[idx];
+  if(!review) return;
+  if(review._liked) return; // already liked — no double count
+
+  review._liked = true;
+  review.like_count = (parseInt(review.like_count)||0) + 1;
+
+  // UI: toggle heart emoji + animate
+  const btn = document.getElementById('vcgHeartBtn'+idx);
+  const countEl = document.getElementById('vcgLikeCount'+idx);
+  if(btn){
+    btn.textContent = '❤️';
+    btn.classList.add('vc-g-heart-liked');
+    setTimeout(()=>btn.classList.remove('vc-g-heart-liked'), 400);
+  }
+  if(countEl) countEl.textContent = review.like_count > 0 ? review.like_count : '';
+
+  // Supabase update
+  try{
+    if(supabaseClient && review.id){
+      await supabaseClient
+        .from('customer_reviews')
+        .update({like_count: review.like_count})
+        .eq('id', review.id);
+    }
+  } catch(err){ console.warn('Like update failed:', err); }
+}
+
+// Auto-init gallery on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function(){
+  // Delay slightly so main settings load first
+  setTimeout(initVcGallery, 800);
+});
 
 // INFO PAGES
 const INFO={
@@ -10867,6 +11590,11 @@ function closeOfferPopup(){
     el.classList.remove('show');
     unlockBody();
     _popPanel();
+    // TASK 29: After offer closes, schedule notification toast
+    if(window._offerJustShown){
+      window._offerJustShown = false;
+      _scheduleNotificationToasts(5000 + Math.random()*5000); // 5–10s random delay
+    }
   }
 }
 
@@ -10896,16 +11624,40 @@ function closeOfferPage(){
 }
 
 // ── Auto-popup on page load with 24h cooldown ─────────────────
+// TASK 29: Coordinated popup queue — offer popup first, then notification toasts
 window.addEventListener('load', function(){
   setTimeout(function(){
     try{
       const last = localStorage.getItem('vc_last_popup_time');
       const TWENTY_FOUR_H = 24 * 60 * 60 * 1000;
       const allowed = !last || (Date.now() - Number(last) >= TWENTY_FOUR_H);
-      if(allowed) openOfferPopup();
-    }catch(e){}
+      const cfg = _getOfferCfg();
+      const hasOffer = cfg && cfg.active_model && cfg.active_model !== 'none';
+      if(allowed && hasOffer){
+        openOfferPopup();
+        // After offer is closed, schedule notification toasts
+        window._offerJustShown = true;
+      } else {
+        // No offer — show notification toasts after 5s of browsing
+        _scheduleNotificationToasts(5000);
+      }
+    }catch(e){
+      _scheduleNotificationToasts(5000);
+    }
   }, 3000);
 });
+
+function _scheduleNotificationToasts(delayMs){
+  setTimeout(function(){
+    // Don't show if user is in checkout
+    const ov = document.getElementById('orderOverlay');
+    if(ov && ov.classList.contains('show')) return;
+    // Try back-in-stock toast first, then draft recovery
+    if(!_tryShowBISToast()){
+      triggerDraftRecoveryToast();
+    }
+  }, delayMs);
+}
 
 // ============================================================
 //  SESSION-LOCKED HEADER INTRO ANIMATION
@@ -10926,22 +11678,195 @@ function typeWriter(text, element, speed, callback) {
   type();
 }
 
+function eraseWriter(element, speed, callback) {
+  function erase() {
+    const t = element.textContent;
+    if (t.length > 0) {
+      element.textContent = t.slice(0, -1);
+      setTimeout(erase, speed);
+    } else if (callback) callback();
+  }
+  erase();
+}
+
+// ── Sparkle / emoji burst engine for the navbar ─────────────────
+function getNavSparkleEmojis() {
+  let found = [];
+  try {
+    const nt = (typeof _settings !== 'undefined') ? _settings['vc_navbar_texts'] : null;
+    if (nt && typeof nt === 'object') {
+      // New structured format: { emojis: ['✨','⭐',...] }
+      if (Array.isArray(nt.emojis) && nt.emojis.length) {
+        return nt.emojis;
+      }
+      // Legacy: scan all string values for emojis
+      const texts = Object.values(nt);
+      texts.forEach(t => {
+        if (typeof t === 'string') {
+          const matches = t.match(/\p{Extended_Pictographic}/gu);
+          if (matches) found = found.concat(matches);
+        }
+      });
+    }
+  } catch (e) {}
+  found = [...new Set(found)];
+  if (!found.length) found = ['✨', '⭐', '🎉', '🛍️'];
+  return found;
+}
+
+function spawnNavSparkles(durationMs) {
+  const navEl = document.querySelector('nav');
+  if (!navEl) return;
+  const emojis = getNavSparkleEmojis();
+  let active = true;
+  const interval = setInterval(() => {
+    if (!active) return;
+    const el = document.createElement('span');
+    el.className = 'nav-sparkle';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = (4 + Math.random() * 88) + '%';
+    el.style.bottom = '-6px';
+    el.style.fontSize = (10 + Math.random() * 8) + 'px';
+    el.style.opacity = '0.85';
+    navEl.appendChild(el);
+    requestAnimationFrame(() => {
+      el.style.transform = `translateY(-${50 + Math.random() * 40}px)`;
+      el.style.opacity = '0';
+    });
+    setTimeout(() => el.remove(), 1700);
+  }, 320);
+  setTimeout(() => { active = false; clearInterval(interval); }, durationMs);
+}
+
+// ── Search promo sequences (run after the welcome/typing animation) ──
+function runSearchPromoMobile(navContent, onDone) {
+  const promo = document.getElementById('searchPromo');
+  const spIcon = document.getElementById('spIconMobile');
+  const spText = document.getElementById('spTextMobile');
+  const promoText = "এখানে প্রোডাক্ট সার্চ করুন";
+  if (!promo || !spIcon || !spText) { onDone(); return; }
+
+  navContent.classList.add('search-promo-active');
+  promo.classList.add('show');
+  requestAnimationFrame(() => promo.classList.add('expand'));
+
+  setTimeout(() => {
+    spIcon.classList.add('slide');
+    typeWriter(promoText, spText, Math.max(15, Math.floor(600 / promoText.length)));
+  }, 550);
+
+  setTimeout(() => {
+    spIcon.classList.remove('slide');
+    eraseWriter(spText, Math.max(15, Math.floor(600 / promoText.length)));
+  }, 550 + 600 + 1200);
+
+  setTimeout(() => {
+    promo.classList.add('shrink');
+  }, 550 + 600 + 1200 + 650);
+
+  setTimeout(() => {
+    promo.classList.add('pop');
+    spIcon.classList.add('pop');
+  }, 550 + 600 + 1200 + 650 + 450);
+
+  setTimeout(() => {
+    promo.classList.remove('show', 'expand', 'shrink', 'pop');
+    spIcon.classList.remove('pop');
+    spText.textContent = '';
+    navContent.classList.remove('search-promo-active');
+    setTimeout(onDone, 350);
+  }, 550 + 600 + 1200 + 650 + 450 + 400);
+}
+
+function runSearchPromoDesktop(navSearch, onDone) {
+  const svg = navSearch ? navSearch.querySelector('svg') : null;
+  const spTextD = document.getElementById('spTextD');
+  const promoText = "এখানে প্রোডাক্ট সার্চ করুন";
+  if (!navSearch || !svg || !spTextD) { onDone(); return; }
+
+  navSearch.classList.add('nsp-init');
+  requestAnimationFrame(() => navSearch.classList.add('nsp-expanded'));
+
+  setTimeout(() => {
+    const dist = Math.max(60, navSearch.offsetWidth - 50);
+    svg.style.transform = `translate(${dist}px,-50%)`;
+    typeWriter(promoText, spTextD, Math.max(15, Math.floor(600 / promoText.length)));
+  }, 550);
+
+  setTimeout(() => {
+    svg.style.transform = 'translateY(-50%)';
+    eraseWriter(spTextD, Math.max(15, Math.floor(600 / promoText.length)));
+  }, 550 + 600 + 1200);
+
+  setTimeout(() => {
+    spTextD.style.background = 'transparent';
+    onDone();
+  }, 550 + 600 + 1200 + 600);
+}
+
+function finishHeaderIntroSequence(isMobile, navContent, navSearch) {
+  const done = () => {
+    setTimeout(() => {
+      window._heroIntroSeqDone = true;
+      startDuoAuto();
+    }, 2000);
+  };
+  if (isMobile) {
+    runSearchPromoMobile(navContent, done);
+  } else {
+    runSearchPromoDesktop(navSearch, done);
+  }
+}
+
 function triggerHeaderIntroAnimation() {
   // Session check — strictly runs only once per browser tab session
-  if (sessionStorage.getItem('vc_header_intro_played') === '1') return;
+  if (sessionStorage.getItem('vc_header_intro_played') === '1') {
+    // Intro already played — ensure header is fully static and slider starts immediately
+    window._heroIntroGate = false;
+    window._heroIntroSeqDone = true;
+    const navContent = document.getElementById('navContent');
+    const introOverlay = document.getElementById('introOverlay');
+    const searchPromo = document.getElementById('searchPromo');
+    const navSearch = document.querySelector('.nav-search');
+    if (navContent) { navContent.style.opacity = '1'; navContent.style.transform = 'none'; }
+    if (introOverlay) { introOverlay.style.opacity = '0'; introOverlay.style.pointerEvents = 'none'; }
+    if (searchPromo) { searchPromo.classList.remove('show','expand','shrink','pop'); }
+    if (navSearch) { navSearch.classList.remove('nsp-init','nsp-expanded'); const svg = navSearch.querySelector('svg'); if(svg) svg.style.transform = ''; const spTextD = document.getElementById('spTextD'); if(spTextD){ spTextD.textContent=''; spTextD.style.background='transparent'; } }
+    startDuoAuto();
+    return;
+  }
   sessionStorage.setItem('vc_header_intro_played', '1');
 
   const navContent = document.getElementById('navContent');
   const introOverlay = document.getElementById('introOverlay');
   const introText = document.getElementById('introText');
   const navSearch = document.querySelector('.nav-search');
+  const navEl = document.querySelector('nav');
 
-  if (!navContent || !introOverlay || !introText) return;
+  if (!navContent || !introOverlay || !introText) { window._heroIntroGate = false; return; }
 
-  const text1 = "Welcome to Vangcur - ভাঙচুর";
-  const text2 = "We Fulfill Your Ultimate Gadget Desires & Taste";
+  // TASK 1: navbar background intro animation (scaleX 0 -> 1)
+  if (navEl) navEl.classList.add('nav-intro-anim');
+
+  const text1 = (()=>{
+    try{
+      const nt=_settings&&_settings['vc_navbar_texts'];
+      if(nt&&typeof nt==='object'&&nt.welcome1) return nt.welcome1;
+    }catch(e){}
+    return "Welcome to Vangcur - ভাঙচুর";
+  })();
+  const text2 = (()=>{
+    try{
+      const nt=_settings&&_settings['vc_navbar_texts'];
+      if(nt&&typeof nt==='object'&&nt.welcome2) return nt.welcome2;
+    }catch(e){}
+    return "We Fulfill Your Ultimate Gadget Desires & Taste";
+  })();
 
   const isMobile = window.innerWidth <= 768;
+
+  // TASK 2: spawn sparkle/emoji burst for the duration of the intro typing
+  spawnNavSparkles(7000);
 
   // STEP 1: Temporarily hide active nav items
   if (isMobile) {
@@ -10955,13 +11880,15 @@ function triggerHeaderIntroAnimation() {
   } else {
     navContent.style.opacity = '1';
     navContent.style.transform = 'translateY(0)';
-    if (navSearch) navSearch.style.opacity = '0';
     introOverlay.style.opacity = '1';
     introOverlay.style.background = 'transparent';
     introOverlay.style.left = '200px';
     introOverlay.style.right = '200px';
     introOverlay.style.width = 'calc(100% - 400px)';
   }
+
+  introText.classList.remove('intro-text-2');
+  introText.classList.add('intro-text-1');
 
   // STEP 2: Type Line 1
   setTimeout(() => {
@@ -10975,6 +11902,8 @@ function triggerHeaderIntroAnimation() {
           introText.style.transition = 'none';
           introText.style.transform = 'translateY(24px)';
           introText.style.opacity = '0';
+          introText.classList.remove('intro-text-1');
+          introText.classList.add('intro-text-2');
 
           requestAnimationFrame(() => {
             introText.style.transition = 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease';
@@ -10991,7 +11920,10 @@ function triggerHeaderIntroAnimation() {
                 setTimeout(() => {
                   navContent.style.opacity = '1';
                   navContent.style.transform = 'translateY(0)';
-                  if (navSearch) navSearch.style.opacity = '1';
+
+                  // TASKS 4 & 5: run the search-promo sequence, then (TASK 6)
+                  // release the hero-slider autoplay gate 2s after it completes.
+                  finishHeaderIntroSequence(isMobile, navContent, navSearch);
                 }, 300);
 
               }, 1200);
@@ -11021,6 +11953,8 @@ function triggerThankYouAnimation(){
   const line2='Vangcur Dispatch is on it. Get ready to upgrade your setup! 📦';
   const isMobile=window.innerWidth<=768;
 
+  spawnNavSparkles(7000);
+
   if(isMobile){
     navContent.style.opacity='0';navContent.style.transform='translateY(8px)';
     introOverlay.style.opacity='1';introOverlay.style.background='var(--white)';
@@ -11033,6 +11967,9 @@ function triggerThankYouAnimation(){
     introOverlay.style.width='calc(100% - 400px)';
   }
 
+  introText.classList.remove('intro-text-2');
+  introText.classList.add('intro-text-1');
+
   setTimeout(()=>{
     typeWriter(line1,introText,38,()=>{
       setTimeout(()=>{
@@ -11040,6 +11977,8 @@ function triggerThankYouAnimation(){
         setTimeout(()=>{
           introText.style.transition='none';
           introText.style.transform='translateY(24px)';introText.style.opacity='0';
+          introText.classList.remove('intro-text-1');
+          introText.classList.add('intro-text-2');
           requestAnimationFrame(()=>{
             introText.style.transition='transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s ease';
             introText.style.transform='translateY(0)';introText.style.opacity='1';
@@ -11062,11 +12001,13 @@ function triggerThankYouAnimation(){
 document.addEventListener('DOMContentLoaded', () => {
   if(localStorage.getItem('vc_show_thank_you')==='1'){
     localStorage.removeItem('vc_show_thank_you');
+    window._heroIntroGate = false;
     setTimeout(triggerThankYouAnimation,100);
   } else {
     setTimeout(triggerHeaderIntroAnimation,100);
   }
 });
+
 
 // ✅ SEC: Right-click disable
 document.addEventListener('contextmenu',function(e){
@@ -11192,6 +12133,153 @@ function _showToastIfEligible(draft){
     const toast=document.getElementById('recoveryToast');
     if(toast){ toast.classList.remove('dismissing'); toast.classList.add('active'); }
   }catch(e){}
+}
+
+// ============================================================
+//  TASK 26: STOCK NOTIFICATION POPUP
+// ============================================================
+let _snProdId = null, _snProdName = '';
+
+function openStockNotifyPopup(prodId, prodName){
+  _snProdId = prodId;
+  _snProdName = prodName || 'প্রোডাক্ট';
+  const modal = document.getElementById('stockNotifyModal');
+  if(!modal) return;
+  document.getElementById('snProdNameLabel').textContent = _snProdName;
+  document.getElementById('snName').value = '';
+  document.getElementById('snPhone').value = '';
+  modal.classList.add('show');
+  lockBody();
+}
+
+function closeStockNotifyPopup(){
+  const modal = document.getElementById('stockNotifyModal');
+  if(modal) modal.classList.remove('show');
+  unlockBody();
+}
+
+async function submitStockNotify(){
+  const name = document.getElementById('snName').value.trim();
+  const phone = document.getElementById('snPhone').value.trim();
+  if(!name){ showToast('❌ আপনার নাম দিন'); return; }
+  if(!/^01[3-9]\d{8}$/.test(phone)){ showToast('❌ সঠিক মোবাইল নম্বর দিন'); return; }
+  const btn = document.getElementById('snSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'সাবমিট হচ্ছে...'; }
+  try{
+    const prod = PRODS.find(p=>p.id===_snProdId||String(p.id)===String(_snProdId));
+    const payload = {
+      customer_name: name,
+      customer_phone: phone,
+      product_id: String(_snProdId),
+      product_name: _snProdName,
+      user_id: currentUser?.id || null
+    };
+    if(supabaseClient){
+      await supabaseClient.from('stock_notifications').insert(payload);
+    }
+    // Also send to Google Sheet async
+    fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addStockRequest',productName:_snProdName,customerName:name,mobileNumber:phone})}).catch(()=>{});
+    // Save locally so we can check when product comes back
+    try{
+      const key = 'vc_sn_' + String(_snProdId);
+      localStorage.setItem(key, JSON.stringify({name,phone,prodId:String(_snProdId),prodName:_snProdName,ts:Date.now()}));
+    }catch(e){}
+    closeStockNotifyPopup();
+    showToast('✅ স্টকে আসলে আপনাকে জানানো হবে!');
+  }catch(err){
+    showToast('❌ সাবমিট করতে সমস্যা হয়েছে');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'জমা দিন'; }
+  }
+}
+
+// ============================================================
+//  TASK 27: BACK-IN-STOCK TOAST
+// ============================================================
+let _bisProduct = null;
+let _bisNotifKey = null;
+
+function _tryShowBISToast(){
+  // Scan localStorage for any vc_sn_ keys and check if product is now in stock
+  const keys = [];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith('vc_sn_')) keys.push(k);
+    }
+  }catch(e){ return false; }
+  if(!keys.length) return false;
+
+  for(const key of keys){
+    try{
+      const data = JSON.parse(localStorage.getItem(key)||'{}');
+      const pid = data.prodId;
+      if(!pid) continue;
+      // Check if dismissed forever
+      if(localStorage.getItem('vc_bis_dismissed_'+pid)) continue;
+      // Find product — check if back in stock
+      const prod = PRODS.find(p=>String(p.id)===String(pid));
+      if(!prod || prod.stock<=0) continue;
+      // Product is back in stock! Show toast
+      _bisProduct = prod;
+      _bisNotifKey = key;
+      const dateStr = data.ts ? new Date(data.ts).toLocaleDateString('bn-BD',{day:'numeric',month:'long'}) : '';
+      const toast = document.getElementById('bisToast');
+      if(!toast) return false;
+      const msgEl = document.getElementById('bisMsgDate');
+      if(msgEl && dateStr) msgEl.textContent = dateStr;
+      const thumbEl = document.getElementById('bisThumb');
+      if(thumbEl){
+        const imgVal=(prod.imgs||['📦'])[0];
+        const isUrl=typeof imgVal==='string'&&imgVal.startsWith('http');
+        thumbEl.innerHTML = isUrl ? `<img src="${imgVal}" onerror="this.parentElement.textContent='📦'">` : (imgVal||'📦');
+      }
+      const nameEl = document.getElementById('bisProdName');
+      if(nameEl) nameEl.textContent = prod.name;
+      const priceEl = document.getElementById('bisProdPrice');
+      if(priceEl) priceEl.textContent = '৳'+prod.price.toLocaleString();
+      toast.classList.remove('dismissing');
+      toast.classList.add('active');
+      return true;
+    }catch(e){ continue; }
+  }
+  return false;
+}
+
+function dismissBISToast(permanent){
+  const toast = document.getElementById('bisToast');
+  if(toast){ toast.classList.add('dismissing'); setTimeout(()=>toast.classList.remove('active','dismissing'),320); }
+  if(permanent && _bisProduct){
+    try{ localStorage.setItem('vc_bis_dismissed_'+String(_bisProduct.id),'1'); }catch(e){}
+    // Also remove the notification request
+    if(_bisNotifKey) try{ localStorage.removeItem(_bisNotifKey); }catch(e){}
+  }
+  _bisProduct = null;
+  _bisNotifKey = null;
+}
+
+function orderFromBISToast(){
+  dismissBISToast(true);
+  if(!_bisProduct) return; // already cleared — use captured value before dismiss
+  const prod = _bisProduct || PRODS.find(p=>p.id===(_bisProduct?.id));
+  // Re-capture product before dismissBISToast clears it
+  const capturedProd = _bisProduct;
+  dismissBISToast(true);
+  if(capturedProd){ openPP(capturedProd.id); }
+}
+
+// Separate capture-then-dismiss for order button
+function _orderFromBISToastSafe(){
+  const prod = _bisProduct;
+  const key = _bisNotifKey;
+  const toast = document.getElementById('bisToast');
+  if(toast){ toast.classList.add('dismissing'); setTimeout(()=>toast.classList.remove('active','dismissing'),320); }
+  if(prod){
+    try{ localStorage.setItem('vc_bis_dismissed_'+String(prod.id),'1'); }catch(e){}
+    if(key) try{ localStorage.removeItem(key); }catch(e){}
+    _bisProduct = null; _bisNotifKey = null;
+    setTimeout(()=>openPP(prod.id), 200);
+  }
 }
 
 function dismissRecoveryToast(isUserDismiss){
@@ -11389,10 +12477,8 @@ openAcc=function(){
   if(currentUser) setTimeout(loadDraftDrawer,200);
 };
 
-/* ---- Auto-trigger toast 5s after page load ---- */
-window.addEventListener('load',function(){
-  setTimeout(triggerDraftRecoveryToast,5000);
-});
+/* ---- Auto-trigger: now managed by TASK 29 popup queue (_scheduleNotificationToasts) ---- */
+// Kept for external callers only — do not add standalone setTimeout here
 </script>
 
 <!-- ============================================================
@@ -11470,6 +12556,46 @@ if ('serviceWorker' in navigator) {
     <div class="ms-progress-bar-wrap"><div class="ms-progress-bar" id="msProgressBar" style="width:0%"></div></div>
     <div class="ms-progress-txt" id="msProgressTxt"></div>
     <div id="msTierList"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TASK 26: STOCK NOTIFICATION POPUP
+     ============================================================ -->
+<div id="stockNotifyModal" onclick="if(event.target===this)closeStockNotifyPopup()">
+  <div class="sn-box">
+    <div class="sn-icon">🔔</div>
+    <div class="sn-title">স্টকে আসলে জানাবো</div>
+    <div class="sn-sub">প্রোডাক্টটি স্টকে আসলে আমরা আপনাকে সরাসরি জানাবো।<br><strong id="snProdNameLabel" style="color:#1A1A1A"></strong></div>
+    <div class="fg2" style="margin-bottom:10px">
+      <input class="sn-input" id="snName" placeholder="আপনার নাম" style="margin-bottom:8px">
+      <input class="sn-input" id="snPhone" placeholder="মোবাইল নম্বর (01XXXXXXXXX)" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')">
+    </div>
+    <div class="sn-btns">
+      <button class="sn-btn-cancel" onclick="closeStockNotifyPopup()">বাতিল</button>
+      <button class="sn-btn-submit" id="snSubmitBtn" onclick="submitStockNotify()">জমা দিন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TASK 27: BACK-IN-STOCK TOAST
+     ============================================================ -->
+<div class="bis-toast" id="bisToast">
+  <div class="bis-header">
+    <div class="bis-title-txt">🎉 স্টকে ফিরে এসেছে! আপনি <span id="bisMsgDate"></span> তারিখে একটি প্রোডাক্ট দেখতে চেয়েছিলেন, সেটি পুনরায় স্টকে এসেছে! দ্রুত অর্ডার করতে পারেন।</div>
+    <button class="bis-close" onclick="dismissBISToast(false)">✕</button>
+  </div>
+  <div class="bis-prod-row">
+    <div class="bis-thumb" id="bisThumb">📦</div>
+    <div class="bis-prod-info">
+      <div class="bis-prod-name" id="bisProdName">প্রোডাক্ট</div>
+      <div class="bis-prod-price" id="bisProdPrice">৳০</div>
+    </div>
+  </div>
+  <div class="bis-actions">
+    <button class="bis-btn-dismiss" onclick="dismissBISToast(true)">এখন না</button>
+    <button class="bis-btn-order" onclick="_orderFromBISToastSafe()">অর্ডার করুন</button>
   </div>
 </div>
 
