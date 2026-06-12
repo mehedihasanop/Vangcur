@@ -10006,8 +10006,8 @@ async function initVcGallery(){
   if(!supabaseClient){ _renderVcGallery([]); return; }
   try {
     const {data, error} = await supabaseClient
-      .from('customer_reviews_view')
-      .select('id,name,img_url,rating,like_count,created_at')
+      .from('customer_reviews')
+      .select('id,image_url,like_count,created_at')
       .order('created_at',{ascending:false})
       .limit(30);
     if(!error && data && data.length > 0){
@@ -10066,8 +10066,8 @@ function _renderVcGallery(reviews){
 
   // Build cards
   track.innerHTML = reviews.map((r,i)=>{
-    const imgUrl = r.img_url && (r.img_url.startsWith('http')||r.img_url.startsWith('//'))
-      ? r.img_url : null;
+    const imgUrl = r.image_url && (r.image_url.startsWith('http')||r.image_url.startsWith('//'))
+      ? r.image_url : null;
     const imgEl = imgUrl
       ? `<img class="vc-g-img" id="vcgImg${i}" src="${escHtml(imgUrl)}" alt="${escHtml(r.name||'Review')}" loading="lazy" draggable="false" onerror="this.style.opacity='.3'">`
       : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;background:#222">📦</div>`;
@@ -10077,10 +10077,6 @@ function _renderVcGallery(reviews){
     return `<div class="vc-g-card ${cls}" id="vcgCard${i}" data-idx="${i}" onclick="_vcGCardClick(${i})">
       <div class="vc-g-img-wrap" id="vcgImgWrap${i}">
         ${imgEl}
-        <div class="vc-g-overlay">
-          <div class="vc-g-name">${escHtml(r.name||'Customer')}</div>
-          <div class="vc-g-stars">${_starsHTML(r.rating)}</div>
-        </div>
         <span class="vc-g-like-count" id="vcgLikeCount${i}">${likeCount > 0 ? likeCount : ''}</span>
         <button class="vc-g-heart-btn" id="vcgHeartBtn${i}" onclick="_vcGHeart(event,${i})" aria-label="লাইক">🤍</button>
       </div>
